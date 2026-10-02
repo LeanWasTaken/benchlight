@@ -2,7 +2,7 @@ name: ci
 
 on:
   push:
-    branches: [main]
+    branches: ['**']
     tags: ['v*']
   pull_request:
 
@@ -26,5 +26,7 @@ jobs:
       - name: Route the kdesign repo through the read-only token
         env:
           KDESIGN_TOKEN: ${{ secrets.KDESIGN_TOKEN }}
-        run: git config --global url."https://x-access-token:${KDESIGN_TOKEN}@github.com/LeanWasTaken/kdesign".insteadOf "https://github.com/LeanWasTaken/kdesign"
-      - run: bun scripts/git-install-check.ts "git+https://github.com/LeanWasTaken/kdesign.git#${GITHUB_SHA}"
+        run: |
+          git config --global url."https://x-access-token:${KDESIGN_TOKEN}@github.com/LeanWasTaken/kdesign".insteadOf "ssh://git@github.com/LeanWasTaken/kdesign"
+          git config --global --add url."https://x-access-token:${KDESIGN_TOKEN}@github.com/LeanWasTaken/kdesign".insteadOf "git@github.com:LeanWasTaken/kdesign"
+      - run: bun scripts/git-install-check.ts "git+ssh://git@github.com/LeanWasTaken/kdesign.git#${GITHUB_SHA}"
