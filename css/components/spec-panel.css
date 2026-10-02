@@ -1,0 +1,45 @@
+@layer components {
+  .kd-spec-panel {
+    margin: 0;
+    overflow: hidden;
+    background: var(--kd-surface);
+    border: 1px solid var(--kd-separator);
+    border-radius: var(--kd-radius-card);
+  }
+  .kd-spec-row {
+    display: grid;
+    grid-template-columns: 128px 1fr;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px;
+  }
+  .kd-spec-row + .kd-spec-row {
+    border-top: 1px solid var(--kd-separator);
+  }
+  .kd-spec-row__label {
+    margin: 0;
+  }
+  .kd-spec-row__value {
+    margin: 0;
+    font-family: var(--kd-font-mono);
+    font-size: var(--kd-text-annotation);
+    line-height: var(--kd-leading-lede);
+    font-variant-numeric: tabular-nums;
+    color: var(--kd-ink-1);
+    overflow-wrap: anywhere;
+  }
+  .kd-spec-row__value a {
+    color: var(--kd-trace);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .kd-spec-row__value a:hover {
+    opacity: 0.8;
+  }
+  @media (max-width: 480px) {
+    .kd-spec-row {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+  }
+}

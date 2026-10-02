@@ -1,0 +1,16 @@
+@layer components {
+  .kd-readout {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 0;
+  }
+  .kd-readout__value {
+    font-family: var(--kd-font-mono);
+    font-size: 2rem;
+    font-weight: 500;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+    color: var(--kd-ink-1);
+  }
+}

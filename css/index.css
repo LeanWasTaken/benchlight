@@ -13,3 +13,17 @@
 @import './components/btn.css';
 @import './components/field.css';
 @import './components/link-arrow.css';
+@import './components/spec-panel.css';
+@import './components/telemetry.css';
+@import './components/led.css';
+@import './components/eq.css';
+@import './components/marquee.css';
+@import './components/readout.css';
+@import './components/meter.css';
+@import './components/msg.css';
+@import './components/log.css';
+@import './components/section-head.css';
+@import './components/meta.css';
+@import './components/index-row.css';
+@import './components/prev-next.css';
+@import './components/prose.css';

@@ -1,0 +1,15 @@
+@layer components {
+  .kd-meter {
+    height: 4px;
+    margin: 16px 0;
+    overflow: hidden;
+    border-radius: 2px;
+    background: var(--kd-separator);
+  }
+  .kd-meter__fill {
+    width: calc(var(--kd-meter-value, 0) * 100%);
+    height: 100%;
+    background: var(--kd-trace);
+    transition: width 100ms linear;
+  }
+}

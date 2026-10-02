@@ -15,7 +15,21 @@ export const MODULES = {
   segmented: 'css/components/segmented.css',
   btn: 'css/components/btn.css',
   field: 'css/components/field.css',
-  'link-arrow': 'css/components/link-arrow.css'
+  'link-arrow': 'css/components/link-arrow.css',
+  'spec-panel': 'css/components/spec-panel.css',
+  telemetry: 'css/components/telemetry.css',
+  led: 'css/components/led.css',
+  eq: 'css/components/eq.css',
+  marquee: 'css/components/marquee.css',
+  readout: 'css/components/readout.css',
+  meter: 'css/components/meter.css',
+  msg: 'css/components/msg.css',
+  log: 'css/components/log.css',
+  'section-head': 'css/components/section-head.css',
+  meta: 'css/components/meta.css',
+  'index-row': 'css/components/index-row.css',
+  'prev-next': 'css/components/prev-next.css',
+  prose: 'css/components/prose.css'
 } as const
 
 export type ModuleName = keyof typeof MODULES
