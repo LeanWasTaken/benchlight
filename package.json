@@ -42,13 +42,14 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "bun run lint && bun run format:check && bun run typecheck && bun run test",
+    "gen": "bun scripts/gen-tokens.ts && bun run gen:js",
     "gen:js": "bun build ./tokens/index.ts --outfile dist/tokens.js --format esm",
     "fixtures": "bun scripts/fixtures.ts"
   },
   "peerDependencies": {
     "@nuxt/kit": "^4.0.0",
     "nuxt": "^4.0.0",
-    "tailwindcss": "^4.0.0",
+    "tailwindcss": "",
     "vite": ">=6.0.0",
     "vue": "^3.5.0"
   },
@@ -73,6 +74,7 @@
     "@eslint/js": "^10.0.1",
     "@nuxt/kit": "^4.5.2",
     "@nuxt/schema": "^4.5.2",
+    "@tailwindcss/node": "^4.3.3",
     "@types/bun": "^1.4.2",
     "@types/node": "^26.6.4",
     "@vitejs/plugin-vue": "^6.0.9",
