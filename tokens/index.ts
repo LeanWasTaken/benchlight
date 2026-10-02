@@ -1,1 +1,2 @@
-export const tokens = { color: { dark: { canvas: '#101214' } } } as const
+export { colorNames, tokens } from './tokens'
+export type { ColorName, Theme, Tokens } from './tokens'
