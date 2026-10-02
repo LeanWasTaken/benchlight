@@ -1,0 +1,1 @@
+@layer components{.kd-meter{background:var(--kd-separator);border-radius:2px;height:4px;margin:16px 0;overflow:hidden}.kd-meter__fill{width:calc(var(--kd-meter-value,0) * 100%);background:var(--kd-trace);height:100%;transition:width .1s linear}}
