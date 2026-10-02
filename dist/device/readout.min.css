@@ -1,0 +1,1 @@
+@layer components{.kd-readout{align-items:baseline;gap:8px;margin:0;display:inline-flex}.kd-readout__value{font-family:var(--kd-font-mono);font-variant-numeric:tabular-nums;color:var(--kd-ink-1);font-size:2rem;font-weight:500;line-height:1.2}}
