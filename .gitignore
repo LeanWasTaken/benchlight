@@ -1,0 +1,15 @@
+node_modules
+.pack
+playground/dist
+fixtures/*/node_modules
+fixtures/*/bun.lock
+fixtures/*/.nuxt
+fixtures/*/.output
+fixtures/*/dist
+test-results
+playwright-report
+.DS_Store
+.omc
+.remember
+.superpowers
+docs/
