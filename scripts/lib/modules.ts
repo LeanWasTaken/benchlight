@@ -6,7 +6,16 @@ export const MODULES = {
   type: 'css/type.css',
   motion: 'css/motion.css',
   layout: 'css/layout.css',
-  tints: 'css/tints.css'
+  tints: 'css/tints.css',
+  'site-bar': 'css/components/site-bar.css',
+  tabbar: 'css/components/tabbar.css',
+  colophon: 'css/components/colophon.css',
+  'skip-link': 'css/components/skip-link.css',
+  switch: 'css/components/switch.css',
+  segmented: 'css/components/segmented.css',
+  btn: 'css/components/btn.css',
+  field: 'css/components/field.css',
+  'link-arrow': 'css/components/link-arrow.css'
 } as const
 
 export type ModuleName = keyof typeof MODULES
