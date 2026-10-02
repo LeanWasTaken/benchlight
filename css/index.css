@@ -1,0 +1,11 @@
+@layer base {
+  :root {
+    --kd-canvas: #eff1f3;
+  }
+}
+
+@layer components {
+  .kd-display {
+    font-weight: 750;
+  }
+}
