@@ -1,11 +1,6 @@
-@layer base {
-  :root {
-    --kd-canvas: #eff1f3;
-  }
-}
-
-@layer components {
-  .kd-display {
-    font-weight: 750;
-  }
-}
+@import './tokens.css';
+@import './base.css';
+@import './type.css';
+@import './motion.css';
+@import './layout.css';
+@import './tints.css';
