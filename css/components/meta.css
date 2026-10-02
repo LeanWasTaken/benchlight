@@ -1,0 +1,17 @@
+@layer components {
+  .kd-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    margin: 0;
+    text-transform: uppercase;
+  }
+  .kd-meta__sep {
+    color: var(--kd-separator);
+  }
+  .kd-meta__key {
+    font-weight: 500;
+    color: var(--kd-ink-2);
+    transition: color var(--kd-duration-fast) ease;
+  }
+}

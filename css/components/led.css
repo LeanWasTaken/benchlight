@@ -1,0 +1,17 @@
+@layer components {
+  .kd-led {
+    display: inline-block;
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--kd-ink-3);
+  }
+  .kd-led--on {
+    background: var(--kd-phosphor);
+    box-shadow: var(--kd-shadow-glow) var(--kd-phosphor);
+  }
+  .kd-led--danger {
+    background: var(--kd-danger);
+  }
+}
