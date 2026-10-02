@@ -1,0 +1,34 @@
+@layer components {
+  .kd-link-arrow {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--kd-ink-2);
+    transition: color var(--kd-duration-fast) ease;
+  }
+  .kd-link-arrow::before {
+    position: absolute;
+    inset: -8px;
+    content: '';
+  }
+  .kd-link-arrow:hover {
+    color: var(--kd-trace);
+  }
+  .kd-link-arrow--quiet {
+    color: var(--kd-ink-3);
+  }
+  .kd-link-arrow--quiet:hover {
+    color: var(--kd-ink-1);
+  }
+  .kd-link-arrow__icon {
+    display: inline-flex;
+    width: 12px;
+    height: 12px;
+    align-items: center;
+    justify-content: center;
+  }
+}
