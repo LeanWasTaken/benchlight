@@ -59,17 +59,33 @@ describe('js/appearance.js', () => {
   })
 
   it('keeps switching when storage throws', () => {
-    vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
+    const errors: unknown[] = []
+    const onError = (event: Event): void => {
+      errors.push(event)
+    }
+    window.addEventListener('error', onError)
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const setItem = vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
       throw new Error('QuotaExceededError')
     })
     run()
-    expect(() => choose('dark')).not.toThrow()
+    choose('dark')
     expect(root.getAttribute('data-kd-appearance')).toBe('dark')
+    choose('light')
+    expect(root.getAttribute('data-kd-appearance')).toBe('light')
+    window.removeEventListener('error', onError)
+    expect(setItem).toHaveBeenCalled()
+    expect(errors).toEqual([])
+    expect(consoleError).not.toHaveBeenCalled()
   })
 
   it('lifts [data-kd-lift] past its threshold and drops it back', () => {
     run()
     const header = document.querySelector('header')!
+    scrollTo(30)
+    expect(header.hasAttribute('data-lifted')).toBe(false)
+    scrollTo(40)
+    expect(header.hasAttribute('data-lifted')).toBe(false)
     scrollTo(41)
     expect(header.hasAttribute('data-lifted')).toBe(true)
     scrollTo(10)
@@ -77,9 +93,18 @@ describe('js/appearance.js', () => {
   })
 
   it('defaults the lift threshold to 24px', () => {
-    document.querySelector('header')!.setAttribute('data-kd-lift', '')
+    const header = document.querySelector('header')!
+    header.setAttribute('data-kd-lift', '')
     run()
+    scrollTo(24)
+    expect(header.hasAttribute('data-lifted')).toBe(false)
     scrollTo(25)
+    expect(header.hasAttribute('data-lifted')).toBe(true)
+  })
+
+  it('lifts immediately when already scrolled before init', () => {
+    scrollTo(100)
+    run()
     expect(document.querySelector('header')!.hasAttribute('data-lifted')).toBe(true)
   })
 })
