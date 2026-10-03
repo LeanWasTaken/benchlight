@@ -1,6 +1,7 @@
 {
   "name": "benchlight",
   "version": "0.2.1",
+  "packageManager": "bun@1.2.21",
   "private": true,
   "description": "Benchlight, the design system for Krists's personal web projects",
   "license": "UNLICENSED",
@@ -40,6 +41,7 @@
     "test:watch": "vitest",
     "typecheck": "vue-tsc --noEmit && tsc --noEmit -p scripts/tsconfig.json",
     "lint": "eslint .",
+    "lint:workflows": "docker run --rm -v \"$PWD\":/repo --workdir /repo rhysd/actionlint:1.7.12 -color",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "bun run lint && bun run format:check && bun run typecheck && bun run test",
