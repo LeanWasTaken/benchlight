@@ -40,6 +40,7 @@ const HELPERS = [
   'useScrollLifted',
   'useReducedMotion',
   'useMarquee',
+  'useFollowScroll',
   'riseDelay',
   'ansiToSegments',
   'APPEARANCE_ATTRIBUTE',

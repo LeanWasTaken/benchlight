@@ -11,6 +11,7 @@ const AUTO_IMPORTS = [
   'useScrollLifted',
   'useReducedMotion',
   'useMarquee',
+  'useFollowScroll',
   'riseDelay',
   'ansiToSegments'
 ] as const
