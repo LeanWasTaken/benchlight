@@ -1,0 +1,127 @@
+name: release
+
+# A source tag (src-vX.Y.Z) publishes the slim consumer tree: exactly what `bun pm pack` ships, committed to
+# the `release` branch and tagged vX.Y.Z. Bun ignores package.json "files" for git installs, so without this
+# a consumer's node_modules would hold the whole repository.
+on:
+  push:
+    tags: ['src-v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  # A release is never cancelled half way: that could leave the branch moved without its tag.
+  # Push source tags one at a time: with a run in flight, a third queued run replaces a pending one.
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    env:
+      TREE_DIR: ${{ github.workspace }}/../benchlight-release-tree
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          # Full history, so the on-main guard below can compare the tagged commit with main.
+          fetch-depth: 0
+      - name: Require the tagged commit to be on main
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "+refs/heads/main:refs/remotes/origin/main"
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" refs/remotes/origin/main; then
+            echo "::error::${GITHUB_REF_NAME} (${GITHUB_SHA}) is not on main; releases are cut from main only"
+            exit 1
+          fi
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - run: bun run check
+      - run: bun run fixtures
+      - name: Build the release tree
+        # Validates the tag name, checks that package.json carries the same version and
+        # refuses anything but the exact `bun pm pack` contents.
+        run: |
+          bun scripts/release-tree.ts "$TREE_DIR" --tag "$GITHUB_REF_NAME"
+          echo "VERSION=${GITHUB_REF_NAME#src-v}" >> "$GITHUB_ENV"
+      - name: Commit the tree to the release branch and tag it
+        env:
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+        run: |
+          set -euo pipefail
+          tag="v${VERSION}"
+          short="$(git rev-parse --short HEAD)"
+          git_dir="$(git rev-parse --absolute-git-dir)"
+
+          # Captured first: a failing ls-remote must abort under set -e, not look like "no match".
+          existing="$(git ls-remote --tags origin "refs/tags/${tag}")"
+          heads="$(git ls-remote --heads origin refs/heads/release)"
+
+          if [ -n "$existing" ]; then
+            echo "::error::${tag} already exists; published tags are never moved"
+            exit 1
+          fi
+
+          # Continue the release branch when it exists, otherwise the first commit becomes its root.
+          parent=()
+          if [ -n "$heads" ]; then
+            git fetch --no-tags origin "+refs/heads/release:refs/remotes/origin/release"
+            parent=(-p refs/remotes/origin/release)
+          fi
+
+          # Plumbing against a throwaway index: the new tree replaces the old one entirely and the
+          # source working tree is never touched. -f ignores any .gitignore inside the tree.
+          export GIT_INDEX_FILE="$RUNNER_TEMP/release.index"
+          rm -f "$GIT_INDEX_FILE"
+          (cd "$TREE_DIR" && git --git-dir="$git_dir" --work-tree=. add -A -f .)
+          tree="$(git write-tree)"
+          commit="$(git commit-tree "$tree" ${parent[@]+"${parent[@]}"} -m "release ${tag} (source ${short})")"
+          unset GIT_INDEX_FILE
+
+          git tag -a "$tag" -m "${tag} (source ${GITHUB_REF_NAME} ${GITHUB_SHA})" "$commit"
+          # One atomic push: the branch moves only together with its tag, and never by force.
+          git push --atomic origin "${commit}:refs/heads/release" "refs/tags/${tag}"
+
+  # Separate job: "Re-run failed jobs" retries only the verification, never the existing-tag guard.
+  verify:
+    needs: release
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - name: Load the read-only deploy key
+        env:
+          BENCHLIGHT_DEPLOY_KEY: ${{ secrets.BENCHLIGHT_DEPLOY_KEY }}
+        run: |
+          umask 077
+          key="$RUNNER_TEMP/benchlight_deploy_key"
+          hosts="$RUNNER_TEMP/benchlight_known_hosts"
+          printf '%s\n' "$BENCHLIGHT_DEPLOY_KEY" > "$key"
+          echo "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl" > "$hosts"
+          echo "DEPLOY_KEY_FILE=$key" >> "$GITHUB_ENV"
+          echo "DEPLOY_KNOWN_HOSTS=$hosts" >> "$GITHUB_ENV"
+      - name: Install the published tag over git+ssh
+        # The key is scoped to this one step through GIT_SSH_COMMAND, never the default ssh directory.
+        run: |
+          export GIT_SSH_COMMAND="ssh -i $DEPLOY_KEY_FILE -o IdentitiesOnly=yes -o UserKnownHostsFile=$DEPLOY_KNOWN_HOSTS -o StrictHostKeyChecking=yes"
+          # bun hides git's stderr, so check the key first and fail with ssh's own message.
+          ssh_out="$($GIT_SSH_COMMAND -T git@github.com 2>&1 || true)"
+          echo "$ssh_out" | grep -q "successfully authenticated" || { echo "$ssh_out"; exit 1; }
+          bun scripts/git-install-check.ts --expect-slim "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v${GITHUB_REF_NAME#src-v}"
+      - name: Remove the deploy key
+        if: always()
+        run: rm -f "$DEPLOY_KEY_FILE" "$DEPLOY_KNOWN_HOSTS"

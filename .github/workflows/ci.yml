@@ -2,8 +2,10 @@ name: ci
 
 on:
   push:
-    branches: ['**']
-    tags: ['v*']
+    # The slim `release` branch has no tests; the release workflow builds it.
+    branches-ignore: [release]
+    # Source tags only: release.yml publishes the consumer tag vX.Y.Z itself.
+    tags: ['src-v*']
   pull_request:
 
 permissions:
@@ -75,6 +77,9 @@ jobs:
         # The key is scoped to this one step through GIT_SSH_COMMAND, never the default ssh directory.
         run: |
           export GIT_SSH_COMMAND="ssh -i $DEPLOY_KEY_FILE -o IdentitiesOnly=yes -o UserKnownHostsFile=$DEPLOY_KNOWN_HOSTS -o StrictHostKeyChecking=yes"
+          # bun hides git's stderr, so check the key first and fail with ssh's own message.
+          ssh_out="$($GIT_SSH_COMMAND -T git@github.com 2>&1 || true)"
+          echo "$ssh_out" | grep -q "successfully authenticated" || { echo "$ssh_out"; exit 1; }
           bun scripts/git-install-check.ts "git+ssh://git@github.com/LeanWasTaken/benchlight.git#${GITHUB_SHA}"
       - name: Remove the deploy key
         if: always()
