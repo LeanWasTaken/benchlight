@@ -243,11 +243,37 @@ describe('BlButton', () => {
   })
 
   it('becomes a link when given href', () => {
-    const wrapper = mount(BlButton, { props: { href: '/x', disabled: true } })
+    const wrapper = mount(BlButton, { props: { href: '/x' } })
     expect(wrapper.element.tagName).toBe('A')
     expect(wrapper.attributes('href')).toBe('/x')
     expect(wrapper.attributes('type')).toBeUndefined()
+    expect(wrapper.attributes('aria-disabled')).toBeUndefined()
+  })
+
+  it('makes a disabled link inert: no href, not tabbable, clicks cancelled', async () => {
+    const wrapper = mount(BlButton, {
+      props: { href: '/x', disabled: true },
+      attachTo: document.body
+    })
+    expect(wrapper.element.tagName).toBe('A')
+    expect(wrapper.attributes('href')).toBeUndefined()
     expect(wrapper.attributes('aria-disabled')).toBe('true')
+    expect(wrapper.attributes('tabindex')).toBe('-1')
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true })
+    wrapper.element.dispatchEvent(event)
+    expect(event.defaultPrevented).toBe(true)
+    wrapper.unmount()
+  })
+
+  it('renders a disabled router-component button as a plain anchor without to', () => {
+    const wrapper = mount(BlButton, {
+      props: { as: RouterLinkLike, to: '/projects', disabled: true },
+      slots: { default: 'Projects' }
+    })
+    expect(wrapper.element.tagName).toBe('A')
+    expect(wrapper.attributes('data-router')).toBeUndefined()
+    expect(wrapper.attributes('href')).toBeUndefined()
+    expect(wrapper.text()).toBe('Projects')
   })
 
   it('disables a button natively and wraps the icon', () => {
