@@ -214,6 +214,20 @@ describe('BlLog', () => {
     ).toBe('Device log')
   })
 
+  it('leaves an overflowing log with follow off where it is', async () => {
+    const wrapper = mount(BlLog, {
+      props: { lines: ['a', 'b'], follow: false },
+      attachTo: document.body
+    })
+    const log = wrapper.element as HTMLElement
+    Object.defineProperty(log, 'scrollHeight', { value: 600, configurable: true })
+    Object.defineProperty(log, 'clientHeight', { value: 100, configurable: true })
+    await wrapper.setProps({ lines: ['a', 'b', 'c'] })
+    await nextTick()
+    expect(log.scrollTop).toBe(0)
+    wrapper.unmount()
+  })
+
   it('does not pull a reader scrolled up back to the bottom', async () => {
     const wrapper = mount(BlLog, { props: { lines: ['a', 'b'] }, attachTo: document.body })
     const log = wrapper.element as HTMLElement

@@ -29,6 +29,9 @@ export function useFollowScroll(
   onMounted(() => {
     bound = el.value
     bound?.addEventListener('scroll', measure, { passive: true })
+    // start truthful: a followed log opens on its newest lines, anything else reports where it is
+    if (bound && toValue(enabled)) bound.scrollTop = bound.scrollHeight
+    measure()
   })
   onBeforeUnmount(() => bound?.removeEventListener('scroll', measure))
 
