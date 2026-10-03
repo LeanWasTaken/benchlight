@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
-import { beforeEach, describe, expect, it } from 'vitest'
-import { createSSRApp, defineComponent, h, nextTick } from 'vue'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { createSSRApp, defineComponent, h, markRaw, nextTick } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 import BlAppearanceSwitch from '../../vue/components/BlAppearanceSwitch.vue'
 import BlButton from '../../vue/components/BlButton.vue'
@@ -284,6 +284,24 @@ describe('BlButton', () => {
     const wrapper = mount(BlButton, { props: { disabled: true }, slots: { icon: '<svg />' } })
     expect(wrapper.attributes('disabled')).toBeDefined()
     expect(wrapper.find('.bl-btn__icon').attributes('aria-hidden')).toBe('true')
+  })
+
+  it('warns when as="button" is given a link target', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const wrapper = mount(BlButton, { props: { as: 'button', href: '/x' } })
+    expect(wrapper.element.tagName).toBe('BUTTON')
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('[benchlight]'))
+    warn.mockRestore()
+  })
+
+  it('does not warn for ordinary buttons and links', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    mount(BlButton, { slots: { default: 'Save' } })
+    mount(BlButton, { props: { href: '/x' } })
+    mount(BlNavLink, { props: { href: '/about' } })
+    mount(BlNavLink, { props: { as: markRaw(RouterLinkLike), to: '/projects' } })
+    expect(warn).not.toHaveBeenCalled()
+    warn.mockRestore()
   })
 })
 

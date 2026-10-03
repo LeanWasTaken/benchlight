@@ -19,21 +19,16 @@
 
 <script setup lang="ts">
   import { computed } from 'vue'
-  import { linkBindings } from '../internal/link'
-  import type { LinkAs, LinkTo } from '../types'
+  import { linkBindings, resolveTag } from '../internal/link'
+  import type { LinkProps } from '../types'
 
-  const props = defineProps<{
-    as?: LinkAs
-    to?: LinkTo
-    href?: string
-    selected?: boolean
-    compact?: boolean
-  }>()
+  const props = defineProps<LinkProps & { selected?: boolean; compact?: boolean }>()
 
-  const tag = computed<LinkAs>(() => props.as ?? (props.href || props.to ? 'a' : 'div'))
+  const tag = computed(() => resolveTag(props.as, props.to, props.href, 'div'))
   const bindings = computed(() => {
-    if (tag.value === 'div') return {}
-    if (tag.value === 'button') return { type: 'button' }
+    if (tag.value === 'div') return linkBindings('div', props.to, props.href)
+    if (tag.value === 'button')
+      return { ...linkBindings('button', props.to, props.href), type: 'button' }
     return linkBindings(tag.value, props.to, props.href)
   })
 </script>
