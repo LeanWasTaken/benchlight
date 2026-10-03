@@ -136,9 +136,9 @@ describe('KdColophon and KdSkipLink', () => {
 })
 
 describe('KdAppearanceSwitch', () => {
-  it('renders three labelled radios in the kd-appearance group', () => {
+  it('renders three labelled radios in one kd-appearance group', () => {
     const wrapper = mount(KdAppearanceSwitch)
-    const radios = wrapper.findAll('input[type="radio"][name="kd-appearance"]')
+    const radios = wrapper.findAll('input[type="radio"][name^="kd-appearance"]')
     expect(radios.map((r) => r.attributes('aria-label'))).toEqual(['Auto', 'Light', 'Dark'])
     expect(wrapper.findAll('.kd-switch__option').map((o) => o.text())).toEqual(['A', 'L', 'D'])
     expect(wrapper.find('legend.kd-sr-only').text()).toBe('Appearance')
@@ -160,6 +160,25 @@ describe('KdAppearanceSwitch', () => {
       .findAll('input')
       .find((input) => (input.element as HTMLInputElement).checked)
     expect(checked?.attributes('value')).toBe('dark')
+  })
+
+  it('gives each switch its own radio group and keeps them in sync', async () => {
+    // One app, as in real use: useId() is unique per app, not across separate mounts.
+    const Pair = defineComponent({
+      render: () => h('div', [h(KdAppearanceSwitch), h(KdAppearanceSwitch)])
+    })
+    const wrapper = mount(Pair, { attachTo: document.body })
+    const [first, second] = wrapper.findAllComponents(KdAppearanceSwitch)
+    await first!.find('input[value="dark"]').setValue(true)
+    await nextTick()
+    const dark = (w: typeof first) => w!.find('input[value="dark"]').element as HTMLInputElement
+    expect(dark(first).checked).toBe(true)
+    expect(dark(second).checked).toBe(true)
+    expect(first!.find('input').attributes('name')).not.toBe(
+      second!.find('input').attributes('name')
+    )
+    wrapper.unmount()
+    document.body.innerHTML = ''
   })
 
   it('accepts translated labels', () => {
