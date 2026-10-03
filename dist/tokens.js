@@ -46,8 +46,7 @@ var tokens = {
   font: {
     sans: "Geist, ui-sans-serif, system-ui, sans-serif",
     mono: "'Geist Mono', ui-monospace, SFMono-Regular, monospace",
-    display: "'Bricolage Grotesque', 'Avenir Next Condensed', 'Arial Narrow', sans-serif",
-    "sans-features": "'cv02', 'cv03', 'cv04', 'cv11'"
+    display: "'Bricolage Grotesque', 'Avenir Next Condensed', 'Arial Narrow', sans-serif"
   },
   text: {
     micro: "0.6875rem",

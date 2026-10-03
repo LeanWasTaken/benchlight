@@ -7,7 +7,6 @@
   html {
     background: var(--bl-canvas);
     font-family: var(--bl-font-sans);
-    font-feature-settings: var(--bl-font-sans-features);
     -webkit-font-smoothing: antialiased;
     scroll-padding-block: var(--bl-scroll-offset-top, 72px) var(--bl-scroll-offset-bottom, 0px);
   }

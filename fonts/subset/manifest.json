@@ -1,5 +1,41 @@
 [
-  { "family": "Geist", "file": "geist.woff2", "weight": "400 600", "unicodes": "U+0020-007E,U+00B0,U+00B7,U+2014,U+2212", "sha256": "97db8ca66dfbfd6f3af9ba5a55997fea7b9bafb16d30035e3c3b953dea14ede2" },
-  { "family": "Geist Mono", "file": "geist-mono.woff2", "weight": "400", "unicodes": "U+0020-007E,U+00B0,U+00B7,U+2014,U+2212", "sha256": "7c8316cc62753c9a1ed032b803c39c6e17a234eca7ab6094c6a8f2e605ad8060" },
-  { "family": "Bricolage Grotesque", "file": "bricolage-grotesque.woff2", "weight": "750", "stretch": "80%", "unicodes": "U+0020,U+002D,U+0030-0039,U+0041-005A", "sha256": "de71c29fc74d0b47a57d3c73a8bf500ad50c5e82becebf0133016a998b396aa6" }
+  {
+    "family": "Geist",
+    "file": "geist.woff2",
+    "weight": "400 600",
+    "unicodes": "U+0020-007E,U+00A7,U+00A9,U+00B0,U+00B7,U+2013,U+2014,U+2019,U+2026,U+2212",
+    "sha256": "45ddb8f89e728ef5f81b0614d59e9d040a770d1c714145d873d199c63bf6baab",
+    "features": [
+      "liga",
+      "tnum",
+      "kern"
+    ]
+  },
+  {
+    "family": "Geist Mono",
+    "file": "geist-mono.woff2",
+    "weight": "400",
+    "unicodes": "U+0020-007E,U+00A7,U+00A9,U+00B0,U+00B7,U+2013,U+2014,U+2019,U+2026,U+2212",
+    "sha256": "4324f133700dcdcf89e1d300f423410a97a80353505c45e6317b83e726efd2a8",
+    "features": [
+      "dnom",
+      "frac",
+      "locl",
+      "numr"
+    ]
+  },
+  {
+    "family": "Bricolage Grotesque",
+    "file": "bricolage-grotesque.woff2",
+    "weight": "750",
+    "stretch": "80%",
+    "unicodes": "U+0020,U+002D,U+0030-0039,U+0041-005A",
+    "sha256": "de71c29fc74d0b47a57d3c73a8bf500ad50c5e82becebf0133016a998b396aa6",
+    "features": [
+      "dnom",
+      "frac",
+      "kern",
+      "numr"
+    ]
+  }
 ]

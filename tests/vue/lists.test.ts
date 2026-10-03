@@ -125,7 +125,9 @@ describe('BlPrevNext', () => {
     expect(wrapper.attributes('aria-label')).toBe('Pagination')
     const prev = wrapper.find('.bl-prev-next__link--prev')
     expect(prev.attributes('href')).toBe('/p/psu')
-    expect(prev.find('.bl-prev-next__label').text()).toBe('←Previous')
+    expect(prev.find('.bl-prev-next__label').text()).toBe('Previous')
+    expect(prev.find('.bl-prev-next__icon > svg[aria-hidden="true"]').exists()).toBe(true)
+    expect(wrapper.html()).not.toMatch(/[←→]/)
     expect(wrapper.find('.bl-prev-next__link--next .bl-prev-next__title').text()).toBe('iDrive')
   })
 
@@ -135,7 +137,8 @@ describe('BlPrevNext', () => {
     })
     expect(wrapper.find('.bl-prev-next__link--prev').exists()).toBe(false)
     expect(wrapper.element.children).toHaveLength(2)
-    expect(wrapper.find('.bl-prev-next__label').text()).toBe('Nākamais→')
+    expect(wrapper.find('.bl-prev-next__label').text()).toBe('Nākamais')
+    expect(wrapper.find('.bl-prev-next__icon > svg').exists()).toBe(true)
   })
 })
 

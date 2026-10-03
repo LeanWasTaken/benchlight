@@ -71,9 +71,6 @@ export function renderTailwindTheme(t: Tokens): string {
   for (const name of Object.keys(t.color.light)) lines.push(`--color-${name}: var(--bl-${name});`)
   for (const name of ['sans', 'mono', 'display']) {
     lines.push(`--font-${name}: var(--bl-font-${name});`)
-    // Preflight resets html font-feature-settings from this; keep Geist's variants.
-    if (name === 'sans')
-      lines.push('--font-sans--font-feature-settings: var(--bl-font-sans-features);')
   }
   for (const name of Object.keys(t.text)) {
     lines.push(`--text-${name}: var(--bl-text-${name});`)
