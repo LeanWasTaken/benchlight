@@ -22,7 +22,8 @@
     "scripts/lib",
     "tests",
     "playground",
+    "showcase",
     "*.config.ts"
   ],
-  "exclude": ["node_modules", "fixtures", "playground/dist"]
+  "exclude": ["node_modules", "fixtures", "playground/dist", "showcase/dist"]
 }
