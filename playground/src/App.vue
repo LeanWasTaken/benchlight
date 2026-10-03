@@ -107,6 +107,9 @@
           <BlLed state="danger" /><span class="bl-annotation">danger</span>
         </div>
         <BlLog :lines="logLines" />
+        <div class="pg-row">
+          <BlButton variant="secondary" @click="appendLogLine">Append line</BlButton>
+        </div>
       </div>
     </section>
 
@@ -273,13 +276,17 @@
     }
   ]
 
-  const logLines = [
+  const logLines = ref([
     '\x1b[0;32mI (1203) wifi: connected to home-5g, rssi -48\x1b[0m',
     '\x1b[0;33mW (1490) sync: clock skew 3 ms\x1b[0m',
     '\x1b[0;31mE (2011) ota: image too large\x1b[0m',
     'I (2100) main: idle',
     ...Array.from({ length: 16 }, (_, i) => `I (${2200 + i * 40}) main: tick ${i + 1}`)
-  ]
+  ])
+
+  function appendLogLine(): void {
+    logLines.value.push(`I (${3000 + logLines.value.length * 40}) main: appended`)
+  }
 
   const projects = [
     {
