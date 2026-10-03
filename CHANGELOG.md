@@ -47,10 +47,12 @@ Accessibility and contract release, from six audits of v0.1.
 ### Changed
 
 - The size guard for `dist/benchlight.min.css` is raised from 25,600 to 27,648 bytes; the
-  full bundle is now 26,148 bytes.
+  full bundle is now 26,271 bytes.
 
 ### Fixed
 
+- `useFollowScroll` rebinds when its element changes.
+- Indeterminate BlMeter shows a full bar under reduced motion.
 - Programmatic focus targets (`tabindex="-1"`) no longer draw a focus ring.
 - BlSectionHead renders its `action` slot outside bar mode.
 - BlSpecRow opens only absolute and protocol-relative links in a new tab; rows can set `external`.
@@ -71,3 +73,15 @@ First release of Benchlight as a library.
   custom-build CLI with optional static-token inlining.
 - Appearance moved to `data-bl-appearance` / `bl-appearance`; saved choices from the old
   `appearance` key are not migrated.
+
+### Fixed (after the release commit, before the tag)
+
+- BlLog keeps following appended lines.
+- Appearance state is shared across `useAppearance` instances.
+- BlSiteBar wraps its nav in a landmark.
+- Geist feature settings are carried through Tailwind's preflight.
+- Small hit areas are widened.
+- Each appearance switch gets its own radio group.
+- The bundle keeps only hand-written vendor prefixes.
+
+The project was renamed from kdesign to benchlight in the last commit before the tag.
