@@ -54,6 +54,12 @@
     cursor: pointer;
     transition: color var(--kd-duration-fast) ease;
   }
+  /* Invisible hit area: 30px option + 7px above and below = 44px. */
+  .kd-switch__option::before {
+    position: absolute;
+    inset: -7px 0;
+    content: '';
+  }
   .kd-switch__option:has(:checked) {
     color: var(--kd-ink-1);
   }

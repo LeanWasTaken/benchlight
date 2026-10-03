@@ -79,6 +79,11 @@ describe('buildDist', () => {
     expect(dist.fonts).not.toContain('http')
   })
 
+  it('keeps media queries readable by the source browser floor', () => {
+    expect(dist.bundle).toContain('max-width:480px')
+    expect(dist.bundle).not.toMatch(/width[<>]=/)
+  })
+
   it('stays within the 25600-byte guard', () => {
     expect(Buffer.byteLength(read('dist/kdesign.min.css'))).toBeLessThanOrEqual(25_600)
   })

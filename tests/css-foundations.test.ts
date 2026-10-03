@@ -37,6 +37,12 @@ describe('foundation CSS', () => {
     expect(read('css/layout.css')).toContain('padding-inline: var(--kd-layout-gutter-narrow);')
   })
 
+  it('hides kd-sr-only content without margin, padding or border', () => {
+    expect(read('css/layout.css')).toMatch(
+      /\.kd-sr-only\s*\{[^}]*margin: -1px;[^}]*padding: 0;[^}]*border: 0;/
+    )
+  })
+
   it('offers a 10% tint per accent', () => {
     const css = read('css/tints.css')
     for (const accent of ['trace', 'copper', 'phosphor', 'danger']) {
