@@ -24,4 +24,11 @@
       transform: translateX(340%);
     }
   }
+  @media (prefers-reduced-motion: reduce) {
+    .bl-meter[data-indeterminate] .bl-meter__fill {
+      width: 100%;
+      opacity: 0.4;
+      animation: none;
+    }
+  }
 }
