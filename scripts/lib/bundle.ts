@@ -2,7 +2,7 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { transform } from 'lightningcss'
 import { tokens } from '../../tokens/tokens'
-import { MODULES, PRESETS, type ModuleName, type PresetName } from './modules'
+import { MODULES, type ModuleName } from './modules'
 import { staticVars } from './render-tokens'
 
 export function minifyCss(code: string, filename: string): string {
@@ -20,7 +20,10 @@ export function inlineStaticTokens(css: string, vars: Array<[string, string]>): 
   let out = css
   for (const [name, value] of vars) {
     out = out.split(`var(${name})`).join(value)
-    out = out.replace(new RegExp(`^\\s*${name}: [^;]*;\\n`, 'm'), '')
+    out = out.replace(new RegExp(`^[ \\t]*${name}: [^;]*;\\n`, 'gm'), '')
+    if (out.includes(`var(${name},`)) {
+      throw new Error(`${name} is used with a fallback and cannot be inlined`)
+    }
   }
   return out
 }
@@ -52,17 +55,33 @@ export function buildModules(
   return { bundle, modules }
 }
 
-export function buildPreset(name: PresetName, root: string) {
-  return buildModules(PRESETS[name], root, { inlineStatic: name === 'device' })
+export function buildDist(root: string): {
+  bundle: string
+  modules: Record<string, string>
+  fonts: string
+} {
+  const { bundle, modules } = buildModules(Object.keys(MODULES) as ModuleName[], root, {
+    inlineStatic: false
+  })
+  // dist/ sits at the same depth as css/, so fonts.css's relative url()s stay valid.
+  const fonts = minifyCss(readFileSync(join(root, 'css/fonts.css'), 'utf8'), 'fonts.css')
+  return { bundle, modules, fonts }
 }
 
-export function writePreset(name: PresetName, root: string): void {
-  const { bundle, modules } = buildPreset(name, root)
-  const dir = join(root, 'dist', name)
+// Returns the paths written, relative to root.
+export function writeDist(root: string): string[] {
+  const { bundle, modules, fonts } = buildDist(root)
+  const dir = join(root, 'dist/modules')
   rmSync(dir, { recursive: true, force: true })
   mkdirSync(dir, { recursive: true })
-  writeFileSync(join(root, 'dist', `${name}.min.css`), bundle)
-  for (const [module, css] of Object.entries(modules)) {
-    writeFileSync(join(dir, `${module}.min.css`), css)
-  }
+  const written: Array<[string, string]> = [
+    ['dist/kdesign.min.css', bundle],
+    ['dist/fonts.min.css', fonts],
+    ...Object.entries(modules).map(([name, css]): [string, string] => [
+      `dist/modules/${name}.min.css`,
+      css
+    ])
+  ]
+  for (const [path, css] of written) writeFileSync(join(root, path), css)
+  return written.map(([path]) => path)
 }

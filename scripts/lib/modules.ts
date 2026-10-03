@@ -1,5 +1,5 @@
 // Every CSS module in cascade order. css/index.css imports exactly these, in this order
-// (tests/css-conventions.test.ts), and scripts/lib/bundle.ts builds presets from them.
+// (tests/css-conventions.test.ts), and scripts/lib/bundle.ts builds dist/ from them.
 export const MODULES = {
   tokens: 'css/tokens.css',
   base: 'css/base.css',
@@ -33,35 +33,3 @@ export const MODULES = {
 } as const
 
 export type ModuleName = keyof typeof MODULES
-
-// Presets ship as dist/<preset>.min.css plus dist/<preset>/<module>.min.css.
-// "device" is the size-budgeted preset for static pages.
-export const PRESETS = {
-  device: [
-    'tokens',
-    'base',
-    'type',
-    'motion',
-    'layout',
-    'tints',
-    'site-bar',
-    'tabbar',
-    'colophon',
-    'switch',
-    'segmented',
-    'btn',
-    'field',
-    'link-arrow',
-    'spec-panel',
-    'telemetry',
-    'led',
-    'readout',
-    'meter',
-    'msg',
-    'log',
-    'section-head',
-    'meta'
-  ]
-} as const satisfies Record<string, readonly ModuleName[]>
-
-export type PresetName = keyof typeof PRESETS
