@@ -1,5 +1,6 @@
 <template>
-  <div
+  <component
+    :is="as ? 'nav' : 'div'"
     class="bl-segmented"
     :class="{ 'bl-segmented--compact': compact }"
     :role="as ? undefined : 'group'"
@@ -12,7 +13,7 @@
         :key="String(option.value)"
         v-bind="linkBindings(as, option.to, option.href)"
         class="bl-segmented__item"
-        :aria-current="option.current ? 'true' : undefined"
+        :aria-current="option.current ? 'page' : undefined"
       >
         {{ option.label }}
       </component>
@@ -29,7 +30,7 @@
         {{ option.label }}
       </button>
     </template>
-  </div>
+  </component>
 </template>
 
 <script setup lang="ts" generic="T extends string | number | null">
