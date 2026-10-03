@@ -54,7 +54,11 @@ const REQUIRED: Record<string, string[]> = {
   eq: ['@keyframes bl-eq', '.bl-eq--active .bl-eq__bar'],
   marquee: ['@property --bl-mask-l', '.bl-marquee[data-overflowing]'],
   readout: ['.bl-readout__value'],
-  meter: ['calc(var(--bl-meter-value, 0) * 100%)'],
+  meter: [
+    'calc(var(--bl-meter-value, 0) * 100%)',
+    '.bl-meter[data-indeterminate] .bl-meter__fill',
+    '@keyframes bl-meter-slide'
+  ],
   msg: ['.bl-msg--ok::before', '.bl-msg--err', '.bl-msg--info'],
   log: ['.bl-ansi-31', '.bl-ansi-97', 'var(--bl-log-height, 200px)'],
   'section-head': [

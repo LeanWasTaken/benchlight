@@ -144,6 +144,24 @@ describe('BlMeter', () => {
       `--bl-meter-value: ${fill}`
     )
   })
+
+  it('renders null as indeterminate', () => {
+    const wrapper = mount(BlMeter, { props: { value: null, label: 'Scanning' } })
+    expect(wrapper.attributes('aria-valuenow')).toBeUndefined()
+    expect(wrapper.attributes('data-indeterminate')).toBe('')
+    expect(wrapper.find('.bl-meter__fill').attributes('style')).toBeUndefined()
+  })
+
+  it('switches between indeterminate and determinate reactively', async () => {
+    const wrapper = mount(BlMeter, { props: { value: null as number | null, label: 'Upload' } })
+    await wrapper.setProps({ value: 0.5 })
+    expect(wrapper.attributes('aria-valuenow')).toBe('50')
+    expect(wrapper.attributes('data-indeterminate')).toBeUndefined()
+    expect(wrapper.find('.bl-meter__fill').attributes('style')).toContain('--bl-meter-value: 0.5')
+    await wrapper.setProps({ value: null })
+    expect(wrapper.attributes('aria-valuenow')).toBeUndefined()
+    expect(wrapper.attributes('data-indeterminate')).toBe('')
+  })
 })
 
 describe('BlLog', () => {
