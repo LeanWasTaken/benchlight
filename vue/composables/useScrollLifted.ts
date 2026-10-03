@@ -1,14 +1,26 @@
-import { onBeforeUnmount, onMounted, ref, type Ref } from 'vue'
+import {
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  toValue,
+  watch,
+  type MaybeRefOrGetter,
+  type Ref
+} from 'vue'
 
-export function useScrollLifted(threshold = 24): Ref<boolean> {
+/** True once the page is scrolled past `threshold` px; `false` disables lifting. Reactive. */
+export function useScrollLifted(threshold: MaybeRefOrGetter<number | false> = 24): Ref<boolean> {
   const lifted = ref(false)
   const update = () => {
-    lifted.value = window.scrollY > threshold
+    const limit = toValue(threshold)
+    lifted.value = limit !== false && window.scrollY > limit
   }
   onMounted(() => {
     update()
     window.addEventListener('scroll', update, { passive: true })
   })
+  // post-flush watchers never run on the server, so this stays SSR-safe
+  watch(() => toValue(threshold), update, { flush: 'post' })
   onBeforeUnmount(() => window.removeEventListener('scroll', update))
   return lifted
 }

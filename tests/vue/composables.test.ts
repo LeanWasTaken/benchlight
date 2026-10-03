@@ -157,6 +157,23 @@ describe('useScrollLifted', () => {
     scrollTo(0)
     expect(result.value).toBe(true)
   })
+
+  it('recomputes when the threshold changes', async () => {
+    scrollTo(100)
+    const threshold = ref<number | false>(false)
+    const { result, wrapper } = withSetup(() => useScrollLifted(threshold))
+    expect(result.value).toBe(false)
+    threshold.value = 10
+    await nextTick()
+    expect(result.value).toBe(true)
+    threshold.value = 200
+    await nextTick()
+    expect(result.value).toBe(false)
+    threshold.value = false
+    scrollTo(1000)
+    expect(result.value).toBe(false)
+    wrapper.unmount()
+  })
 })
 
 describe('useReducedMotion', () => {
@@ -302,6 +319,17 @@ describe('useFollowScroll', () => {
     expect(result.pinned.value).toBe(true)
     result.toBottom()
     expect(el.scrollTop).toBe(500)
+    wrapper.unmount()
+    el.remove()
+  })
+
+  it('counts a distance of exactly the threshold as pinned, one more as not', () => {
+    const el = scroller() // 500 tall in a 100 viewport: the bottom is scrollTop 400
+    const { result, wrapper } = withSetup(() => useFollowScroll(ref(el)))
+    scrollTo(el, 396) // distance 4
+    expect(result.pinned.value).toBe(true)
+    scrollTo(el, 395) // distance 5
+    expect(result.pinned.value).toBe(false)
     wrapper.unmount()
     el.remove()
   })

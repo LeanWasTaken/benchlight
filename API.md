@@ -227,6 +227,7 @@ Exposed: none
 | `follow` | `boolean \| undefined` | no | `true` |
 | `label` | `string \| undefined` | no | `"Log"` |
 | `lines` | `string[]` | yes |  |
+| `offset` | `number \| undefined` | no | `0` |
 
 Slots: none
 Events: none

@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { createSSRApp, defineComponent, h, markRaw, nextTick } from 'vue'
+import { createSSRApp, defineComponent, h, markRaw, nextTick, ref } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 import BlAppearanceSwitch from '../../vue/components/BlAppearanceSwitch.vue'
 import BlButton from '../../vue/components/BlButton.vue'
@@ -51,6 +51,17 @@ describe('BlSiteBar', () => {
     expect(wrapper.find('header.bl-site-bar > .bl-col.bl-site-bar__inner').exists()).toBe(true)
     expect(wrapper.find('ul.bl-site-bar__nav > li').exists()).toBe(true)
     expect(wrapper.find('.bl-site-bar__actions span').exists()).toBe(true)
+  })
+
+  it('lifts when lift changes after mount', async () => {
+    scrollTo(100)
+    const wrapper = mount(BlSiteBar, { props: { lift: false } })
+    expect(wrapper.attributes('data-lifted')).toBeUndefined()
+    await wrapper.setProps({ lift: 10 })
+    expect(wrapper.attributes('data-lifted')).toBe('')
+    await wrapper.setProps({ lift: false })
+    expect(wrapper.attributes('data-lifted')).toBeUndefined()
+    wrapper.unmount()
   })
 
   it('wraps the nav list in a labelled landmark', () => {
@@ -361,6 +372,47 @@ describe('form controls', () => {
     expect(wrapper.find('.bl-range__value').text()).toBe('-12 dB')
     expect(wrapper.find('input').attributes('aria-valuetext')).toBe('-12 dB')
     expect(wrapper.find('input').attributes('min')).toBe('-60')
+  })
+
+  it('BlRange sends aria-label, disabled and name to the slider, not the wrapper', () => {
+    const wrapper = mount(BlRange, {
+      attrs: { 'aria-label': 'Volume', disabled: true, name: 'volume', 'data-test': 'x' }
+    })
+    const input = wrapper.find('input[type="range"]')
+    expect(input.attributes('aria-label')).toBe('Volume')
+    expect(input.attributes('name')).toBe('volume')
+    expect((input.element as HTMLInputElement).disabled).toBe(true)
+    expect(input.attributes('data-test')).toBe('x')
+    expect(wrapper.attributes('aria-label')).toBeUndefined()
+    expect(wrapper.attributes('disabled')).toBeUndefined()
+    expect(wrapper.attributes('name')).toBeUndefined()
+  })
+
+  it('BlRange picks up attrs that arrive after mount', async () => {
+    const extra = ref<Record<string, unknown>>({})
+    const Host = defineComponent({ setup: () => () => h(BlRange, extra.value) })
+    const wrapper = mount(Host)
+    expect(wrapper.find('input').attributes('aria-label')).toBeUndefined()
+    extra.value = { disabled: true, 'aria-label': 'Volume' }
+    await nextTick()
+    const input = wrapper.find('input')
+    expect(input.attributes('aria-label')).toBe('Volume')
+    expect((input.element as HTMLInputElement).disabled).toBe(true)
+  })
+
+  it('BlRange keeps class and style on the wrapper', () => {
+    const wrapper = mount(BlRange, { attrs: { class: 'mine', style: 'width: 10px' } })
+    expect(wrapper.classes()).toEqual(expect.arrayContaining(['bl-range', 'mine']))
+    expect(wrapper.attributes('style')).toContain('width: 10px')
+    expect(wrapper.find('input').attributes('class')).toBeUndefined()
+    expect(wrapper.find('input').attributes('style')).toBeUndefined()
+  })
+
+  it('BlRange forwards listeners to the slider', async () => {
+    const onChange = vi.fn()
+    const wrapper = mount(BlRange, { attrs: { onChange } })
+    await wrapper.find('input').trigger('change')
+    expect(onChange).toHaveBeenCalledOnce()
   })
 
   it('BlField wires a nested BlInput without slot props', () => {
