@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
+import { ruleBody } from './helpers/css'
 
 const read = (name: string) =>
   readFileSync(new URL(`../css/components/${name}.css`, import.meta.url), 'utf8')
@@ -87,8 +88,68 @@ describe.each(Object.entries(REQUIRED))('css/components/%s.css', (name, selector
 })
 
 describe('touch targets', () => {
-  it.each(['site-bar', 'switch', 'btn', 'field'])('%s keeps a 44px minimum', (name) => {
-    expect(read(name)).toContain('min-height: 44px;')
+  it.each([
+    ['site-bar', '.bl-site-bar__brand'],
+    ['site-bar', '.bl-site-bar__link'],
+    ['switch', '.bl-switch'],
+    ['btn', '.bl-btn'],
+    ['field', '.bl-input'],
+    ['field', '.bl-select'],
+    ['field', ".bl-range input[type='range']"]
+  ])('%s: %s keeps a 44px minimum', (name, selector) => {
+    expect(ruleBody(read(name), selector)['min-height']).toBe('44px')
+  })
+
+  it('keeps each switch option 44px wide with a hit area reaching 44px tall', () => {
+    const css = read('switch')
+    const option = ruleBody(css, '.bl-switch__option')
+    expect(option.width).toBe('44px')
+    expect(option.height).toBe('30px')
+    expect(ruleBody(css, '.bl-switch__option::before').inset).toBe('-7px 0')
+  })
+})
+
+describe('anchored behaviour', () => {
+  it('pins the tab bar to the viewport and hides it from 640px up', () => {
+    const css = read('tabbar')
+    expect(ruleBody(css, '.bl-tabbar').position).toBe('fixed')
+    expect(ruleBody(css, '.bl-tabbar', ['@media (min-width: 640px)']).display).toBe('none')
+  })
+
+  it('reserves room for the tab bar below 640px only', () => {
+    const css = read('tabbar')
+    const narrow = ['@media (max-width: 639px)']
+    expect(ruleBody(css, 'body:has(.bl-tabbar)', narrow)['padding-bottom']).toBe('80px')
+    expect(ruleBody(css, 'html:has(.bl-tabbar)', narrow)['--bl-scroll-offset-bottom']).toBe('96px')
+  })
+
+  it('dims a disabled button and blocks pointer events on aria-disabled', () => {
+    const css = read('btn')
+    const disabled = ruleBody(css, '.bl-btn:disabled')
+    expect(disabled.opacity).toBe('0.45')
+    expect(disabled.cursor).toBe('not-allowed')
+    expect(ruleBody(css, ".bl-btn[aria-disabled='true']")['pointer-events']).toBe('none')
+  })
+
+  it('slides the switch thumb one 44px option per step', () => {
+    const css = read('switch')
+    expect(
+      ruleBody(css, ".bl-switch__track:has(input[value='light']:checked)::before").transform
+    ).toBe('translateX(44px)')
+    expect(
+      ruleBody(css, ".bl-switch__track:has(input[value='dark']:checked)::before").transform
+    ).toBe('translateX(88px)')
+  })
+
+  it('lights an on LED in phosphor with a glow', () => {
+    const on = ruleBody(read('led'), '.bl-led--on')
+    expect(on.background).toBe('var(--bl-phosphor)')
+    expect(on['box-shadow']).toBe('var(--bl-shadow-glow) var(--bl-phosphor)')
+  })
+
+  it('draws a trace-coloured focus outline on the switch track', () => {
+    const focus = ruleBody(read('switch'), '.bl-switch__track:has(input:focus-visible)')
+    expect(focus.outline).toBe('2px solid var(--bl-trace)')
   })
 })
 
