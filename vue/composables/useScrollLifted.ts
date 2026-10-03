@@ -8,7 +8,10 @@ import {
   type Ref
 } from 'vue'
 
-/** True once the page is scrolled past `threshold` px; `false` disables lifting. Reactive. */
+/**
+ * Ref that is true once the page is scrolled past `threshold` px (a number, `false` to disable, a ref
+ * or a getter, re-evaluated on change). `false` on the server and until mounted.
+ */
 export function useScrollLifted(threshold: MaybeRefOrGetter<number | false> = 24): Ref<boolean> {
   const lifted = ref(false)
   const update = () => {
