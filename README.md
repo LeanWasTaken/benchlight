@@ -14,12 +14,18 @@ classes.
 
 The repo is private and the URL uses SSH on purpose: bun turns GitHub https URLs into API tarball
 downloads that cannot authenticate to a private repo. Locally, plain SSH access to GitHub is enough.
-In GitHub Actions, add a fine-grained token (repository `benchlight` only, Contents: read-only) as the
-secret `BENCHLIGHT_TOKEN`, and before `bun install`:
+In GitHub Actions, give each consuming repo its own read-only deploy key on `benchlight`
+(`ssh-keygen -t ed25519`, add the public half under benchlight → Settings → Deploy keys, store the
+private half as the secret `BENCHLIGHT_DEPLOY_KEY` in the consuming repo), and before `bun install`:
 
-```sh
-git config --global url."https://x-access-token:${BENCHLIGHT_TOKEN}@github.com/LeanWasTaken/benchlight".insteadOf "ssh://git@github.com/LeanWasTaken/benchlight"
-git config --global --add url."https://x-access-token:${BENCHLIGHT_TOKEN}@github.com/LeanWasTaken/benchlight".insteadOf "git@github.com:LeanWasTaken/benchlight"
+```yaml
+- env:
+    BENCHLIGHT_DEPLOY_KEY: ${{ secrets.BENCHLIGHT_DEPLOY_KEY }}
+  run: |
+    mkdir -p ~/.ssh
+    printf '%s\n' "$BENCHLIGHT_DEPLOY_KEY" > ~/.ssh/id_ed25519
+    chmod 600 ~/.ssh/id_ed25519
+    echo "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl" >> ~/.ssh/known_hosts
 ```
 
 ## Nuxt
