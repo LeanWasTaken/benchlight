@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-// Fetches the exact Google Fonts files the portfolio serves (latin + latin-ext), checks
+// Fetches the pinned Google Fonts files (latin + latin-ext), checks
 // them against fonts/full/manifest.json and writes css/fonts.css. Fails on any hash change.
 const ROOT = join(import.meta.dir, '..')
 const CSS_URL =
