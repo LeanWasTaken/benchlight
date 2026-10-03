@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.2.1 - 2026-10-03
+
+### Fixed
+
+- BlButton, BlIndexRow, BlLinkArrow, BlNavLink and BlTabBarItem failed to compile in apps
+  without TypeScript installed (v0.2.0 regression: imported props type). Props are inline again.
+- Meta text on a selected BlIndexRow uses `ink-2`; `ink-3` on the selected tint measured
+  4.05:1 in light mode, under WCAG AA.
+
+### Changed
+
+- CI runs the Playwright axe, keyboard and screenshot checks on Linux, with per-platform
+  screenshot baselines (`*-darwin.png`, `*-linux.png`).
+- CI installs Benchlight over SSH with a read-only deploy key (`BENCHLIGHT_DEPLOY_KEY`)
+  instead of the never-set `BENCHLIGHT_TOKEN`; the README shows the same setup for consumers.
+
 ## 0.2.0 - 2026-10-03
 
 Accessibility and contract release, from six audits of v0.1.
