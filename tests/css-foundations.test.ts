@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
+import { ruleBody } from './helpers/css'
 
 const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8')
 
@@ -26,7 +27,11 @@ describe('foundation CSS', () => {
   })
 
   it('switches motion off for reduced-motion users', () => {
-    expect(read('css/base.css')).toContain('@media (prefers-reduced-motion: reduce)')
+    const body = ruleBody(read('css/base.css'), '*', ['@media (prefers-reduced-motion: reduce)'])
+    expect(body['animation-duration']).toBe('0.01ms !important')
+    expect(body['animation-iteration-count']).toBe('1 !important')
+    expect(body['transition-duration']).toBe('0.01ms !important')
+    expect(body['scroll-behavior']).toBe('auto !important')
   })
 
   it('staggers the rise entrance through --bl-rise-delay', () => {
@@ -38,9 +43,17 @@ describe('foundation CSS', () => {
   })
 
   it('hides bl-sr-only content without margin, padding or border', () => {
-    expect(read('css/layout.css')).toMatch(
-      /\.bl-sr-only\s*\{[^}]*margin: -1px;[^}]*padding: 0;[^}]*border: 0;/
-    )
+    const body = ruleBody(read('css/layout.css'), '.bl-sr-only')
+    expect(body).toMatchObject({
+      position: 'absolute',
+      width: '1px',
+      height: '1px',
+      margin: '-1px',
+      padding: '0',
+      overflow: 'hidden',
+      border: '0',
+      'clip-path': 'inset(50%)'
+    })
   })
 
   it('offers a 10% tint per accent', () => {
@@ -56,7 +69,13 @@ describe('foundation CSS', () => {
     )
   })
 
+  it('draws a doubled-specificity trace focus ring on keyboard focus', () => {
+    const ring = ruleBody(read('css/base.css'), ':focus-visible:focus-visible')
+    expect(ring.outline).toBe('2px solid var(--bl-trace)')
+    expect(ring['outline-offset']).toBe('2px')
+  })
+
   it('draws no ring on programmatic focus targets', () => {
-    expect(read('css/base.css')).toMatch(/\[tabindex='-1'\]:focus-visible\s*\{\s*outline: none;/)
+    expect(ruleBody(read('css/base.css'), "[tabindex='-1']:focus-visible").outline).toBe('none')
   })
 })
