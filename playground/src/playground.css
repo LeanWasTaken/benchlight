@@ -27,17 +27,17 @@
   display: grid;
   gap: 8px;
   padding: 10px;
-  background: var(--kd-surface);
-  border: 1px solid var(--kd-separator);
+  background: var(--bl-surface);
+  border: 1px solid var(--bl-separator);
   border-radius: 8px;
 }
 .pg-chip {
   height: 36px;
-  border: 1px solid var(--kd-separator);
+  border: 1px solid var(--bl-separator);
   border-radius: 5px;
 }
 .pg-dim {
-  color: var(--kd-ink-3);
+  color: var(--bl-ink-3);
 }
 .pg-marquee {
   max-width: 220px;

@@ -1,5 +1,5 @@
 @layer components {
-  .kd-switch {
+  .bl-switch {
     display: flex;
     align-items: center;
     min-height: 44px;
@@ -7,39 +7,39 @@
     padding: 0;
     border: 0;
   }
-  .kd-switch__track {
+  .bl-switch__track {
     position: relative;
     display: flex;
-    background: var(--kd-surface);
-    border: 1px solid var(--kd-separator);
+    background: var(--bl-surface);
+    border: 1px solid var(--bl-separator);
     border-radius: 8px;
-    box-shadow: var(--kd-shadow-well);
+    box-shadow: var(--bl-shadow-well);
   }
-  .kd-switch__track::before {
+  .bl-switch__track::before {
     position: absolute;
     top: 2px;
     left: 2px;
     z-index: 0;
     width: 32px;
     height: 26px;
-    background: var(--kd-raised);
-    border: 1px solid var(--kd-separator);
-    border-radius: var(--kd-radius-chip);
-    box-shadow: var(--kd-shadow-thumb);
-    transition: transform var(--kd-duration-fast) ease;
+    background: var(--bl-raised);
+    border: 1px solid var(--bl-separator);
+    border-radius: var(--bl-radius-chip);
+    box-shadow: var(--bl-shadow-thumb);
+    transition: transform var(--bl-duration-fast) ease;
     content: '';
   }
-  .kd-switch__track:has(input[value='light']:checked)::before {
+  .bl-switch__track:has(input[value='light']:checked)::before {
     transform: translateX(36px);
   }
-  .kd-switch__track:has(input[value='dark']:checked)::before {
+  .bl-switch__track:has(input[value='dark']:checked)::before {
     transform: translateX(72px);
   }
-  .kd-switch__track:has(input:focus-visible) {
-    outline: 2px solid var(--kd-trace);
+  .bl-switch__track:has(input:focus-visible) {
+    outline: 2px solid var(--bl-trace);
     outline-offset: 2px;
   }
-  .kd-switch__option {
+  .bl-switch__option {
     position: relative;
     z-index: 1;
     display: grid;
@@ -47,23 +47,23 @@
     width: 36px;
     height: 30px;
     margin: 0;
-    font-family: var(--kd-font-mono);
-    font-size: var(--kd-text-micro);
+    font-family: var(--bl-font-mono);
+    font-size: var(--bl-text-micro);
     font-weight: 500;
-    color: var(--kd-ink-3);
+    color: var(--bl-ink-3);
     cursor: pointer;
-    transition: color var(--kd-duration-fast) ease;
+    transition: color var(--bl-duration-fast) ease;
   }
   /* Invisible hit area: 30px option + 7px above and below = 44px. */
-  .kd-switch__option::before {
+  .bl-switch__option::before {
     position: absolute;
     inset: -7px 0;
     content: '';
   }
-  .kd-switch__option:has(:checked) {
-    color: var(--kd-ink-1);
+  .bl-switch__option:has(:checked) {
+    color: var(--bl-ink-1);
   }
-  .kd-switch__option input {
+  .bl-switch__option input {
     position: absolute;
     opacity: 0;
     pointer-events: none;

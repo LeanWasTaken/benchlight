@@ -84,7 +84,7 @@ export function writeDist(root: string): string[] {
   rmSync(dir, { recursive: true, force: true })
   mkdirSync(dir, { recursive: true })
   const written: Array<[string, string]> = [
-    ['dist/kdesign.min.css', bundle],
+    ['dist/benchlight.min.css', bundle],
     ['dist/fonts.min.css', fonts],
     ...Object.entries(modules).map(([name, css]): [string, string] => [
       `dist/modules/${name}.min.css`,

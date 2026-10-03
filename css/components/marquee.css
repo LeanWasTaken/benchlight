@@ -1,50 +1,50 @@
-@property --kd-mask-l {
+@property --bl-mask-l {
   syntax: '<percentage>';
   inherits: false;
   initial-value: 0%;
 }
 
-@property --kd-mask-r {
+@property --bl-mask-r {
   syntax: '<percentage>';
   inherits: false;
   initial-value: 100%;
 }
 
 @layer components {
-  .kd-marquee {
+  .bl-marquee {
     position: relative;
     display: flex;
     align-items: center;
     min-width: 0;
     overflow: hidden;
   }
-  .kd-marquee__content {
+  .bl-marquee__content {
     display: flex;
     align-items: center;
     gap: 8px;
     white-space: nowrap;
   }
-  .kd-marquee[data-overflowing] {
-    --kd-mask-l: 0%;
-    --kd-mask-r: 88%;
+  .bl-marquee[data-overflowing] {
+    --bl-mask-l: 0%;
+    --bl-mask-r: 88%;
     -webkit-mask: linear-gradient(
         to right,
         transparent 0,
-        #000 var(--kd-mask-l),
-        #000 var(--kd-mask-r),
+        #000 var(--bl-mask-l),
+        #000 var(--bl-mask-r),
         transparent 100%
       )
       center / 100% 100% no-repeat;
     mask: linear-gradient(
         to right,
         transparent 0,
-        #000 var(--kd-mask-l),
-        #000 var(--kd-mask-r),
+        #000 var(--bl-mask-l),
+        #000 var(--bl-mask-r),
         transparent 100%
       )
       center / 100% 100% no-repeat;
   }
-  .kd-marquee[data-overflowing] .kd-marquee__content {
+  .bl-marquee[data-overflowing] .bl-marquee__content {
     will-change: transform;
   }
 }

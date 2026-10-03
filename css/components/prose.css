@@ -1,95 +1,95 @@
 @layer components {
-  .kd-prose {
-    max-width: var(--kd-layout-prose);
-    font-size: var(--kd-text-body);
-    line-height: var(--kd-leading-lede);
-    color: var(--kd-ink-2);
-    counter-reset: kd-section;
+  .bl-prose {
+    max-width: var(--bl-layout-prose);
+    font-size: var(--bl-text-body);
+    line-height: var(--bl-leading-lede);
+    color: var(--bl-ink-2);
+    counter-reset: bl-section;
   }
-  .kd-prose h2 {
+  .bl-prose h2 {
     margin: 40px 0 12px;
     font-size: 1.5rem;
     font-weight: 600;
     line-height: 2rem;
-    letter-spacing: var(--kd-tracking-heading);
-    color: var(--kd-ink-1);
-    counter-increment: kd-section;
+    letter-spacing: var(--bl-tracking-heading);
+    color: var(--bl-ink-1);
+    counter-increment: bl-section;
   }
-  .kd-prose h2::before {
+  .bl-prose h2::before {
     margin-right: 14px;
-    font-family: var(--kd-font-mono);
-    font-size: var(--kd-text-annotation);
+    font-family: var(--bl-font-mono);
+    font-size: var(--bl-text-annotation);
     font-weight: 500;
-    letter-spacing: var(--kd-tracking-nav);
-    color: var(--kd-trace);
+    letter-spacing: var(--bl-tracking-nav);
+    color: var(--bl-trace);
     vertical-align: middle;
-    content: '\00a7' counter(kd-section, decimal-leading-zero);
+    content: '\00a7' counter(bl-section, decimal-leading-zero);
   }
-  .kd-prose h3 {
+  .bl-prose h3 {
     margin: 28px 0 8px;
     font-size: 1.125rem;
     font-weight: 600;
     line-height: 1.75rem;
-    letter-spacing: var(--kd-tracking-heading);
-    color: var(--kd-ink-1);
+    letter-spacing: var(--bl-tracking-heading);
+    color: var(--bl-ink-1);
   }
-  .kd-prose p {
+  .bl-prose p {
     margin: 0 0 16px;
   }
-  .kd-prose ul {
+  .bl-prose ul {
     margin: 0 0 16px;
     padding-left: 20px;
     list-style: disc;
   }
-  .kd-prose li {
+  .bl-prose li {
     margin-bottom: 6px;
   }
-  .kd-prose a {
-    color: var(--kd-trace);
+  .bl-prose a {
+    color: var(--bl-trace);
     text-decoration: underline;
     text-underline-offset: 3px;
   }
-  .kd-prose a:hover {
+  .bl-prose a:hover {
     opacity: 0.8;
   }
-  .kd-prose :is(h2, h3) a {
+  .bl-prose :is(h2, h3) a {
     color: inherit;
     text-decoration: none;
   }
-  .kd-prose :is(h2, h3) a:hover {
+  .bl-prose :is(h2, h3) a:hover {
     opacity: 1;
   }
-  .kd-prose :is(h2, h3) a:is(:hover, :focus-visible)::after {
-    color: var(--kd-ink-3);
+  .bl-prose :is(h2, h3) a:is(:hover, :focus-visible)::after {
+    color: var(--bl-ink-3);
     content: ' #';
   }
-  .kd-prose :not(pre) > code {
+  .bl-prose :not(pre) > code {
     padding: 2px 4px;
-    background: var(--kd-surface);
-    border: 1px solid var(--kd-separator);
+    background: var(--bl-surface);
+    border: 1px solid var(--bl-separator);
     border-radius: 4px;
-    font-family: var(--kd-font-mono);
-    font-size: var(--kd-text-annotation);
-    color: var(--kd-ink-1);
+    font-family: var(--bl-font-mono);
+    font-size: var(--bl-text-annotation);
+    color: var(--bl-ink-1);
   }
-  .kd-prose pre {
+  .bl-prose pre {
     margin: 16px 0;
     padding: 16px;
     overflow-x: auto;
-    background: var(--kd-surface);
-    border: 1px solid var(--kd-separator);
-    border-radius: var(--kd-radius-card);
-    font-size: var(--kd-text-annotation);
+    background: var(--bl-surface);
+    border: 1px solid var(--bl-separator);
+    border-radius: var(--bl-radius-card);
+    font-size: var(--bl-text-annotation);
   }
-  .kd-prose pre code {
-    font-family: var(--kd-font-mono);
-    color: var(--kd-ink-1);
+  .bl-prose pre code {
+    font-family: var(--bl-font-mono);
+    color: var(--bl-ink-1);
   }
-  .kd-prose blockquote {
+  .bl-prose blockquote {
     margin: 16px 0;
     padding-left: 16px;
-    border-left: 2px solid var(--kd-separator);
-    color: var(--kd-ink-2);
+    border-left: 2px solid var(--bl-separator);
+    color: var(--bl-ink-2);
     font-style: italic;
   }
 }

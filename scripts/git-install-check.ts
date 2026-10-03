@@ -9,7 +9,7 @@ if (!spec) {
   process.exit(1)
 }
 
-const dir = mkdtempSync(join(tmpdir(), 'kdesign-git-'))
+const dir = mkdtempSync(join(tmpdir(), 'benchlight-git-'))
 try {
   cpSync(join(import.meta.dir, '../fixtures/vite-app'), dir, {
     recursive: true,
@@ -17,12 +17,12 @@ try {
   })
   const manifestPath = join(dir, 'package.json')
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
-  manifest.dependencies.kdesign = spec
+  manifest.dependencies.benchlight = spec
   writeFileSync(manifestPath, JSON.stringify(manifest, null, 2))
   await install(dir)
   verifyVite(dir)
   console.log(`git install OK: ${spec}`)
-  console.log(`installed: ${readdirSync(join(dir, 'node_modules/kdesign')).sort().join(' ')}`)
+  console.log(`installed: ${readdirSync(join(dir, 'node_modules/benchlight')).sort().join(' ')}`)
 } finally {
   rmSync(dir, { recursive: true, force: true })
 }

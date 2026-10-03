@@ -1,12 +1,12 @@
 {
-  "name": "kd-fixture-vite",
+  "name": "bl-fixture-vite",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "vite build"
   },
   "dependencies": {
-    "kdesign": "file:../../.pack/kdesign.tgz",
+    "benchlight": "file:../../.pack/benchlight.tgz",
     "vue": "^3.5.0"
   },
   "devDependencies": {

@@ -1,61 +1,61 @@
 @layer components {
-  .kd-telemetry {
+  .bl-telemetry {
     overflow: hidden;
-    background: var(--kd-surface);
-    border: 1px solid var(--kd-separator);
-    border-radius: var(--kd-radius-card);
+    background: var(--bl-surface);
+    border: 1px solid var(--bl-separator);
+    border-radius: var(--bl-radius-card);
   }
-  .kd-ruler {
+  .bl-ruler {
     height: 8px;
     opacity: 0.6;
     background:
       repeating-linear-gradient(
         90deg,
-        var(--kd-separator) 0,
-        var(--kd-separator) 1px,
+        var(--bl-separator) 0,
+        var(--bl-separator) 1px,
         transparent 1px,
         transparent 8px
       ),
       repeating-linear-gradient(
         90deg,
-        var(--kd-ink-3) 0,
-        var(--kd-ink-3) 1px,
+        var(--bl-ink-3) 0,
+        var(--bl-ink-3) 1px,
         transparent 1px,
         transparent 40px
       );
   }
-  .kd-telemetry__cells {
+  .bl-telemetry__cells {
     display: grid;
   }
-  .kd-telemetry__cell {
+  .bl-telemetry__cell {
     display: flex;
     flex-direction: column;
     gap: 6px;
     min-width: 0;
     padding: 16px;
   }
-  .kd-telemetry__cell + .kd-telemetry__cell {
-    border-top: 1px solid var(--kd-separator);
+  .bl-telemetry__cell + .bl-telemetry__cell {
+    border-top: 1px solid var(--bl-separator);
   }
-  .kd-telemetry__value {
+  .bl-telemetry__value {
     display: flex;
     align-items: center;
     gap: 10px;
     min-height: 28px;
-    font-family: var(--kd-font-mono);
-    font-size: var(--kd-text-annotation);
+    font-family: var(--bl-font-mono);
+    font-size: var(--bl-text-annotation);
     font-variant-numeric: tabular-nums;
-    color: var(--kd-ink-1);
+    color: var(--bl-ink-1);
   }
   @media (min-width: 640px) {
-    .kd-telemetry__cells {
+    .bl-telemetry__cells {
       grid-auto-flow: column;
       grid-auto-columns: minmax(0, 1fr);
-      grid-template-columns: var(--kd-telemetry-columns, none);
+      grid-template-columns: var(--bl-telemetry-columns, none);
     }
-    .kd-telemetry__cell + .kd-telemetry__cell {
+    .bl-telemetry__cell + .bl-telemetry__cell {
       border-top: 0;
-      border-left: 1px solid var(--kd-separator);
+      border-left: 1px solid var(--bl-separator);
     }
   }
 }

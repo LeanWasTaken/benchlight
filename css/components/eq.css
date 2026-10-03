@@ -1,5 +1,5 @@
 @layer components {
-  @keyframes kd-eq {
+  @keyframes bl-eq {
     0%,
     100% {
       transform: scaleY(0.4);
@@ -8,56 +8,56 @@
       transform: scaleY(1);
     }
   }
-  .kd-eq {
+  .bl-eq {
     display: inline-flex;
     flex-shrink: 0;
     align-items: flex-end;
     gap: 2.5px;
     height: 14px;
   }
-  .kd-eq__bar {
+  .bl-eq__bar {
     width: 2.5px;
     border-radius: 1px;
-    background: var(--kd-ink-3);
+    background: var(--bl-ink-3);
     opacity: 0.4;
     transform-origin: bottom;
     transition:
-      height 500ms var(--kd-ease-out),
-      background-color 500ms var(--kd-ease-out);
+      height 500ms var(--bl-ease-out),
+      background-color 500ms var(--bl-ease-out);
   }
-  .kd-eq__bar:nth-child(1) {
+  .bl-eq__bar:nth-child(1) {
     height: 4px;
   }
-  .kd-eq__bar:nth-child(2) {
+  .bl-eq__bar:nth-child(2) {
     height: 8px;
     animation-delay: 120ms;
   }
-  .kd-eq__bar:nth-child(3) {
+  .bl-eq__bar:nth-child(3) {
     height: 5px;
     animation-delay: 240ms;
   }
-  .kd-eq__bar:nth-child(4) {
+  .bl-eq__bar:nth-child(4) {
     height: 10px;
     animation-delay: 360ms;
   }
-  .kd-eq--active .kd-eq__bar {
-    background: var(--kd-phosphor);
+  .bl-eq--active .bl-eq__bar {
+    background: var(--bl-phosphor);
     opacity: 1;
-    animation-name: kd-eq;
+    animation-name: bl-eq;
     animation-duration: 0.8s;
     animation-timing-function: ease-in-out;
     animation-iteration-count: infinite;
   }
-  .kd-eq--active .kd-eq__bar:nth-child(1) {
+  .bl-eq--active .bl-eq__bar:nth-child(1) {
     height: 5px;
   }
-  .kd-eq--active .kd-eq__bar:nth-child(2) {
+  .bl-eq--active .bl-eq__bar:nth-child(2) {
     height: 11px;
   }
-  .kd-eq--active .kd-eq__bar:nth-child(3) {
+  .bl-eq--active .bl-eq__bar:nth-child(3) {
     height: 7px;
   }
-  .kd-eq--active .kd-eq__bar:nth-child(4) {
+  .bl-eq--active .bl-eq__bar:nth-child(4) {
     height: 13px;
   }
 }

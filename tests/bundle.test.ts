@@ -19,41 +19,41 @@ const LAYERS = '@layer theme,base,components,utilities;'
 describe('inlineStaticTokens', () => {
   it('substitutes short literals and drops their declaration', () => {
     const css =
-      ':root {\n    --kd-text-micro: 0.6875rem;\n}\n.a { font-size: var(--kd-text-micro); }'
-    const out = inlineStaticTokens(css, [['--kd-text-micro', '0.6875rem']])
+      ':root {\n    --bl-text-micro: 0.6875rem;\n}\n.a { font-size: var(--bl-text-micro); }'
+    const out = inlineStaticTokens(css, [['--bl-text-micro', '0.6875rem']])
     expect(out).toContain('font-size: 0.6875rem;')
-    expect(out).not.toContain('--kd-text-micro')
+    expect(out).not.toContain('--bl-text-micro')
   })
 
   it('removes a redeclared static token declaration everywhere', () => {
     const css =
-      ':root {\n  --kd-text-micro: 0.6875rem;\n}\n@media (min-width: 1px) {\n  :root {\n    --kd-text-micro: 1rem;\n  }\n}\n.a { font-size: var(--kd-text-micro); }'
-    const out = inlineStaticTokens(css, [['--kd-text-micro', '0.6875rem']])
-    expect(out).not.toContain('--kd-text-micro')
+      ':root {\n  --bl-text-micro: 0.6875rem;\n}\n@media (min-width: 1px) {\n  :root {\n    --bl-text-micro: 1rem;\n  }\n}\n.a { font-size: var(--bl-text-micro); }'
+    const out = inlineStaticTokens(css, [['--bl-text-micro', '0.6875rem']])
+    expect(out).not.toContain('--bl-text-micro')
     expect(out).toContain('font-size: 0.6875rem;')
   })
 
   it('throws when the token is used with a fallback', () => {
     expect(() =>
-      inlineStaticTokens('.a { font-size: var(--kd-text-micro, 1px); }', [
-        ['--kd-text-micro', '0.6875rem']
+      inlineStaticTokens('.a { font-size: var(--bl-text-micro, 1px); }', [
+        ['--bl-text-micro', '0.6875rem']
       ])
-    ).toThrow('--kd-text-micro is used with a fallback and cannot be inlined')
+    ).toThrow('--bl-text-micro is used with a fallback and cannot be inlined')
   })
 
   it('keeps long values (font stacks, shadows, easing) as variables', () => {
     const names = inlinableVars().map(([name]) => name)
-    expect(names).toContain('--kd-text-micro')
-    expect(names).toContain('--kd-radius-card')
-    expect(names).not.toContain('--kd-font-mono')
-    expect(names).not.toContain('--kd-ease-out')
-    expect(names).not.toContain('--kd-shadow-float')
+    expect(names).toContain('--bl-text-micro')
+    expect(names).toContain('--bl-radius-card')
+    expect(names).not.toContain('--bl-font-mono')
+    expect(names).not.toContain('--bl-ease-out')
+    expect(names).not.toContain('--bl-shadow-float')
   })
 })
 
 describe('buildDist', () => {
   it('is fresh on disk', () => {
-    expect(read('dist/kdesign.min.css')).toBe(dist.bundle)
+    expect(read('dist/benchlight.min.css')).toBe(dist.bundle)
     expect(read('dist/fonts.min.css')).toBe(dist.fonts)
     for (const [name, css] of Object.entries(dist.modules)) {
       expect(read(`dist/modules/${name}.min.css`)).toBe(css)
@@ -70,8 +70,8 @@ describe('buildDist', () => {
   })
 
   it('keeps every token as a variable, so it is interchangeable with the source CSS', () => {
-    expect(dist.bundle).toContain('--kd-text-micro:')
-    expect(dist.bundle).toContain('var(--kd-text-micro)')
+    expect(dist.bundle).toContain('--bl-text-micro:')
+    expect(dist.bundle).toContain('var(--bl-text-micro)')
   })
 
   it('has six local font faces and nothing remote', () => {
@@ -93,7 +93,7 @@ describe('buildDist', () => {
   })
 
   it('stays within the 25600-byte guard', () => {
-    expect(Buffer.byteLength(read('dist/kdesign.min.css'))).toBeLessThanOrEqual(25_600)
+    expect(Buffer.byteLength(read('dist/benchlight.min.css'))).toBeLessThanOrEqual(25_600)
   })
 })
 
@@ -107,19 +107,19 @@ describe('custom build', () => {
   })
 
   it('inlines short static tokens and keeps long ones as variables', () => {
-    expect(inlined).not.toContain('var(--kd-text-micro)')
-    expect(inlined).toContain('var(--kd-font-mono)')
+    expect(inlined).not.toContain('var(--bl-text-micro)')
+    expect(inlined).toContain('var(--bl-font-mono)')
   })
 
   it('contains only the requested modules', () => {
-    expect(inlined).not.toMatch(/\.kd-prose(?![\w-])/)
+    expect(inlined).not.toMatch(/\.bl-prose(?![\w-])/)
   })
 })
 
 describe('minifyCss', () => {
   it('keeps cascade layers', () => {
-    expect(minifyCss('@layer components { .kd-x { color: red; } }', 'x.css')).toBe(
-      '@layer components{.kd-x{color:red}}'
+    expect(minifyCss('@layer components { .bl-x { color: red; } }', 'x.css')).toBe(
+      '@layer components{.bl-x{color:red}}'
     )
   })
 })

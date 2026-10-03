@@ -1,5 +1,5 @@
 @layer components {
-  .kd-link-arrow {
+  .bl-link-arrow {
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -7,24 +7,24 @@
     width: fit-content;
     text-transform: uppercase;
     text-decoration: none;
-    color: var(--kd-ink-2);
-    transition: color var(--kd-duration-fast) ease;
+    color: var(--bl-ink-2);
+    transition: color var(--bl-duration-fast) ease;
   }
-  .kd-link-arrow::before {
+  .bl-link-arrow::before {
     position: absolute;
     inset: -8px;
     content: '';
   }
-  .kd-link-arrow:hover {
-    color: var(--kd-trace);
+  .bl-link-arrow:hover {
+    color: var(--bl-trace);
   }
-  .kd-link-arrow--quiet {
-    color: var(--kd-ink-3);
+  .bl-link-arrow--quiet {
+    color: var(--bl-ink-3);
   }
-  .kd-link-arrow--quiet:hover {
-    color: var(--kd-ink-1);
+  .bl-link-arrow--quiet:hover {
+    color: var(--bl-ink-1);
   }
-  .kd-link-arrow__icon {
+  .bl-link-arrow__icon {
     display: inline-flex;
     width: 12px;
     height: 12px;

@@ -16,7 +16,7 @@ const AUTO_IMPORTS = [
 ] as const
 
 export default defineNuxtModule<ModuleOptions>({
-  meta: { name: 'kdesign', configKey: 'kdesign', compatibility: { nuxt: '>=4.0.0' } },
+  meta: { name: 'benchlight', configKey: 'benchlight', compatibility: { nuxt: '>=4.0.0' } },
   defaults: { fonts: true },
   setup(options, nuxt) {
     const { resolve } = createResolver(import.meta.url)
@@ -34,10 +34,10 @@ export default defineNuxtModule<ModuleOptions>({
     addComponentsDir({ path: resolve('../vue/components'), pathPrefix: false })
     addImports(AUTO_IMPORTS.map((name) => ({ name, from: resolve('../vue/index') })))
 
-    nuxt.options.build.transpile.push('kdesign')
+    nuxt.options.build.transpile.push('benchlight')
     nuxt.options.vite.optimizeDeps = {
       ...nuxt.options.vite.optimizeDeps,
-      exclude: [...(nuxt.options.vite.optimizeDeps?.exclude ?? []), 'kdesign']
+      exclude: [...(nuxt.options.vite.optimizeDeps?.exclude ?? []), 'benchlight']
     }
   }
 })

@@ -1,147 +1,147 @@
 <template>
-  <KdSkipLink />
-  <KdSiteBar>
+  <BlSkipLink />
+  <BlSiteBar>
     <template #brand>
-      <a class="kd-site-bar__brand" href="#top">KDESIGN</a>
+      <a class="bl-site-bar__brand" href="#top">BENCHLIGHT</a>
     </template>
     <template #nav>
-      <KdNavLink href="#tokens" current>Tokens</KdNavLink>
-      <KdNavLink href="#controls">Controls</KdNavLink>
-      <KdNavLink href="#readouts">Readouts</KdNavLink>
-      <KdNavLink href="#lists">Lists</KdNavLink>
+      <BlNavLink href="#tokens" current>Tokens</BlNavLink>
+      <BlNavLink href="#controls">Controls</BlNavLink>
+      <BlNavLink href="#readouts">Readouts</BlNavLink>
+      <BlNavLink href="#lists">Lists</BlNavLink>
     </template>
     <template #actions>
-      <KdAppearanceSwitch />
+      <BlAppearanceSwitch />
     </template>
-  </KdSiteBar>
+  </BlSiteBar>
 
-  <main id="main-content" tabindex="-1" class="kd-col pg-main">
+  <main id="main-content" tabindex="-1" class="bl-col pg-main">
     <section id="top">
-      <KdMeta class="kd-rise" :items="['kdesign', 'Benchlight', 'v0.1.0']" separator />
-      <h1 class="kd-display kd-display--xl kd-rise" :style="riseDelay(1)">Benchlight</h1>
-      <p class="kd-lede kd-rise" :style="riseDelay(2)">
+      <BlMeta class="bl-rise" :items="['Benchlight', 'design system', 'v0.1.0']" separator />
+      <h1 class="bl-display bl-display--xl bl-rise" :style="riseDelay(1)">Benchlight</h1>
+      <p class="bl-lede bl-rise" :style="riseDelay(2)">
         One bench-lit identity for every personal project: generated tokens, plain CSS in cascade
         layers, and thin Vue components on top.
       </p>
-      <KdTelemetry class="pg-block kd-rise" :style="riseDelay(3)" columns="1.4fr 1fr 1fr">
-        <KdTelemetryCell label="Now playing">
-          <KdEqBars active />
-          <KdMarquee
+      <BlTelemetry class="pg-block bl-rise" :style="riseDelay(3)" columns="1.4fr 1fr 1fr">
+        <BlTelemetryCell label="Now playing">
+          <BlEqBars active />
+          <BlMarquee
             class="pg-marquee"
             title="Track title · Artist name · Album name long enough to scroll"
           >
             <span>Track title</span>
             <span class="pg-dim">·</span>
             <span>Artist name · Album name long enough to scroll</span>
-          </KdMarquee>
-        </KdTelemetryCell>
-        <KdTelemetryCell label="Local time">UTC 21:04</KdTelemetryCell>
-        <KdTelemetryCell label="Status"><KdLed state="on" /> Available</KdTelemetryCell>
-      </KdTelemetry>
+          </BlMarquee>
+        </BlTelemetryCell>
+        <BlTelemetryCell label="Local time">UTC 21:04</BlTelemetryCell>
+        <BlTelemetryCell label="Status"><BlLed state="on" /> Available</BlTelemetryCell>
+      </BlTelemetry>
     </section>
 
     <section id="tokens">
-      <KdSectionHead eyebrow="Tokens" heading="Colour" ruled />
+      <BlSectionHead eyebrow="Tokens" heading="Colour" ruled />
       <div class="pg-swatches">
         <div v-for="name in colorNames" :key="name" class="pg-swatch">
-          <span class="pg-chip" :style="{ background: `var(--kd-${name})` }" />
-          <span class="kd-annotation">--kd-{{ name }}</span>
+          <span class="pg-chip" :style="{ background: `var(--bl-${name})` }" />
+          <span class="bl-annotation">--bl-{{ name }}</span>
         </div>
       </div>
       <div class="pg-row">
-        <span class="kd-silkscreen">Silkscreen</span>
-        <span class="kd-annotation">Annotation 2026-10-03</span>
-        <span class="kd-display kd-display--md">Display</span>
+        <span class="bl-silkscreen">Silkscreen</span>
+        <span class="bl-annotation">Annotation 2026-10-03</span>
+        <span class="bl-display bl-display--md">Display</span>
       </div>
     </section>
 
     <section id="controls">
-      <KdSectionHead eyebrow="Controls" heading="Buttons, segments, fields" ruled />
+      <BlSectionHead eyebrow="Controls" heading="Buttons, segments, fields" ruled />
       <div class="pg-row">
-        <KdButton>Primary</KdButton>
-        <KdButton variant="secondary">Secondary</KdButton>
-        <KdButton variant="danger">Erase flash</KdButton>
-        <KdButton variant="secondary" pill>← Back home</KdButton>
-        <KdButton disabled>Disabled</KdButton>
+        <BlButton>Primary</BlButton>
+        <BlButton variant="secondary">Secondary</BlButton>
+        <BlButton variant="danger">Erase flash</BlButton>
+        <BlButton variant="secondary" pill>← Back home</BlButton>
+        <BlButton disabled>Disabled</BlButton>
       </div>
       <div class="pg-row">
-        <KdSegmented v-model="filter" :options="filters" label="Category" />
-        <KdSegmented as="a" compact :options="locales" label="Language" />
+        <BlSegmented v-model="filter" :options="filters" label="Category" />
+        <BlSegmented as="a" compact :options="locales" label="Language" />
       </div>
       <div class="pg-stack">
-        <KdField v-slot="{ id }" label="Display name" hint="Shown next to your avatar.">
-          <KdInput :id="id" v-model="displayName" />
-        </KdField>
-        <KdField v-slot="{ id }" label="Network">
-          <KdSelect :id="id" v-model="network" :options="networks" />
-        </KdField>
-        <KdField v-slot="{ id }" label="Volume">
-          <KdRange :id="id" v-model="volume" :min="-60" :max="0" :format="(v) => `${v} dB`" />
-        </KdField>
+        <BlField v-slot="{ id }" label="Display name" hint="Shown next to your avatar.">
+          <BlInput :id="id" v-model="displayName" />
+        </BlField>
+        <BlField v-slot="{ id }" label="Network">
+          <BlSelect :id="id" v-model="network" :options="networks" />
+        </BlField>
+        <BlField v-slot="{ id }" label="Volume">
+          <BlRange :id="id" v-model="volume" :min="-60" :max="0" :format="(v) => `${v} dB`" />
+        </BlField>
       </div>
       <div class="pg-row">
-        <KdLinkArrow href="#lists">All projects</KdLinkArrow>
-        <KdLinkArrow href="#top" direction="left" quiet>Back</KdLinkArrow>
-        <KdLinkArrow href="mailto:hello@example.com" direction="up-right">Contact</KdLinkArrow>
+        <BlLinkArrow href="#lists">All projects</BlLinkArrow>
+        <BlLinkArrow href="#top" direction="left" quiet>Back</BlLinkArrow>
+        <BlLinkArrow href="mailto:hello@example.com" direction="up-right">Contact</BlLinkArrow>
       </div>
     </section>
 
     <section id="readouts">
-      <KdSectionHead eyebrow="Readouts" heading="Panels, meters, messages" ruled />
+      <BlSectionHead eyebrow="Readouts" heading="Panels, meters, messages" ruled />
       <div class="pg-stack">
-        <KdSpecPanel :rows="specRows" />
+        <BlSpecPanel :rows="specRows" />
         <div>
-          <KdReadout value="94.2" unit="Mbps" />
-          <KdMeter :value="0.62" label="Download" />
+          <BlReadout value="94.2" unit="Mbps" />
+          <BlMeter :value="0.62" label="Download" />
         </div>
         <div>
-          <KdMsg tone="ok">Saved. Rebooting in 3 s.</KdMsg>
-          <KdMsg tone="err">Upload failed: image too large.</KdMsg>
-          <KdMsg tone="info">Scanning for networks…</KdMsg>
+          <BlMsg tone="ok">Saved. Rebooting in 3 s.</BlMsg>
+          <BlMsg tone="err">Upload failed: image too large.</BlMsg>
+          <BlMsg tone="info">Scanning for networks…</BlMsg>
         </div>
         <div class="pg-row">
-          <KdLed state="on" /><span class="kd-annotation">on</span> <KdLed /><span
-            class="kd-annotation"
+          <BlLed state="on" /><span class="bl-annotation">on</span> <BlLed /><span
+            class="bl-annotation"
             >off</span
           >
-          <KdLed state="danger" /><span class="kd-annotation">danger</span>
+          <BlLed state="danger" /><span class="bl-annotation">danger</span>
         </div>
-        <KdLog :lines="logLines" />
+        <BlLog :lines="logLines" />
       </div>
     </section>
 
     <section id="lists">
-      <KdSectionHead eyebrow="Featured projects" bar>
-        <template #action><KdLinkArrow href="#lists">All projects</KdLinkArrow></template>
-      </KdSectionHead>
-      <KdIndex>
-        <KdIndexRow v-for="project in projects" :key="project.refdes" href="#lists">
+      <BlSectionHead eyebrow="Featured projects" bar>
+        <template #action><BlLinkArrow href="#lists">All projects</BlLinkArrow></template>
+      </BlSectionHead>
+      <BlIndex>
+        <BlIndexRow v-for="project in projects" :key="project.refdes" href="#lists">
           <template #meta>
-            <KdMeta as="span" :items="project.meta" />
+            <BlMeta as="span" :items="project.meta" />
           </template>
           <template #title>{{ project.title }}</template>
           {{ project.description }}
-        </KdIndexRow>
-      </KdIndex>
+        </BlIndexRow>
+      </BlIndex>
 
-      <KdSectionHead class="pg-block" eyebrow="Timeline" heading="Journey" />
-      <KdIndex ruled-top>
-        <KdIndexRow v-for="entry in timeline" :key="entry.year" compact>
+      <BlSectionHead class="pg-block" eyebrow="Timeline" heading="Journey" />
+      <BlIndex ruled-top>
+        <BlIndexRow v-for="entry in timeline" :key="entry.year" compact>
           <template #meta>
-            <KdMeta
+            <BlMeta
               as="span"
-              :items="[{ text: entry.year, class: 'kd-meta__key' }, entry.meta]"
+              :items="[{ text: entry.year, class: 'bl-meta__key' }, entry.meta]"
               separator
             />
           </template>
           <template #title>{{ entry.title }}</template>
           {{ entry.desc }}
-        </KdIndexRow>
-      </KdIndex>
+        </BlIndexRow>
+      </BlIndex>
 
-      <KdSectionHead class="pg-block" eyebrow="Off the clock" heading="Other things I'm into" />
-      <KdIndex ruled-top grid>
-        <KdIndexRow v-for="interest in interests" :key="interest.title" compact>
+      <BlSectionHead class="pg-block" eyebrow="Off the clock" heading="Other things I'm into" />
+      <BlIndex ruled-top grid>
+        <BlIndexRow v-for="interest in interests" :key="interest.title" compact>
           <template #icon>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="9" />
@@ -149,15 +149,15 @@
           </template>
           <template #title>{{ interest.title }}</template>
           {{ interest.desc }}
-        </KdIndexRow>
-      </KdIndex>
+        </BlIndexRow>
+      </BlIndex>
 
-      <KdPrevNext
+      <BlPrevNext
         :prev="{ title: 'Project Two', href: '#lists' }"
         :next="{ title: 'Project Three', href: '#lists' }"
       />
 
-      <KdProse class="pg-block">
+      <BlProse class="pg-block">
         <h2>Why I built it</h2>
         <p>
           Existing tools are expensive, platform-locked, or both. This one runs in the browser and
@@ -171,73 +171,73 @@
         <p>Polling runs every <code>500</code> ms:</p>
         <pre><code>const value = parse(input)</code></pre>
         <blockquote>Fix things that, probably, weren't broken.</blockquote>
-      </KdProse>
+      </BlProse>
     </section>
   </main>
 
-  <KdColophon :items="['© 2026 Example', 'Remote', 'Rev 0.1.0']" />
-  <KdTabBar label="Playground">
-    <KdTabBarItem href="#tokens" current>
+  <BlColophon :items="['© 2026 Example', 'Remote', 'Rev 0.1.0']" />
+  <BlTabBar label="Playground">
+    <BlTabBarItem href="#tokens" current>
       <template #icon>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="4" y="4" width="16" height="16" rx="2" />
         </svg>
       </template>
       Tokens
-    </KdTabBarItem>
-    <KdTabBarItem href="#controls">
+    </BlTabBarItem>
+    <BlTabBarItem href="#controls">
       <template #icon>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M4 7h16M4 17h16" />
         </svg>
       </template>
       Controls
-    </KdTabBarItem>
-    <KdTabBarItem href="#lists">
+    </BlTabBarItem>
+    <BlTabBarItem href="#lists">
       <template #icon>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M8 6h12M8 12h12M8 18h12M4 6h0M4 12h0M4 18h0" />
         </svg>
       </template>
       Lists
-    </KdTabBarItem>
-  </KdTabBar>
+    </BlTabBarItem>
+  </BlTabBar>
 </template>
 
 <script setup lang="ts">
   import { ref } from 'vue'
   import { colorNames } from '../../tokens/tokens'
   import {
-    KdAppearanceSwitch,
-    KdButton,
-    KdColophon,
-    KdEqBars,
-    KdField,
-    KdIndex,
-    KdIndexRow,
-    KdInput,
-    KdLed,
-    KdLinkArrow,
-    KdLog,
-    KdMarquee,
-    KdMeta,
-    KdMeter,
-    KdMsg,
-    KdNavLink,
-    KdPrevNext,
-    KdProse,
-    KdRange,
-    KdReadout,
-    KdSectionHead,
-    KdSegmented,
-    KdSelect,
-    KdSiteBar,
-    KdSkipLink,
-    KdSpecPanel,
-    KdTabBar,
-    KdTabBarItem,
-    KdTelemetry,
-    KdTelemetryCell,
+    BlAppearanceSwitch,
+    BlButton,
+    BlColophon,
+    BlEqBars,
+    BlField,
+    BlIndex,
+    BlIndexRow,
+    BlInput,
+    BlLed,
+    BlLinkArrow,
+    BlLog,
+    BlMarquee,
+    BlMeta,
+    BlMeter,
+    BlMsg,
+    BlNavLink,
+    BlPrevNext,
+    BlProse,
+    BlRange,
+    BlReadout,
+    BlSectionHead,
+    BlSegmented,
+    BlSelect,
+    BlSiteBar,
+    BlSkipLink,
+    BlSpecPanel,
+    BlTabBar,
+    BlTabBarItem,
+    BlTelemetry,
+    BlTelemetryCell,
     riseDelay
   } from '../../vue'
 
@@ -285,13 +285,13 @@
       refdes: 'SW-01',
       title: 'Project One',
       description: 'A browser tool for inspecting live data streams.',
-      meta: [{ text: 'SW-01', class: 'kd-meta__key' }, 'Software', '2026', 'Active']
+      meta: [{ text: 'SW-01', class: 'bl-meta__key' }, 'Software', '2026', 'Active']
     },
     {
       refdes: 'HW-01',
       title: 'Project Two',
       description: 'A small board that logs power readings over USB.',
-      meta: [{ text: 'HW-01', class: 'kd-meta__key' }, 'Hardware', '2025', 'Shipped']
+      meta: [{ text: 'HW-01', class: 'bl-meta__key' }, 'Hardware', '2025', 'Shipped']
     }
   ]
 

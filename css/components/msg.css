@@ -1,38 +1,38 @@
 /* ok/err/info share one tint each; ok text stays ink-1 because phosphor text on its own
    tint fails AA in light mode (spec §4.1). */
 @layer components {
-  .kd-msg {
+  .bl-msg {
     display: flex;
     align-items: center;
     gap: 10px;
     margin: 12px 0 0;
     padding: 10px 12px;
-    border-radius: var(--kd-radius-chip);
-    background: var(--kd-surface);
-    font-family: var(--kd-font-mono);
-    font-size: var(--kd-text-annotation);
-    color: var(--kd-ink-2);
+    border-radius: var(--bl-radius-chip);
+    background: var(--bl-surface);
+    font-family: var(--bl-font-mono);
+    font-size: var(--bl-text-annotation);
+    color: var(--bl-ink-2);
     overflow-wrap: anywhere;
   }
-  .kd-msg--ok {
-    background: color-mix(in srgb, var(--kd-phosphor) 10%, transparent);
-    color: var(--kd-ink-1);
+  .bl-msg--ok {
+    background: color-mix(in srgb, var(--bl-phosphor) 10%, transparent);
+    color: var(--bl-ink-1);
   }
-  .kd-msg--ok::before {
+  .bl-msg--ok::before {
     flex-shrink: 0;
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--kd-phosphor);
-    box-shadow: var(--kd-shadow-glow) var(--kd-phosphor);
+    background: var(--bl-phosphor);
+    box-shadow: var(--bl-shadow-glow) var(--bl-phosphor);
     content: '';
   }
-  .kd-msg--err {
-    background: color-mix(in srgb, var(--kd-danger) 10%, transparent);
-    color: var(--kd-danger);
+  .bl-msg--err {
+    background: color-mix(in srgb, var(--bl-danger) 10%, transparent);
+    color: var(--bl-danger);
   }
-  .kd-msg--info {
-    background: color-mix(in srgb, var(--kd-trace) 10%, transparent);
-    color: var(--kd-trace);
+  .bl-msg--info {
+    background: color-mix(in srgb, var(--bl-trace) 10%, transparent);
+    color: var(--bl-trace);
   }
 }

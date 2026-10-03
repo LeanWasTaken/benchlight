@@ -1,24 +1,24 @@
 <template>
   <div>
-    <KdSkipLink />
-    <KdSiteBar>
+    <BlSkipLink />
+    <BlSiteBar>
       <template #brand>
-        <NuxtLink to="/" class="kd-site-bar__brand">FIXTURE</NuxtLink>
+        <NuxtLink to="/" class="bl-site-bar__brand">FIXTURE</NuxtLink>
       </template>
       <template #nav>
-        <KdNavLink :as="NuxtLink" to="/" current>Home</KdNavLink>
+        <BlNavLink :as="NuxtLink" to="/" current>Home</BlNavLink>
       </template>
       <template #actions>
-        <KdAppearanceSwitch />
+        <BlAppearanceSwitch />
       </template>
-    </KdSiteBar>
-    <main id="main-content" class="kd-col">
-      <h1 class="kd-display kd-display--lg kd-rise" :style="riseDelay(1)">Fixture</h1>
+    </BlSiteBar>
+    <main id="main-content" class="bl-col">
+      <h1 class="bl-display bl-display--lg bl-rise" :style="riseDelay(1)">Fixture</h1>
       <p class="bg-surface text-ink-2 font-display">tailwind utilities</p>
-      <KdLed state="on" />
-      <KdSpecPanel :rows="[{ label: 'Refdes', value: 'SW-01' }]" />
+      <BlLed state="on" />
+      <BlSpecPanel :rows="[{ label: 'Refdes', value: 'SW-01' }]" />
     </main>
-    <KdColophon :items="['fixture']" />
+    <BlColophon :items="['fixture']" />
   </div>
 </template>
 

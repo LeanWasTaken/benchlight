@@ -18,13 +18,13 @@ const STATIC_GROUPS = [
 ] as const
 
 export function colorVars(t: Tokens, theme: Theme): Vars {
-  return Object.entries(t.color[theme]).map(([name, value]) => [`--kd-${name}`, value])
+  return Object.entries(t.color[theme]).map(([name, value]) => [`--bl-${name}`, value])
 }
 
 export function staticVars(t: Tokens): Vars {
   return STATIC_GROUPS.flatMap((group) =>
     Object.entries(t[group] as Record<string, string>).map(
-      ([name, value]) => [`--kd-${group}-${name}`, value] as [string, string]
+      ([name, value]) => [`--bl-${group}-${name}`, value] as [string, string]
     )
   )
 }
@@ -44,12 +44,12 @@ export function renderTokensCss(t: Tokens): string {
     '    color-scheme: light;',
     '  }',
     '  @media (prefers-color-scheme: dark) {',
-    "    :root:not([data-kd-appearance='light']) {",
+    "    :root:not([data-bl-appearance='light']) {",
     declarations(dark, '      '),
     '      color-scheme: dark;',
     '    }',
     '  }',
-    "  :root[data-kd-appearance='dark'] {",
+    "  :root[data-bl-appearance='dark'] {",
     declarations(dark, '    '),
     '    color-scheme: dark;',
     '  }',
@@ -68,27 +68,27 @@ const TEXT_LEADING: Record<string, string> = {
 
 export function renderTailwindTheme(t: Tokens): string {
   const lines: string[] = []
-  for (const name of Object.keys(t.color.light)) lines.push(`--color-${name}: var(--kd-${name});`)
+  for (const name of Object.keys(t.color.light)) lines.push(`--color-${name}: var(--bl-${name});`)
   for (const name of ['sans', 'mono', 'display']) {
-    lines.push(`--font-${name}: var(--kd-font-${name});`)
+    lines.push(`--font-${name}: var(--bl-font-${name});`)
     // Preflight resets html font-feature-settings from this; keep Geist's variants.
     if (name === 'sans')
-      lines.push('--font-sans--font-feature-settings: var(--kd-font-sans-features);')
+      lines.push('--font-sans--font-feature-settings: var(--bl-font-sans-features);')
   }
   for (const name of Object.keys(t.text)) {
-    lines.push(`--text-${name}: var(--kd-text-${name});`)
+    lines.push(`--text-${name}: var(--bl-text-${name});`)
     const leading = TEXT_LEADING[name]
-    if (leading) lines.push(`--text-${name}--line-height: var(--kd-leading-${leading});`)
+    if (leading) lines.push(`--text-${name}--line-height: var(--bl-leading-${leading});`)
   }
   for (const name of Object.keys(t.tracking)) {
-    lines.push(`--tracking-${name}: var(--kd-tracking-${name});`)
+    lines.push(`--tracking-${name}: var(--bl-tracking-${name});`)
   }
   for (const name of Object.keys(t.radius))
-    lines.push(`--radius-${name}: var(--kd-radius-${name});`)
-  lines.push('--ease-out: var(--kd-ease-out);')
-  lines.push('--container-column: var(--kd-layout-column);')
-  lines.push('--container-prose: var(--kd-layout-prose);')
+    lines.push(`--radius-${name}: var(--bl-radius-${name});`)
+  lines.push('--ease-out: var(--bl-ease-out);')
+  lines.push('--container-column: var(--bl-layout-column);')
+  lines.push('--container-prose: var(--bl-layout-prose);')
   for (const name of ['thumb', 'float', 'well'])
-    lines.push(`--shadow-${name}: var(--kd-shadow-${name});`)
+    lines.push(`--shadow-${name}: var(--bl-shadow-${name});`)
   return `${GENERATED_HEADER}\n@theme inline {\n${lines.map((line) => `  ${line}`).join('\n')}\n}\n`
 }

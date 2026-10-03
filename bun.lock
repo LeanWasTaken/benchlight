@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "kdesign",
+      "name": "benchlight",
       "devDependencies": {
         "@eslint/js": "^10.0.1",
         "@nuxt/kit": "^4.5.2",
