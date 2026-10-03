@@ -6,7 +6,7 @@
         <input
           v-model="mode"
           type="radio"
-          name="kd-appearance"
+          :name="groupName"
           :value="option.value"
           :aria-label="option.label"
         />
@@ -17,12 +17,13 @@
 </template>
 
 <script setup lang="ts">
-  import { computed } from 'vue'
+  import { computed, useId } from 'vue'
   import { useAppearance, type AppearanceMode } from '../composables/useAppearance'
   import type { AppearanceLabels } from '../types'
 
   const props = defineProps<{ labels?: Partial<AppearanceLabels> }>()
   const { mode } = useAppearance()
+  const groupName = `kd-appearance-${useId()}`
 
   const text = computed<AppearanceLabels>(() => ({
     legend: 'Appearance',
