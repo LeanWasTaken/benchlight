@@ -18,6 +18,8 @@ export default defineConfig(
       'docs/**',
       '.remember/**',
       '.omc/**',
+      '.omx/**',
+      'showcase/dist/**',
       '.superpowers/**'
     ]
   },
