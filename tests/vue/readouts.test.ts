@@ -144,6 +144,34 @@ describe('BlLog', () => {
     expect(wrapper.element.scrollTop).toBe(700)
     wrapper.unmount()
   })
+
+  it('is a focusable, labelled log without a redundant live region', () => {
+    const wrapper = mount(BlLog, { props: { lines: ['a'] } })
+    expect(wrapper.attributes('tabindex')).toBe('0')
+    expect(wrapper.attributes('aria-label')).toBe('Log')
+    expect(wrapper.attributes('aria-live')).toBeUndefined()
+    expect(
+      mount(BlLog, { props: { lines: [], label: 'Device log' } }).attributes('aria-label')
+    ).toBe('Device log')
+  })
+
+  it('does not pull a reader scrolled up back to the bottom', async () => {
+    const wrapper = mount(BlLog, { props: { lines: ['a', 'b'] }, attachTo: document.body })
+    const log = wrapper.element as HTMLElement
+    Object.defineProperty(log, 'scrollHeight', { value: 600, configurable: true })
+    Object.defineProperty(log, 'clientHeight', { value: 100, configurable: true })
+    log.scrollTop = 50
+    log.dispatchEvent(new Event('scroll'))
+    await wrapper.setProps({ lines: ['a', 'b', 'c'] })
+    await nextTick()
+    expect(log.scrollTop).toBe(50)
+    log.scrollTop = 500
+    log.dispatchEvent(new Event('scroll'))
+    await wrapper.setProps({ lines: ['a', 'b', 'c', 'd'] })
+    await nextTick()
+    expect(log.scrollTop).toBe(600)
+    wrapper.unmount()
+  })
 })
 
 describe('BlMarquee', () => {

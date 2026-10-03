@@ -3,6 +3,7 @@ import { createSSRApp, defineComponent, h, nextTick, ref } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 import { riseDelay } from '../../vue/composables/riseDelay'
 import { resetAppearanceState, useAppearance } from '../../vue/composables/useAppearance'
+import { useFollowScroll } from '../../vue/composables/useFollowScroll'
 import { useMarquee } from '../../vue/composables/useMarquee'
 import { useReducedMotion } from '../../vue/composables/useReducedMotion'
 import { useScrollLifted } from '../../vue/composables/useScrollLifted'
@@ -264,5 +265,62 @@ describe('riseDelay', () => {
 
   it('never goes below the base', () => {
     expect(riseDelay(-3, { base: 100 })).toEqual({ '--bl-rise-delay': '100ms' })
+  })
+})
+
+describe('useFollowScroll', () => {
+  function scroller(scrollHeight = 500, clientHeight = 100) {
+    const el = document.createElement('div')
+    Object.defineProperty(el, 'scrollHeight', { value: scrollHeight, configurable: true })
+    Object.defineProperty(el, 'clientHeight', { value: clientHeight, configurable: true })
+    document.body.appendChild(el)
+    return el
+  }
+  const scrollTo = (el: HTMLElement, top: number) => {
+    el.scrollTop = top
+    el.dispatchEvent(new Event('scroll'))
+  }
+
+  it('starts pinned and follows to the bottom', () => {
+    const el = scroller()
+    const { result, wrapper } = withSetup(() => useFollowScroll(ref(el)))
+    expect(result.pinned.value).toBe(true)
+    result.toBottom()
+    expect(el.scrollTop).toBe(500)
+    wrapper.unmount()
+    el.remove()
+  })
+
+  it('stops following while the reader is scrolled up, resumes at the bottom', () => {
+    const el = scroller()
+    const { result, wrapper } = withSetup(() => useFollowScroll(ref(el)))
+    scrollTo(el, 100)
+    expect(result.pinned.value).toBe(false)
+    result.toBottom()
+    expect(el.scrollTop).toBe(100)
+    scrollTo(el, 398) // within the 4px threshold of 400
+    expect(result.pinned.value).toBe(true)
+    result.toBottom()
+    expect(el.scrollTop).toBe(500)
+    wrapper.unmount()
+    el.remove()
+  })
+
+  it('does nothing when disabled', () => {
+    const el = scroller()
+    const { result, wrapper } = withSetup(() => useFollowScroll(ref(el), { enabled: false }))
+    result.toBottom()
+    expect(el.scrollTop).toBe(0)
+    wrapper.unmount()
+    el.remove()
+  })
+
+  it('stops listening after unmount', () => {
+    const el = scroller()
+    const { result, wrapper } = withSetup(() => useFollowScroll(ref(el)))
+    wrapper.unmount()
+    scrollTo(el, 0)
+    expect(result.pinned.value).toBe(true)
+    el.remove()
   })
 })
