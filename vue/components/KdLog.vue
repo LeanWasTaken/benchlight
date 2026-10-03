@@ -17,12 +17,9 @@
   const element = ref<HTMLElement | null>(null)
   const parsed = computed(() => props.lines.map(ansiToSegments))
 
-  watch(
-    () => props.lines,
-    async () => {
-      if (!props.follow) return
-      await nextTick()
-      if (element.value) element.value.scrollTop = element.value.scrollHeight
-    }
-  )
+  watch([() => props.lines, () => props.lines.length], async () => {
+    if (!props.follow) return
+    await nextTick()
+    if (element.value) element.value.scrollTop = element.value.scrollHeight
+  })
 </script>

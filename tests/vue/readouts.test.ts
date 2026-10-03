@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { h, nextTick } from 'vue'
+import { defineComponent, h, nextTick, ref } from 'vue'
 import KdEqBars from '../../vue/components/KdEqBars.vue'
 import KdLed from '../../vue/components/KdLed.vue'
 import KdLog from '../../vue/components/KdLog.vue'
@@ -120,6 +120,19 @@ describe('KdLog', () => {
     await wrapper.setProps({ lines: ['a', 'b'] })
     await nextTick()
     expect(wrapper.element.scrollTop).toBe(500)
+    wrapper.unmount()
+  })
+
+  it('follows lines pushed onto the same array', async () => {
+    const lines = ref(['a'])
+    const Host = defineComponent({ setup: () => () => h(KdLog, { lines: lines.value }) })
+    const wrapper = mount(Host, { attachTo: document.body })
+    const log = wrapper.find('pre').element
+    Object.defineProperty(log, 'scrollHeight', { value: 500, configurable: true })
+    lines.value.push('b')
+    await nextTick()
+    await nextTick()
+    expect(log.scrollTop).toBe(500)
     wrapper.unmount()
   })
 
