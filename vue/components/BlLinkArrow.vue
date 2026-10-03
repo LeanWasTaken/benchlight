@@ -18,10 +18,16 @@
 <script setup lang="ts">
   import { computed } from 'vue'
   import { linkBindings, resolveTag } from '../internal/link'
-  import type { LinkProps } from '../types'
+  import type { LinkAs, LinkTo } from '../types'
 
   const props = withDefaults(
-    defineProps<LinkProps & { direction?: 'left' | 'right' | 'up-right'; quiet?: boolean }>(),
+    defineProps<{
+      as?: LinkAs
+      to?: LinkTo
+      href?: string
+      direction?: 'left' | 'right' | 'up-right'
+      quiet?: boolean
+    }>(),
     { direction: 'right' }
   )
   const tag = computed(() => resolveTag(props.as, props.to, props.href, 'a'))

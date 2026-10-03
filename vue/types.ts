@@ -8,6 +8,8 @@ export type LinkTo = string | Record<string, unknown>
  * - `as` a component (e.g. RouterLink): receives `to` if set, otherwise `href`.
  * - `as` 'a' (the default when `to` or `href` is set): receives `href`, else a string `to`.
  * - `as` any other tag: receives neither (a dev warning fires if you passed one).
+ * Components spell these props out inline rather than extending this type: compiling an
+ * imported props type needs TypeScript in the consuming app.
  */
 export interface LinkProps {
   as?: LinkAs
