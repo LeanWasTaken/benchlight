@@ -58,8 +58,9 @@ test('the log stays put while scrolled up and follows while pinned', async ({ pa
     log.evaluate((el) => el.scrollHeight - el.scrollTop - el.clientHeight)
 
   await log.focus()
-  // scroll down first: a scroll event is what unpins the log, and Home alone
-  // from the initial top position fires none
+  // the log starts at the bottom, so this first End is a no-op that keeps
+  // the focus-and-keyboard path honest; a scroll event is what unpins the
+  // log, and Home then moves it up to fire one
   await page.keyboard.press('End')
   await expect.poll(() => log.evaluate((el) => el.scrollTop)).toBeGreaterThan(0)
   await page.keyboard.press('Home')

@@ -17,7 +17,7 @@
 
   <main id="main-content" tabindex="-1" class="bl-col pg-main">
     <section id="top">
-      <BlMeta class="bl-rise" :items="['Benchlight', 'design system', 'v0.1.0']" separator />
+      <BlMeta class="bl-rise" :items="['Benchlight', 'design system', 'v0.2.0']" separator />
       <h1 class="bl-display bl-display--xl bl-rise" :style="riseDelay(1)">Benchlight</h1>
       <p class="bl-lede bl-rise" :style="riseDelay(2)">
         One bench-lit identity for every personal project: generated tokens, plain CSS in cascade
@@ -63,6 +63,7 @@
         <BlButton variant="danger">Erase flash</BlButton>
         <BlButton variant="secondary" pill>← Back home</BlButton>
         <BlButton disabled>Disabled</BlButton>
+        <BlButton href="/x" disabled variant="secondary">Unavailable</BlButton>
       </div>
       <div class="pg-row">
         <BlSegmented v-model="filter" :options="filters" label="Category" />
@@ -72,6 +73,7 @@
         <BlField v-slot="{ id }" label="Display name" hint="Shown next to your avatar.">
           <BlInput :id="id" v-model="displayName" />
         </BlField>
+        <BlField label="Auto-wired" hint="Linked via context"><BlInput /></BlField>
         <BlField v-slot="{ id }" label="Network">
           <BlSelect :id="id" v-model="network" :options="networks" />
         </BlField>
@@ -79,6 +81,9 @@
           <BlRange :id="id" v-model="volume" :min="-60" :max="0" :format="(v) => `${v} dB`" />
         </BlField>
       </div>
+      <BlSectionHead eyebrow="Links" heading="Section with an action" ruled>
+        <template #action><BlLinkArrow href="#lists">All projects</BlLinkArrow></template>
+      </BlSectionHead>
       <div class="pg-row">
         <BlLinkArrow href="#lists">All projects</BlLinkArrow>
         <BlLinkArrow href="#top" direction="left" quiet>Back</BlLinkArrow>
@@ -93,6 +98,7 @@
         <div>
           <BlReadout value="94.2" unit="Mbps" />
           <BlMeter :value="0.62" label="Download" />
+          <BlMeter :value="null" label="Scanning" />
         </div>
         <div>
           <BlMsg tone="ok">Saved. Rebooting in 3 s.</BlMsg>
@@ -178,7 +184,7 @@
     </section>
   </main>
 
-  <BlColophon :items="['© 2026 Example', 'Remote', 'Rev 0.1.0']" />
+  <BlColophon :items="['© 2026 Example', 'Remote', 'Rev 0.2.0']" />
   <BlTabBar label="Playground">
     <BlTabBarItem href="#tokens" current>
       <template #icon>
