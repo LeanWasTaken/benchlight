@@ -1,5 +1,61 @@
 # Changelog
 
+## 0.3.0 - 2026-10-04
+
+Accessibility, packaging and CI release. Per the README rule (removing a custom property or changing
+a component contract is breaking, minor bump while 0.x), this is a minor bump with two breaking items.
+
+### Breaking
+
+- `--bl-font-sans-features` is removed (Geist has no cvXX features). Delete any use of it.
+- BlRange forwards fallthrough attrs (`aria-label`, `disabled`, `name`, listeners) to the slider
+  instead of the wrapper; `class` and `style` stay on the wrapper. Explicit `ariaDescribedby` and
+  `id` props still win over the field context.
+
+### Added
+
+- `--bl-control-border` token (at least 3:1 against canvas, surface and raised in both themes), with
+  the `border-control-border` Tailwind utility; non-text contrast is tested.
+- Forced-colors support: LEDs, meter fill, EQ bars, the ok dot and the selected segment stay visible.
+- BlLog `offset` prop (absolute index of `lines[0]`) so a capped buffer reuses rows.
+- `dist/appearance.min.js` for pages that inline the switch script.
+- `PREPAINT` and `PREPAINT_CSP_HASH` from `benchlight/js/prepaint-script.mjs` for strict CSP.
+- The bundle CLI warns when selected modules need `type` or `base` and they are missing.
+- `bun run lint:workflows` (actionlint) and unit tests for the Nuxt module and Vite plugin.
+
+### Changed
+
+- Release tags are slim: pushing `src-vX.Y.Z` makes CI commit exactly the `bun pm pack` contents
+  to the `release` branch and tag it `vX.Y.Z`. The installed package no longer contains tests,
+  fixtures, the playground or screenshots. Consumer URLs are unchanged. Tags up to v0.2.1 are
+  full-tree source tags.
+- The appearance switch is 24px wider (44px options); link arrows, colophon links and segmented
+  items get 44px hit areas.
+- BlPrevNext renders nothing when it has no neighbours.
+- Arrows in BlLinkArrow and BlPrevNext are inline SVG; the icon slot override is unchanged.
+- Geist and Geist Mono subsets add section sign, copyright, en dash, right single quote and
+  ellipsis and keep Geist's kerning. The subset cap is raised from 22,528 to 23,552 bytes (now
+  22,840).
+- Full-bundle guard raised from 27,648 to 28,672 bytes (now 28,165).
+- Firefox target raised to 121 (`:has()`); links underline on hover instead of fading below AA.
+- BlSiteBar `lift` is reactive; `useScrollLifted` accepts a ref or getter.
+- `LinkTo` accepts any object, so typed router locations pass.
+- The Nuxt module and Vite plugin import the generated `js/prepaint-script.mjs`, so consumers no
+  longer need `@types/node` (`nuxi typecheck` passes). The vite peer range is `^6 || ^7`.
+- bun 1.4.2 is required (`packageManager`): bun 1.2.x passes a malformed `-c` option to `git clone`
+  on Linux, so git installs of Benchlight fail there. Consumers installing from git need 1.4.2+.
+- CI: least-privilege permissions, SHA-pinned actions, one bun version via `packageManager`,
+  actionlint. The deploy key is used only through `GIT_SSH_COMMAND`; the README shows the same
+  pattern for consumers.
+
+### Fixed
+
+- Radio-label segmented items show the focus ring on keyboard focus.
+- `.bl-prose` keeps ordered lists and h4-h6 styling under Tailwind's preflight; the focus ring
+  outranks Firefox's `:-moz-focusring`.
+- The appearance switch no longer slides after hydration.
+- Uncoloured BlLog segments no longer emit `class=""`.
+
 ## 0.2.1 - 2026-10-03
 
 ### Fixed
