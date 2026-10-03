@@ -210,21 +210,25 @@ describe('BlSegmented', () => {
     expect(wrapper.emitted('update:modelValue')).toEqual([['hardware']])
   })
 
-  it('renders links with aria-current in links mode', () => {
+  it('renders a labelled nav of links with aria-current="page" in links mode', () => {
     const wrapper = mount(BlSegmented, {
       props: {
         as: 'a',
         compact: true,
+        label: 'Language',
         options: [
           { value: 'en', label: 'en', href: '/en', current: true },
           { value: 'lv', label: 'lv', href: '/lv' }
         ]
       }
     })
+    expect(wrapper.element.tagName).toBe('NAV')
+    expect(wrapper.attributes('aria-label')).toBe('Language')
+    expect(wrapper.attributes('role')).toBeUndefined()
     expect(wrapper.classes()).toContain('bl-segmented--compact')
     const links = wrapper.findAll('a.bl-segmented__item')
     expect(links.map((l) => l.attributes('href'))).toEqual(['/en', '/lv'])
-    expect(links[0]!.attributes('aria-current')).toBe('true')
+    expect(links[0]!.attributes('aria-current')).toBe('page')
     expect(links[1]!.attributes('aria-current')).toBeUndefined()
   })
 })
