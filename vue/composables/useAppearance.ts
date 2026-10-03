@@ -1,4 +1,12 @@
-import { onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue'
+import {
+  effectScope,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+  type EffectScope,
+  type Ref
+} from 'vue'
 
 export type AppearanceMode = 'auto' | 'light' | 'dark'
 export type ResolvedAppearance = 'light' | 'dark'
@@ -27,34 +35,81 @@ function applyAttribute(mode: AppearanceMode): void {
   else root.setAttribute(APPEARANCE_ATTRIBUTE, mode)
 }
 
-// SSR-safe: nothing touches the DOM or storage until mounted.
-export function useAppearance(): { mode: Ref<AppearanceMode>; resolved: Ref<ResolvedAppearance> } {
-  const mode = ref<AppearanceMode>('auto')
-  const resolved = ref<ResolvedAppearance>('light')
-  let media: MediaQueryList | null = null
+interface SharedAppearance {
+  mode: Ref<AppearanceMode>
+  resolved: Ref<ResolvedAppearance>
+  media: MediaQueryList | null
+  users: number
+  scope: EffectScope | null
+  resolve: () => void
+}
 
-  const resolve = () => {
-    resolved.value = mode.value === 'auto' ? (media?.matches ? 'dark' : 'light') : mode.value
+// One state per page, so every caller sees the same choice.
+let shared: SharedAppearance | null = null
+
+function getShared(): SharedAppearance {
+  if (shared) return shared
+  const state: SharedAppearance = {
+    mode: ref<AppearanceMode>('auto'),
+    resolved: ref<ResolvedAppearance>('light'),
+    media: null,
+    users: 0,
+    scope: null,
+    resolve: () => {
+      state.resolved.value =
+        state.mode.value === 'auto' ? (state.media?.matches ? 'dark' : 'light') : state.mode.value
+    }
   }
+  shared = state
+  return state
+}
 
-  onMounted(() => {
-    media = window.matchMedia('(prefers-color-scheme: dark)')
-    media.addEventListener('change', resolve)
-    mode.value = readSaved()
-    applyAttribute(mode.value)
-    resolve()
-    watch(mode, (value) => {
-      applyAttribute(value)
-      try {
-        localStorage.setItem(APPEARANCE_STORAGE_KEY, value)
-      } catch {
-        // storage unavailable: the choice lasts for this page only
-      }
-      resolve()
-    })
-  })
+function attach(state: SharedAppearance): void {
+  state.users += 1
+  if (state.users > 1) return
+  state.media ??= window.matchMedia('(prefers-color-scheme: dark)')
+  state.media.addEventListener('change', state.resolve)
+  if (!state.scope) {
+    state.mode.value = readSaved()
+    applyAttribute(state.mode.value)
+    // Detached so the watcher outlives whichever component mounted first.
+    state.scope = effectScope(true)
+    state.scope.run(() =>
+      watch(state.mode, (value) => {
+        applyAttribute(value)
+        try {
+          localStorage.setItem(APPEARANCE_STORAGE_KEY, value)
+        } catch {
+          // storage unavailable: the choice lasts for this page only
+        }
+        state.resolve()
+      })
+    )
+  }
+  state.resolve()
+}
 
-  onBeforeUnmount(() => media?.removeEventListener('change', resolve))
+function detach(state: SharedAppearance): void {
+  state.users -= 1
+  if (state.users === 0) state.media?.removeEventListener('change', state.resolve)
+}
 
-  return { mode, resolved }
+/** @internal test helper: drops the shared state so each test starts fresh. */
+export function resetAppearanceState(): void {
+  if (!shared) return
+  if (shared.users > 0) shared.media?.removeEventListener('change', shared.resolve)
+  shared.scope?.stop()
+  shared = null
+}
+
+// SSR-safe: nothing touches the DOM or storage until mounted, and the server
+// gets fresh refs per call so requests never share state.
+export function useAppearance(): { mode: Ref<AppearanceMode>; resolved: Ref<ResolvedAppearance> } {
+  if (typeof window === 'undefined') {
+    return { mode: ref<AppearanceMode>('auto'), resolved: ref<ResolvedAppearance>('light') }
+  }
+  const state = getShared()
+  onMounted(() => attach(state))
+  onBeforeUnmount(() => detach(state))
+  return { mode: state.mode, resolved: state.resolved }
 }

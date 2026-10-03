@@ -16,6 +16,7 @@ import KdSiteBar from '../../vue/components/KdSiteBar.vue'
 import KdSkipLink from '../../vue/components/KdSkipLink.vue'
 import KdTabBar from '../../vue/components/KdTabBar.vue'
 import KdTabBarItem from '../../vue/components/KdTabBarItem.vue'
+import { resetAppearanceState } from '../../vue/composables/useAppearance'
 import { mockMatchMedia } from '../helpers/vue'
 
 const RouterLinkLike = defineComponent({
@@ -31,6 +32,7 @@ const scrollTo = (y: number) => {
 }
 
 beforeEach(() => {
+  resetAppearanceState()
   localStorage.clear()
   document.documentElement.removeAttribute('data-kd-appearance')
   mockMatchMedia()
@@ -138,6 +140,17 @@ describe('KdAppearanceSwitch', () => {
     await wrapper.find('input[value="dark"]').setValue(true)
     await nextTick()
     expect(document.documentElement.getAttribute('data-kd-appearance')).toBe('dark')
+  })
+
+  it('keeps separate switches in sync', async () => {
+    const first = mount(KdAppearanceSwitch)
+    const second = mount(KdAppearanceSwitch)
+    await first.find('input[value="dark"]').setValue(true)
+    await nextTick()
+    const checked = second
+      .findAll('input')
+      .find((input) => (input.element as HTMLInputElement).checked)
+    expect(checked?.attributes('value')).toBe('dark')
   })
 
   it('accepts translated labels', () => {
