@@ -79,10 +79,8 @@ describe('buildDist', () => {
     expect(dist.fonts).not.toContain('http')
   })
 
-  const measured = Buffer.byteLength(read('dist/kdesign.min.css'))
-  const guard = Math.ceil(measured / 1024) * 1024
-  it(`stays within the ${guard}-byte guard`, () => {
-    expect(Buffer.byteLength(dist.bundle)).toBeLessThanOrEqual(guard)
+  it('stays within the 25600-byte guard', () => {
+    expect(Buffer.byteLength(read('dist/kdesign.min.css'))).toBeLessThanOrEqual(25_600)
   })
 })
 

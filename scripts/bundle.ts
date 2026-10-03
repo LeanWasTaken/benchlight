@@ -19,13 +19,21 @@ function fail(message: string): never {
 }
 
 const root = join(import.meta.dir, '..')
-const { values } = parseArgs({
-  options: {
-    modules: { type: 'string' },
-    out: { type: 'string' },
-    'inline-static': { type: 'boolean', default: false }
-  }
-})
+let values: ReturnType<typeof parse>
+function parse() {
+  return parseArgs({
+    options: {
+      modules: { type: 'string' },
+      out: { type: 'string' },
+      'inline-static': { type: 'boolean', default: false }
+    }
+  }).values
+}
+try {
+  values = parse()
+} catch (error) {
+  fail(error instanceof Error ? error.message : String(error))
+}
 
 if (values.modules === undefined) {
   if (values.out !== undefined) fail('--out needs --modules')
@@ -40,7 +48,9 @@ if (values.modules === undefined) {
     .filter(Boolean)
   if (names.length === 0) fail('--modules is empty')
   if (!values.out) fail('--modules needs --out <file>')
-  for (const name of names) if (!(name in MODULES)) fail(`unknown module: ${name}`)
+  for (const name of names) if (!Object.hasOwn(MODULES, name)) fail(`unknown module: ${name}`)
+  const dup = names.find((name, i) => names.indexOf(name) !== i)
+  if (dup) fail(`duplicate module: ${dup}`)
   const { bundle } = buildModules(names as ModuleName[], root, {
     inlineStatic: values['inline-static']
   })
