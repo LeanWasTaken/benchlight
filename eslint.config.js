@@ -26,7 +26,7 @@ export default defineConfig(
   vue.configs['flat/recommended'],
   {
     files: ['**/*.vue'],
-    languageOptions: { parserOptions: { parser: tseslint.parser } },
+    languageOptions: { globals: globals.browser, parserOptions: { parser: tseslint.parser } },
     rules: { 'vue/require-default-prop': 'off' }
   },
   { files: ['js/**/*.js'], languageOptions: { sourceType: 'script', globals: globals.browser } },
