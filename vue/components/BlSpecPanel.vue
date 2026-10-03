@@ -2,11 +2,12 @@
   <dl class="bl-spec-panel">
     <slot>
       <BlSpecRow
-        v-for="row in rows"
-        :key="row.label"
+        v-for="(row, index) in rows"
+        :key="index"
         :label="row.label"
         :value="row.value"
         :href="row.href"
+        :external="row.external"
       />
     </slot>
   </dl>

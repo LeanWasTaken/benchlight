@@ -20,6 +20,8 @@ export interface SpecRowData {
   label: string
   value: string
   href?: string
+  /** open in a new tab; default: true for absolute or protocol-relative URLs */
+  external?: boolean
 }
 
 export type MetaItem = string | { text: string; class?: string }

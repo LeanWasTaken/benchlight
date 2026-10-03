@@ -8,6 +8,7 @@ import BlMarquee from '../../vue/components/BlMarquee.vue'
 import BlMeter from '../../vue/components/BlMeter.vue'
 import BlMsg from '../../vue/components/BlMsg.vue'
 import BlReadout from '../../vue/components/BlReadout.vue'
+import BlSpecRow from '../../vue/components/BlSpecRow.vue'
 import BlSpecPanel from '../../vue/components/BlSpecPanel.vue'
 import BlTelemetry from '../../vue/components/BlTelemetry.vue'
 import BlTelemetryCell from '../../vue/components/BlTelemetryCell.vue'
@@ -33,6 +34,46 @@ describe('BlSpecPanel', () => {
       target: '_blank',
       rel: 'noopener noreferrer'
     })
+  })
+
+  it.each([
+    ['https://github.com/x', true],
+    ['//cdn.example.com/x', true],
+    ['/projects/x', false],
+    ['#section', false],
+    ['mailto:hi@example.com', false]
+  ])('treats %s as external: %s', (href, external) => {
+    const link = mount(BlSpecRow, { props: { label: 'L', value: 'v', href } }).find('a')
+    expect(link.attributes('target')).toBe(external ? '_blank' : undefined)
+    expect(link.attributes('rel')).toBe(external ? 'noopener noreferrer' : undefined)
+  })
+
+  it('lets external override the URL guess, also from row data', () => {
+    expect(
+      mount(BlSpecRow, { props: { label: 'L', value: 'v', href: '/x', external: true } })
+        .find('a')
+        .attributes('target')
+    ).toBe('_blank')
+    const panel = mount(BlSpecPanel, {
+      props: {
+        rows: [{ label: 'Site', value: 'docs', href: 'https://example.com', external: false }]
+      }
+    })
+    expect(panel.find('a').attributes('target')).toBeUndefined()
+  })
+
+  it('renders rows with duplicate labels without key collisions', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const wrapper = mount(BlSpecPanel, {
+      props: {
+        rows: [
+          { label: 'A', value: '1' },
+          { label: 'A', value: '2' }
+        ]
+      }
+    })
+    expect(wrapper.findAll('.bl-spec-row__value').map((d) => d.text())).toEqual(['1', '2'])
+    expect(warn).not.toHaveBeenCalled()
   })
 })
 
