@@ -3,7 +3,16 @@ import { expect, test } from '@playwright/test'
 test('playground renders every component', async ({ page }) => {
   await page.goto('/')
   await page.evaluate(() => document.fonts.ready)
-  await expect(page).toHaveScreenshot('playground.png', { fullPage: true })
+  // Linux Chromium rounds a fractional page height up or down between captures, so clip the
+  // full-page shot to a whole-pixel box.
+  const { width, height } = await page.evaluate(() => {
+    const box = document.documentElement.getBoundingClientRect()
+    return { width: Math.floor(box.width), height: Math.floor(box.height) }
+  })
+  await expect(page).toHaveScreenshot('playground.png', {
+    fullPage: true,
+    clip: { x: 0, y: 0, width, height }
+  })
 })
 
 test('a saved choice opposite to the OS survives a reload', async ({ page }, testInfo) => {
