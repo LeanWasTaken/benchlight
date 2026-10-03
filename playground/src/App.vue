@@ -17,7 +17,7 @@
 
   <main id="main-content" tabindex="-1" class="bl-col pg-main">
     <section id="top">
-      <BlMeta class="bl-rise" :items="['Benchlight', 'design system', 'v0.2.0']" separator />
+      <BlMeta class="bl-rise" :items="['Benchlight', 'design system', `v${version}`]" separator />
       <h1 class="bl-display bl-display--xl bl-rise" :style="riseDelay(1)">Benchlight</h1>
       <p class="bl-lede bl-rise" :style="riseDelay(2)">
         One bench-lit identity for every personal project: generated tokens, plain CSS in cascade
@@ -189,7 +189,7 @@
     </section>
   </main>
 
-  <BlColophon :items="['© 2026 Example', 'Remote', 'Rev 0.2.0']" />
+  <BlColophon :items="['© 2026 Example', 'Remote', `Rev ${version}`]" />
   <BlTabBar label="Playground">
     <BlTabBarItem href="#tokens" current>
       <template #icon>
@@ -220,6 +220,7 @@
 
 <script setup lang="ts">
   import { ref } from 'vue'
+  import pkg from '../../package.json'
   import { colorNames } from '../../tokens/tokens'
   import {
     BlAppearanceSwitch,
@@ -255,6 +256,7 @@
     riseDelay
   } from '../../vue'
 
+  const version = pkg.version
   const filter = ref<string | null>(null)
   const filters = [
     { value: null, label: 'All' },
