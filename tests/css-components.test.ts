@@ -57,7 +57,8 @@ const REQUIRED: Record<string, string[]> = {
   meter: [
     'calc(var(--bl-meter-value, 0) * 100%)',
     '.bl-meter[data-indeterminate] .bl-meter__fill',
-    '@keyframes bl-meter-slide'
+    '@keyframes bl-meter-slide',
+    '@media (prefers-reduced-motion: reduce)'
   ],
   msg: ['.bl-msg--ok::before', '.bl-msg--err', '.bl-msg--info'],
   log: ['.bl-ansi-31', '.bl-ansi-97', 'var(--bl-log-height, 200px)'],
