@@ -42,13 +42,27 @@ function expectAll(haystack: string, needles: readonly string[], where: string):
 
 export const VITE_EXPECTATIONS = {
   html: ['kd-appearance'],
-  css: ['--kd-canvas', '.kd-display'],
-  js: ['kd-led']
+  css: ['--kd-canvas', '.kd-display', '@font-face', 'Bricolage Grotesque', '.kd-btn--secondary'],
+  js: ['kd-led', 'kd-btn', 'kd-switch']
 }
 
 export const NUXT_EXPECTATIONS = {
-  page: ['data-kd-appearance', 'kd-led kd-led--on', 'kd-display'],
-  css: ['.bg-canvas', 'var(--kd-canvas)', '.kd-display']
+  page: [
+    'data-kd-appearance',
+    'kd-site-bar',
+    'kd-switch',
+    'kd-led kd-led--on',
+    'kd-spec-row',
+    '--kd-rise-delay:60ms'
+  ],
+  css: [
+    '.bg-surface',
+    'var(--kd-surface)',
+    '.font-display',
+    '@font-face',
+    '.kd-display',
+    '.kd-prose'
+  ]
 }
 
 export function verifyVite(dir: string): void {
