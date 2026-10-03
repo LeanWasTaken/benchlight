@@ -13,7 +13,12 @@ const REQUIRED: Record<string, string[]> = {
     ".bl-site-bar__link[aria-current='page']",
     '.bl-site-bar__navwrap + .bl-site-bar__actions'
   ],
-  tabbar: [".bl-tabbar__item[aria-current='page']", 'body:has(.bl-tabbar)'],
+  tabbar: [
+    ".bl-tabbar__item[aria-current='page']",
+    'body:has(.bl-tabbar)',
+    'html:has(.bl-tabbar)',
+    '--bl-scroll-offset-bottom: 96px'
+  ],
   colophon: ['.bl-colophon__inner', '.bl-colophon__items a:hover'],
   'skip-link': ['.bl-skip-link:focus'],
   switch: [
@@ -30,7 +35,13 @@ const REQUIRED: Record<string, string[]> = {
     '.bl-segmented--compact .bl-segmented__item',
     '.bl-segmented__item::before'
   ],
-  btn: ['.bl-btn--secondary', '.bl-btn--danger', '.bl-btn--pill', '.bl-btn:disabled'],
+  btn: [
+    '.bl-btn--secondary',
+    '.bl-btn--danger',
+    '.bl-btn--pill',
+    '.bl-btn:disabled',
+    'pointer-events: none'
+  ],
   field: ['.bl-input:focus-visible', '.bl-select', ".bl-range input[type='range']"],
   'link-arrow': ['.bl-link-arrow::before', '.bl-link-arrow--quiet'],
   'spec-panel': ['.bl-spec-row + .bl-spec-row', '.bl-spec-row__value a'],
