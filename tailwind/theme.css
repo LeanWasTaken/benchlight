@@ -13,6 +13,7 @@
   --color-phosphor: var(--kd-phosphor);
   --color-danger: var(--kd-danger);
   --font-sans: var(--kd-font-sans);
+  --font-sans--font-feature-settings: var(--kd-font-sans-features);
   --font-mono: var(--kd-font-mono);
   --font-display: var(--kd-font-display);
   --text-micro: var(--kd-text-micro);
