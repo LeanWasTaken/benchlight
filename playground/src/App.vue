@@ -277,7 +277,8 @@
     '\x1b[0;32mI (1203) wifi: connected to home-5g, rssi -48\x1b[0m',
     '\x1b[0;33mW (1490) sync: clock skew 3 ms\x1b[0m',
     '\x1b[0;31mE (2011) ota: image too large\x1b[0m',
-    'I (2100) main: idle'
+    'I (2100) main: idle',
+    ...Array.from({ length: 16 }, (_, i) => `I (${2200 + i * 40}) main: tick ${i + 1}`)
   ]
 
   const projects = [
