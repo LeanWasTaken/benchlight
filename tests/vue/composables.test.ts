@@ -315,6 +315,24 @@ describe('useFollowScroll', () => {
     el.remove()
   })
 
+  it('starts an overflowing, enabled element at the bottom and pinned', () => {
+    const el = scroller()
+    const { result, wrapper } = withSetup(() => useFollowScroll(ref(el)))
+    expect(el.scrollTop).toBe(500)
+    expect(result.pinned.value).toBe(true)
+    wrapper.unmount()
+    el.remove()
+  })
+
+  it('measures instead of scrolling on mount when disabled', () => {
+    const el = scroller()
+    const { result, wrapper } = withSetup(() => useFollowScroll(ref(el), { enabled: false }))
+    expect(el.scrollTop).toBe(0)
+    expect(result.pinned.value).toBe(false)
+    wrapper.unmount()
+    el.remove()
+  })
+
   it('stops listening after unmount', () => {
     const el = scroller()
     const { result, wrapper } = withSetup(() => useFollowScroll(ref(el)))
