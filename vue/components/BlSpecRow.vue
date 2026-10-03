@@ -6,8 +6,8 @@
         <a
           v-if="href"
           :href="href"
-          :target="external ? '_blank' : undefined"
-          :rel="external ? 'noopener noreferrer' : undefined"
+          :target="isExternal ? '_blank' : undefined"
+          :rel="isExternal ? 'noopener noreferrer' : undefined"
           >{{ value }}</a
         >
         <template v-else>{{ value }}</template>
@@ -17,8 +17,11 @@
 </template>
 
 <script setup lang="ts">
-  withDefaults(
-    defineProps<{ label: string; value?: string; href?: string; external?: boolean }>(),
-    { external: true }
+  import { computed } from 'vue'
+
+  const props = withDefaults(
+    defineProps<{ label: string; value?: string; href?: string; external?: boolean | null }>(),
+    { external: null }
   )
+  const isExternal = computed(() => props.external ?? /^(https?:)?\/\//.test(props.href ?? ''))
 </script>
