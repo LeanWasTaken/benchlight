@@ -46,7 +46,9 @@
     "gen:js": "bun build ./tokens/index.ts --outfile dist/tokens.js --format esm",
     "bundle": "bun scripts/bundle.ts",
     "build": "bun run gen && bun run bundle",
-    "fixtures": "bun scripts/fixtures.ts"
+    "fixtures": "bun scripts/fixtures.ts",
+    "playground": "vite playground",
+    "test:visual": "playwright test"
   },
   "peerDependencies": {
     "@nuxt/kit": "^4.0.0",
@@ -76,6 +78,7 @@
     "@eslint/js": "^10.0.1",
     "@nuxt/kit": "^4.5.2",
     "@nuxt/schema": "^4.5.2",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/node": "^4.3.3",
     "@types/bun": "^1.4.2",
     "@types/node": "^26.6.4",

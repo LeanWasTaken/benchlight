@@ -1,0 +1,44 @@
+.pg-main {
+  display: grid;
+  gap: 72px;
+  padding-block: 56px 64px;
+}
+.pg-block {
+  margin-top: 40px;
+}
+.pg-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-block: 16px;
+}
+.pg-stack {
+  display: grid;
+  gap: 16px;
+  max-width: 720px;
+}
+.pg-swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+.pg-swatch {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  background: var(--kd-surface);
+  border: 1px solid var(--kd-separator);
+  border-radius: 8px;
+}
+.pg-chip {
+  height: 36px;
+  border: 1px solid var(--kd-separator);
+  border-radius: 5px;
+}
+.pg-dim {
+  color: var(--kd-ink-3);
+}
+.pg-marquee {
+  max-width: 220px;
+}
