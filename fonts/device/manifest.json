@@ -1,5 +1,0 @@
-[
-  { "family": "Geist", "file": "geist.woff2", "weight": "400 600", "sha256": "97db8ca66dfbfd6f3af9ba5a55997fea7b9bafb16d30035e3c3b953dea14ede2" },
-  { "family": "Geist Mono", "file": "geist-mono.woff2", "weight": "400", "sha256": "7c8316cc62753c9a1ed032b803c39c6e17a234eca7ab6094c6a8f2e605ad8060" },
-  { "family": "Bricolage Grotesque", "file": "bricolage-grotesque.woff2", "weight": "750", "stretch": "80%", "sha256": "de71c29fc74d0b47a57d3c73a8bf500ad50c5e82becebf0133016a998b396aa6" }
-]

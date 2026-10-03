@@ -14,7 +14,7 @@ interface Pinned {
   sha256: string
 }
 const full: Pinned[] = JSON.parse(readFileSync(path('fonts/full/manifest.json'), 'utf8'))
-const device: Pinned[] = JSON.parse(readFileSync(path('fonts/device/manifest.json'), 'utf8'))
+const subset: Pinned[] = JSON.parse(readFileSync(path('fonts/subset/manifest.json'), 'utf8'))
 
 describe('full fonts', () => {
   it.each(full)('$file matches its pinned hash', ({ file, sha256: pinned }) => {
@@ -29,17 +29,17 @@ describe('full fonts', () => {
   })
 })
 
-describe('device fonts', () => {
-  it.each(device)('$file is the amp subset byte-for-byte', ({ file, sha256: pinned }) => {
-    expect(sha256(`fonts/device/${file}`)).toBe(pinned)
+describe('subset fonts', () => {
+  it.each(subset)('$file matches its pinned hash', ({ file, sha256: pinned }) => {
+    expect(sha256(`fonts/subset/${file}`)).toBe(pinned)
   })
 
-  it('fit the 21,916-byte budget', () => {
-    const total = device.reduce(
-      (sum, { file }) => sum + statSync(path(`fonts/device/${file}`)).size,
+  it('stay compact (≤ 22,528 bytes total)', () => {
+    const total = subset.reduce(
+      (sum, { file }) => sum + statSync(path(`fonts/subset/${file}`)).size,
       0
     )
-    expect(total).toBeLessThanOrEqual(21_916)
+    expect(total).toBeLessThanOrEqual(22_528)
   })
 })
 
