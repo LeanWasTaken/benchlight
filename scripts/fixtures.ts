@@ -94,8 +94,7 @@ export const NUXT_EXPECTATIONS = {
     '.font-display',
     '@font-face',
     '.bl-display',
-    '.bl-prose',
-    '--default-font-feature-settings:var(--bl-font-sans-features)'
+    '.bl-prose'
   ]
 }
 

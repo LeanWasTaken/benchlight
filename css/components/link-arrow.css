@@ -26,9 +26,13 @@
   }
   .bl-link-arrow__icon {
     display: inline-flex;
-    width: 12px;
-    height: 12px;
+    width: 1em;
+    height: 1em;
     align-items: center;
     justify-content: center;
+  }
+  .bl-link-arrow__icon > svg {
+    width: 100%;
+    height: 100%;
   }
 }

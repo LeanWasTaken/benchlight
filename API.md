@@ -621,7 +621,6 @@ Exposed: none
 - `--font-display`
 - `--font-mono`
 - `--font-sans`
-- `--font-sans--font-feature-settings`
 - `--radius-card`
 - `--radius-chip`
 - `--radius-pill`

@@ -37,7 +37,7 @@ describe('renderTokensCss', () => {
 
   it('names static tokens by group', () => {
     const names = staticVars(tokens).map(([name]) => name)
-    expect(names).toContain('--bl-font-sans-features')
+    expect(names).not.toContain('--bl-font-sans-features')
     expect(names).toContain('--bl-layout-gutter-narrow')
     expect(names).not.toContain('--bl-breakpoint-sm')
   })
@@ -50,10 +50,8 @@ describe('generated files are fresh', () => {
 })
 
 describe('renderTailwindTheme', () => {
-  it('carries the sans feature settings into the theme', () => {
-    expect(renderTailwindTheme(tokens)).toContain(
-      '  --font-sans--font-feature-settings: var(--bl-font-sans-features);'
-    )
+  it('does not map font feature settings (the shipped Geist has no stylistic sets)', () => {
+    expect(renderTailwindTheme(tokens)).not.toContain('font-feature-settings')
   })
 })
 
@@ -93,14 +91,14 @@ describe('Tailwind v4 theme', () => {
     expect(css).toContain('var(--bl-ease-out)')
   })
 
-  it('keeps the sans feature settings through preflight', async () => {
+  it('leaves font feature settings at preflight defaults', async () => {
     const root = fileURLToPath(new URL('..', import.meta.url))
     const compiler = await compile(`@import 'tailwindcss';\n@import './tailwind/theme.css';`, {
       base: root,
       onDependency: () => {}
     })
     const css = compiler.build(['font-sans'])
-    expect(css).toMatch(/--default-font-feature-settings:[^;]*var\(--bl-font-sans-features\)/)
-    expect(css).toContain('--bl-font-sans-features')
+    expect(css).not.toContain('--bl-font-sans-features')
+    expect(css).not.toMatch(/--default-font-feature-settings:[^;]*var\(/)
   })
 })

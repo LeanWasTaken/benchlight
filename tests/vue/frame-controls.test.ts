@@ -317,9 +317,32 @@ describe('BlButton', () => {
 })
 
 describe('BlLinkArrow', () => {
-  it('puts a right arrow after the text by default', () => {
+  it('puts a right arrow icon after the text by default', () => {
     const wrapper = mount(BlLinkArrow, { props: { href: '/p' }, slots: { default: 'All' } })
-    expect(wrapper.text()).toBe('All→')
+    expect(wrapper.text()).toBe('All')
+    const children = wrapper.element.children
+    expect(children[children.length - 1].matches('.bl-link-arrow__icon')).toBe(true)
+    const svg = wrapper.find('.bl-link-arrow__icon > svg')
+    expect(svg.exists()).toBe(true)
+    expect(svg.attributes('aria-hidden')).toBe('true')
+    expect(svg.attributes('stroke')).toBe('currentColor')
+  })
+
+  it('draws a distinct icon per direction, with no text-glyph arrows', () => {
+    const path = (direction?: string) =>
+      mount(BlLinkArrow, { props: { href: '/p', direction: direction as 'left' } }).html()
+    const [right, left, upRight] = [path(), path('left'), path('up-right')]
+    expect(new Set([right, left, upRight]).size).toBe(3)
+    for (const html of [right, left, upRight]) expect(html).not.toMatch(/[←→↗]/)
+  })
+
+  it('lets the icon slot replace the drawn icon', () => {
+    const wrapper = mount(BlLinkArrow, {
+      props: { href: '/p' },
+      slots: { default: 'All', icon: '+' }
+    })
+    expect(wrapper.find('.bl-link-arrow__icon').text()).toBe('+')
+    expect(wrapper.find('svg').exists()).toBe(false)
   })
 
   it('puts a left arrow first and supports quiet', () => {
@@ -327,7 +350,8 @@ describe('BlLinkArrow', () => {
       props: { href: '/p', direction: 'left', quiet: true },
       slots: { default: 'Back' }
     })
-    expect(wrapper.text()).toBe('←Back')
+    expect(wrapper.text()).toBe('Back')
+    expect(wrapper.element.firstElementChild?.matches('.bl-link-arrow__icon')).toBe(true)
     expect(wrapper.classes()).toContain('bl-link-arrow--quiet')
   })
 })

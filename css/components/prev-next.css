@@ -35,6 +35,10 @@
     display: inline-flex;
     transition: transform var(--bl-duration-fast) ease;
   }
+  .bl-prev-next__icon > svg {
+    width: 1em;
+    height: 1em;
+  }
   .bl-prev-next__link--prev:hover .bl-prev-next__icon {
     transform: translateX(-2px);
   }
