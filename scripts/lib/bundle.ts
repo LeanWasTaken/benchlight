@@ -96,3 +96,33 @@ export function writeDist(root: string): string[] {
   for (const [path, css] of written) writeFileSync(join(root, path), css)
   return written.map(([path]) => path)
 }
+
+// Foundations a component module silently relies on. `type` styles the component parts it
+// lists (.bl-field__label, .bl-meta ...), so a module whose CSS names one of those blocks
+// needs it; `base` holds the reduced-motion rule, which every animated module without its
+// own needs. Both are derived from the CSS, so new modules are covered without upkeep.
+const blocks = (css: string): Set<string> =>
+  new Set(
+    [...css.matchAll(/\.(bl-[a-z0-9]+(?:-[a-z0-9]+)*?)(?=__|--|[^a-z0-9_-]|$)/g)].map((m) => m[1]!)
+  )
+
+export function missingFoundations(names: readonly ModuleName[], root: string): string[] {
+  const read = (name: ModuleName) => readFileSync(join(root, MODULES[name]), 'utf8')
+  const typeBlocks = blocks(read('type'))
+  const messages: string[] = []
+  for (const name of names) {
+    if (name === 'tokens' || name === 'base' || name === 'type') continue
+    const css = read(name)
+    if (!names.includes('type') && [...blocks(css)].some((block) => typeBlocks.has(block))) {
+      messages.push(`${name} needs type (its type voices live in css/type.css)`)
+    }
+    if (
+      !names.includes('base') &&
+      /animation/.test(css) &&
+      !css.includes('prefers-reduced-motion')
+    ) {
+      messages.push(`${name} needs base (its reduced-motion rule lives in css/base.css)`)
+    }
+  }
+  return messages
+}

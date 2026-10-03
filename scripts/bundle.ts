@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { parseArgs } from 'node:util'
-import { buildModules, writeDist } from './lib/bundle'
+import { buildModules, missingFoundations, writeDist } from './lib/bundle'
 import { MODULES, type ModuleName } from './lib/modules'
 
 const USAGE = `usage:
@@ -51,6 +51,9 @@ if (values.modules === undefined) {
   for (const name of names) if (!Object.hasOwn(MODULES, name)) fail(`unknown module: ${name}`)
   const dup = names.find((name, i) => names.indexOf(name) !== i)
   if (dup) fail(`duplicate module: ${dup}`)
+  for (const message of missingFoundations(names as ModuleName[], root)) {
+    console.error(`warning: ${message}`)
+  }
   const { bundle } = buildModules(names as ModuleName[], root, {
     inlineStatic: values['inline-static']
   })

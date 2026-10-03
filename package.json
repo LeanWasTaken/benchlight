@@ -43,8 +43,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "bun run lint && bun run format:check && bun run typecheck && bun run test",
-    "gen": "bun scripts/gen-tokens.ts && bun run gen:js",
-    "gen:js": "bun build ./tokens/index.ts --outfile dist/tokens.js --format esm",
+    "gen": "bun scripts/gen-tokens.ts && bun scripts/gen-prepaint.ts && bun run gen:js",
+    "gen:js": "bun build ./tokens/index.ts --outfile dist/tokens.js --format esm && bun build ./js/appearance.js --outfile dist/appearance.min.js --minify",
     "bundle": "bun scripts/bundle.ts",
     "build": "bun run gen && bun run bundle && bun run gen:api",
     "gen:api": "bun scripts/gen-api.ts",
@@ -56,7 +56,7 @@
     "@nuxt/kit": "^4.0.0",
     "nuxt": "^4.0.0",
     "tailwindcss": "^4.0.0",
-    "vite": ">=6.0.0",
+    "vite": "^6.0.0 || ^7.0.0",
     "vue": "^3.5.0"
   },
   "peerDependenciesMeta": {

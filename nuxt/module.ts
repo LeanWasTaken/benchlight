@@ -1,5 +1,5 @@
-import { readFileSync } from 'node:fs'
 import { addComponentsDir, addImports, createResolver, defineNuxtModule } from '@nuxt/kit'
+import { PREPAINT } from '../js/prepaint-script.mjs'
 
 export interface ModuleOptions {
   /** add css/fonts.css (self-hosted Geist, Geist Mono, Bricolage Grotesque) */
@@ -26,9 +26,8 @@ export default defineNuxtModule<ModuleOptions>({
     if (options.fonts) css.unshift(resolve('../css/fonts.css'))
     nuxt.options.css.unshift(...css)
 
-    const prepaint = readFileSync(resolve('../js/prepaint.js'), 'utf8').trim()
     nuxt.options.app.head.script = [
-      { innerHTML: prepaint, tagPosition: 'head' },
+      { innerHTML: PREPAINT, tagPosition: 'head' },
       ...(nuxt.options.app.head.script ?? [])
     ]
 

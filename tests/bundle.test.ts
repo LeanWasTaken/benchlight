@@ -1,11 +1,15 @@
 // @vitest-environment node
-import { readFileSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
+import { readFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import {
   buildDist,
   buildModules,
   inlinableVars,
+  missingFoundations,
   inlineStaticTokens,
   minifyCss
 } from '../scripts/lib/bundle'
@@ -121,5 +125,48 @@ describe('minifyCss', () => {
     expect(minifyCss('@layer components { .bl-x { color: red; } }', 'x.css')).toBe(
       '@layer components{.bl-x{color:red}}'
     )
+  })
+})
+
+describe('missingFoundations', () => {
+  const warn = (names: string[]) => missingFoundations(names as never, ROOT)
+
+  it('is silent for the full set and for a self-sufficient one', () => {
+    expect(warn(Object.keys(MODULES))).toEqual([])
+    expect(warn(['tokens', 'base', 'type', 'field', 'eq'])).toEqual([])
+  })
+
+  it('names type for components that speak in its voices', () => {
+    const messages = warn(['tokens', 'base', 'field', 'meta', 'link-arrow'])
+    expect(messages).toHaveLength(3)
+    for (const name of ['field', 'meta', 'link-arrow']) {
+      expect(messages.join('\n')).toContain(`${name} needs type`)
+    }
+  })
+
+  it('names base for animated modules without their own reduced-motion rule', () => {
+    const messages = warn(['tokens', 'type', 'eq', 'motion', 'meter'])
+    expect(messages.join('\n')).toContain('eq needs base')
+    expect(messages.join('\n')).toContain('motion needs base')
+    expect(messages.join('\n')).not.toContain('meter')
+  })
+
+  it('does not ask for modules that are not needed', () => {
+    expect(warn(['tokens', 'btn', 'led'])).toEqual([])
+  })
+})
+
+describe('bundle CLI', () => {
+  it('builds but warns on stderr when foundations are missing', () => {
+    const out = join(tmpdir(), `bl-bundle-${process.pid}.css`)
+    const result = spawnSync(
+      'bun',
+      ['scripts/bundle.ts', '--modules', 'tokens,field,eq', '--out', out],
+      { cwd: ROOT, encoding: 'utf8' }
+    )
+    rmSync(out, { force: true })
+    expect(result.status).toBe(0)
+    expect(result.stderr).toContain('field needs type')
+    expect(result.stderr).toContain('eq needs base')
   })
 })

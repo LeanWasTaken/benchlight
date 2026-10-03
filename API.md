@@ -15,6 +15,7 @@
 - `./vue`
 
 ## dist files
+- `dist/appearance.min.js`
 - `dist/benchlight.min.css`
 - `dist/fonts.min.css`
 - `dist/modules/base.min.css`

@@ -13,3 +13,4 @@ playwright-report
 .remember
 .superpowers
 docs/
+.playwright-mcp/

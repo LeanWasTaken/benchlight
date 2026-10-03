@@ -50,6 +50,13 @@ export async function install(dir: string): Promise<void> {
   }
   await $`bun install`.cwd(dir).quiet()
   await $`bun run build`.cwd(dir).quiet()
+  if (JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')).scripts?.typecheck) {
+    // A consumer's typecheck covers the TypeScript source benchlight ships.
+    const result = await $`bun run typecheck`.cwd(dir).nothrow().quiet()
+    if (result.exitCode !== 0) {
+      throw new Error(`${dir}: typecheck failed\n${result.stdout}${result.stderr}`)
+    }
+  }
 }
 
 function readAll(dir: string, extension: string): string {
