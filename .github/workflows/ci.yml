@@ -6,29 +6,45 @@ on:
     tags: ['v*']
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  # A newer push supersedes an in-flight branch run; a tag run is never cancelled.
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+# Every job runs the bun pinned by "packageManager" in package.json: tests/js/appearance-min.test.ts
+# compares dist/appearance.min.js with live `bun build --minify` output, so versions must match.
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version-file: package.json
       - run: bun install --frozen-lockfile
       - run: bun run check
       - run: bun run fixtures
+      - name: Lint workflows
+        run: bun run lint:workflows
 
   browser:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     # Same image as scripts/visual-linux.sh, so the committed *-linux.png baselines match.
     container:
       image: mcr.microsoft.com/playwright:v1.63.0-noble
       options: --ipc=host
     steps:
-      - uses: actions/checkout@v4
-      - run: npm install -g bun@1.2.21
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - run: npm install -g "bun@$(node -p "require('./package.json').packageManager.split('@')[1]")"
       - run: bun install --frozen-lockfile
       - run: bunx playwright test
       - if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: playwright-results
           path: test-results
@@ -37,16 +53,29 @@ jobs:
   git-install:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version-file: package.json
       - run: bun install --frozen-lockfile
       - name: Load the read-only deploy key
         env:
           BENCHLIGHT_DEPLOY_KEY: ${{ secrets.BENCHLIGHT_DEPLOY_KEY }}
         run: |
-          mkdir -p ~/.ssh
-          printf '%s\n' "$BENCHLIGHT_DEPLOY_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          echo "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl" >> ~/.ssh/known_hosts
-      - run: bun scripts/git-install-check.ts "git+ssh://git@github.com/LeanWasTaken/benchlight.git#${GITHUB_SHA}"
+          umask 077
+          key="$RUNNER_TEMP/benchlight_deploy_key"
+          hosts="$RUNNER_TEMP/benchlight_known_hosts"
+          printf '%s\n' "$BENCHLIGHT_DEPLOY_KEY" > "$key"
+          echo "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl" > "$hosts"
+          echo "DEPLOY_KEY_FILE=$key" >> "$GITHUB_ENV"
+          echo "DEPLOY_KNOWN_HOSTS=$hosts" >> "$GITHUB_ENV"
+      - name: Install the pushed commit over git+ssh
+        # The key is scoped to this one step through GIT_SSH_COMMAND, never the default ssh directory.
+        run: |
+          export GIT_SSH_COMMAND="ssh -i $DEPLOY_KEY_FILE -o IdentitiesOnly=yes -o UserKnownHostsFile=$DEPLOY_KNOWN_HOSTS -o StrictHostKeyChecking=yes"
+          bun scripts/git-install-check.ts "git+ssh://git@github.com/LeanWasTaken/benchlight.git#${GITHUB_SHA}"
+      - name: Remove the deploy key
+        if: always()
+        run: rm -f "$DEPLOY_KEY_FILE" "$DEPLOY_KNOWN_HOSTS"
