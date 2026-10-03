@@ -1,8 +1,8 @@
 <template>
   <li>
     <component
-      :is="as"
-      v-bind="linkBindings(as, to, href)"
+      :is="tag"
+      v-bind="linkBindings(tag, to, href)"
       class="bl-site-bar__link"
       :aria-current="current ? 'page' : undefined"
     >
@@ -12,10 +12,10 @@
 </template>
 
 <script setup lang="ts">
-  import { linkBindings } from '../internal/link'
-  import type { LinkAs, LinkTo } from '../types'
+  import { computed } from 'vue'
+  import { linkBindings, resolveTag } from '../internal/link'
+  import type { LinkProps } from '../types'
 
-  withDefaults(defineProps<{ as?: LinkAs; to?: LinkTo; href?: string; current?: boolean }>(), {
-    as: 'a'
-  })
+  const props = defineProps<LinkProps & { current?: boolean }>()
+  const tag = computed(() => resolveTag(props.as, props.to, props.href, 'a'))
 </script>

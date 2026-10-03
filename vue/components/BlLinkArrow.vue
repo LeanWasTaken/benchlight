@@ -1,7 +1,7 @@
 <template>
   <component
-    :is="as"
-    v-bind="linkBindings(as, to, href)"
+    :is="tag"
+    v-bind="linkBindings(tag, to, href)"
     class="bl-link-arrow"
     :class="{ 'bl-link-arrow--quiet': quiet }"
   >
@@ -16,17 +16,13 @@
 </template>
 
 <script setup lang="ts">
-  import { linkBindings } from '../internal/link'
-  import type { LinkAs, LinkTo } from '../types'
+  import { computed } from 'vue'
+  import { linkBindings, resolveTag } from '../internal/link'
+  import type { LinkProps } from '../types'
 
-  withDefaults(
-    defineProps<{
-      as?: LinkAs
-      to?: LinkTo
-      href?: string
-      direction?: 'left' | 'right' | 'up-right'
-      quiet?: boolean
-    }>(),
-    { as: 'a', direction: 'right' }
+  const props = withDefaults(
+    defineProps<LinkProps & { direction?: 'left' | 'right' | 'up-right'; quiet?: boolean }>(),
+    { direction: 'right' }
   )
+  const tag = computed(() => resolveTag(props.as, props.to, props.href, 'a'))
 </script>

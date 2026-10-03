@@ -3,11 +3,21 @@ import type { Component, InjectionKey, Ref } from 'vue'
 export type LinkAs = string | Component
 export type LinkTo = string | Record<string, unknown>
 
-export interface SegmentedOption<T> {
-  value: T
-  label: string
+/**
+ * Link props shared by every link-rendering component.
+ * - `as` a component (e.g. RouterLink): receives `to` if set, otherwise `href`.
+ * - `as` 'a' (the default when `to` or `href` is set): receives `href`, else a string `to`.
+ * - `as` any other tag: receives neither (a dev warning fires if you passed one).
+ */
+export interface LinkProps {
+  as?: LinkAs
   to?: LinkTo
   href?: string
+}
+
+export interface SegmentedOption<T> extends Pick<LinkProps, 'to' | 'href'> {
+  value: T
+  label: string
   current?: boolean
 }
 
@@ -26,10 +36,8 @@ export interface SpecRowData {
 
 export type MetaItem = string | { text: string; class?: string }
 
-export interface PrevNextItem {
+export interface PrevNextItem extends Pick<LinkProps, 'to' | 'href'> {
   title: string
-  to?: LinkTo
-  href?: string
 }
 
 export interface AppearanceLabels {

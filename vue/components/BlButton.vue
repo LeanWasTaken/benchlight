@@ -16,19 +16,18 @@
 
 <script setup lang="ts">
   import { computed } from 'vue'
-  import { linkBindings } from '../internal/link'
-  import type { LinkAs, LinkTo } from '../types'
+  import { linkBindings, resolveTag } from '../internal/link'
+  import type { LinkAs, LinkProps } from '../types'
 
   const props = withDefaults(
-    defineProps<{
-      variant?: 'primary' | 'secondary' | 'danger'
-      pill?: boolean
-      as?: LinkAs
-      to?: LinkTo
-      href?: string
-      type?: 'button' | 'submit' | 'reset'
-      disabled?: boolean
-    }>(),
+    defineProps<
+      LinkProps & {
+        variant?: 'primary' | 'secondary' | 'danger'
+        pill?: boolean
+        type?: 'button' | 'submit' | 'reset'
+        disabled?: boolean
+      }
+    >(),
     { variant: 'primary', type: 'button' }
   )
 
@@ -37,13 +36,19 @@
     event.stopImmediatePropagation()
   }
 
-  const linkTag = computed<LinkAs>(() => props.as ?? (props.href || props.to ? 'a' : 'button'))
+  const linkTag = computed<LinkAs>(() => resolveTag(props.as, props.to, props.href, 'button'))
   // A disabled link is rendered as a bare anchor so no router component receives a missing `to`.
   const tag = computed<LinkAs>(() =>
     props.disabled && linkTag.value !== 'button' ? 'a' : linkTag.value
   )
   const bindings = computed(() => {
-    if (tag.value === 'button') return { type: props.type, disabled: props.disabled || undefined }
+    if (tag.value === 'button') {
+      return {
+        ...linkBindings('button', props.to, props.href),
+        type: props.type,
+        disabled: props.disabled || undefined
+      }
+    }
     if (props.disabled) {
       return { 'aria-disabled': 'true', tabindex: '-1', onClickCapture: blockClick }
     }
