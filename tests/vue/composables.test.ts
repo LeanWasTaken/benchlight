@@ -75,11 +75,24 @@ describe('useAppearance', () => {
     vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
       throw new Error('SecurityError')
     })
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const { result } = withSetup(useAppearance)
     expect(result.mode.value).toBe('auto')
     result.mode.value = 'light'
     await nextTick()
     expect(attribute()).toBe('light')
+    expect(result.resolved.value).toBe('light')
+    expect(error).not.toHaveBeenCalled()
+    expect(warn).not.toHaveBeenCalled()
+  })
+
+  it('stops tracking the OS after unmount', () => {
+    const media = mockMatchMedia({ [DARK_QUERY]: false })
+    const { result, wrapper } = withSetup(useAppearance)
+    wrapper.unmount()
+    media.set(DARK_QUERY, true)
+    expect(result.resolved.value).toBe('light')
   })
 
   it('touches neither storage nor the document during SSR', async () => {
@@ -100,6 +113,10 @@ describe('useAppearance', () => {
 })
 
 describe('useScrollLifted', () => {
+  afterEach(() => {
+    delete (window as unknown as Record<string, unknown>).scrollY
+  })
+
   const scrollTo = (y: number) => {
     Object.defineProperty(window, 'scrollY', { value: y, configurable: true })
     window.dispatchEvent(new Event('scroll'))
@@ -125,6 +142,14 @@ describe('useReducedMotion', () => {
     media.set(REDUCED_QUERY, true)
     expect(result.value).toBe(true)
   })
+
+  it('stops following the media query after unmount', () => {
+    const media = mockMatchMedia({ [REDUCED_QUERY]: false })
+    const { result, wrapper } = withSetup(useReducedMotion)
+    wrapper.unmount()
+    media.set(REDUCED_QUERY, true)
+    expect(result.value).toBe(false)
+  })
 })
 
 describe('useMarquee', () => {
@@ -133,10 +158,11 @@ describe('useMarquee', () => {
     const text = document.createElement('div')
     Object.defineProperty(box, 'clientWidth', { value: boxWidth })
     Object.defineProperty(text, 'scrollWidth', { value: contentWidth })
-    const animate = vi.fn(() => ({ cancel: vi.fn() }) as unknown as Animation)
+    const cancel = vi.fn()
+    const animate = vi.fn(() => ({ cancel }) as unknown as Animation)
     box.animate = animate
     text.animate = animate
-    return { box, text, animate }
+    return { box, text, animate, cancel }
   }
 
   it('reports no overflow when the text fits', () => {
@@ -159,6 +185,45 @@ describe('useMarquee', () => {
     const { result } = withSetup(() => useMarquee(ref(box), ref(text)))
     expect(result.overflowing.value).toBe(true)
     expect(animate).not.toHaveBeenCalled()
+  })
+})
+
+describe('useMarquee cleanup', () => {
+  function setup() {
+    const box = document.createElement('div')
+    const text = document.createElement('div')
+    Object.defineProperty(box, 'clientWidth', { value: 100 })
+    Object.defineProperty(text, 'scrollWidth', { value: 300 })
+    const cancel = vi.fn()
+    const animate = vi.fn(() => ({ cancel }) as unknown as Animation)
+    box.animate = animate
+    text.animate = animate
+    return { box, text, animate, cancel }
+  }
+
+  afterEach(() => vi.useRealTimers())
+
+  it('cancels both animations and ignores resizes after unmount', () => {
+    vi.useFakeTimers()
+    const { box, text, animate, cancel } = setup()
+    const { wrapper } = withSetup(() => useMarquee(ref(box), ref(text)))
+    expect(animate).toHaveBeenCalledTimes(2)
+    wrapper.unmount()
+    expect(cancel).toHaveBeenCalledTimes(2)
+    window.dispatchEvent(new Event('resize'))
+    vi.advanceTimersByTime(200)
+    expect(animate).toHaveBeenCalledTimes(2)
+  })
+
+  it('cancels running animations when reduced motion turns on', async () => {
+    const media = mockMatchMedia({ [REDUCED_QUERY]: false })
+    const { box, text, animate, cancel } = setup()
+    withSetup(() => useMarquee(ref(box), ref(text)))
+    expect(animate).toHaveBeenCalledTimes(2)
+    media.set(REDUCED_QUERY, true)
+    await nextTick()
+    expect(cancel).toHaveBeenCalledTimes(2)
+    expect(animate).toHaveBeenCalledTimes(2)
   })
 })
 

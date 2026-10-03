@@ -11,7 +11,7 @@ describe('linkBindings', () => {
   })
 
   it('drops object routes on plain anchors', () => {
-    expect(linkBindings('a', { name: 'home' })).toEqual({ href: undefined })
+    expect(linkBindings('a', { name: 'home' })).toStrictEqual({ href: undefined })
   })
 
   it('passes to through to router components', () => {
