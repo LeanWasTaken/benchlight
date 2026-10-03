@@ -30,7 +30,13 @@ describe('ansiToSegments', () => {
 
   it('skips 256-colour and truecolour parameters without bogus classes', () => {
     expect(ansiToSegments(`${ESC}[38;5;208mX`)).toEqual([{ text: 'X' }])
+    expect(ansiToSegments(`${ESC}[38;5;31mX`)).toEqual([{ text: 'X' }])
+    expect(ansiToSegments(`${ESC}[48;5;94mX`)).toEqual([{ text: 'X' }])
     expect(ansiToSegments(`${ESC}[38;2;255;0;0mX${ESC}[34mY`)).toEqual([
+      { text: 'X' },
+      { text: 'Y', className: 'kd-ansi-34' }
+    ])
+    expect(ansiToSegments(`${ESC}[38;2;31;32;33mX${ESC}[34mY`)).toEqual([
       { text: 'X' },
       { text: 'Y', className: 'kd-ansi-34' }
     ])

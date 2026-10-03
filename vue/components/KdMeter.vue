@@ -16,6 +16,6 @@
 
   const props = defineProps<{ value: number; label: string }>()
   const fraction = computed(() =>
-    Number.isFinite(props.value) ? Math.min(1, Math.max(0, props.value)) : 0
+    Number.isNaN(props.value) ? 0 : Math.min(1, Math.max(0, props.value))
   )
 </script>
