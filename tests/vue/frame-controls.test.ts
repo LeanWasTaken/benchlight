@@ -344,4 +344,79 @@ describe('form controls', () => {
     expect(wrapper.find('input').attributes('aria-valuetext')).toBe('-12 dB')
     expect(wrapper.find('input').attributes('min')).toBe('-60')
   })
+
+  it('BlField wires a nested BlInput without slot props', () => {
+    const wrapper = mount(BlField, {
+      props: { label: 'SSID', hint: 'Network name' },
+      slots: { default: () => h(BlInput) }
+    })
+    const input = wrapper.find('input')
+    const id = wrapper.find('label').attributes('for')
+    expect(input.attributes('id')).toBe(id)
+    expect(wrapper.find('.bl-field__hint').attributes('id')).toBe(`${id}-hint`)
+    expect(input.attributes('aria-describedby')).toBe(`${id}-hint`)
+  })
+
+  it('BlField leaves aria-describedby off without a hint', () => {
+    const wrapper = mount(BlField, {
+      props: { label: 'SSID' },
+      slots: { default: () => h(BlInput) }
+    })
+    expect(wrapper.find('input').attributes('aria-describedby')).toBeUndefined()
+  })
+
+  it('explicit id and aria-describedby on the control win over the field', () => {
+    const wrapper = mount(BlField, {
+      props: { label: 'SSID', hint: 'Network name' },
+      slots: { default: () => h(BlInput, { id: 'own', 'aria-describedby': 'mine' }) }
+    })
+    const input = wrapper.find('input')
+    expect(input.attributes('id')).toBe('own')
+    expect(input.attributes('aria-describedby')).toBe('mine')
+  })
+
+  it('BlField wires BlSelect and BlRange too', () => {
+    const select = mount(BlField, {
+      props: { label: 'Mode', hint: 'h' },
+      slots: { default: () => h(BlSelect, { options: [{ value: 'a', label: 'A' }] }) }
+    })
+    const selectId = select.find('label').attributes('for')
+    expect(select.find('select').attributes('id')).toBe(selectId)
+    expect(select.find('select').attributes('aria-describedby')).toBe(`${selectId}-hint`)
+    const range = mount(BlField, {
+      props: { label: 'Volume', hint: 'h' },
+      slots: { default: () => h(BlRange) }
+    })
+    const rangeId = range.find('label').attributes('for')
+    expect(range.find('input[type="range"]').attributes('id')).toBe(rangeId)
+    expect(range.find('input[type="range"]').attributes('aria-describedby')).toBe(`${rangeId}-hint`)
+  })
+
+  it('exposes id and describedby as slot props for third-party controls', () => {
+    const wrapper = mount(BlField, {
+      props: { label: 'L', hint: 'H', id: 'f' },
+      slots: {
+        default: (p: { id: string; describedby?: string }) =>
+          h('textarea', { id: p.id, 'aria-describedby': p.describedby })
+      }
+    })
+    expect(wrapper.find('textarea').attributes()).toMatchObject({
+      id: 'f',
+      'aria-describedby': 'f-hint'
+    })
+  })
+
+  it('controls outside a field render no id', () => {
+    expect(mount(BlInput).find('input').attributes('id')).toBeUndefined()
+  })
+
+  it('BlRange id prop and explicit attrs win over the field', () => {
+    const wrapper = mount(BlField, {
+      props: { label: 'Volume', hint: 'h' },
+      slots: { default: () => h(BlRange, { id: 'own', 'aria-describedby': 'mine' }) }
+    })
+    const input = wrapper.find('input[type="range"]')
+    expect(input.attributes('id')).toBe('own')
+    expect(input.attributes('aria-describedby')).toBe('mine')
+  })
 })

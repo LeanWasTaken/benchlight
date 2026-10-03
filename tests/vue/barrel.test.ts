@@ -44,7 +44,8 @@ const HELPERS = [
   'riseDelay',
   'ansiToSegments',
   'APPEARANCE_ATTRIBUTE',
-  'APPEARANCE_STORAGE_KEY'
+  'APPEARANCE_STORAGE_KEY',
+  'FIELD_CONTEXT'
 ]
 
 describe('benchlight/vue', () => {
