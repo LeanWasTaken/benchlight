@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createSSRApp, defineComponent, h, nextTick, ref } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 import { riseDelay } from '../../vue/composables/riseDelay'
-import { useAppearance } from '../../vue/composables/useAppearance'
+import { resetAppearanceState, useAppearance } from '../../vue/composables/useAppearance'
 import { useMarquee } from '../../vue/composables/useMarquee'
 import { useReducedMotion } from '../../vue/composables/useReducedMotion'
 import { useScrollLifted } from '../../vue/composables/useScrollLifted'
@@ -12,6 +12,7 @@ const root = document.documentElement
 const attribute = () => root.getAttribute('data-kd-appearance')
 
 beforeEach(() => {
+  resetAppearanceState()
   localStorage.clear()
   root.removeAttribute('data-kd-appearance')
   mockMatchMedia()
@@ -93,6 +94,29 @@ describe('useAppearance', () => {
     wrapper.unmount()
     media.set(DARK_QUERY, true)
     expect(result.resolved.value).toBe('light')
+  })
+
+  it('shares mode and resolved between callers', async () => {
+    const first = withSetup(useAppearance)
+    const second = withSetup(useAppearance)
+    first.result.mode.value = 'dark'
+    await nextTick()
+    expect(second.result.mode.value).toBe('dark')
+    expect(second.result.resolved.value).toBe('dark')
+  })
+
+  it('keeps OS tracking while any caller is mounted', () => {
+    const media = mockMatchMedia({ [DARK_QUERY]: false })
+    const first = withSetup(useAppearance)
+    const second = withSetup(useAppearance)
+    expect(media.listenerCount(DARK_QUERY)).toBe(1)
+    first.wrapper.unmount()
+    media.set(DARK_QUERY, true)
+    expect(second.result.resolved.value).toBe('dark')
+    second.wrapper.unmount()
+    expect(media.listenerCount(DARK_QUERY)).toBe(0)
+    media.set(DARK_QUERY, false)
+    expect(second.result.resolved.value).toBe('dark')
   })
 
   it('touches neither storage nor the document during SSR', async () => {

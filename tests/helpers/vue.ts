@@ -38,6 +38,9 @@ export function mockMatchMedia(initial: Record<string, boolean> = {}) {
     set(query: string, matches: boolean) {
       state.set(query, matches)
       listeners.get(query)?.forEach((listener) => listener())
+    },
+    listenerCount(query: string) {
+      return listeners.get(query)?.size ?? 0
     }
   }
 }
