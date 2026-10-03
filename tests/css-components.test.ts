@@ -11,7 +11,7 @@ const REQUIRED: Record<string, string[]> = {
     '.kd-site-bar[data-lifted]',
     '.kd-site-bar__brand',
     ".kd-site-bar__link[aria-current='page']",
-    '.kd-site-bar__nav + .kd-site-bar__actions'
+    '.kd-site-bar__navwrap + .kd-site-bar__actions'
   ],
   tabbar: [".kd-tabbar__item[aria-current='page']", 'body:has(.kd-tabbar)'],
   colophon: ['.kd-colophon__inner', '.kd-colophon__items a:hover'],

@@ -53,6 +53,14 @@ describe('KdSiteBar', () => {
     expect(wrapper.find('.kd-site-bar__actions span').exists()).toBe(true)
   })
 
+  it('wraps the nav list in a labelled landmark', () => {
+    const slots = { nav: '<li>n</li>' }
+    const wrapper = mount(KdSiteBar, { slots })
+    expect(wrapper.find('nav[aria-label="Primary"] > ul.kd-site-bar__nav').exists()).toBe(true)
+    const custom = mount(KdSiteBar, { props: { navLabel: 'Galvenā' }, slots })
+    expect(custom.find('nav.kd-site-bar__navwrap').attributes('aria-label')).toBe('Galvenā')
+  })
+
   it('lifts after scrolling past the threshold', async () => {
     const wrapper = mount(KdSiteBar)
     expect(wrapper.attributes('data-lifted')).toBeUndefined()
