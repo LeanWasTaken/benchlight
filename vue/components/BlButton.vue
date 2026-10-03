@@ -32,12 +32,21 @@
     { variant: 'primary', type: 'button' }
   )
 
-  const tag = computed<LinkAs>(() => props.as ?? (props.href || props.to ? 'a' : 'button'))
+  function blockClick(event: MouseEvent): void {
+    event.preventDefault()
+    event.stopImmediatePropagation()
+  }
+
+  const linkTag = computed<LinkAs>(() => props.as ?? (props.href || props.to ? 'a' : 'button'))
+  // A disabled link is rendered as a bare anchor so no router component receives a missing `to`.
+  const tag = computed<LinkAs>(() =>
+    props.disabled && linkTag.value !== 'button' ? 'a' : linkTag.value
+  )
   const bindings = computed(() => {
     if (tag.value === 'button') return { type: props.type, disabled: props.disabled || undefined }
-    return {
-      ...linkBindings(tag.value, props.to, props.href),
-      'aria-disabled': props.disabled ? 'true' : undefined
+    if (props.disabled) {
+      return { 'aria-disabled': 'true', tabindex: '-1', onClickCapture: blockClick }
     }
+    return linkBindings(tag.value, props.to, props.href)
   })
 </script>
