@@ -84,6 +84,14 @@ describe('buildDist', () => {
     expect(dist.bundle).not.toMatch(/width[<>]=/)
   })
 
+  it('keeps hand-written vendor prefixes without adding duplicates', () => {
+    const count = (re: RegExp) => dist.bundle.match(re)?.length ?? 0
+    const prefixed = count(/-webkit-mask:/g)
+    expect(prefixed).toBeGreaterThan(0)
+    expect(prefixed).toBe(count(/(?<!-webkit-)mask:/g))
+    expect(count(/-webkit-font-smoothing:/g)).toBeGreaterThan(0)
+  })
+
   it('stays within the 25600-byte guard', () => {
     expect(Buffer.byteLength(read('dist/kdesign.min.css'))).toBeLessThanOrEqual(25_600)
   })
