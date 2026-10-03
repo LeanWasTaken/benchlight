@@ -1,5 +1,5 @@
 @layer components {
-  .kd-skip-link {
+  .bl-skip-link {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -7,7 +7,7 @@
     clip-path: inset(50%);
     white-space: nowrap;
   }
-  .kd-skip-link:focus {
+  .bl-skip-link:focus {
     position: fixed;
     top: 12px;
     left: 12px;
@@ -17,9 +17,9 @@
     overflow: visible;
     clip-path: none;
     padding: 6px 12px;
-    border-radius: var(--kd-radius-pill);
-    background: var(--kd-ink-1);
-    color: var(--kd-canvas);
+    border-radius: var(--bl-radius-pill);
+    background: var(--bl-ink-1);
+    color: var(--bl-canvas);
     font-size: 0.875rem;
     font-weight: 500;
     text-decoration: none;

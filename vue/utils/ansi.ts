@@ -11,7 +11,7 @@ const TRAILING_ESCAPE = /\x1b\[[0-9;]*$/
 const STRAY_ESCAPE = /\x1b/g
 const COLOR = /^(3[0-7]|9[0-7])$/
 
-// Splits one log line into runs coloured by SGR foreground codes (kd-ansi-30…97).
+// Splits one log line into runs coloured by SGR foreground codes (bl-ansi-30…97).
 export function ansiToSegments(line: string): AnsiSegment[] {
   const segments: AnsiSegment[] = []
   let className: string | undefined
@@ -27,7 +27,7 @@ export function ansiToSegments(line: string): AnsiSegment[] {
     for (let i = 0; i < params.length; i++) {
       const param = params[i] ?? ''
       if (param === '' || param === '0' || param === '39') className = undefined
-      else if (COLOR.test(param)) className = `kd-ansi-${param}`
+      else if (COLOR.test(param)) className = `bl-ansi-${param}`
       else if (param === '38' || param === '48') {
         i += params[i + 1] === '5' ? 2 : params[i + 1] === '2' ? 4 : 0
       }

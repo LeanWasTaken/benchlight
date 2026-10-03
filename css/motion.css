@@ -1,5 +1,5 @@
 @layer components {
-  @keyframes kd-rise {
+  @keyframes bl-rise {
     from {
       opacity: 0;
       transform: translateY(10px);
@@ -9,22 +9,22 @@
       transform: none;
     }
   }
-  .kd-rise {
-    animation: kd-rise var(--kd-duration-rise) var(--kd-ease-out) both;
-    animation-delay: var(--kd-rise-delay, 0ms);
+  .bl-rise {
+    animation: bl-rise var(--bl-duration-rise) var(--bl-ease-out) both;
+    animation-delay: var(--bl-rise-delay, 0ms);
   }
-  .kd-page-leave-active {
-    transition: opacity var(--kd-duration-page-leave) linear;
+  .bl-page-leave-active {
+    transition: opacity var(--bl-duration-page-leave) linear;
     will-change: opacity;
   }
-  .kd-page-leave-to {
+  .bl-page-leave-to {
     opacity: 0;
   }
-  .kd-page-enter-active {
-    transition: opacity var(--kd-duration-page-enter) linear;
+  .bl-page-enter-active {
+    transition: opacity var(--bl-duration-page-enter) linear;
     will-change: opacity;
   }
-  .kd-page-enter-from {
+  .bl-page-enter-from {
     opacity: 0;
   }
 }

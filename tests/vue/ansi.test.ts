@@ -10,20 +10,20 @@ describe('ansiToSegments', () => {
 
   it('maps reset-prefixed colour codes and resets', () => {
     expect(ansiToSegments(`${ESC}[0;32mI (12) wifi: up${ESC}[0m`)).toEqual([
-      { text: 'I (12) wifi: up', className: 'kd-ansi-32' }
+      { text: 'I (12) wifi: up', className: 'bl-ansi-32' }
     ])
   })
 
   it('splits coloured and plain runs', () => {
     expect(ansiToSegments(`${ESC}[1;31mERR${ESC}[0m tail`)).toEqual([
-      { text: 'ERR', className: 'kd-ansi-31' },
+      { text: 'ERR', className: 'bl-ansi-31' },
       { text: ' tail' }
     ])
   })
 
   it('supports bright colours and default-colour resets', () => {
     expect(ansiToSegments(`${ESC}[94mA${ESC}[39mB`)).toEqual([
-      { text: 'A', className: 'kd-ansi-94' },
+      { text: 'A', className: 'bl-ansi-94' },
       { text: 'B' }
     ])
   })
@@ -34,11 +34,11 @@ describe('ansiToSegments', () => {
     expect(ansiToSegments(`${ESC}[48;5;94mX`)).toEqual([{ text: 'X' }])
     expect(ansiToSegments(`${ESC}[38;2;255;0;0mX${ESC}[34mY`)).toEqual([
       { text: 'X' },
-      { text: 'Y', className: 'kd-ansi-34' }
+      { text: 'Y', className: 'bl-ansi-34' }
     ])
     expect(ansiToSegments(`${ESC}[38;2;31;32;33mX${ESC}[34mY`)).toEqual([
       { text: 'X' },
-      { text: 'Y', className: 'kd-ansi-34' }
+      { text: 'Y', className: 'bl-ansi-34' }
     ])
   })
 

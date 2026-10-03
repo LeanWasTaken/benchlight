@@ -16,30 +16,30 @@ describe('renderTokensCss', () => {
   })
 
   it('puts light colours and every static token on :root', () => {
-    expect(css).toContain('    --kd-canvas: #eff1f3;')
-    expect(css).toContain('    --kd-text-micro: 0.6875rem;')
-    expect(css).toContain('    --kd-ease-out: cubic-bezier(0.32, 0.72, 0, 1);')
+    expect(css).toContain('    --bl-canvas: #eff1f3;')
+    expect(css).toContain('    --bl-text-micro: 0.6875rem;')
+    expect(css).toContain('    --bl-ease-out: cubic-bezier(0.32, 0.72, 0, 1);')
   })
 
   it('follows the OS unless the user saved light', () => {
     expect(css).toContain('  @media (prefers-color-scheme: dark) {')
-    expect(css).toContain("    :root:not([data-kd-appearance='light']) {")
+    expect(css).toContain("    :root:not([data-bl-appearance='light']) {")
   })
 
   it('forces dark when the user saved dark', () => {
-    expect(css).toContain("  :root[data-kd-appearance='dark'] {")
+    expect(css).toContain("  :root[data-bl-appearance='dark'] {")
   })
 
   it('emits dark colours twice and static tokens once', () => {
-    expect(css.match(/--kd-canvas: #101214;/g)).toHaveLength(2)
-    expect(css.match(/--kd-ease-out:/g)).toHaveLength(1)
+    expect(css.match(/--bl-canvas: #101214;/g)).toHaveLength(2)
+    expect(css.match(/--bl-ease-out:/g)).toHaveLength(1)
   })
 
   it('names static tokens by group', () => {
     const names = staticVars(tokens).map(([name]) => name)
-    expect(names).toContain('--kd-font-sans-features')
-    expect(names).toContain('--kd-layout-gutter-narrow')
-    expect(names).not.toContain('--kd-breakpoint-sm')
+    expect(names).toContain('--bl-font-sans-features')
+    expect(names).toContain('--bl-layout-gutter-narrow')
+    expect(names).not.toContain('--bl-breakpoint-sm')
   })
 })
 
@@ -52,7 +52,7 @@ describe('generated files are fresh', () => {
 describe('renderTailwindTheme', () => {
   it('carries the sans feature settings into the theme', () => {
     expect(renderTailwindTheme(tokens)).toContain(
-      '  --font-sans--font-feature-settings: var(--kd-font-sans-features);'
+      '  --font-sans--font-feature-settings: var(--bl-font-sans-features);'
     )
   })
 })
@@ -75,7 +75,7 @@ describe('Tailwind v4 theme', () => {
       'shadow-float',
       'tracking-silkscreen'
     ])
-    const rule = (selector: string) => new RegExp(`\\.${selector}\\s*\\{[^}]*var\\(--kd-`, 's')
+    const rule = (selector: string) => new RegExp(`\\.${selector}\\s*\\{[^}]*var\\(--bl-`, 's')
     for (const selector of [
       'bg-canvas',
       'text-ink-2',
@@ -89,8 +89,8 @@ describe('Tailwind v4 theme', () => {
     ]) {
       expect(css).toMatch(rule(selector))
     }
-    expect(css).toContain('var(--kd-canvas)')
-    expect(css).toContain('var(--kd-ease-out)')
+    expect(css).toContain('var(--bl-canvas)')
+    expect(css).toContain('var(--bl-ease-out)')
   })
 
   it('keeps the sans feature settings through preflight', async () => {
@@ -100,7 +100,7 @@ describe('Tailwind v4 theme', () => {
       onDependency: () => {}
     })
     const css = compiler.build(['font-sans'])
-    expect(css).toMatch(/--default-font-feature-settings:[^;]*var\(--kd-font-sans-features\)/)
-    expect(css).toContain('--kd-font-sans-features')
+    expect(css).toMatch(/--default-font-feature-settings:[^;]*var\(--bl-font-sans-features\)/)
+    expect(css).toContain('--bl-font-sans-features')
   })
 })

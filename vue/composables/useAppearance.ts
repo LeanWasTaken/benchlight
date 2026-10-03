@@ -11,8 +11,8 @@ import {
 export type AppearanceMode = 'auto' | 'light' | 'dark'
 export type ResolvedAppearance = 'light' | 'dark'
 
-export const APPEARANCE_ATTRIBUTE = 'data-kd-appearance'
-export const APPEARANCE_STORAGE_KEY = 'kd-appearance'
+export const APPEARANCE_ATTRIBUTE = 'data-bl-appearance'
+export const APPEARANCE_STORAGE_KEY = 'bl-appearance'
 
 const isExplicit = (value: unknown): value is ResolvedAppearance =>
   value === 'light' || value === 'dark'

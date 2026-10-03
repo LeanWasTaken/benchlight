@@ -4,7 +4,7 @@ import { join } from 'node:path'
 
 const ROOT = join(import.meta.dir, '..')
 const PACK_DIR = join(ROOT, '.pack')
-export const PACK = join(PACK_DIR, 'kdesign.tgz')
+export const PACK = join(PACK_DIR, 'benchlight.tgz')
 
 // Bun copies a `file:` directory dependency wholesale and caches tarballs by path,
 // so fixtures install a freshly packed tarball after their node_modules and lockfile
@@ -41,28 +41,28 @@ function expectAll(haystack: string, needles: readonly string[], where: string):
 }
 
 export const VITE_EXPECTATIONS = {
-  html: ['kd-appearance'],
-  css: ['--kd-canvas', '.kd-display', '@font-face', 'Bricolage Grotesque', '.kd-btn--secondary'],
-  js: ['kd-led', 'kd-btn', 'kd-switch']
+  html: ['bl-appearance'],
+  css: ['--bl-canvas', '.bl-display', '@font-face', 'Bricolage Grotesque', '.bl-btn--secondary'],
+  js: ['bl-led', 'bl-btn', 'bl-switch']
 }
 
 export const NUXT_EXPECTATIONS = {
   page: [
-    'data-kd-appearance',
-    'kd-site-bar',
-    'kd-switch',
-    'kd-led kd-led--on',
-    'kd-spec-row',
-    '--kd-rise-delay:60ms'
+    'data-bl-appearance',
+    'bl-site-bar',
+    'bl-switch',
+    'bl-led bl-led--on',
+    'bl-spec-row',
+    '--bl-rise-delay:60ms'
   ],
   css: [
     '.bg-surface',
-    'var(--kd-surface)',
+    'var(--bl-surface)',
     '.font-display',
     '@font-face',
-    '.kd-display',
-    '.kd-prose',
-    '--default-font-feature-settings:var(--kd-font-sans-features)'
+    '.bl-display',
+    '.bl-prose',
+    '--default-font-feature-settings:var(--bl-font-sans-features)'
   ]
 }
 

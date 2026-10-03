@@ -4,35 +4,35 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const code = readFileSync(join(process.cwd(), 'js/prepaint.js'), 'utf8')
 const run = () => new Function(code)()
-const stamped = () => document.documentElement.getAttribute('data-kd-appearance')
+const stamped = () => document.documentElement.getAttribute('data-bl-appearance')
 
 describe('js/prepaint.js', () => {
   beforeEach(() => {
     localStorage.clear()
-    document.documentElement.removeAttribute('data-kd-appearance')
+    document.documentElement.removeAttribute('data-bl-appearance')
   })
   afterEach(() => vi.restoreAllMocks())
 
   it('stamps a saved dark choice', () => {
-    localStorage.setItem('kd-appearance', 'dark')
+    localStorage.setItem('bl-appearance', 'dark')
     run()
     expect(stamped()).toBe('dark')
   })
 
   it('stamps a saved light choice', () => {
-    localStorage.setItem('kd-appearance', 'light')
+    localStorage.setItem('bl-appearance', 'light')
     run()
     expect(stamped()).toBe('light')
   })
 
   it('leaves auto unstamped', () => {
-    localStorage.setItem('kd-appearance', 'auto')
+    localStorage.setItem('bl-appearance', 'auto')
     run()
     expect(stamped()).toBeNull()
   })
 
-  it('ignores junk and the pre-kdesign key', () => {
-    localStorage.setItem('kd-appearance', 'blue')
+  it('ignores junk and the pre-Benchlight key', () => {
+    localStorage.setItem('bl-appearance', 'blue')
     localStorage.setItem('appearance', 'dark')
     run()
     expect(stamped()).toBeNull()

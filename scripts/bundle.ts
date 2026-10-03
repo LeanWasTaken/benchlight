@@ -6,7 +6,7 @@ import { MODULES, type ModuleName } from './lib/modules'
 
 const USAGE = `usage:
   bun scripts/bundle.ts
-      Writes the minified dist/: kdesign.min.css, fonts.min.css and modules/<name>.min.css.
+      Writes the minified dist/: benchlight.min.css, fonts.min.css and modules/<name>.min.css.
   bun scripts/bundle.ts --modules a,b,c --out <file> [--inline-static]
       Writes a custom minified build of the listed modules, in the order given.
       --inline-static substitutes short static tokens and omits their declarations from the

@@ -1,38 +1,38 @@
 import { describe, expect, it } from 'vitest'
-import * as kdesign from '../../vue'
+import * as benchlight from '../../vue'
 
 const COMPONENTS = [
-  'KdAppearanceSwitch',
-  'KdButton',
-  'KdColophon',
-  'KdEqBars',
-  'KdField',
-  'KdIndex',
-  'KdIndexRow',
-  'KdInput',
-  'KdLed',
-  'KdLinkArrow',
-  'KdLog',
-  'KdMarquee',
-  'KdMeta',
-  'KdMeter',
-  'KdMsg',
-  'KdNavLink',
-  'KdPrevNext',
-  'KdProse',
-  'KdRange',
-  'KdReadout',
-  'KdSectionHead',
-  'KdSegmented',
-  'KdSelect',
-  'KdSiteBar',
-  'KdSkipLink',
-  'KdSpecPanel',
-  'KdSpecRow',
-  'KdTabBar',
-  'KdTabBarItem',
-  'KdTelemetry',
-  'KdTelemetryCell'
+  'BlAppearanceSwitch',
+  'BlButton',
+  'BlColophon',
+  'BlEqBars',
+  'BlField',
+  'BlIndex',
+  'BlIndexRow',
+  'BlInput',
+  'BlLed',
+  'BlLinkArrow',
+  'BlLog',
+  'BlMarquee',
+  'BlMeta',
+  'BlMeter',
+  'BlMsg',
+  'BlNavLink',
+  'BlPrevNext',
+  'BlProse',
+  'BlRange',
+  'BlReadout',
+  'BlSectionHead',
+  'BlSegmented',
+  'BlSelect',
+  'BlSiteBar',
+  'BlSkipLink',
+  'BlSpecPanel',
+  'BlSpecRow',
+  'BlTabBar',
+  'BlTabBarItem',
+  'BlTelemetry',
+  'BlTelemetryCell'
 ]
 
 const HELPERS = [
@@ -46,16 +46,16 @@ const HELPERS = [
   'APPEARANCE_STORAGE_KEY'
 ]
 
-describe('kdesign/vue', () => {
+describe('benchlight/vue', () => {
   it('exports every component', () => {
-    for (const name of COMPONENTS) expect(kdesign, name).toHaveProperty(name)
+    for (const name of COMPONENTS) expect(benchlight, name).toHaveProperty(name)
   })
 
   it('exports every composable and helper', () => {
-    for (const name of HELPERS) expect(kdesign, name).toHaveProperty(name)
+    for (const name of HELPERS) expect(benchlight, name).toHaveProperty(name)
   })
 
   it('exports nothing unexpected', () => {
-    expect(Object.keys(kdesign).sort()).toEqual([...COMPONENTS, ...HELPERS].sort())
+    expect(Object.keys(benchlight).sort()).toEqual([...COMPONENTS, ...HELPERS].sort())
   })
 })

@@ -1,6 +1,6 @@
 ;(function () {
   var root = document.documentElement
-  var ATTRIBUTE = 'data-kd-appearance'
+  var ATTRIBUTE = 'data-bl-appearance'
 
   function currentMode() {
     return root.getAttribute(ATTRIBUTE) || 'auto'
@@ -12,7 +12,7 @@
       if (input.value === 'auto') root.removeAttribute(ATTRIBUTE)
       else root.setAttribute(ATTRIBUTE, input.value)
       try {
-        localStorage.setItem('kd-appearance', input.value)
+        localStorage.setItem('bl-appearance', input.value)
       } catch {
         // storage unavailable: the choice applies to this page only
       }
@@ -20,7 +20,7 @@
   }
 
   function wireLift(element) {
-    var threshold = parseInt(element.getAttribute('data-kd-lift'), 10)
+    var threshold = parseInt(element.getAttribute('data-bl-lift'), 10)
     if (isNaN(threshold)) threshold = 24
     function update() {
       if (window.scrollY > threshold) element.setAttribute('data-lifted', '')
@@ -31,8 +31,8 @@
   }
 
   function init() {
-    document.querySelectorAll('input[name="kd-appearance"]').forEach(wireSwitch)
-    document.querySelectorAll('[data-kd-lift]').forEach(wireLift)
+    document.querySelectorAll('input[name="bl-appearance"]').forEach(wireSwitch)
+    document.querySelectorAll('[data-bl-lift]').forEach(wireLift)
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init)

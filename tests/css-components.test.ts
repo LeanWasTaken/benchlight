@@ -8,54 +8,54 @@ const read = (name: string) =>
 // Selectors each component must define; states are ARIA or native attributes.
 const REQUIRED: Record<string, string[]> = {
   'site-bar': [
-    '.kd-site-bar[data-lifted]',
-    '.kd-site-bar__brand',
-    ".kd-site-bar__link[aria-current='page']",
-    '.kd-site-bar__navwrap + .kd-site-bar__actions'
+    '.bl-site-bar[data-lifted]',
+    '.bl-site-bar__brand',
+    ".bl-site-bar__link[aria-current='page']",
+    '.bl-site-bar__navwrap + .bl-site-bar__actions'
   ],
-  tabbar: [".kd-tabbar__item[aria-current='page']", 'body:has(.kd-tabbar)'],
-  colophon: ['.kd-colophon__inner', '.kd-colophon__items a:hover'],
-  'skip-link': ['.kd-skip-link:focus'],
+  tabbar: [".bl-tabbar__item[aria-current='page']", 'body:has(.bl-tabbar)'],
+  colophon: ['.bl-colophon__inner', '.bl-colophon__items a:hover'],
+  'skip-link': ['.bl-skip-link:focus'],
   switch: [
-    ".kd-switch__track:has(input[value='light']:checked)::before",
-    ".kd-switch__track:has(input[value='dark']:checked)::before",
-    '.kd-switch__track:has(input:focus-visible)',
-    '.kd-switch__option:has(:checked)',
-    '.kd-switch__option::before'
+    ".bl-switch__track:has(input[value='light']:checked)::before",
+    ".bl-switch__track:has(input[value='dark']:checked)::before",
+    '.bl-switch__track:has(input:focus-visible)',
+    '.bl-switch__option:has(:checked)',
+    '.bl-switch__option::before'
   ],
   segmented: [
-    ".kd-segmented__item[aria-pressed='true']",
-    '.kd-segmented__item[aria-current]',
-    '.kd-segmented__item:has(:checked)',
-    '.kd-segmented--compact .kd-segmented__item',
-    '.kd-segmented__item::before'
+    ".bl-segmented__item[aria-pressed='true']",
+    '.bl-segmented__item[aria-current]',
+    '.bl-segmented__item:has(:checked)',
+    '.bl-segmented--compact .bl-segmented__item',
+    '.bl-segmented__item::before'
   ],
-  btn: ['.kd-btn--secondary', '.kd-btn--danger', '.kd-btn--pill', '.kd-btn:disabled'],
-  field: ['.kd-input:focus-visible', '.kd-select', ".kd-range input[type='range']"],
-  'link-arrow': ['.kd-link-arrow::before', '.kd-link-arrow--quiet'],
-  'spec-panel': ['.kd-spec-row + .kd-spec-row', '.kd-spec-row__value a'],
+  btn: ['.bl-btn--secondary', '.bl-btn--danger', '.bl-btn--pill', '.bl-btn:disabled'],
+  field: ['.bl-input:focus-visible', '.bl-select', ".bl-range input[type='range']"],
+  'link-arrow': ['.bl-link-arrow::before', '.bl-link-arrow--quiet'],
+  'spec-panel': ['.bl-spec-row + .bl-spec-row', '.bl-spec-row__value a'],
   telemetry: [
-    '.kd-ruler',
-    'var(--kd-telemetry-columns, none)',
-    '.kd-telemetry__cell + .kd-telemetry__cell'
+    '.bl-ruler',
+    'var(--bl-telemetry-columns, none)',
+    '.bl-telemetry__cell + .bl-telemetry__cell'
   ],
-  led: ['.kd-led--on', '.kd-led--danger'],
-  eq: ['@keyframes kd-eq', '.kd-eq--active .kd-eq__bar'],
-  marquee: ['@property --kd-mask-l', '.kd-marquee[data-overflowing]'],
-  readout: ['.kd-readout__value'],
-  meter: ['calc(var(--kd-meter-value, 0) * 100%)'],
-  msg: ['.kd-msg--ok::before', '.kd-msg--err', '.kd-msg--info'],
-  log: ['.kd-ansi-31', '.kd-ansi-97', 'var(--kd-log-height, 200px)'],
-  'section-head': ['.kd-section-head--ruled', '.kd-section-head--bar', '.kd-section-head__action'],
-  meta: ['.kd-meta__sep', '.kd-meta__key'],
+  led: ['.bl-led--on', '.bl-led--danger'],
+  eq: ['@keyframes bl-eq', '.bl-eq--active .bl-eq__bar'],
+  marquee: ['@property --bl-mask-l', '.bl-marquee[data-overflowing]'],
+  readout: ['.bl-readout__value'],
+  meter: ['calc(var(--bl-meter-value, 0) * 100%)'],
+  msg: ['.bl-msg--ok::before', '.bl-msg--err', '.bl-msg--info'],
+  log: ['.bl-ansi-31', '.bl-ansi-97', 'var(--bl-log-height, 200px)'],
+  'section-head': ['.bl-section-head--ruled', '.bl-section-head--bar', '.bl-section-head__action'],
+  meta: ['.bl-meta__sep', '.bl-meta__key'],
   'index-row': [
-    '.kd-index--grid',
-    ".kd-index-row[aria-current='true']",
-    '.kd-index-row--compact .kd-index-row__title',
-    '.kd-index-row:has(> .kd-index-row__icon)'
+    '.bl-index--grid',
+    ".bl-index-row[aria-current='true']",
+    '.bl-index-row--compact .bl-index-row__title',
+    '.bl-index-row:has(> .bl-index-row__icon)'
   ],
-  'prev-next': ['.kd-prev-next__link--next', '.kd-prev-next__link:hover .kd-prev-next__title'],
-  prose: ['counter(kd-section, decimal-leading-zero)', '.kd-prose :not(pre) > code']
+  'prev-next': ['.bl-prev-next__link--next', '.bl-prev-next__link:hover .bl-prev-next__title'],
+  prose: ['counter(bl-section, decimal-leading-zero)', '.bl-prose :not(pre) > code']
 }
 
 describe.each(Object.entries(REQUIRED))('css/components/%s.css', (name, selectors) => {
@@ -71,9 +71,9 @@ describe('touch targets', () => {
 })
 
 describe('text on tints (spec §4.1)', () => {
-  it('kd-msg--ok uses ink-1 text and carries phosphor in the LED mark', () => {
+  it('bl-msg--ok uses ink-1 text and carries phosphor in the LED mark', () => {
     const css = read('msg')
-    expect(css).toMatch(/\.kd-msg--ok\s*\{[^}]*color:\s*var\(--kd-ink-1\)/)
-    expect(css).toMatch(/\.kd-msg--ok::before\s*\{[^}]*background:\s*var\(--kd-phosphor\)/)
+    expect(css).toMatch(/\.bl-msg--ok\s*\{[^}]*color:\s*var\(--bl-ink-1\)/)
+    expect(css).toMatch(/\.bl-msg--ok::before\s*\{[^}]*background:\s*var\(--bl-phosphor\)/)
   })
 })

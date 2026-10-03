@@ -1,4 +1,4 @@
-# kdesign
+# Benchlight
 
 Benchlight, the design system for my personal web projects. Not for client work.
 
@@ -9,17 +9,17 @@ classes.
 ## Install
 
 ```json
-"kdesign": "git+ssh://git@github.com/LeanWasTaken/kdesign.git#v0.1.0"
+"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.1.0"
 ```
 
 The repo is private and the URL uses SSH on purpose: bun turns GitHub https URLs into API tarball
 downloads that cannot authenticate to a private repo. Locally, plain SSH access to GitHub is enough.
-In GitHub Actions, add a fine-grained token (repository `kdesign` only, Contents: read-only) as the
-secret `KDESIGN_TOKEN`, and before `bun install`:
+In GitHub Actions, add a fine-grained token (repository `benchlight` only, Contents: read-only) as the
+secret `BENCHLIGHT_TOKEN`, and before `bun install`:
 
 ```sh
-git config --global url."https://x-access-token:${KDESIGN_TOKEN}@github.com/LeanWasTaken/kdesign".insteadOf "ssh://git@github.com/LeanWasTaken/kdesign"
-git config --global --add url."https://x-access-token:${KDESIGN_TOKEN}@github.com/LeanWasTaken/kdesign".insteadOf "git@github.com:LeanWasTaken/kdesign"
+git config --global url."https://x-access-token:${BENCHLIGHT_TOKEN}@github.com/LeanWasTaken/benchlight".insteadOf "ssh://git@github.com/LeanWasTaken/benchlight"
+git config --global --add url."https://x-access-token:${BENCHLIGHT_TOKEN}@github.com/LeanWasTaken/benchlight".insteadOf "git@github.com:LeanWasTaken/benchlight"
 ```
 
 ## Nuxt
@@ -27,20 +27,20 @@ git config --global --add url."https://x-access-token:${KDESIGN_TOKEN}@github.co
 ```ts
 // nuxt.config.ts
 export default defineNuxtConfig({
-  modules: ['kdesign/nuxt'],
-  app: { pageTransition: { name: 'kd-page', mode: 'out-in' } }
+  modules: ['benchlight/nuxt'],
+  app: { pageTransition: { name: 'bl-page', mode: 'out-in' } }
 })
 ```
 
 ```css
 /* app/assets/main.css, with @tailwindcss/vite */
 @import 'tailwindcss';
-@import 'kdesign/tailwind/theme.css';
+@import 'benchlight/tailwind/theme.css';
 ```
 
-The module adds the fonts and component CSS, the no-flash appearance script, auto-imported `Kd*`
+The module adds the fonts and component CSS, the no-flash appearance script, auto-imported `Bl*`
 components and composables (`useAppearance`, `useScrollLifted`, `useReducedMotion`, `useMarquee`,
-`riseDelay`, `ansiToSegments`). `kdesign: { fonts: false }` skips the bundled fonts. `KdSiteBar`
+`riseDelay`, `ansiToSegments`). `benchlight: { fonts: false }` skips the bundled fonts. `BlSiteBar`
 wraps its nav in a `<nav>` landmark labelled by `navLabel` (default `Primary`).
 
 ```vue
@@ -50,16 +50,16 @@ wraps its nav in a `<nav>` landmark labelled by `navLabel` (default `Primary`).
 </script>
 
 <template>
-  <KdSkipLink />
-  <KdSiteBar>
-    <template #brand><NuxtLink to="/" class="kd-site-bar__brand">MY SITE</NuxtLink></template>
+  <BlSkipLink />
+  <BlSiteBar>
+    <template #brand><NuxtLink to="/" class="bl-site-bar__brand">MY SITE</NuxtLink></template>
     <template #nav>
-      <KdNavLink :as="NuxtLink" to="/projects" :current="isActive('/projects')">Projects</KdNavLink>
+      <BlNavLink :as="NuxtLink" to="/projects" :current="isActive('/projects')">Projects</BlNavLink>
     </template>
-    <template #actions><KdAppearanceSwitch /></template>
-  </KdSiteBar>
-  <main id="main-content" class="kd-col"><slot /></main>
-  <KdColophon :items="['© 2026 Your name']" />
+    <template #actions><BlAppearanceSwitch /></template>
+  </BlSiteBar>
+  <main id="main-content" class="bl-col"><slot /></main>
+  <BlColophon :items="['© 2026 Your name']" />
 </template>
 ```
 
@@ -68,25 +68,25 @@ wraps its nav in a `<nav>` landmark labelled by `navLabel` (default `Primary`).
 ```ts
 // vite.config.ts
 import vue from '@vitejs/plugin-vue'
-import { kdesign } from 'kdesign/vite'
+import { benchlight } from 'benchlight/vite'
 import { defineConfig } from 'vite'
-export default defineConfig({ plugins: [vue(), kdesign()] })
+export default defineConfig({ plugins: [vue(), benchlight()] })
 ```
 
 ```ts
 // main.ts
-import 'kdesign/css/fonts.css'
-import 'kdesign/css/index.css'
-import { KdButton } from 'kdesign/vue'
+import 'benchlight/css/fonts.css'
+import 'benchlight/css/index.css'
+import { BlButton } from 'benchlight/vue'
 ```
 
-`kdesign()` inlines the no-flash appearance script and keeps the shipped `.vue` source out of
+`benchlight()` inlines the no-flash appearance script and keeps the shipped `.vue` source out of
 dependency pre-bundling.
 
 ## Static pages (no build step)
 
 - Inline `js/prepaint.js` in `<head>` and `js/appearance.js` before `</body>`.
-- Link or inline `dist/kdesign.min.css`, or only the `dist/modules/<module>.min.css` files a page uses
+- Link or inline `dist/benchlight.min.css`, or only the `dist/modules/<module>.min.css` files a page uses
   (`tokens` always first), plus `dist/fonts.min.css`.
 - For size-critical pages, build a custom file: `bun scripts/bundle.ts --modules tokens,base,type,btn --inline-static --out page.min.css`
   (short non-colour tokens become literals; the output is self-contained).
@@ -95,23 +95,23 @@ dependency pre-bundling.
 
 ## Conventions
 
-- Everything global is prefixed: `.kd-*`, `--kd-*`, `kd-*` keyframes, `Kd*` components.
+- Everything global is prefixed: `.bl-*`, `--bl-*`, `bl-*` keyframes, `Bl*` components.
 - Library CSS lives in `@layer base` / `@layer components`; utilities and your own CSS win without
   `!important`.
 - States are ARIA or native attributes (`aria-current`, `aria-pressed`, `:checked`, `:disabled`);
   selected rows use `aria-current="true"`. Only `data-lifted` and `data-overflowing` are script-set.
-- Appearance: `data-kd-appearance="light|dark"` on `<html>` (absent = auto), stored as
-  `localStorage['kd-appearance']`.
+- Appearance: `data-bl-appearance="light|dark"` on `<html>` (absent = auto), stored as
+  `localStorage['bl-appearance']`.
 - Text on a tint is `ink-1`, `trace` or `danger`; copper and phosphor are marks only there.
 
 ## Tokens in JS
 
 ```ts
-import { tokens } from 'kdesign/tokens'
+import { tokens } from 'benchlight/tokens'
 tokens.color.dark.canvas // '#101214', e.g. for OG images that cannot read CSS variables
 ```
 
-`kdesign/tokens` resolves at runtime to `dist/tokens.js`, because Nuxt's server bundler cannot compile
+`benchlight/tokens` resolves at runtime to `dist/tokens.js`, because Nuxt's server bundler cannot compile
 TypeScript from `node_modules`. Types still come from `tokens/index.ts`.
 
 ## Development

@@ -11,11 +11,11 @@ test('a saved choice opposite to the OS survives a reload', async ({ page }, tes
   await page.goto('/')
   await page.getByRole('radio', { name: opposite }).check({ force: true })
   const html = page.locator('html')
-  await expect(html).toHaveAttribute('data-kd-appearance', opposite.toLowerCase())
+  await expect(html).toHaveAttribute('data-bl-appearance', opposite.toLowerCase())
   // Block the app bundle so only the inline prepaint script can apply the choice.
   await page.route(/\/assets\/.*\.js$/, (route) => route.abort())
   await page.reload()
-  await expect(html).toHaveAttribute('data-kd-appearance', opposite.toLowerCase())
+  await expect(html).toHaveAttribute('data-bl-appearance', opposite.toLowerCase())
   const canvas = await page.evaluate(() => getComputedStyle(document.body).backgroundColor)
   expect(canvas).toBe(opposite === 'Dark' ? 'rgb(16, 18, 20)' : 'rgb(239, 241, 243)')
 })
@@ -24,7 +24,7 @@ test('the tab bar is pinned to the viewport bottom on mobile and hidden on deskt
   page
 }, testInfo) => {
   await page.goto('/')
-  const tabbar = page.locator('.kd-tabbar')
+  const tabbar = page.locator('.bl-tabbar')
   if (testInfo.project.name.startsWith('mobile')) {
     await expect(tabbar).toBeVisible()
     const box = await tabbar.boundingBox()

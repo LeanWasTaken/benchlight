@@ -1,37 +1,37 @@
 @layer components {
-  .kd-section-head {
+  .bl-section-head {
     margin-bottom: 20px;
   }
-  .kd-section-head__eyebrow {
+  .bl-section-head__eyebrow {
     display: block;
     margin: 0 0 4px;
   }
-  .kd-section-head__heading {
+  .bl-section-head__heading {
     margin: 0;
-    font-size: var(--kd-text-heading);
+    font-size: var(--bl-text-heading);
     font-weight: 600;
-    line-height: var(--kd-leading-heading);
-    letter-spacing: var(--kd-tracking-heading);
-    color: var(--kd-ink-1);
+    line-height: var(--bl-leading-heading);
+    letter-spacing: var(--bl-tracking-heading);
+    color: var(--bl-ink-1);
   }
-  .kd-section-head--ruled {
+  .bl-section-head--ruled {
     margin-bottom: 24px;
     padding-bottom: 20px;
-    border-bottom: 1px solid var(--kd-separator);
+    border-bottom: 1px solid var(--bl-separator);
   }
-  .kd-section-head--bar {
+  .bl-section-head--bar {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
     gap: 16px;
     margin-bottom: 0;
     padding-bottom: 10px;
-    border-bottom: 1px solid var(--kd-separator);
+    border-bottom: 1px solid var(--bl-separator);
   }
-  .kd-section-head--bar .kd-section-head__eyebrow {
+  .bl-section-head--bar .bl-section-head__eyebrow {
     margin: 0;
   }
-  .kd-section-head__action {
+  .bl-section-head__action {
     flex-shrink: 0;
   }
 }

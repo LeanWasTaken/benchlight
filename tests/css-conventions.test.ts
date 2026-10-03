@@ -40,14 +40,14 @@ describe.each(layered)('%s', (file) => {
     ).not.toThrow()
   })
 
-  it('prefixes every class with kd-', () => {
-    for (const name of classNames(css)) expect(name).toMatch(/^kd-/)
+  it('prefixes every class with bl-', () => {
+    for (const name of classNames(css)) expect(name).toMatch(/^bl-/)
   })
 
-  it('prefixes every custom property, keyframe and @property with kd', () => {
-    for (const name of customPropertyDeclarations(css)) expect(name).toMatch(/^--kd-/)
-    for (const name of keyframeNames(css)) expect(name).toMatch(/^kd-/)
-    for (const name of propertyNames(css)) expect(name).toMatch(/^--kd-/)
+  it('prefixes every custom property, keyframe and @property with bl', () => {
+    for (const name of customPropertyDeclarations(css)) expect(name).toMatch(/^--bl-/)
+    for (const name of keyframeNames(css)) expect(name).toMatch(/^bl-/)
+    for (const name of propertyNames(css)) expect(name).toMatch(/^--bl-/)
   })
 
   it('keeps every rule inside a cascade layer', () => {

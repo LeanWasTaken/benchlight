@@ -6,7 +6,7 @@ const code = readFileSync(join(process.cwd(), 'js/appearance.js'), 'utf8')
 const run = () => new Function(code)()
 const root = document.documentElement
 const radio = (value: string) =>
-  document.querySelector<HTMLInputElement>(`input[name="kd-appearance"][value="${value}"]`)!
+  document.querySelector<HTMLInputElement>(`input[name="bl-appearance"][value="${value}"]`)!
 
 function choose(value: string): void {
   radio(value).checked = true
@@ -21,14 +21,14 @@ function scrollTo(y: number): void {
 describe('js/appearance.js', () => {
   beforeEach(() => {
     localStorage.clear()
-    root.removeAttribute('data-kd-appearance')
+    root.removeAttribute('data-bl-appearance')
     scrollTo(0)
     Object.defineProperty(document, 'readyState', { value: 'complete', configurable: true })
     document.body.innerHTML = `
-      <header class="kd-site-bar" data-kd-lift="40"></header>
-      <input type="radio" name="kd-appearance" value="auto">
-      <input type="radio" name="kd-appearance" value="light">
-      <input type="radio" name="kd-appearance" value="dark">`
+      <header class="bl-site-bar" data-bl-lift="40"></header>
+      <input type="radio" name="bl-appearance" value="auto">
+      <input type="radio" name="bl-appearance" value="light">
+      <input type="radio" name="bl-appearance" value="dark">`
   })
   afterEach(() => vi.restoreAllMocks())
 
@@ -38,7 +38,7 @@ describe('js/appearance.js', () => {
   })
 
   it('checks the stamped mode', () => {
-    root.setAttribute('data-kd-appearance', 'dark')
+    root.setAttribute('data-bl-appearance', 'dark')
     run()
     expect(radio('dark').checked).toBe(true)
   })
@@ -46,16 +46,16 @@ describe('js/appearance.js', () => {
   it('applies and persists a choice', () => {
     run()
     choose('light')
-    expect(root.getAttribute('data-kd-appearance')).toBe('light')
-    expect(localStorage.getItem('kd-appearance')).toBe('light')
+    expect(root.getAttribute('data-bl-appearance')).toBe('light')
+    expect(localStorage.getItem('bl-appearance')).toBe('light')
   })
 
   it('returns to auto by removing the attribute', () => {
-    root.setAttribute('data-kd-appearance', 'dark')
+    root.setAttribute('data-bl-appearance', 'dark')
     run()
     choose('auto')
-    expect(root.hasAttribute('data-kd-appearance')).toBe(false)
-    expect(localStorage.getItem('kd-appearance')).toBe('auto')
+    expect(root.hasAttribute('data-bl-appearance')).toBe(false)
+    expect(localStorage.getItem('bl-appearance')).toBe('auto')
   })
 
   it('keeps switching when storage throws', () => {
@@ -70,16 +70,16 @@ describe('js/appearance.js', () => {
     })
     run()
     choose('dark')
-    expect(root.getAttribute('data-kd-appearance')).toBe('dark')
+    expect(root.getAttribute('data-bl-appearance')).toBe('dark')
     choose('light')
-    expect(root.getAttribute('data-kd-appearance')).toBe('light')
+    expect(root.getAttribute('data-bl-appearance')).toBe('light')
     window.removeEventListener('error', onError)
     expect(setItem).toHaveBeenCalled()
     expect(errors).toEqual([])
     expect(consoleError).not.toHaveBeenCalled()
   })
 
-  it('lifts [data-kd-lift] past its threshold and drops it back', () => {
+  it('lifts [data-bl-lift] past its threshold and drops it back', () => {
     run()
     const header = document.querySelector('header')!
     scrollTo(30)
@@ -94,7 +94,7 @@ describe('js/appearance.js', () => {
 
   it('defaults the lift threshold to 24px', () => {
     const header = document.querySelector('header')!
-    header.setAttribute('data-kd-lift', '')
+    header.setAttribute('data-bl-lift', '')
     run()
     scrollTo(24)
     expect(header.hasAttribute('data-lifted')).toBe(false)

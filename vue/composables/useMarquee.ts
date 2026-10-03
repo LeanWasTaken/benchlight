@@ -56,10 +56,10 @@ export function useMarquee(
       ),
       box.animate(
         [
-          { '--kd-mask-l': '0%', '--kd-mask-r': '88%', offset: 0 },
-          { '--kd-mask-l': '0%', '--kd-mask-r': '88%', offset: pause },
-          { '--kd-mask-l': '12%', '--kd-mask-r': '100%', offset: 1 - pause },
-          { '--kd-mask-l': '12%', '--kd-mask-r': '100%', offset: 1 }
+          { '--bl-mask-l': '0%', '--bl-mask-r': '88%', offset: 0 },
+          { '--bl-mask-l': '0%', '--bl-mask-r': '88%', offset: pause },
+          { '--bl-mask-l': '12%', '--bl-mask-r': '100%', offset: 1 - pause },
+          { '--bl-mask-l': '12%', '--bl-mask-r': '100%', offset: 1 }
         ] as unknown as Keyframe[],
         timing
       )

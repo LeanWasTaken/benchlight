@@ -1,3 +1,3 @@
 import type { Plugin } from 'vite'
 
-export declare function kdesign(): Plugin
+export declare function benchlight(): Plugin

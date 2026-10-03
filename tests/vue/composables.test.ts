@@ -9,12 +9,12 @@ import { useScrollLifted } from '../../vue/composables/useScrollLifted'
 import { DARK_QUERY, mockMatchMedia, REDUCED_QUERY, withSetup } from '../helpers/vue'
 
 const root = document.documentElement
-const attribute = () => root.getAttribute('data-kd-appearance')
+const attribute = () => root.getAttribute('data-bl-appearance')
 
 beforeEach(() => {
   resetAppearanceState()
   localStorage.clear()
-  root.removeAttribute('data-kd-appearance')
+  root.removeAttribute('data-bl-appearance')
   mockMatchMedia()
 })
 afterEach(() => vi.restoreAllMocks())
@@ -28,7 +28,7 @@ describe('useAppearance', () => {
   })
 
   it('adopts the attribute stamped by prepaint', () => {
-    root.setAttribute('data-kd-appearance', 'light')
+    root.setAttribute('data-bl-appearance', 'light')
     mockMatchMedia({ [DARK_QUERY]: true })
     const { result } = withSetup(useAppearance)
     expect(result.mode.value).toBe('light')
@@ -36,14 +36,14 @@ describe('useAppearance', () => {
   })
 
   it('falls back to storage and applies it when prepaint did not run', () => {
-    localStorage.setItem('kd-appearance', 'dark')
+    localStorage.setItem('bl-appearance', 'dark')
     const { result } = withSetup(useAppearance)
     expect(result.mode.value).toBe('dark')
     expect(attribute()).toBe('dark')
   })
 
   it('treats junk in storage as auto', () => {
-    localStorage.setItem('kd-appearance', 'blue')
+    localStorage.setItem('bl-appearance', 'blue')
     const { result } = withSetup(useAppearance)
     expect(result.mode.value).toBe('auto')
     expect(attribute()).toBeNull()
@@ -54,12 +54,12 @@ describe('useAppearance', () => {
     result.mode.value = 'dark'
     await nextTick()
     expect(attribute()).toBe('dark')
-    expect(localStorage.getItem('kd-appearance')).toBe('dark')
+    expect(localStorage.getItem('bl-appearance')).toBe('dark')
     expect(result.resolved.value).toBe('dark')
     result.mode.value = 'auto'
     await nextTick()
     expect(attribute()).toBeNull()
-    expect(localStorage.getItem('kd-appearance')).toBe('auto')
+    expect(localStorage.getItem('bl-appearance')).toBe('auto')
   })
 
   it('tracks OS changes while on auto', () => {
@@ -253,16 +253,16 @@ describe('useMarquee cleanup', () => {
 
 describe('riseDelay', () => {
   it('steps by 60ms from zero by default', () => {
-    expect(riseDelay(0)).toEqual({ '--kd-rise-delay': '0ms' })
-    expect(riseDelay(2)).toEqual({ '--kd-rise-delay': '120ms' })
+    expect(riseDelay(0)).toEqual({ '--bl-rise-delay': '0ms' })
+    expect(riseDelay(2)).toEqual({ '--bl-rise-delay': '120ms' })
   })
 
   it('supports a base, a custom step and a cap', () => {
-    expect(riseDelay(3, { base: 240, step: 70 })).toEqual({ '--kd-rise-delay': '450ms' })
-    expect(riseDelay(10, { base: 240, step: 70, cap: 6 })).toEqual({ '--kd-rise-delay': '660ms' })
+    expect(riseDelay(3, { base: 240, step: 70 })).toEqual({ '--bl-rise-delay': '450ms' })
+    expect(riseDelay(10, { base: 240, step: 70, cap: 6 })).toEqual({ '--bl-rise-delay': '660ms' })
   })
 
   it('never goes below the base', () => {
-    expect(riseDelay(-3, { base: 100 })).toEqual({ '--kd-rise-delay': '100ms' })
+    expect(riseDelay(-3, { base: 100 })).toEqual({ '--bl-rise-delay': '100ms' })
   })
 })
