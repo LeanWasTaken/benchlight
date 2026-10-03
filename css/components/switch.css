@@ -35,6 +35,25 @@
   .bl-switch__track:has(input[value='dark']:checked)::before {
     transform: translateX(88px);
   }
+  /* Before the component mounts the radios may not match the saved choice yet (server markup is
+     "auto"), so the thumb and active label follow the root attribute until it is ready. */
+  :root[data-bl-appearance='light'] .bl-switch:not([data-ready]) .bl-switch__track::before {
+    transform: translateX(44px);
+  }
+  :root[data-bl-appearance='dark'] .bl-switch:not([data-ready]) .bl-switch__track::before {
+    transform: translateX(88px);
+  }
+  :root[data-bl-appearance] .bl-switch:not([data-ready]) .bl-switch__option {
+    color: var(--bl-ink-3);
+  }
+  :root[data-bl-appearance='light']
+    .bl-switch:not([data-ready])
+    .bl-switch__option:has(input[value='light']),
+  :root[data-bl-appearance='dark']
+    .bl-switch:not([data-ready])
+    .bl-switch__option:has(input[value='dark']) {
+    color: var(--bl-ink-1);
+  }
   .bl-switch__track:has(input:focus-visible) {
     outline: 2px solid var(--bl-trace);
     outline-offset: 2px;

@@ -15,13 +15,11 @@
 </template>
 
 <script setup lang="ts">
-  import { computed } from 'vue'
   import { useScrollLifted } from '../composables/useScrollLifted'
 
   const props = withDefaults(defineProps<{ lift?: number | false; navLabel?: string }>(), {
     lift: 24,
     navLabel: 'Primary'
   })
-  const scrolled = useScrollLifted(props.lift === false ? Infinity : props.lift)
-  const lifted = computed(() => props.lift !== false && scrolled.value)
+  const lifted = useScrollLifted(() => props.lift)
 </script>

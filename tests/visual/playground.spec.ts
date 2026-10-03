@@ -45,3 +45,49 @@ test('the tab bar is pinned to the viewport bottom on mobile and hidden on deskt
     await expect(tabbar).not.toBeVisible()
   }
 })
+
+test.describe('appearance switch on a reload with a saved choice', () => {
+  // Motion is reduced project-wide; this check is about the transition, so allow it.
+  test.use({ reducedMotion: 'no-preference' })
+
+  test('settles on the saved choice without animating, and holds it until ready', async ({
+    page
+  }, testInfo) => {
+    const saved = testInfo.project.name.endsWith('dark') ? 'light' : 'dark'
+    const thumb = (selector: string) =>
+      page.evaluate((sel) => {
+        const style = getComputedStyle(document.querySelector(sel)!, '::before')
+        return { transform: style.transform }
+      }, selector)
+
+    await page.addInitScript((value) => localStorage.setItem('bl-appearance', value), saved)
+    await page.addInitScript(() => {
+      const runs: string[] = []
+      ;(window as unknown as { __thumbRuns: string[] }).__thumbRuns = runs
+      document.addEventListener(
+        'transitionrun',
+        (event) => {
+          if ((event.target as Element).closest('.bl-switch__track')) runs.push(event.propertyName)
+        },
+        true
+      )
+    })
+
+    const final = saved === 'dark' ? 'matrix(1, 0, 0, 1, 88, 0)' : 'matrix(1, 0, 0, 1, 44, 0)'
+
+    // With the app running, the thumb settles on the same spot and never transitions there.
+    await page.goto('/')
+    await expect(page.locator('.bl-switch').first()).toHaveAttribute('data-ready', '')
+    expect((await thumb('.bl-switch__track')).transform).toBe(final)
+    expect(
+      await page.evaluate(() => (window as unknown as { __thumbRuns: string[] }).__thumbRuns)
+    ).toEqual([])
+
+    // Before the component reports ready the thumb follows the root attribute, not the radios.
+    await page.evaluate(() => {
+      document.querySelector<HTMLInputElement>('.bl-switch input[value="auto"]')!.checked = true
+      document.querySelector('.bl-switch')!.removeAttribute('data-ready')
+    })
+    expect((await thumb('.bl-switch__track')).transform).toBe(final)
+  })
+})

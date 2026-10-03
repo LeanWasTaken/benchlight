@@ -139,6 +139,13 @@ describe('BlPrevNext', () => {
   })
 })
 
+describe('BlPrevNext empty', () => {
+  it('renders no landmark without neighbours', () => {
+    expect(mount(BlPrevNext).find('nav').exists()).toBe(false)
+    expect(mount(BlPrevNext, { props: { prev: null, next: null } }).html()).not.toContain('<nav')
+  })
+})
+
 describe('BlProse', () => {
   it('wraps content in bl-prose with a configurable tag', () => {
     const wrapper = mount(BlProse, { props: { as: 'article' }, slots: { default: '<h2>Why</h2>' } })

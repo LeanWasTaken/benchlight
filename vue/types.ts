@@ -1,7 +1,8 @@
 import type { Component, InjectionKey, Ref } from 'vue'
 
 export type LinkAs = string | Component
-export type LinkTo = string | Record<string, unknown>
+// `object`, not an index-signature record: router location types are interfaces, which lack one.
+export type LinkTo = string | object
 
 /**
  * Link props shared by every link-rendering component.

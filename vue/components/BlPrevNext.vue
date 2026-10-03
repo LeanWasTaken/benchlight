@@ -1,5 +1,5 @@
 <template>
-  <nav class="bl-prev-next" :aria-label="text.nav">
+  <nav v-if="prev || next" class="bl-prev-next" :aria-label="text.nav">
     <component
       :is="as"
       v-if="prev"

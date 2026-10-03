@@ -204,6 +204,30 @@ describe('BlLog', () => {
     wrapper.unmount()
   })
 
+  it('reuses row elements for surviving lines when offset tracks a shifted buffer', async () => {
+    const wrapper = mount(BlLog, { props: { lines: ['a', 'b', 'c'], offset: 0 } })
+    const before = wrapper.findAll('span').map((span) => span.element)
+    await wrapper.setProps({ lines: ['b', 'c', 'd'], offset: 1 })
+    const after = wrapper.findAll('span').map((span) => span.element)
+    expect(wrapper.text()).toBe('b\nc\nd')
+    expect(after[0]).toBe(before[1])
+    expect(after[1]).toBe(before[2])
+  })
+
+  it('keys rows by position when no offset is given', async () => {
+    const wrapper = mount(BlLog, { props: { lines: ['a', 'b'] } })
+    const first = wrapper.find('span').element
+    await wrapper.setProps({ lines: ['b', 'c'] })
+    expect(wrapper.find('span').element).toBe(first)
+  })
+
+  it('renders uncoloured segments without an empty class attribute', () => {
+    const wrapper = mount(BlLog, { props: { lines: ['plain', '\x1b[0;31mred\x1b[0m'] } })
+    const [plain, red] = wrapper.findAll('span')
+    expect(plain!.attributes('class')).toBeUndefined()
+    expect(red!.classes()).toContain('bl-ansi-31')
+  })
+
   it('is a focusable, labelled log without a redundant live region', () => {
     const wrapper = mount(BlLog, { props: { lines: ['a'] } })
     expect(wrapper.attributes('tabindex')).toBe('0')
