@@ -41,10 +41,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - name: Route the benchlight repo through the read-only token
+      - name: Load the read-only deploy key
         env:
-          BENCHLIGHT_TOKEN: ${{ secrets.BENCHLIGHT_TOKEN }}
+          BENCHLIGHT_DEPLOY_KEY: ${{ secrets.BENCHLIGHT_DEPLOY_KEY }}
         run: |
-          git config --global url."https://x-access-token:${BENCHLIGHT_TOKEN}@github.com/LeanWasTaken/benchlight".insteadOf "ssh://git@github.com/LeanWasTaken/benchlight"
-          git config --global --add url."https://x-access-token:${BENCHLIGHT_TOKEN}@github.com/LeanWasTaken/benchlight".insteadOf "git@github.com:LeanWasTaken/benchlight"
+          mkdir -p ~/.ssh
+          printf '%s\n' "$BENCHLIGHT_DEPLOY_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          echo "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl" >> ~/.ssh/known_hosts
       - run: bun scripts/git-install-check.ts "git+ssh://git@github.com/LeanWasTaken/benchlight.git#${GITHUB_SHA}"
