@@ -602,6 +602,7 @@ Exposed: none
 
 ## Tailwind theme variables
 - `--color-canvas`
+- `--color-control-border`
 - `--color-copper`
 - `--color-danger`
 - `--color-ink-1`

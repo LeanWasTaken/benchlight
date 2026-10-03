@@ -13,6 +13,8 @@
     position: relative;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    min-width: 40px;
     padding: 6px 12px;
     background: transparent;
     border: 0;
@@ -47,11 +49,26 @@
   .bl-segmented__item:has(:checked) {
     background: var(--bl-raised);
     color: var(--bl-ink-1);
-    box-shadow: var(--bl-shadow-thumb);
+    box-shadow:
+      var(--bl-shadow-thumb),
+      inset 0 0 0 1px var(--bl-control-border);
+  }
+  .bl-segmented__item:has(input:focus-visible) {
+    outline: 2px solid var(--bl-trace);
+    outline-offset: 2px;
   }
   .bl-segmented__item input {
     position: absolute;
     opacity: 0;
     pointer-events: none;
+  }
+  @media (forced-colors: active) {
+    .bl-segmented__item[aria-pressed='true'],
+    .bl-segmented__item[aria-current],
+    .bl-segmented__item:has(:checked) {
+      forced-color-adjust: none;
+      background: Highlight;
+      color: HighlightText;
+    }
   }
 }

@@ -35,4 +35,11 @@
     background: color-mix(in srgb, var(--bl-trace) 10%, transparent);
     color: var(--bl-trace);
   }
+  @media (forced-colors: active) {
+    .bl-msg--ok::before {
+      forced-color-adjust: none;
+      background: Highlight;
+      box-shadow: none;
+    }
+  }
 }

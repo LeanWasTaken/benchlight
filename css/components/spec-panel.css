@@ -34,7 +34,7 @@
     text-underline-offset: 3px;
   }
   .bl-spec-row__value a:hover {
-    opacity: 0.8;
+    text-decoration-thickness: 2px;
   }
   @media (max-width: 480px) {
     .bl-spec-row {

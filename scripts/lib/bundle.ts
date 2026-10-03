@@ -5,8 +5,9 @@ import { tokens } from '../../tokens/tokens'
 import { MODULES, type ModuleName } from './modules'
 import { staticVars } from './render-tokens'
 
-// The source's browser floor, set by color-mix() and :has().
-const TARGETS = { safari: (16 << 16) | (2 << 8), chrome: 111 << 16, firefox: 113 << 16 }
+// The source's browser floor: color-mix() sets Chrome 111 and Safari 16.2, :has() sets Firefox 121.
+// The marquee's @property needs Firefox 128; older Firefox skips it and the mask just does not animate.
+const TARGETS = { safari: (16 << 16) | (2 << 8), chrome: 111 << 16, firefox: 121 << 16 }
 
 export function minifyCss(code: string, filename: string): string {
   const result = transform({
@@ -14,7 +15,8 @@ export function minifyCss(code: string, filename: string): string {
     code: Buffer.from(code),
     minify: true,
     targets: TARGETS,
-    exclude: Features.VendorPrefixes
+    // light-dark() is never used, so its --lightningcss-* fallback helpers would be dead weight.
+    exclude: Features.VendorPrefixes | Features.LightDark
   })
   return Buffer.from(result.code).toString('utf8')
 }
