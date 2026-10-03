@@ -14,7 +14,8 @@
     "vue",
     "nuxt",
     "vite",
-    "dist"
+    "dist",
+    "API.md"
   ],
   "exports": {
     "./tokens": {
@@ -45,7 +46,8 @@
     "gen": "bun scripts/gen-tokens.ts && bun run gen:js",
     "gen:js": "bun build ./tokens/index.ts --outfile dist/tokens.js --format esm",
     "bundle": "bun scripts/bundle.ts",
-    "build": "bun run gen && bun run bundle",
+    "build": "bun run gen && bun run bundle && bun run gen:api",
+    "gen:api": "bun scripts/gen-api.ts",
     "fixtures": "bun scripts/fixtures.ts",
     "playground": "vite playground",
     "test:visual": "playwright test"
@@ -97,6 +99,7 @@
     "vite": "^7.3.0",
     "vitest": "^5.0.3",
     "vue": "^3.5.0",
+    "vue-component-meta": "^3.3.12",
     "vue-tsc": "^3.3.12"
   }
 }
