@@ -5,8 +5,11 @@ import { tokens } from '../../tokens/tokens'
 import { MODULES, type ModuleName } from './modules'
 import { staticVars } from './render-tokens'
 
+// The source's browser floor, set by color-mix() and :has().
+const TARGETS = { safari: (16 << 16) | (2 << 8), chrome: 111 << 16, firefox: 113 << 16 }
+
 export function minifyCss(code: string, filename: string): string {
-  const result = transform({ filename, code: Buffer.from(code), minify: true })
+  const result = transform({ filename, code: Buffer.from(code), minify: true, targets: TARGETS })
   return Buffer.from(result.code).toString('utf8')
 }
 

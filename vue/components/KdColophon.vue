@@ -1,11 +1,11 @@
 <template>
   <footer class="kd-colophon">
     <div class="kd-col kd-colophon__inner">
-      <p class="kd-colophon__items">
+      <div class="kd-colophon__items">
         <slot>
           <span v-for="item in items" :key="item">{{ item }}</span>
         </slot>
-      </p>
+      </div>
       <slot name="actions" />
     </div>
   </footer>

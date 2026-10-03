@@ -120,6 +120,7 @@ describe('KdColophon and KdSkipLink', () => {
       props: { items: ['© 2026 Krists', 'Rev abc'] },
       slots: { actions: '<span class="act">EN</span>' }
     })
+    expect(wrapper.find('.kd-colophon__items').element.tagName).toBe('DIV')
     expect(wrapper.findAll('.kd-colophon__items > span').map((s) => s.text())).toEqual([
       '© 2026 Krists',
       'Rev abc'

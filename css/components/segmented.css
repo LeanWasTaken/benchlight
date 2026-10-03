@@ -26,6 +26,12 @@
       color var(--kd-duration-fast) ease,
       background-color var(--kd-duration-fast) ease;
   }
+  /* Invisible hit area: ~29px item + 8px above and below, meeting at the 4px gap midpoint. */
+  .kd-segmented__item::before {
+    position: absolute;
+    inset: -8px -2px;
+    content: '';
+  }
   .kd-segmented--compact .kd-segmented__item {
     padding: 6px 10px;
     font-size: var(--kd-text-micro);

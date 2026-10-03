@@ -20,13 +20,15 @@ const REQUIRED: Record<string, string[]> = {
     ".kd-switch__track:has(input[value='light']:checked)::before",
     ".kd-switch__track:has(input[value='dark']:checked)::before",
     '.kd-switch__track:has(input:focus-visible)',
-    '.kd-switch__option:has(:checked)'
+    '.kd-switch__option:has(:checked)',
+    '.kd-switch__option::before'
   ],
   segmented: [
     ".kd-segmented__item[aria-pressed='true']",
     '.kd-segmented__item[aria-current]',
     '.kd-segmented__item:has(:checked)',
-    '.kd-segmented--compact .kd-segmented__item'
+    '.kd-segmented--compact .kd-segmented__item',
+    '.kd-segmented__item::before'
   ],
   btn: ['.kd-btn--secondary', '.kd-btn--danger', '.kd-btn--pill', '.kd-btn:disabled'],
   field: ['.kd-input:focus-visible', '.kd-select', ".kd-range input[type='range']"],
