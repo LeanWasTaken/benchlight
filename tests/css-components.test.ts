@@ -57,7 +57,12 @@ const REQUIRED: Record<string, string[]> = {
   meter: ['calc(var(--bl-meter-value, 0) * 100%)'],
   msg: ['.bl-msg--ok::before', '.bl-msg--err', '.bl-msg--info'],
   log: ['.bl-ansi-31', '.bl-ansi-97', 'var(--bl-log-height, 200px)'],
-  'section-head': ['.bl-section-head--ruled', '.bl-section-head--bar', '.bl-section-head__action'],
+  'section-head': [
+    '.bl-section-head--ruled',
+    '.bl-section-head--bar',
+    '.bl-section-head__action',
+    '.bl-section-head:not(.bl-section-head--bar):has(> .bl-section-head__action)'
+  ],
   meta: ['.bl-meta__sep', '.bl-meta__key'],
   'index-row': [
     '.bl-index--grid',
