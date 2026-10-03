@@ -8,6 +8,7 @@
     --bl-surface: #f8f9fa;
     --bl-raised: #ffffff;
     --bl-separator: #d9dde1;
+    --bl-control-border: #7f858c;
     --bl-ink-1: #1a1d21;
     --bl-ink-2: #4e555d;
     --bl-ink-3: #646c75;
@@ -63,6 +64,7 @@
       --bl-surface: #16191c;
       --bl-raised: #1c2024;
       --bl-separator: #2a2f35;
+      --bl-control-border: #69707a;
       --bl-ink-1: #e8eaed;
       --bl-ink-2: #a2a9b0;
       --bl-ink-3: #8a929b;
@@ -78,6 +80,7 @@
     --bl-surface: #16191c;
     --bl-raised: #1c2024;
     --bl-separator: #2a2f35;
+    --bl-control-border: #69707a;
     --bl-ink-1: #e8eaed;
     --bl-ink-2: #a2a9b0;
     --bl-ink-3: #8a929b;

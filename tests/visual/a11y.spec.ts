@@ -82,3 +82,111 @@ test('the log stays put while scrolled up and follows while pinned', async ({ pa
   await expect.poll(lineCount).toBeGreaterThan(pinnedCount)
   await expect.poll(distanceFromBottom).toBeLessThanOrEqual(4)
 })
+
+test('a keyboard-focused radio segmented item shows a ring', async ({ page }) => {
+  await page.goto('/')
+  const radio = page.getByRole('radio', { name: 'M', exact: true })
+  const item = page.locator('.bl-segmented__item', { has: radio })
+  await radio.focus()
+  await page.keyboard.press('ArrowRight')
+  const next = page.locator('.bl-segmented__item', { has: page.getByRole('radio', { name: 'L' }) })
+  await expect(next.locator('input')).toBeFocused()
+  const ring = await next.evaluate((el) => {
+    const style = getComputedStyle(el)
+    return { style: style.outlineStyle, width: style.outlineWidth }
+  })
+  expect(ring).toEqual({ style: 'solid', width: '2px' })
+  expect(await item.evaluate((el) => getComputedStyle(el).outlineStyle)).toBe('none')
+})
+
+test.describe('forced colors', () => {
+  test.use({ forcedColors: 'active' })
+
+  // A shape is visible when it paints a fill other than the page ground, or a border or outline.
+  const visible = ({ selector }: { selector: string }) => {
+    const el = document.querySelector(selector)!
+    const style = getComputedStyle(el)
+    const ground = getComputedStyle(document.body).backgroundColor
+    const fill = style.backgroundColor !== ground && style.backgroundColor !== 'rgba(0, 0, 0, 0)'
+    const edge = parseFloat(style.borderTopWidth) > 0 && style.borderTopStyle !== 'none'
+    const outline = parseFloat(style.outlineWidth) > 0 && style.outlineStyle !== 'none'
+    return fill || edge || outline
+  }
+
+  for (const selector of [
+    '.bl-led',
+    '.bl-led--on',
+    '.bl-led--danger',
+    '.bl-meter',
+    '.bl-meter__fill',
+    '.bl-eq__bar',
+    '.bl-segmented__item[aria-pressed="true"]',
+    '.bl-segmented__item:has(:checked)'
+  ]) {
+    test(`${selector} stays visible`, async ({ page }) => {
+      await page.goto('/')
+      expect(await page.evaluate(visible, { selector })).toBe(true)
+    })
+  }
+
+  test('the ok message dot stays visible', async ({ page }) => {
+    await page.goto('/')
+    const dot = await page.evaluate(() => {
+      const style = getComputedStyle(document.querySelector('.bl-msg--ok')!, '::before')
+      return {
+        fill: style.backgroundColor,
+        ground: getComputedStyle(document.body).backgroundColor
+      }
+    })
+    expect(dot.fill).not.toBe(dot.ground)
+  })
+
+  test('the selected segment is painted with the Highlight system colour', async ({ page }) => {
+    await page.goto('/')
+    const { on, off, highlight } = await page.evaluate(() => {
+      const bg = (el: Element) => getComputedStyle(el).backgroundColor
+      const probe = document.body.appendChild(document.createElement('div'))
+      probe.style.background = 'Highlight'
+      const highlight = bg(probe)
+      probe.remove()
+      return {
+        on: bg(document.querySelector('.bl-segmented__item[aria-pressed="true"]')!),
+        off: bg(document.querySelector('.bl-segmented__item[aria-pressed="false"]')!),
+        highlight
+      }
+    })
+    expect(on).toBe(highlight)
+    expect(off).not.toBe(highlight)
+  })
+})
+
+test('invisible hit areas reach 44px at phone width', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/')
+  const targets = await page.evaluate(() => {
+    const selectors = [
+      '.bl-link-arrow',
+      '.bl-colophon__items a',
+      '.bl-switch__option',
+      '.bl-segmented__item',
+      '.bl-segmented--compact .bl-segmented__item'
+    ]
+    return selectors.flatMap((selector) =>
+      [...document.querySelectorAll(selector)].map((el, index) => {
+        const box = el.getBoundingClientRect()
+        const pseudo = getComputedStyle(el, '::before')
+        const covers = pseudo.content !== 'none' && pseudo.position === 'absolute'
+        return {
+          name: `${selector}[${index}]`,
+          width: Math.max(box.width, covers ? parseFloat(pseudo.width) : 0),
+          height: Math.max(box.height, covers ? parseFloat(pseudo.height) : 0)
+        }
+      })
+    )
+  })
+  expect(targets.length).toBeGreaterThan(10)
+  for (const target of targets) {
+    expect(target.width, `${target.name} width`).toBeGreaterThanOrEqual(44)
+    expect(target.height, `${target.name} height`).toBeGreaterThanOrEqual(44)
+  }
+})

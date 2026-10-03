@@ -60,4 +60,14 @@
   .bl-eq--active .bl-eq__bar:nth-child(4) {
     height: 13px;
   }
+  @media (forced-colors: active) {
+    .bl-eq__bar {
+      forced-color-adjust: none;
+      background: GrayText;
+      opacity: 1;
+    }
+    .bl-eq--active .bl-eq__bar {
+      background: Highlight;
+    }
+  }
 }

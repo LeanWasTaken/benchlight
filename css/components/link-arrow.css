@@ -12,7 +12,7 @@
   }
   .bl-link-arrow::before {
     position: absolute;
-    inset: -8px;
+    inset: -12px -8px;
     content: '';
   }
   .bl-link-arrow:hover {

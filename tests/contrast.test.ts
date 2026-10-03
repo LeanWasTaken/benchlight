@@ -56,3 +56,11 @@ describe('WCAG AA for text tokens', () => {
     }
   })
 })
+
+describe('non-text contrast for control edges (WCAG 1.4.11)', () => {
+  const pairs = THEMES.flatMap((theme) => SURFACES.map((bg) => [theme, bg] as const))
+  it.each(pairs)('%s control-border on %s', (theme, bg) => {
+    const c = tokens.color[theme]
+    expect(contrast(hexToRgb(c['control-border']), hexToRgb(c[bg]))).toBeGreaterThanOrEqual(3)
+  })
+})

@@ -5,6 +5,7 @@
   --color-surface: var(--bl-surface);
   --color-raised: var(--bl-raised);
   --color-separator: var(--bl-separator);
+  --color-control-border: var(--bl-control-border);
   --color-ink-1: var(--bl-ink-1);
   --color-ink-2: var(--bl-ink-2);
   --color-ink-3: var(--bl-ink-3);

@@ -5,6 +5,7 @@
     overflow: hidden;
     border-radius: 2px;
     background: var(--bl-separator);
+    box-shadow: 0 0 0 1px var(--bl-control-border);
   }
   .bl-meter__fill {
     width: calc(var(--bl-meter-value, 0) * 100%);
@@ -22,6 +23,15 @@
     }
     to {
       transform: translateX(340%);
+    }
+  }
+  @media (forced-colors: active) {
+    .bl-meter {
+      outline: 1px solid CanvasText;
+    }
+    .bl-meter__fill {
+      forced-color-adjust: none;
+      background: Highlight;
     }
   }
   @media (prefers-reduced-motion: reduce) {

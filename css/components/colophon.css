@@ -26,7 +26,7 @@
   }
   .bl-colophon__items a::before {
     position: absolute;
-    inset: -8px;
+    inset: -12px -8px;
     content: '';
   }
   .bl-colophon__items a:hover {

@@ -69,6 +69,14 @@
         <BlSegmented v-model="filter" :options="filters" label="Category" />
         <BlSegmented as="a" compact :options="locales" label="Language" />
       </div>
+      <div class="pg-row">
+        <div class="bl-segmented" role="radiogroup" aria-label="Size">
+          <label v-for="size in ['S', 'M', 'L']" :key="size" class="bl-segmented__item">
+            <input v-model="sizeChoice" type="radio" name="size" :value="size" />
+            {{ size }}
+          </label>
+        </div>
+      </div>
       <div class="pg-stack">
         <BlField v-slot="{ id }" label="Display name" hint="Shown next to your avatar.">
           <BlInput :id="id" v-model="displayName" />
@@ -178,6 +186,11 @@
           talks to a <a href="#lists">common USB adapter</a>.
         </p>
         <h3>How it works</h3>
+        <h4>Pipeline</h4>
+        <ol>
+          <li>Read frames from the adapter</li>
+          <li>Decode them with the active <strong>schema</strong></li>
+        </ol>
         <ul>
           <li>Decode pipeline with schema support</li>
           <li>Scripting sandbox for replay and testing</li>
@@ -258,6 +271,7 @@
 
   const version = pkg.version
   const filter = ref<string | null>(null)
+  const sizeChoice = ref('M')
   const filters = [
     { value: null, label: 'All' },
     { value: 'software', label: 'Software' },

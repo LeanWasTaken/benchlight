@@ -20,20 +20,20 @@
     top: 2px;
     left: 2px;
     z-index: 0;
-    width: 32px;
+    width: 40px;
     height: 26px;
     background: var(--bl-raised);
-    border: 1px solid var(--bl-separator);
+    border: 1px solid var(--bl-control-border);
     border-radius: var(--bl-radius-chip);
     box-shadow: var(--bl-shadow-thumb);
     transition: transform var(--bl-duration-fast) ease;
     content: '';
   }
   .bl-switch__track:has(input[value='light']:checked)::before {
-    transform: translateX(36px);
+    transform: translateX(44px);
   }
   .bl-switch__track:has(input[value='dark']:checked)::before {
-    transform: translateX(72px);
+    transform: translateX(88px);
   }
   .bl-switch__track:has(input:focus-visible) {
     outline: 2px solid var(--bl-trace);
@@ -44,7 +44,7 @@
     z-index: 1;
     display: grid;
     place-items: center;
-    width: 36px;
+    width: 44px;
     height: 30px;
     margin: 0;
     font-family: var(--bl-font-mono);
