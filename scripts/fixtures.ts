@@ -1,6 +1,16 @@
 import { $ } from 'bun'
-import { mkdirSync, readdirSync, readFileSync, renameSync, rmSync } from 'node:fs'
-import { join } from 'node:path'
+import {
+  cpSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  renameSync,
+  rmSync,
+  writeFileSync
+} from 'node:fs'
+import { tmpdir } from 'node:os'
+import { basename, join } from 'node:path'
 
 const ROOT = join(import.meta.dir, '..')
 const PACK_DIR = join(ROOT, '.pack')
@@ -16,6 +26,22 @@ export async function pack(): Promise<void> {
   const tarball = readdirSync(PACK_DIR).find((file) => file.endsWith('.tgz'))
   if (!tarball) throw new Error('bun pm pack produced no tarball')
   renameSync(join(PACK_DIR, tarball), PACK)
+}
+
+// Fixtures are built from a copy outside the repo, like a real consumer: inside it, module
+// resolution would quietly fall back to this repo's own node_modules (TypeScript included).
+export function isolate(name: string, benchlight: string): string {
+  const dir = mkdtempSync(join(tmpdir(), `benchlight-${name}-`))
+  cpSync(join(ROOT, 'fixtures', name), dir, {
+    recursive: true,
+    filter: (source) =>
+      !['node_modules', 'dist', 'bun.lock', '.nuxt', '.output'].includes(basename(source))
+  })
+  const manifestPath = join(dir, 'package.json')
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
+  manifest.dependencies.benchlight = benchlight
+  writeFileSync(manifestPath, JSON.stringify(manifest, null, 2))
+  return dir
 }
 
 export async function install(dir: string): Promise<void> {
@@ -107,12 +133,17 @@ export async function verifyNuxt(dir: string): Promise<void> {
 
 if (import.meta.main) {
   await pack()
-  const vite = join(ROOT, 'fixtures/vite-app')
-  await install(vite)
-  verifyVite(vite)
-  console.log('vite fixture OK')
-  const nuxt = join(ROOT, 'fixtures/nuxt-app')
-  await install(nuxt)
-  await verifyNuxt(nuxt)
-  console.log('nuxt fixture OK')
+  const vite = isolate('vite-app', `file:${PACK}`)
+  const nuxt = isolate('nuxt-app', `file:${PACK}`)
+  try {
+    await install(vite)
+    verifyVite(vite)
+    console.log('vite fixture OK')
+    await install(nuxt)
+    await verifyNuxt(nuxt)
+    console.log('nuxt fixture OK')
+  } finally {
+    rmSync(vite, { recursive: true, force: true })
+    rmSync(nuxt, { recursive: true, force: true })
+  }
 }

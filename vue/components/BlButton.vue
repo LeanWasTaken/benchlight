@@ -17,17 +17,18 @@
 <script setup lang="ts">
   import { computed } from 'vue'
   import { linkBindings, resolveTag } from '../internal/link'
-  import type { LinkAs, LinkProps } from '../types'
+  import type { LinkAs, LinkTo } from '../types'
 
   const props = withDefaults(
-    defineProps<
-      LinkProps & {
-        variant?: 'primary' | 'secondary' | 'danger'
-        pill?: boolean
-        type?: 'button' | 'submit' | 'reset'
-        disabled?: boolean
-      }
-    >(),
+    defineProps<{
+      as?: LinkAs
+      to?: LinkTo
+      href?: string
+      variant?: 'primary' | 'secondary' | 'danger'
+      pill?: boolean
+      type?: 'button' | 'submit' | 'reset'
+      disabled?: boolean
+    }>(),
     { variant: 'primary', type: 'button' }
   )
 

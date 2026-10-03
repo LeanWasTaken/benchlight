@@ -13,8 +13,8 @@
 <script setup lang="ts">
   import { computed } from 'vue'
   import { linkBindings, resolveTag } from '../internal/link'
-  import type { LinkProps } from '../types'
+  import type { LinkAs, LinkTo } from '../types'
 
-  const props = defineProps<LinkProps & { current?: boolean }>()
+  const props = defineProps<{ as?: LinkAs; to?: LinkTo; href?: string; current?: boolean }>()
   const tag = computed(() => resolveTag(props.as, props.to, props.href, 'a'))
 </script>
