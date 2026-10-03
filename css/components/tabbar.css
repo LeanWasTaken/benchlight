@@ -57,5 +57,8 @@
     body:has(.bl-tabbar) {
       padding-bottom: 80px;
     }
+    html:has(.bl-tabbar) {
+      --bl-scroll-offset-bottom: 96px;
+    }
   }
 }

@@ -49,4 +49,14 @@ describe('foundation CSS', () => {
       expect(css).toContain(`.bl-tint-${accent} {`)
     }
   })
+
+  it('keeps focused elements clear of fixed chrome', () => {
+    expect(read('css/base.css')).toContain(
+      'scroll-padding-block: var(--bl-scroll-offset-top, 72px) var(--bl-scroll-offset-bottom, 0px);'
+    )
+  })
+
+  it('draws no ring on programmatic focus targets', () => {
+    expect(read('css/base.css')).toMatch(/\[tabindex='-1'\]:focus-visible\s*\{\s*outline: none;/)
+  })
 })

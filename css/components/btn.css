@@ -57,4 +57,7 @@
     opacity: 0.45;
     cursor: not-allowed;
   }
+  .bl-btn[aria-disabled='true'] {
+    pointer-events: none;
+  }
 }
