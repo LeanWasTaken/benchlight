@@ -149,7 +149,8 @@ TypeScript from `node_modules`. Types still come from `tokens/index.ts`.
 | `bun run fixtures`           | packs the working tree, builds and verifies the Nuxt and Vite fixtures                            |
 | `bun run build`              | regenerates `css/tokens.css`, `tailwind/theme.css`, `dist/tokens.js` and the minified `dist/` CSS |
 | `bun run playground`         | component showcase on Vite                                                                        |
-| `bun run test:visual`        | Playwright screenshots of the playground (local only)                                             |
+| `bun run test:visual`        | Playwright axe, keyboard and screenshot checks of the playground (also run in CI on Linux)        |
+| `scripts/visual-linux.sh`    | the same suite in CI's Linux image via Docker; add `--update-snapshots` to re-record Linux shots  |
 | `bun scripts/fetch-fonts.ts` | re-fetches the pinned Google font files and `css/fonts.css`                                       |
 | `scripts/subset-fonts.sh`    | re-cuts the compact font subsets with fontTools                                                   |
 

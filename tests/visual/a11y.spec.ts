@@ -20,8 +20,12 @@ test('the log is keyboard-reachable and scrollable', async ({ page }) => {
   await expect.poll(() => log.evaluate((el) => el.scrollTop)).toBeGreaterThan(0)
   await page.keyboard.press('Home')
   await expect.poll(() => log.evaluate((el) => el.scrollTop)).toBe(0)
-  await page.keyboard.press('ArrowDown')
-  await expect.poll(() => log.evaluate((el) => el.scrollTop)).toBeGreaterThan(0)
+  // Retry the key: under a loaded CI runner Chromium can drop a press that lands just as
+  // the Home scroll settles. A log that ignores arrows still fails every attempt.
+  await expect(async () => {
+    await page.keyboard.press('ArrowDown')
+    expect(await log.evaluate((el) => el.scrollTop)).toBeGreaterThan(0)
+  }).toPass({ timeout: 5000 })
 })
 
 test('the skip-link target takes focus without a ring', async ({ page }) => {
