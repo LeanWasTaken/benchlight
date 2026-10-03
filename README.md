@@ -40,9 +40,15 @@ export default defineNuxtConfig({
 
 The module adds the fonts and component CSS, the no-flash appearance script, auto-imported `Kd*`
 components and composables (`useAppearance`, `useScrollLifted`, `useReducedMotion`, `useMarquee`,
-`riseDelay`, `ansiToSegments`). `kdesign: { fonts: false }` skips the bundled fonts.
+`riseDelay`, `ansiToSegments`). `kdesign: { fonts: false }` skips the bundled fonts. `KdSiteBar`
+wraps its nav in a `<nav>` landmark labelled by `navLabel` (default `Primary`).
 
 ```vue
+<script setup lang="ts">
+  import { NuxtLink } from '#components'
+  const isActive = (path: string) => useRoute().path.startsWith(path)
+</script>
+
 <template>
   <KdSkipLink />
   <KdSiteBar>
@@ -63,6 +69,7 @@ components and composables (`useAppearance`, `useScrollLifted`, `useReducedMotio
 // vite.config.ts
 import vue from '@vitejs/plugin-vue'
 import { kdesign } from 'kdesign/vite'
+import { defineConfig } from 'vite'
 export default defineConfig({ plugins: [vue(), kdesign()] })
 ```
 
@@ -92,7 +99,7 @@ dependency pre-bundling.
 - Library CSS lives in `@layer base` / `@layer components`; utilities and your own CSS win without
   `!important`.
 - States are ARIA or native attributes (`aria-current`, `aria-pressed`, `:checked`, `:disabled`);
-  selected rows use `aria-current="true"`. Only `.kd-site-bar[data-lifted]` is script-set.
+  selected rows use `aria-current="true"`. Only `data-lifted` and `data-overflowing` are script-set.
 - Appearance: `data-kd-appearance="light|dark"` on `<html>` (absent = auto), stored as
   `localStorage['kd-appearance']`.
 - Text on a tint is `ink-1`, `trace` or `danger`; copper and phosphor are marks only there.
