@@ -18,7 +18,7 @@
   const parsed = computed(() => props.lines.map(ansiToSegments))
 
   watch(
-    () => props.lines.length,
+    () => props.lines,
     async () => {
       if (!props.follow) return
       await nextTick()

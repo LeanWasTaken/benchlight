@@ -94,6 +94,7 @@ describe('KdMeter', () => {
   it.each([
     [1.5, '100', '1'],
     [-1, '0', '0'],
+    [Number.POSITIVE_INFINITY, '100', '1'],
     [Number.NaN, '0', '0']
   ])('clamps %s to %s%%', (value, now, fill) => {
     const wrapper = meter(value)
@@ -119,6 +120,15 @@ describe('KdLog', () => {
     await wrapper.setProps({ lines: ['a', 'b'] })
     await nextTick()
     expect(wrapper.element.scrollTop).toBe(500)
+    wrapper.unmount()
+  })
+
+  it('follows when a same-length array replaces the lines', async () => {
+    const wrapper = mount(KdLog, { props: { lines: ['a', 'b'] }, attachTo: document.body })
+    Object.defineProperty(wrapper.element, 'scrollHeight', { value: 700, configurable: true })
+    await wrapper.setProps({ lines: ['b', 'c'] })
+    await nextTick()
+    expect(wrapper.element.scrollTop).toBe(700)
     wrapper.unmount()
   })
 })
@@ -154,8 +164,9 @@ describe('KdMarquee', () => {
     expect(wrapper.find('.kd-marquee__content').text()).toBe('Xtal · Aphex Twin')
   })
 
-  it('stays unmasked and untitled when the text fits', () => {
+  it('stays unmasked and untitled when the text fits', async () => {
     const wrapper = mount(KdMarquee, { props: { title: 'Short' }, slots: { default: 'Short' } })
+    await nextTick()
     expect(wrapper.attributes('data-overflowing')).toBeUndefined()
     expect(wrapper.attributes('title')).toBeUndefined()
   })
