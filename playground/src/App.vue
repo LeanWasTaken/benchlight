@@ -124,7 +124,12 @@
         <template #action><BlLinkArrow href="#lists">All projects</BlLinkArrow></template>
       </BlSectionHead>
       <BlIndex>
-        <BlIndexRow v-for="project in projects" :key="project.refdes" href="#lists">
+        <BlIndexRow
+          v-for="(project, index) in projects"
+          :key="project.refdes"
+          href="#lists"
+          :selected="index === 0"
+        >
           <template #meta>
             <BlMeta as="span" :items="project.meta" />
           </template>

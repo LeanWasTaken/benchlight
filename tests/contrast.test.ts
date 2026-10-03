@@ -32,6 +32,22 @@ describe('WCAG AA for text tokens', () => {
     expect(contrast(text, mix(text, hexToRgb(c[bg]), 0.1))).toBeGreaterThanOrEqual(4.5)
   })
 
+  // A selected .bl-index-row sits on a 10% trace tint; its secondary text must stay readable.
+  it.each(THEMES.flatMap((theme) => TINT_GROUNDS.map((bg) => [theme, bg] as const)))(
+    '%s ink-2 on a selected row tint over %s',
+    (theme, bg) => {
+      const c = tokens.color[theme]
+      const ground = mix(hexToRgb(c.trace), hexToRgb(c[bg]), 0.1)
+      expect(contrast(hexToRgb(c['ink-2']), ground)).toBeGreaterThanOrEqual(4.5)
+    }
+  )
+
+  it('shows why ink-3 is not allowed on a selected row tint', () => {
+    const c = tokens.color.light
+    const ground = mix(hexToRgb(c.trace), hexToRgb(c.canvas), 0.1)
+    expect(contrast(hexToRgb(c['ink-3']), ground)).toBeLessThan(4.5)
+  })
+
   it('shows why copper and phosphor text is not allowed on tints (spec §4.1)', () => {
     const c = tokens.color.light
     for (const accent of ['copper', 'phosphor'] as const) {

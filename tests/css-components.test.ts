@@ -72,6 +72,7 @@ const REQUIRED: Record<string, string[]> = {
   'index-row': [
     '.bl-index--grid',
     ".bl-index-row[aria-current='true']",
+    ".bl-index-row[aria-current='true'] .bl-meta",
     '.bl-index-row--compact .bl-index-row__title',
     '.bl-index-row:has(> .bl-index-row__icon)'
   ],
