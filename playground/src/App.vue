@@ -26,13 +26,16 @@
       <KdTelemetry class="pg-block kd-rise" :style="riseDelay(3)" columns="1.4fr 1fr 1fr">
         <KdTelemetryCell label="Now playing">
           <KdEqBars active />
-          <KdMarquee class="pg-marquee" title="Xtal · Aphex Twin · Selected Ambient Works 85-92">
-            <span>Xtal</span>
+          <KdMarquee
+            class="pg-marquee"
+            title="Track title · Artist name · Album name long enough to scroll"
+          >
+            <span>Track title</span>
             <span class="pg-dim">·</span>
-            <span>Aphex Twin · Selected Ambient Works 85-92</span>
+            <span>Artist name · Album name long enough to scroll</span>
           </KdMarquee>
         </KdTelemetryCell>
-        <KdTelemetryCell label="Local time">RĪGA 21:04 EET</KdTelemetryCell>
+        <KdTelemetryCell label="Local time">UTC 21:04</KdTelemetryCell>
         <KdTelemetryCell label="Status"><KdLed state="on" /> Available</KdTelemetryCell>
       </KdTelemetry>
     </section>
@@ -79,7 +82,7 @@
       <div class="pg-row">
         <KdLinkArrow href="#lists">All projects</KdLinkArrow>
         <KdLinkArrow href="#top" direction="left" quiet>Back</KdLinkArrow>
-        <KdLinkArrow href="mailto:hi@krists.lol" direction="up-right">Contact</KdLinkArrow>
+        <KdLinkArrow href="mailto:hello@example.com" direction="up-right">Contact</KdLinkArrow>
       </div>
     </section>
 
@@ -150,29 +153,29 @@
       </KdIndex>
 
       <KdPrevNext
-        :prev="{ title: 'PSU meters', href: '#lists' }"
-        :next="{ title: 'iDrive interpreter', href: '#lists' }"
+        :prev="{ title: 'Project Two', href: '#lists' }"
+        :next="{ title: 'Project Three', href: '#lists' }"
       />
 
       <KdProse class="pg-block">
         <h2>Why I built it</h2>
         <p>
-          Existing CAN debuggers are expensive, Windows-only, or both. This one runs in the browser
-          and talks to a <a href="#lists">cheap USB adapter</a>.
+          Existing tools are expensive, platform-locked, or both. This one runs in the browser and
+          talks to a <a href="#lists">common USB adapter</a>.
         </p>
         <h3>How it works</h3>
         <ul>
-          <li>Frame decode pipeline with DBC support</li>
-          <li>JS scripting sandbox for replay and fuzzing</li>
+          <li>Decode pipeline with schema support</li>
+          <li>Scripting sandbox for replay and testing</li>
         </ul>
-        <p>Keep-alive is <code>0x510</code> every 500 ms:</p>
-        <pre><code>const frame = decode(buffer, dbc)</code></pre>
+        <p>Polling runs every <code>500</code> ms:</p>
+        <pre><code>const value = parse(input)</code></pre>
         <blockquote>Fix things that, probably, weren't broken.</blockquote>
       </KdProse>
     </section>
   </main>
 
-  <KdColophon :items="['© 2026 Krists', '56.95°N 24.11°E', 'Rev 0.1.0']" />
+  <KdColophon :items="['© 2026 Example', 'Remote', 'Rev 0.1.0']" />
   <KdTabBar label="Playground">
     <KdTabBarItem href="#tokens" current>
       <template #icon>
@@ -250,7 +253,7 @@
     { value: 'lv', label: 'lv', href: '#top' }
   ]
 
-  const displayName = ref('Krists')
+  const displayName = ref('Your name')
   const network = ref('home')
   const networks = [
     { value: 'home', label: 'home-5g · -48 dBm' },
@@ -265,8 +268,8 @@
     { label: 'Stack', value: 'TypeScript · Rust · WebUSB' },
     {
       label: 'Source',
-      value: 'github.com/LeanWasTaken/cantools',
-      href: 'https://github.com/LeanWasTaken/cantools'
+      value: 'github.com/example/project-one',
+      href: 'https://github.com/example/project-one'
     }
   ]
 
@@ -279,16 +282,16 @@
 
   const projects = [
     {
-      refdes: 'SW-02',
-      title: 'CANTools',
-      description: 'Open-source CAN bus debugger with a web UI, scripting, and recording playback.',
-      meta: [{ text: 'SW-02', class: 'kd-meta__key' }, 'Software', '2026', 'Active']
+      refdes: 'SW-01',
+      title: 'Project One',
+      description: 'A browser tool for inspecting live data streams.',
+      meta: [{ text: 'SW-01', class: 'kd-meta__key' }, 'Software', '2026', 'Active']
     },
     {
-      refdes: 'HW-02',
-      title: 'PSU meters',
-      description: 'Bench power-supply add-on with USB telemetry and live graphs.',
-      meta: [{ text: 'HW-02', class: 'kd-meta__key' }, 'Hardware', '2025', 'Shipped']
+      refdes: 'HW-01',
+      title: 'Project Two',
+      description: 'A small board that logs power readings over USB.',
+      meta: [{ text: 'HW-01', class: 'kd-meta__key' }, 'Hardware', '2025', 'Shipped']
     }
   ]
 
@@ -296,7 +299,7 @@
     { year: '2025', meta: 'Now', title: 'Personal projects', desc: 'Wherever curiosity points.' },
     {
       year: '2023',
-      meta: 'Riga',
+      meta: 'Remote',
       title: 'Web developer',
       desc: 'Production apps in TypeScript and Vue.'
     }
