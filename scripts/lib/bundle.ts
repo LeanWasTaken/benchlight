@@ -1,6 +1,6 @@
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { transform } from 'lightningcss'
+import { Features, transform } from 'lightningcss'
 import { tokens } from '../../tokens/tokens'
 import { MODULES, type ModuleName } from './modules'
 import { staticVars } from './render-tokens'
@@ -9,7 +9,13 @@ import { staticVars } from './render-tokens'
 const TARGETS = { safari: (16 << 16) | (2 << 8), chrome: 111 << 16, firefox: 113 << 16 }
 
 export function minifyCss(code: string, filename: string): string {
-  const result = transform({ filename, code: Buffer.from(code), minify: true, targets: TARGETS })
+  const result = transform({
+    filename,
+    code: Buffer.from(code),
+    minify: true,
+    targets: TARGETS,
+    exclude: Features.VendorPrefixes
+  })
   return Buffer.from(result.code).toString('utf8')
 }
 
