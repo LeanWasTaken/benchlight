@@ -341,4 +341,36 @@ describe('useFollowScroll', () => {
     expect(result.pinned.value).toBe(true)
     el.remove()
   })
+
+  it('binds an element that is set after mount', async () => {
+    const el = scroller()
+    const target = ref<HTMLElement | null>(null)
+    const { result, wrapper } = withSetup(() => useFollowScroll(target))
+    target.value = el
+    await nextTick()
+    scrollTo(el, 100)
+    expect(result.pinned.value).toBe(false)
+    result.toBottom()
+    expect(el.scrollTop).toBe(100)
+    wrapper.unmount()
+    el.remove()
+  })
+
+  it('unbinds the old element when the ref is swapped', async () => {
+    const first = scroller()
+    const second = scroller()
+    const target = ref<HTMLElement | null>(first)
+    const { result, wrapper } = withSetup(() => useFollowScroll(target))
+    const removed = vi.spyOn(first, 'removeEventListener')
+    target.value = second
+    await nextTick()
+    scrollTo(second, 100)
+    expect(result.pinned.value).toBe(false)
+    scrollTo(second, 400)
+    expect(result.pinned.value).toBe(true)
+    expect(removed).toHaveBeenCalledWith('scroll', expect.any(Function))
+    wrapper.unmount()
+    first.remove()
+    second.remove()
+  })
 })

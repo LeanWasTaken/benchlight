@@ -230,6 +230,7 @@ describe('BlLog', () => {
 
   it('does not pull a reader scrolled up back to the bottom', async () => {
     const wrapper = mount(BlLog, { props: { lines: ['a', 'b'] }, attachTo: document.body })
+    await nextTick() // the post-flush watcher binds the scroll listener
     const log = wrapper.element as HTMLElement
     Object.defineProperty(log, 'scrollHeight', { value: 600, configurable: true })
     Object.defineProperty(log, 'clientHeight', { value: 100, configurable: true })

@@ -1,4 +1,4 @@
-import { onBeforeUnmount, onMounted, ref, toValue, type MaybeRefOrGetter, type Ref } from 'vue'
+import { onBeforeUnmount, ref, toValue, watch, type MaybeRefOrGetter, type Ref } from 'vue'
 
 export interface FollowScrollOptions {
   /** follow new content at all (default true) */
@@ -26,14 +26,25 @@ export function useFollowScroll(
   }
 
   let bound: HTMLElement | null = null
-  onMounted(() => {
-    bound = el.value
-    bound?.addEventListener('scroll', measure, { passive: true })
-    // start truthful: a followed log opens on its newest lines, anything else reports where it is
-    if (bound && toValue(enabled)) bound.scrollTop = bound.scrollHeight
-    measure()
-  })
-  onBeforeUnmount(() => bound?.removeEventListener('scroll', measure))
+  function unbind(): void {
+    bound?.removeEventListener('scroll', measure)
+    bound = null
+  }
+  // post-flush watchers never run on the server, so this stays SSR-safe
+  watch(
+    el,
+    (node) => {
+      unbind()
+      bound = node
+      if (!node) return
+      node.addEventListener('scroll', measure, { passive: true })
+      // start truthful: a followed log opens on its newest lines, anything else reports where it is
+      if (toValue(enabled)) node.scrollTop = node.scrollHeight
+      measure()
+    },
+    { immediate: true, flush: 'post' }
+  )
+  onBeforeUnmount(unbind)
 
   return { pinned, toBottom }
 }
