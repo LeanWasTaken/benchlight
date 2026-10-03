@@ -1,4 +1,4 @@
-import type { Component } from 'vue'
+import type { Component, InjectionKey, Ref } from 'vue'
 
 export type LinkAs = string | Component
 export type LinkTo = string | Record<string, unknown>
@@ -42,3 +42,11 @@ export interface PrevNextLabels {
   prev: string
   next: string
 }
+
+export interface FieldContext {
+  id: Readonly<Ref<string>>
+  describedBy: Readonly<Ref<string | undefined>>
+}
+
+// Provided by BlField; form controls (Benchlight's or your own) inject it for id and hint wiring.
+export const FIELD_CONTEXT: InjectionKey<FieldContext> = Symbol('bl-field')
