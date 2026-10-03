@@ -1,6 +1,4 @@
-import { readFileSync } from 'node:fs'
-
-const prepaint = readFileSync(new URL('../js/prepaint.js', import.meta.url), 'utf8').trim()
+import { PREPAINT } from '../js/prepaint-script.mjs'
 
 /**
  * Benchlight integration for plain Vite apps: keeps the shipped .vue source out of
@@ -11,6 +9,6 @@ export function benchlight() {
   return {
     name: 'benchlight',
     config: () => ({ optimizeDeps: { exclude: ['benchlight'] } }),
-    transformIndexHtml: () => [{ tag: 'script', children: prepaint, injectTo: 'head-prepend' }]
+    transformIndexHtml: () => [{ tag: 'script', children: PREPAINT, injectTo: 'head-prepend' }]
   }
 }

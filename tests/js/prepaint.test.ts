@@ -1,6 +1,8 @@
+import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { PREPAINT, PREPAINT_CSP_HASH } from '../../js/prepaint-script.mjs'
 
 const code = readFileSync(join(process.cwd(), 'js/prepaint.js'), 'utf8')
 const run = () => new Function(code)()
@@ -48,5 +50,23 @@ describe('js/prepaint.js', () => {
 
   it('stays small enough to inline in every page head', () => {
     expect(Buffer.byteLength(code.trim())).toBeLessThanOrEqual(256)
+  })
+})
+
+describe('js/prepaint-script.mjs', () => {
+  it('is fresh: PREPAINT is the trimmed text of js/prepaint.js', () => {
+    expect(PREPAINT).toBe(code.trim())
+  })
+
+  it('exports the CSP hash of the exact injected text', () => {
+    const digest = createHash('sha256').update(PREPAINT).digest('base64')
+    expect(PREPAINT_CSP_HASH).toBe(`'sha256-${digest}'`)
+  })
+
+  it('needs no node: builtins, so a consumer typecheck without @types/node passes', () => {
+    for (const path of ['nuxt/module.ts', 'vite/index.js']) {
+      const source = readFileSync(join(process.cwd(), path), 'utf8')
+      expect(source, path).not.toMatch(/['"]node:fs['"]/)
+    }
   })
 })
