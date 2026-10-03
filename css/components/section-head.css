@@ -34,4 +34,14 @@
   .bl-section-head__action {
     flex-shrink: 0;
   }
+  .bl-section-head:not(.bl-section-head--bar):has(> .bl-section-head__action) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    column-gap: 16px;
+  }
+  .bl-section-head:not(.bl-section-head--bar):has(> .bl-section-head__action)
+    > .bl-section-head__eyebrow {
+    grid-column: 1 / -1;
+  }
 }

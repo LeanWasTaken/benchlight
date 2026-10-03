@@ -27,6 +27,15 @@ describe('BlSectionHead', () => {
     expect(wrapper.find('.bl-section-head__action a').exists()).toBe(true)
   })
 
+  it('renders the action slot outside bar mode too', () => {
+    const wrapper = mount(BlSectionHead, {
+      props: { eyebrow: 'Stack', heading: 'What I work with' },
+      slots: { action: '<a href="/x">All</a>' }
+    })
+    expect(wrapper.find('.bl-section-head__action a').exists()).toBe(true)
+    expect(wrapper.find('h2.bl-section-head__heading').text()).toBe('What I work with')
+  })
+
   it('ruled adds the hairline modifier', () => {
     expect(mount(BlSectionHead, { props: { heading: 'x', ruled: true } }).classes()).toContain(
       'bl-section-head--ruled'

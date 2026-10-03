@@ -10,6 +10,7 @@
     <template v-else>
       <p v-if="eyebrow" class="bl-section-head__eyebrow">{{ eyebrow }}</p>
       <component :is="headingTag" class="bl-section-head__heading">{{ heading }}</component>
+      <div v-if="$slots.action" class="bl-section-head__action"><slot name="action" /></div>
     </template>
   </header>
 </template>
