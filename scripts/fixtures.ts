@@ -61,7 +61,8 @@ export const NUXT_EXPECTATIONS = {
     '.font-display',
     '@font-face',
     '.kd-display',
-    '.kd-prose'
+    '.kd-prose',
+    '--default-font-feature-settings:var(--kd-font-sans-features)'
   ]
 }
 

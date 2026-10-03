@@ -69,8 +69,12 @@ const TEXT_LEADING: Record<string, string> = {
 export function renderTailwindTheme(t: Tokens): string {
   const lines: string[] = []
   for (const name of Object.keys(t.color.light)) lines.push(`--color-${name}: var(--kd-${name});`)
-  for (const name of ['sans', 'mono', 'display'])
+  for (const name of ['sans', 'mono', 'display']) {
     lines.push(`--font-${name}: var(--kd-font-${name});`)
+    // Preflight resets html font-feature-settings from this; keep Geist's variants.
+    if (name === 'sans')
+      lines.push('--font-sans--font-feature-settings: var(--kd-font-sans-features);')
+  }
   for (const name of Object.keys(t.text)) {
     lines.push(`--text-${name}: var(--kd-text-${name});`)
     const leading = TEXT_LEADING[name]

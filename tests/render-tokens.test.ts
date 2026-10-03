@@ -49,6 +49,14 @@ describe('generated files are fresh', () => {
     expect(read('tailwind/theme.css')).toBe(renderTailwindTheme(tokens)))
 })
 
+describe('renderTailwindTheme', () => {
+  it('carries the sans feature settings into the theme', () => {
+    expect(renderTailwindTheme(tokens)).toContain(
+      '  --font-sans--font-feature-settings: var(--kd-font-sans-features);'
+    )
+  })
+})
+
 describe('Tailwind v4 theme', () => {
   it('maps tokens onto utilities that follow the appearance switch', async () => {
     const root = fileURLToPath(new URL('..', import.meta.url))
@@ -83,5 +91,16 @@ describe('Tailwind v4 theme', () => {
     }
     expect(css).toContain('var(--kd-canvas)')
     expect(css).toContain('var(--kd-ease-out)')
+  })
+
+  it('keeps the sans feature settings through preflight', async () => {
+    const root = fileURLToPath(new URL('..', import.meta.url))
+    const compiler = await compile(`@import 'tailwindcss';\n@import './tailwind/theme.css';`, {
+      base: root,
+      onDependency: () => {}
+    })
+    const css = compiler.build(['font-sans'])
+    expect(css).toMatch(/--default-font-feature-settings:[^;]*var\(--kd-font-sans-features\)/)
+    expect(css).toContain('--kd-font-sans-features')
   })
 })
