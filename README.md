@@ -14,6 +14,7 @@ classes.
 
 The repo is private and the URL uses SSH on purpose: bun turns GitHub https URLs into API tarball
 downloads that cannot authenticate to a private repo. Locally, plain SSH access to GitHub is enough.
+Use bun 1.4.2 or newer: bun 1.2.x cannot clone git dependencies on Linux.
 In GitHub Actions, give each consuming repo its own read-only deploy key on `benchlight`
 (`ssh-keygen -t ed25519`, add the public half under benchlight → Settings → Deploy keys, store the
 private half as the secret `BENCHLIGHT_DEPLOY_KEY` in the consuming repo). Install like this, so the

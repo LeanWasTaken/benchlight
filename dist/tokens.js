@@ -86,6 +86,6 @@ var tokens = {
   }
 };
 export {
-  tokens,
-  colorNames
+  colorNames,
+  tokens
 };
