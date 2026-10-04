@@ -5,6 +5,8 @@
     align-items: center;
     gap: 6px;
     width: fit-content;
+    max-width: 100%;
+    overflow-wrap: anywhere;
     text-transform: uppercase;
     text-decoration: none;
     color: var(--bl-ink-2);
@@ -12,7 +14,8 @@
   }
   .bl-link-arrow::before {
     position: absolute;
-    inset: -12px -8px;
+    /* Vertical overhang only: a horizontal one would widen scroll width. */
+    inset: -12px 0;
     content: '';
   }
   .bl-link-arrow:hover {

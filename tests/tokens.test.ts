@@ -48,8 +48,8 @@ describe('tokens', () => {
       small: '0.9375rem',
       body: '1.0625rem',
       heading: '1.25rem',
-      'display-xl': 'clamp(3.375rem, 9vw, 6rem)',
-      'display-lg': 'clamp(2.25rem, 6vw, 3.375rem)',
+      'display-xl': 'clamp(2.5rem, 1rem + 7vw, 6rem)',
+      'display-lg': 'clamp(1.875rem, 0.75rem + 5vw, 3.375rem)',
       'display-md': 'clamp(1.875rem, 4.5vw, 2.5rem)'
     })
   })

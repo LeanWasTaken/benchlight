@@ -24,8 +24,8 @@
     --bl-text-small: 0.9375rem;
     --bl-text-body: 1.0625rem;
     --bl-text-heading: 1.25rem;
-    --bl-text-display-xl: clamp(3.375rem, 9vw, 6rem);
-    --bl-text-display-lg: clamp(2.25rem, 6vw, 3.375rem);
+    --bl-text-display-xl: clamp(2.5rem, 1rem + 7vw, 6rem);
+    --bl-text-display-lg: clamp(1.875rem, 0.75rem + 5vw, 3.375rem);
     --bl-text-display-md: clamp(1.875rem, 4.5vw, 2.5rem);
     --bl-leading-body: 1.6;
     --bl-leading-lede: 1.625;
