@@ -1,0 +1,525 @@
+<template>
+  <BlSiteBar v-if="chrome && chrome.bar" data-chrome>
+    <template #brand>
+      <a class="bl-site-bar__brand" href="#">
+        <svg v-if="chrome.logo" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" fill="currentColor" />
+        </svg>
+        {{ chrome.brand }}
+      </a>
+    </template>
+    <template v-if="chrome.links > 0" #nav>
+      <BlNavLink v-for="(l, i) in links(chrome.links)" :key="i" href="#" :current="i === 0">
+        {{ l }}
+      </BlNavLink>
+    </template>
+    <template #actions><BlAppearanceSwitch /></template>
+  </BlSiteBar>
+  <main id="main-content" class="bl-col st-main">
+    <p v-if="!only" class="bl-annotation">
+      Regression page for responsive behaviour. Open a chrome case alone with ?case=&lt;id&gt;:
+      <template v-for="id in chromeCases" :key="id">
+        <a :href="`?case=${id}`">{{ id }}</a
+        >{{ ' ' }}
+      </template>
+    </p>
+
+    <!-- D1: wrapping / intrinsic sizing -->
+    <section v-if="show('readout-long')" data-case="readout-long">
+      <h2 class="st-label">readout-long</h2>
+      <div data-box>
+        <BlReadout :value="hash" unit="milliseconds-per-sample" />
+        <BlReadout value="1234567890123456789012345678901234567890" unit="kHz" />
+      </div>
+    </section>
+
+    <section v-if="show('button-long')" data-case="button-long">
+      <h2 class="st-label">button-long</h2>
+      <div data-box>
+        <BlButton>{{ hash }}</BlButton>
+        <BlButton variant="secondary">{{ german }}</BlButton>
+      </div>
+    </section>
+
+    <section v-if="show('field-hint-url')" data-case="field-hint-url">
+      <h2 class="st-label">field-hint-url</h2>
+      <div data-box>
+        <BlField label="Endpoint" :hint="`See ${url}`">
+          <template #default="{ id, describedby }">
+            <BlInput :id="id" :aria-describedby="describedby" model-value="" />
+          </template>
+        </BlField>
+      </div>
+    </section>
+
+    <section v-if="show('segmented-long')" data-case="segmented-long">
+      <h2 class="st-label">segmented-long</h2>
+      <div data-box>
+        <BlSegmented
+          label="Long labels"
+          :options="[
+            { value: 'a', label: 'Konfigurationsverwaltungssystem' },
+            { value: 'b', label: 'Short' }
+          ]"
+          model-value="a"
+        />
+      </div>
+    </section>
+
+    <section v-if="show('link-arrow-long')" data-case="link-arrow-long">
+      <h2 class="st-label">link-arrow-long</h2>
+      <div data-box>
+        <BlLinkArrow href="#">{{ german }}</BlLinkArrow>
+      </div>
+    </section>
+
+    <section v-if="show('colophon-unbreakable')" data-case="colophon-unbreakable">
+      <h2 class="st-label">colophon-unbreakable</h2>
+      <div data-box>
+        <BlColophon :items="['Benchlight', hash]" />
+      </div>
+    </section>
+
+    <section v-if="show('prose')" data-case="prose">
+      <h2 class="st-label">prose</h2>
+      <div data-box>
+        <BlProse>
+          <h2>Informationssicherheitsmanagementsystemdokumentation</h2>
+          <p>
+            Inline hash <code>{{ hash }}</code> and link <a href="#">{{ url }}</a
+            >.
+          </p>
+          <p>
+            <img :src="wideImage" width="1200" height="60" alt="" />
+          </p>
+          <video width="1000" height="80" controls />
+          <iframe title="embed" src="about:blank" width="900" height="80" />
+          <blockquote>
+            <p>{{ url }}</p>
+          </blockquote>
+          <table>
+            <thead>
+              <tr>
+                <th>Alpha</th>
+                <th>Beta</th>
+                <th>Gamma</th>
+                <th>Delta</th>
+                <th>Epsilon</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{ hash.slice(0, 20) }}</td>
+                <td>{{ hash.slice(20, 40) }}</td>
+                <td>{{ hash.slice(40) }}</td>
+                <td>four</td>
+                <td>five</td>
+              </tr>
+            </tbody>
+          </table>
+        </BlProse>
+      </div>
+    </section>
+
+    <section v-if="show('index-row-long')" data-case="index-row-long">
+      <h2 class="st-label">index-row-long</h2>
+      <div data-box>
+        <BlIndex ruled-top>
+          <BlIndexRow href="#">
+            <template #meta>{{ hash }}</template>
+            <template #title>{{ german }}</template>
+            {{ url }}
+          </BlIndexRow>
+        </BlIndex>
+      </div>
+    </section>
+
+    <section v-if="show('meta-hash')" data-case="meta-hash">
+      <h2 class="st-label">meta-hash</h2>
+      <div data-box>
+        <BlMeta :items="['commit', hash]" separator />
+      </div>
+    </section>
+
+    <section v-if="show('section-head-compound')" data-case="section-head-compound">
+      <h2 class="st-label">section-head-compound</h2>
+      <div data-box>
+        <BlSectionHead eyebrow="Section" :heading="german" ruled />
+      </div>
+    </section>
+
+    <section v-if="show('display-xl')" data-case="display-xl">
+      <h2 class="st-label">display-xl</h2>
+      <div data-box>
+        <p class="bl-display bl-display--xl">INFRASTRUCTURE</p>
+      </div>
+    </section>
+
+    <section v-if="show('telemetry-long')" data-case="telemetry-long">
+      <h2 class="st-label">telemetry-long</h2>
+      <div data-box>
+        <BlTelemetry>
+          <BlTelemetryCell label="Checksum">{{ hash }}</BlTelemetryCell>
+          <BlTelemetryCell label="Endpoint">{{ url }}</BlTelemetryCell>
+          <BlTelemetryCell label="Status">Konfigurationsverwaltung</BlTelemetryCell>
+        </BlTelemetry>
+      </div>
+    </section>
+
+    <section v-if="show('spec-row-long')" data-case="spec-row-long">
+      <h2 class="st-label">spec-row-long</h2>
+      <div data-box>
+        <BlSpecPanel>
+          <BlSpecRow label="Netzwerkkonfigurationsschnittstelle" :value="hash" />
+        </BlSpecPanel>
+      </div>
+    </section>
+
+    <!-- D2: container-aware / em based -->
+    <section v-if="show('telemetry-4')" data-case="telemetry-4">
+      <h2 class="st-label">telemetry-4</h2>
+      <div data-box>
+        <BlTelemetry>
+          <BlTelemetryCell v-for="n in 4" :key="n" :label="`Channel ${n}`">
+            -{{ n }}2.5 dBFS
+          </BlTelemetryCell>
+        </BlTelemetry>
+      </div>
+    </section>
+
+    <section v-if="show('telemetry-6')" data-case="telemetry-6">
+      <h2 class="st-label">telemetry-6</h2>
+      <div data-box>
+        <BlTelemetry>
+          <BlTelemetryCell v-for="n in 6" :key="n" :label="`Channel ${n}`">
+            -{{ n }}2.5 dBFS
+          </BlTelemetryCell>
+        </BlTelemetry>
+      </div>
+    </section>
+
+    <section v-if="show('spec-panel')" data-case="spec-panel">
+      <h2 class="st-label">spec-panel</h2>
+      <div data-box>
+        <BlSpecPanel
+          :rows="[
+            { label: 'Sample rate', value: '48 kHz' },
+            { label: 'Firmware', value: hash.slice(0, 24) },
+            { label: 'Docs', value: 'benchlight.dev/docs', href: 'https://example.com' }
+          ]"
+        />
+      </div>
+    </section>
+
+    <section v-if="show('index-grid')" data-case="index-grid">
+      <h2 class="st-label">index-grid</h2>
+      <div data-box>
+        <BlIndex grid>
+          <BlIndexRow v-for="n in 4" :key="n" href="#">
+            <template #meta>2026-0{{ n }}-01</template>
+            <template #title>Entry number {{ n }}</template>
+            A short description of the entry.
+          </BlIndexRow>
+        </BlIndex>
+      </div>
+    </section>
+
+    <section v-if="show('host-flex-telemetry')" data-case="host-flex-telemetry">
+      <h2 class="st-label">host-flex-telemetry</h2>
+      <div data-box>
+        <div data-host style="display: flex">
+          <BlTelemetry>
+            <BlTelemetryCell v-for="n in 3" :key="n" :label="`Channel ${n}`"
+              >-{{ n }}2.5 dBFS</BlTelemetryCell
+            >
+          </BlTelemetry>
+        </div>
+      </div>
+    </section>
+
+    <section v-if="show('host-flex-spec-panel')" data-case="host-flex-spec-panel">
+      <h2 class="st-label">host-flex-spec-panel</h2>
+      <div data-box>
+        <div data-host style="display: flex">
+          <BlSpecPanel
+            :rows="[
+              { label: 'Sample rate', value: '48 kHz' },
+              { label: 'Docs', value: 'benchlight.dev/docs' }
+            ]"
+          />
+        </div>
+      </div>
+    </section>
+
+    <section v-if="show('host-flex-colophon')" data-case="host-flex-colophon">
+      <h2 class="st-label">host-flex-colophon</h2>
+      <div data-box>
+        <div data-host style="display: flex">
+          <BlColophon :items="['Benchlight', 'Built 2026-10-04', 'MIT licence']" />
+        </div>
+      </div>
+    </section>
+
+    <section v-if="show('host-inline-telemetry')" data-case="host-inline-telemetry">
+      <h2 class="st-label">host-inline-telemetry</h2>
+      <div data-box>
+        <div data-host style="display: inline-block">
+          <BlTelemetry>
+            <BlTelemetryCell v-for="n in 3" :key="n" :label="`Channel ${n}`"
+              >-{{ n }}2.5 dBFS</BlTelemetryCell
+            >
+          </BlTelemetry>
+        </div>
+      </div>
+    </section>
+
+    <section v-if="show('host-inline-spec-panel')" data-case="host-inline-spec-panel">
+      <h2 class="st-label">host-inline-spec-panel</h2>
+      <div data-box>
+        <div data-host style="display: inline-block">
+          <BlSpecPanel
+            :rows="[
+              { label: 'Sample rate', value: '48 kHz' },
+              { label: 'Docs', value: 'benchlight.dev/docs' }
+            ]"
+          />
+        </div>
+      </div>
+    </section>
+
+    <section v-if="show('host-inline-colophon')" data-case="host-inline-colophon">
+      <h2 class="st-label">host-inline-colophon</h2>
+      <div data-box>
+        <div data-host style="display: inline-block">
+          <BlColophon :items="['Benchlight', 'Built 2026-10-04', 'MIT licence']" />
+        </div>
+      </div>
+    </section>
+
+    <section v-if="show('link-arrow-short')" data-case="link-arrow-short">
+      <h2 class="st-label">link-arrow-short</h2>
+      <div data-box>
+        <BlLinkArrow href="#">Go</BlLinkArrow>
+      </div>
+    </section>
+
+    <section v-if="show('prev-next-long')" data-case="prev-next-long">
+      <h2 class="st-label">prev-next-long</h2>
+      <div data-box>
+        <BlPrevNext
+          :prev="{ href: '#', title: german + ' ' + german }"
+          :next="{ href: '#', title: hash }"
+        />
+      </div>
+    </section>
+
+    <section v-if="show('colophon-narrow')" data-case="colophon-narrow">
+      <h2 class="st-label">colophon-narrow</h2>
+      <div data-box>
+        <BlColophon :items="['Benchlight', 'Built 2026-10-04', 'MIT licence', 'Made on a bench']">
+          <template #actions><BlAppearanceSwitch /></template>
+        </BlColophon>
+      </div>
+    </section>
+
+    <section v-if="show('section-head-action')" data-case="section-head-action">
+      <h2 class="st-label">section-head-action</h2>
+      <div data-box>
+        <BlSectionHead eyebrow="Archive" heading="All entries" ruled>
+          <template #action>
+            <BlLinkArrow href="#">Browse the complete archive of every note</BlLinkArrow>
+          </template>
+        </BlSectionHead>
+      </div>
+    </section>
+
+    <section v-if="show('section-head-bar-action')" data-case="section-head-bar-action">
+      <h2 class="st-label">section-head-bar-action</h2>
+      <div data-box>
+        <BlSectionHead bar eyebrow="Archive of everything">
+          <template #action>
+            <BlLinkArrow href="#">Browse the complete archive of every note</BlLinkArrow>
+          </template>
+        </BlSectionHead>
+      </div>
+    </section>
+
+    <!-- D4: vue-level behaviour -->
+    <section v-if="show('msg-link')" data-case="msg-link">
+      <h2 class="st-label">msg-link</h2>
+      <div data-box>
+        <BlMsg tone="err">
+          Upload failed, see <a href="#">the troubleshooting guide</a> or run
+          <code>bun run build</code> again.
+        </BlMsg>
+      </div>
+    </section>
+
+    <section v-if="show('range-long')" data-case="range-long">
+      <h2 class="st-label">range-long</h2>
+      <div data-box>
+        <BlRange
+          :model-value="40"
+          aria-label="Gain"
+          :format="(v: number) => `${v.toFixed(3)} decibels relative to full scale`"
+        />
+      </div>
+    </section>
+
+    <section v-if="show('segmented-12')" data-case="segmented-12">
+      <h2 class="st-label">segmented-12</h2>
+      <div data-box>
+        <BlSegmented label="Twelve" :options="twelve" model-value="o1" />
+      </div>
+    </section>
+
+    <section v-if="show('meta-sep')" data-case="meta-sep">
+      <h2 class="st-label">meta-sep</h2>
+      <div data-box>
+        <BlMeta
+          :items="[
+            'Benchlight',
+            'design system',
+            'version 0.4.0',
+            'released',
+            '2026-10-04',
+            'MIT',
+            'personal',
+            'projects'
+          ]"
+          separator
+        />
+      </div>
+    </section>
+
+    <section v-if="show('log-scale')" data-case="log-scale">
+      <h2 class="st-label">log-scale</h2>
+      <div data-box>
+        <BlLog :lines="['boot ok', 'link up 1000 Mbps', 'ready']" />
+      </div>
+    </section>
+
+    <!-- D3: page chrome; each rendered alone via ?case=<id> -->
+    <template v-if="chrome">
+      <div v-for="n in 12" :key="n" class="st-filler">Filler line {{ n }}</div>
+    </template>
+  </main>
+
+  <BlTabBar v-if="chrome && chrome.tabs.length" data-chrome>
+    <BlTabBarItem v-for="(t, i) in chrome.tabs" :key="i" href="#" :current="i === 0">
+      <template #icon>
+        <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="currentColor" /></svg>
+      </template>
+      {{ t }}
+    </BlTabBarItem>
+  </BlTabBar>
+</template>
+
+<script setup lang="ts">
+  defineOptions({ name: 'StressPage' })
+  import {
+    BlAppearanceSwitch,
+    BlButton,
+    BlColophon,
+    BlField,
+    BlIndex,
+    BlIndexRow,
+    BlInput,
+    BlLinkArrow,
+    BlLog,
+    BlMeta,
+    BlMsg,
+    BlNavLink,
+    BlPrevNext,
+    BlProse,
+    BlRange,
+    BlReadout,
+    BlSectionHead,
+    BlSegmented,
+    BlSiteBar,
+    BlSpecPanel,
+    BlSpecRow,
+    BlTabBar,
+    BlTabBarItem,
+    BlTelemetry,
+    BlTelemetryCell
+  } from '../../vue'
+
+  const hash = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+  const url =
+    'https://example.com/very/long/path/that/never/breaks/ever/and/keeps/going/forever/index.html'
+  const german = 'Donaudampfschifffahrtsgesellschaftskapitaenspatent'
+  const wideImage = `data:image/svg+xml;utf8,${encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="60"><rect width="1200" height="60" fill="#888"/></svg>'
+  )}`
+  const twelve = Array.from({ length: 12 }, (_, i) => ({
+    value: `o${i + 1}`,
+    label: `Option ${i + 1}`
+  }))
+
+  const words = [
+    'Tokens',
+    'Controls',
+    'Readouts',
+    'Lists',
+    'Archive',
+    'Changelog',
+    'Guides',
+    'Reference',
+    'Examples',
+    'Roadmap',
+    'Support',
+    'About'
+  ]
+  const links = (n: number) => words.slice(0, n)
+
+  interface Chrome {
+    bar: boolean
+    brand: string
+    links: number
+    tabs: string[]
+    logo?: boolean
+  }
+  const tab = (n: number) => Array.from({ length: n }, (_, i) => `Tab ${i + 1}`)
+  const brand = 'BENCHLIGHT'
+  const chromeDefs: Record<string, Chrome> = {
+    'sitebar-4': { bar: true, brand, links: 4, tabs: [] },
+    'sitebar-6': { bar: true, brand, links: 6, tabs: [] },
+    'sitebar-8': { bar: true, brand, links: 8, tabs: [] },
+    'sitebar-12': { bar: true, brand, links: 12, tabs: [] },
+    'sitebar-brand-30': { bar: true, brand: 'B'.repeat(30), links: 0, tabs: [] },
+    'sitebar-brand-30-nav': { bar: true, brand: 'B'.repeat(30), links: 4, tabs: [] },
+    'sitebar-logo': { bar: true, brand, links: 4, tabs: [], logo: true },
+    'sitebar-nav-no-tabs': { bar: true, brand, links: 4, tabs: [] },
+    'tabbar-6': { bar: true, brand, links: 4, tabs: tab(6) },
+    'tabbar-7': { bar: true, brand, links: 4, tabs: tab(7) },
+    'tabbar-long-4': {
+      bar: true,
+      brand,
+      links: 4,
+      tabs: ['Konfiguration', 'Einstellungen', 'Verwaltung', 'Übersichtsseite']
+    }
+  }
+  const chromeCases = Object.keys(chromeDefs)
+
+  const only = new URLSearchParams(location.search).get('case')
+  const chrome = only ? (chromeDefs[only] ?? null) : null
+  const show = (id: string) => !chrome && (!only || only === id)
+</script>
+
+<style>
+  .st-main {
+    padding-block: 16px 96px;
+  }
+  .st-label {
+    margin: 24px 0 8px;
+    font-family: var(--bl-font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: var(--bl-ink-3);
+  }
+  .st-filler {
+    padding-block: 8px;
+  }
+</style>
