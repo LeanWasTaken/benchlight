@@ -16,7 +16,7 @@
     clip-path: inset(50%);
     white-space: nowrap;
   }
-  @media (max-width: 480px) {
+  @media (max-width: 30em) {
     .bl-col {
       padding-inline: var(--bl-layout-gutter-narrow);
     }

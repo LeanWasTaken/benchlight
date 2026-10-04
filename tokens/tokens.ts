@@ -73,7 +73,7 @@ export const tokens = {
   },
   radius: { chip: '6px', card: '12px', pill: '9999px' },
   layout: { column: '1080px', prose: '720px', gutter: '24px', 'gutter-narrow': '16px' },
-  breakpoint: { sm: '640px', md: '768px', lg: '1024px', xl: '1280px' },
+  breakpoint: { xs: '480px', sm: '640px', md: '768px', lg: '1024px', xl: '1280px' },
   ease: { out: 'cubic-bezier(0.32, 0.72, 0, 1)' },
   duration: {
     fast: '150ms',

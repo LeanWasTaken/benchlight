@@ -4,7 +4,9 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { transform } from 'lightningcss'
 import { describe, expect, it } from 'vitest'
+import { stripNoise } from '../scripts/lib/css-scan'
 import { MODULES } from '../scripts/lib/modules'
+import { tokens } from '../tokens/tokens'
 import {
   classNames,
   customPropertyDeclarations,
@@ -53,5 +55,34 @@ describe.each(layered)('%s', (file) => {
   it('keeps every rule inside a cascade layer', () => {
     for (const prelude of topLevelPreludes(css))
       expect(prelude).toMatch(/^@(layer|property|import)\b/)
+  })
+})
+
+describe('media query units', () => {
+  const tokenEm = new Set(
+    Object.values(tokens.breakpoint).flatMap((px) => {
+      const em = parseFloat(px) / 16
+      return [`${em}em`, `${+(em - 0.01).toFixed(2)}em`]
+    })
+  )
+
+  it('tokenises the xs breakpoint at 480px', () => {
+    expect(tokens.breakpoint.xs).toBe('480px')
+  })
+
+  it.each(layered)('%s uses no px width in media or container queries', (file) => {
+    const queries = [...stripNoise(read(file)).matchAll(/@(?:media|container)[^{]*/g)].map(
+      (m) => m[0]
+    )
+    for (const query of queries) expect(query).not.toMatch(/\d\s*px/)
+  })
+
+  it.each(layered)('%s width media queries match a breakpoint token', (file) => {
+    const widths = [
+      ...stripNoise(read(file)).matchAll(
+        /@(?:media|container)[^{]*?\((?:min|max)-width:\s*([\d.]+em)\)/g
+      )
+    ].map((m) => m[1])
+    for (const width of widths) expect(tokenEm.has(width!), `${file}: ${width}`).toBe(true)
   })
 })
