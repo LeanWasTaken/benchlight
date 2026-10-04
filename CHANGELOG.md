@@ -1,5 +1,74 @@
 # Changelog
 
+## 0.4.0 - 2026-10-04
+
+Responsiveness release. Layouts size by available space instead of viewport width, long content wraps,
+and the site bar, tab bar and iOS safe areas hold up at any width. Per the README rule (removing a class
+or custom property, or changing a component contract, is breaking; minor bump while 0.x), this is a
+minor bump with two breaking items.
+
+### Breaking
+
+- The `.bl-meta__sep` element is removed. BlMeta `separator` now adds `.bl-meta--sep` and draws the
+  dashes with `.bl-meta--sep > * + *::before`. Raw-CSS users who wrote the separator element by hand
+  should add `bl-meta--sep` to the container and drop the element.
+- `--bl-telemetry-columns` now applies at every width; it used to apply only from 640px. A value set
+  for desktop now also governs phones, so wrap it in your own media query for the old behaviour. The
+  default is auto-fit with 12rem cells; with no custom columns, six cells lay out 3x2 when there is
+  room.
+
+### Added
+
+- `xs` breakpoint token (30em / 480px).
+- `--bl-range-value-width` (default 56px) reserves room for the BlRange value so the track does not
+  change length while dragging.
+- `.bl-msg__text`: BlMsg wraps its slot in it. Raw-CSS users should wrap message text in it.
+- Telemetry dividers survive forced-colors mode.
+- Safe-area insets for the fixed bars, body padding, scroll offsets and `.bl-col` (needs
+  `viewport-fit=cover` in the page's viewport meta).
+- Stress suite: `/stress.html` in the playground and `tests/visual/stress.spec.ts` (11 widths from
+  320 to 1920, 200% text, a 280px container; `STRESS_BREAK` proves the checks bite).
+
+### Changed
+
+- Media queries use `em` (sm 40em, xs 30em) so they follow the user's font size. The `md`, `lg` and
+  `xl` tokens are unchanged and still unused by the library CSS.
+- BlPrevNext titles wrap instead of truncating, and the grid shrinks to fit.
+- BlSpecPanel rows and BlColophon wrap; the colophon is left-aligned when narrow.
+- Display sizes are smaller on phones (`xl` is 40px at 320px wide); maximums are unchanged.
+- Link arrows have a 44px minimum width; their hit area no longer overhangs horizontally.
+- BlLog text and default height are in rem (12.5rem); long lines break only where they would
+  overflow.
+- `.bl-prose` measure is `min(720px, 68ch)`, ordered lists indent 1.75em, and images, video, iframes
+  and tables are capped to the column (tables scroll horizontally).
+- Site-bar controls have a negative `scroll-margin`: `scrollIntoView()` or a `#hash` aimed at one
+  lands up to about 34px off. Target page content instead.
+- Full-bundle guard raised from 28,672 to 32,768 bytes.
+
+### Fixed
+
+- Page-wide overflow from long URLs, hashes and compound words (BlReadout widened the page by 541px
+  at 320px): readout, button, field label and hint, segmented, link arrow, colophon, index row, meta,
+  section head, telemetry and spec row now wrap.
+- BlPrevNext: a long title no longer widens the page at any width.
+- BlSiteBar: six or more links, long labels or a long brand no longer push the page sideways. The nav
+  scrolls on one line with an edge fade and focus rings intact; short brands never truncate, long
+  ones ellipsise; the appearance switch never moves and is vertically centred; logo brands are
+  vertically centred. Below 40em the nav stays visible unless a tab bar replaces it. Focusing a nav
+  link scrolls only the nav, never the page. The bar is static on screens under 30em tall.
+- BlTabBar: items shrink and ellipsise (5 tabs maximum) with 44px targets.
+- BlMsg: links and code no longer split the message into flex columns.
+- BlRange: keeps a 96px track.
+- BlSegmented: wrapped rows no longer steal taps from each other; the control rounds to 17px;
+  compact items keep 44px targets.
+- BlMeta: a wrapped line never ends on a dash.
+- BlMarquee (`useMarquee`): re-measures on container, content and font changes; with reduced motion,
+  overflowing text wraps instead of hiding.
+- BlIndexRow: hover styles apply only on hover-capable pointers, so a tap never leaves a row
+  highlighted.
+- BlSectionHead: the heading keeps its column when the action is long.
+- Inputs and selects are 16px on coarse pointers, so iOS does not zoom on focus.
+
 ## 0.3.0 - 2026-10-04
 
 Accessibility, packaging and CI release. Per the README rule (removing a custom property or changing
