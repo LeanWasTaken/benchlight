@@ -13,6 +13,7 @@
   import { useFollowScroll } from '../composables/useFollowScroll'
   import { ansiToSegments } from '../utils/ansi'
 
+  // CSS: text is in rem; the default max height is 12.5rem, set `--bl-log-height` to change it.
   const props = withDefaults(
     defineProps<{
       lines: string[]
