@@ -16,10 +16,23 @@ export default defineConfig({
     url: 'http://localhost:4173',
     reuseExistingServer: true
   },
+  // The stress suite sets its own viewports, so it runs in one project only.
   projects: [
     { name: 'desktop-light', use: { viewport: viewport.desktop, colorScheme: 'light' } },
-    { name: 'desktop-dark', use: { viewport: viewport.desktop, colorScheme: 'dark' } },
-    { name: 'mobile-light', use: { viewport: viewport.mobile, colorScheme: 'light' } },
-    { name: 'mobile-dark', use: { viewport: viewport.mobile, colorScheme: 'dark' } }
+    {
+      name: 'desktop-dark',
+      testIgnore: /stress\.spec\.ts/,
+      use: { viewport: viewport.desktop, colorScheme: 'dark' }
+    },
+    {
+      name: 'mobile-light',
+      testIgnore: /stress\.spec\.ts/,
+      use: { viewport: viewport.mobile, colorScheme: 'light' }
+    },
+    {
+      name: 'mobile-dark',
+      testIgnore: /stress\.spec\.ts/,
+      use: { viewport: viewport.mobile, colorScheme: 'dark' }
+    }
   ]
 })
