@@ -1,9 +1,8 @@
 <template>
-  <component :is="as" class="bl-meta">
-    <template v-for="(item, index) in normalized" :key="index">
-      <span v-if="separator && index > 0" class="bl-meta__sep" aria-hidden="true">—</span>
-      <span :class="item.class">{{ item.text }}</span>
-    </template>
+  <component :is="as" class="bl-meta" :class="{ 'bl-meta--sep': separator }">
+    <span v-for="(item, index) in normalized" :key="index" :class="item.class">{{
+      item.text
+    }}</span>
   </component>
 </template>
 

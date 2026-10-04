@@ -10,8 +10,13 @@
     min-width: 0;
     overflow-wrap: anywhere;
   }
-  .bl-meta__sep {
+  /* Each item after the first draws its own separator, so one never strands at a line end.
+     The empty alt text keeps screen readers from announcing it. */
+  .bl-meta--sep > * + *::before {
+    margin-right: 0.75em;
     color: var(--bl-separator);
+    content: '—';
+    content: '—' / '';
   }
   .bl-meta__key {
     font-weight: 500;

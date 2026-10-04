@@ -269,6 +269,112 @@ describe('useMarquee cleanup', () => {
   })
 })
 
+describe('useMarquee observers', () => {
+  class FakeResizeObserver {
+    static instances: FakeResizeObserver[] = []
+    observed: Element[] = []
+    disconnected = false
+    constructor(readonly callback: () => void) {
+      FakeResizeObserver.instances.push(this)
+    }
+    observe(el: Element) {
+      this.observed.push(el)
+    }
+    disconnect() {
+      this.disconnected = true
+    }
+  }
+
+  function setup(width = { content: 300, box: 100 }) {
+    const box = document.createElement('div')
+    const text = document.createElement('div')
+    box.append(text)
+    const sizes = { ...width }
+    Object.defineProperty(box, 'clientWidth', { get: () => sizes.box })
+    Object.defineProperty(text, 'scrollWidth', { get: () => sizes.content })
+    const animate = vi.fn(() => ({ cancel: vi.fn() }) as unknown as Animation)
+    box.animate = animate
+    text.animate = animate
+    return { box, text, animate, sizes }
+  }
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+    FakeResizeObserver.instances = []
+    vi.stubGlobal('ResizeObserver', FakeResizeObserver)
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllGlobals()
+  })
+
+  it('re-measures when the container or the content resizes', () => {
+    const { box, text, animate, sizes } = setup({ content: 80, box: 100 })
+    const { result } = withSetup(() => useMarquee(ref(box), ref(text)))
+    expect(result.overflowing.value).toBe(false)
+    const observer = FakeResizeObserver.instances[0]!
+    expect(observer.observed).toEqual([box, text])
+    sizes.box = 40
+    observer.callback()
+    vi.advanceTimersByTime(200)
+    expect(result.overflowing.value).toBe(true)
+    expect(animate).toHaveBeenCalledTimes(2)
+  })
+
+  it('leaves running animations alone when an observer fires without a size change', () => {
+    const { box, text, animate } = setup()
+    withSetup(() => useMarquee(ref(box), ref(text)))
+    expect(animate).toHaveBeenCalledTimes(2)
+    FakeResizeObserver.instances[0]!.callback()
+    vi.advanceTimersByTime(200)
+    expect(animate).toHaveBeenCalledTimes(2)
+  })
+
+  it('re-measures when the content changes without a contentKey', async () => {
+    const { box, text, sizes } = setup({ content: 80, box: 100 })
+    const { result } = withSetup(() => useMarquee(ref(box), ref(text)))
+    expect(result.overflowing.value).toBe(false)
+    sizes.content = 400
+    text.textContent = 'a much longer title than before'
+    await Promise.resolve()
+    vi.advanceTimersByTime(200)
+    expect(result.overflowing.value).toBe(true)
+  })
+
+  it('re-measures once web fonts have loaded', async () => {
+    let load!: () => void
+    const ready = new Promise<void>((resolve) => (load = resolve))
+    Object.defineProperty(document, 'fonts', { value: { ready }, configurable: true })
+    try {
+      const { box, text, sizes } = setup({ content: 80, box: 100 })
+      const { result } = withSetup(() => useMarquee(ref(box), ref(text)))
+      sizes.content = 400
+      load()
+      await ready
+      await Promise.resolve()
+      vi.advanceTimersByTime(200)
+      expect(result.overflowing.value).toBe(true)
+    } finally {
+      Reflect.deleteProperty(document, 'fonts')
+    }
+  })
+
+  it('disconnects its observers on unmount', () => {
+    const { box, text } = setup()
+    const { wrapper } = withSetup(() => useMarquee(ref(box), ref(text)))
+    wrapper.unmount()
+    expect(FakeResizeObserver.instances[0]!.disconnected).toBe(true)
+  })
+
+  it('works where ResizeObserver does not exist', () => {
+    vi.unstubAllGlobals()
+    Reflect.deleteProperty(globalThis, 'ResizeObserver')
+    const { box, text } = setup()
+    const { result } = withSetup(() => useMarquee(ref(box), ref(text)))
+    expect(result.overflowing.value).toBe(true)
+  })
+})
+
 describe('riseDelay', () => {
   it('steps by 60ms from zero by default', () => {
     expect(riseDelay(0)).toEqual({ '--bl-rise-delay': '0ms' })

@@ -25,14 +25,17 @@
     text-decoration: none;
     transition: background-color var(--bl-duration-fast) ease;
   }
-  a.bl-index-row:hover,
-  button.bl-index-row:hover {
-    background: var(--bl-surface);
-  }
-  a.bl-index-row:hover .bl-index-row__title,
-  button.bl-index-row:hover .bl-index-row__title,
-  a.bl-index-row:hover .bl-meta__key {
-    color: var(--bl-trace);
+  /* Hover only where a pointer can hover, so a tap never leaves the row highlighted. */
+  @media (hover: hover) {
+    a.bl-index-row:hover,
+    button.bl-index-row:hover {
+      background: var(--bl-surface);
+    }
+    a.bl-index-row:hover .bl-index-row__title,
+    button.bl-index-row:hover .bl-index-row__title,
+    a.bl-index-row:hover .bl-meta__key {
+      color: var(--bl-trace);
+    }
   }
   .bl-index-row[aria-current='true'] {
     background: color-mix(in srgb, var(--bl-trace) 10%, transparent);

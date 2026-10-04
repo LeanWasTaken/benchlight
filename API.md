@@ -526,14 +526,15 @@ Exposed: none
 - `bl-marquee`
 - `bl-marquee__content`
 - `bl-meta`
+- `bl-meta--sep`
 - `bl-meta__key`
-- `bl-meta__sep`
 - `bl-meter`
 - `bl-meter__fill`
 - `bl-msg`
 - `bl-msg--err`
 - `bl-msg--info`
 - `bl-msg--ok`
+- `bl-msg__text`
 - `bl-page-enter-active`
 - `bl-page-enter-from`
 - `bl-page-leave-active`
@@ -597,6 +598,7 @@ Exposed: none
 ## CSS hooks (custom properties a consumer may set)
 - `--bl-log-height`
 - `--bl-meter-value`
+- `--bl-range-value-width`
 - `--bl-rise-delay`
 - `--bl-scroll-offset-bottom`
 - `--bl-scroll-offset-top`
