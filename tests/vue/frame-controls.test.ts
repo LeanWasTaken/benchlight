@@ -72,6 +72,52 @@ describe('BlSiteBar', () => {
     expect(custom.find('nav.bl-site-bar__navwrap').attributes('aria-label')).toBe('Galvenā')
   })
 
+  it('scrolls only the nav scroller to reveal a focused link, never the window', async () => {
+    const original = Element.prototype.scrollIntoView
+    const scrollIntoView = vi.fn()
+    Element.prototype.scrollIntoView = scrollIntoView
+    const windowScroll = vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
+    try {
+      const wrapper = mount(BlSiteBar, {
+        slots: { nav: '<li><a class="bl-site-bar__link" href="#a">A</a></li>' },
+        attachTo: document.body
+      })
+      const nav = wrapper.find('nav').element
+      const link = wrapper.find('a').element
+      nav.getBoundingClientRect = () => ({ left: 100, right: 200 }) as DOMRect
+      Object.defineProperty(nav, 'scrollWidth', { value: 400, configurable: true })
+      Object.defineProperty(nav, 'clientWidth', { value: 100, configurable: true })
+      link.getBoundingClientRect = () => ({ left: 170, right: 260 }) as DOMRect
+      const navScroll = vi.fn()
+      nav.scrollTo = navScroll as unknown as typeof nav.scrollTo
+      await wrapper.find('a').trigger('focusin')
+      // link overshoots the clear region (right edge 184) by 76 but only 54 fits; left stays visible
+      expect(navScroll).toHaveBeenCalledWith({ left: 54, behavior: 'auto' })
+      expect(scrollIntoView).not.toHaveBeenCalled()
+      expect(windowScroll).not.toHaveBeenCalled()
+      wrapper.unmount()
+    } finally {
+      Element.prototype.scrollIntoView = original
+    }
+  })
+
+  it('leaves a nav that fits alone when a link is focused', async () => {
+    const wrapper = mount(BlSiteBar, {
+      slots: { nav: '<li><a class="bl-site-bar__link" href="#a">A</a></li>' },
+      attachTo: document.body
+    })
+    const nav = wrapper.find('nav').element
+    Object.defineProperty(nav, 'scrollWidth', { value: 300, configurable: true })
+    Object.defineProperty(nav, 'clientWidth', { value: 300, configurable: true })
+    nav.getBoundingClientRect = () => ({ left: 100, right: 200 }) as DOMRect
+    wrapper.find('a').element.getBoundingClientRect = () => ({ left: 170, right: 260 }) as DOMRect
+    const navScroll = vi.fn()
+    nav.scrollTo = navScroll as unknown as typeof nav.scrollTo
+    await wrapper.find('a').trigger('focusin')
+    expect(navScroll).not.toHaveBeenCalled()
+    wrapper.unmount()
+  })
+
   it('lifts after scrolling past the threshold', async () => {
     const wrapper = mount(BlSiteBar)
     expect(wrapper.attributes('data-lifted')).toBeUndefined()

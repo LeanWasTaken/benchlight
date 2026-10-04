@@ -54,15 +54,23 @@ describe('BlMeta', () => {
     expect(wrapper.find('.bl-meta__sep').exists()).toBe(false)
   })
 
-  it('adds em-dash separators between items when asked', () => {
+  it('marks separated metas with a modifier instead of rendering separator spans', () => {
     const wrapper = mount(BlMeta, {
       props: { items: ['Krists', 'Riga', 'Rev a1'], separator: true, as: 'span' }
     })
     expect(wrapper.element.tagName).toBe('SPAN')
-    const seps = wrapper.findAll('.bl-meta__sep')
-    expect(seps).toHaveLength(2)
-    expect(seps[0]!.attributes('aria-hidden')).toBe('true')
-    expect(seps[0]!.text()).toBe('—')
+    expect(wrapper.classes()).toContain('bl-meta--sep')
+    expect(wrapper.find('.bl-meta__sep').exists()).toBe(false)
+    expect([...wrapper.element.children].map((c) => c.textContent)).toEqual([
+      'Krists',
+      'Riga',
+      'Rev a1'
+    ])
+  })
+
+  it('has no separator modifier by default', () => {
+    const wrapper = mount(BlMeta, { props: { items: ['a', 'b'] } })
+    expect(wrapper.classes()).not.toContain('bl-meta--sep')
   })
 })
 

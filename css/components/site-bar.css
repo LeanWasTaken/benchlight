@@ -105,6 +105,16 @@
   .bl-site-bar__navwrap + .bl-site-bar__actions {
     margin-left: 0;
   }
+  /* Focus must not scroll the window: the sticky bar sits inside the root's scroll-padding, so
+     the browser would scroll the page to "clear" a focused bar control. A negative margin takes
+     the control out of that calculation. Side effect: scrollIntoView() or a #hash aimed at a bar
+     control lands up to ~34px off; target page content instead. */
+  .bl-site-bar a,
+  .bl-site-bar button,
+  .bl-site-bar input,
+  .bl-site-bar select {
+    scroll-margin-block: -100px;
+  }
   /* Below 40em a tab bar replaces the nav; without one the nav stays reachable. */
   @media (max-width: 39.99em) {
     html:has(.bl-tabbar) .bl-site-bar__navwrap {
@@ -118,6 +128,12 @@
   @media (max-height: 30em) {
     .bl-site-bar {
       position: static;
+    }
+    .bl-site-bar a,
+    .bl-site-bar button,
+    .bl-site-bar input,
+    .bl-site-bar select {
+      scroll-margin-block: 0;
     }
     html {
       --bl-scroll-offset-top: 0px;

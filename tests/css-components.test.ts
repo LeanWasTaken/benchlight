@@ -58,14 +58,14 @@ const REQUIRED: Record<string, string[]> = {
     '@media (prefers-reduced-motion: reduce)'
   ],
   msg: ['.bl-msg--ok::before', '.bl-msg--err', '.bl-msg--info'],
-  log: ['.bl-ansi-31', '.bl-ansi-97', 'var(--bl-log-height, 200px)'],
+  log: ['.bl-ansi-31', '.bl-ansi-97', 'var(--bl-log-height, 12.5rem)'],
   'section-head': [
     '.bl-section-head--ruled',
     '.bl-section-head--bar',
     '.bl-section-head__action',
     '.bl-section-head:not(.bl-section-head--bar):has(> .bl-section-head__action)'
   ],
-  meta: ['.bl-meta__sep', '.bl-meta__key'],
+  meta: ['.bl-meta--sep > * + *::before', '.bl-meta__key'],
   'index-row': [
     '.bl-index--grid',
     ".bl-index-row[aria-current='true']",
@@ -286,6 +286,56 @@ describe('intrinsic wrapping (long tokens never widen the page)', () => {
     expect(ruleBody(css, '.bl-prose :not(pre) > code')['overflow-wrap']).toBe('anywhere')
     expect(ruleBody(css, '.bl-prose ol')['padding-left']).toBe('1.75em')
     expect(ruleBody(type, '.bl-lede')['max-width']).toBe('min(var(--bl-layout-prose), 68ch)')
+  })
+
+  it('msg text, range, segmented, log and marquee keep their content responsive', () => {
+    expect(ruleBody(read('msg'), '.bl-msg__text')['min-width']).toBe('0')
+    const field = read('field')
+    expect(ruleBody(field, ".bl-range input[type='range']")['min-width']).toBe('96px')
+    expect(ruleBody(field, '.bl-range')['flex-wrap']).toBe('wrap')
+    const value = ruleBody(field, '.bl-range__value')
+    expect(value['min-width']).toBe('var(--bl-range-value-width, 56px)')
+    expect(value['max-width']).toBe('50%')
+    expect(value['overflow-wrap']).toBe('anywhere')
+    const seg = read('segmented')
+    const segmented = ruleBody(seg, '.bl-segmented')
+    expect(segmented['row-gap']).toBe('16px')
+    expect(segmented['column-gap']).toBe('4px')
+    expect(segmented['border-radius']).toBe('17px')
+    expect(ruleBody(seg, '.bl-segmented__item')['min-width']).toBe('44px')
+    expect(ruleBody(seg, '.bl-segmented__item::before').inset).toBe('-8px 0')
+    expect(ruleBody(seg, '.bl-segmented--compact .bl-segmented__item::before').inset).toBe('-9px 0')
+    const log = ruleBody(read('log'), '.bl-log')
+    expect(log['font-size']).toBe('0.75rem')
+    expect(log['overflow-wrap']).toBe('anywhere')
+    expect(log['word-break']).toBeUndefined()
+    const marquee = read('marquee')
+    expect(marquee).toMatch(
+      /@media \(prefers-reduced-motion: reduce\)\s*\{[^@]*\.bl-marquee__content\s*\{[^}]*white-space:\s*normal/
+    )
+    const reduced = marquee.slice(marquee.indexOf('prefers-reduced-motion'))
+    expect(reduced).toMatch(/\.bl-marquee\s*\{[^}]*overflow:\s*visible/)
+    expect(reduced).toMatch(/\.bl-marquee__content\s*\{[^}]*overflow-wrap:\s*anywhere/)
+    expect(marquee).toMatch(/\.bl-marquee\[data-overflowing\]\s*\{[^}]*mask:\s*none/)
+  })
+
+  it('site bar controls never scroll the window on focus while the bar is sticky', () => {
+    const css = read('site-bar')
+    expect(css).toMatch(/\.bl-site-bar select\s*\{\s*scroll-margin-block:\s*-100px/)
+    expect(css).toMatch(/@media \(max-height: 30em\)[\s\S]*scroll-margin-block:\s*0/)
+  })
+
+  it('index row hover only applies where hover exists', () => {
+    const css = read('index-row')
+    expect(css).toMatch(/@media \(hover: hover\)\s*\{\s*a\.bl-index-row:hover/)
+    expect(css.replace(/@media \(hover: hover\)\s*\{[\s\S]*?\n {2}\}/, '')).not.toMatch(/:hover/)
+  })
+
+  it('meta separators are pseudo-elements with alt text, not elements', () => {
+    const css = read('meta')
+    expect(css).toMatch(/\.bl-meta--sep > \* \+ \*::before\s*\{[^}]*content:\s*'—'/)
+    expect(css).toContain("content: '—' / ''")
+    expect(css).not.toContain('.bl-meta__sep')
   })
 
   it('index row, meta and section head break long tokens', () => {

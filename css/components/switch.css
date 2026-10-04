@@ -1,4 +1,6 @@
 @layer components {
+  /* The track's own 6px margin centres it in the 44px footprint: a fieldset's min-height does
+     not centre its content, which left the track 6px above the bar's text line. */
   .bl-switch {
     display: flex;
     align-items: center;
@@ -10,6 +12,7 @@
   .bl-switch__track {
     position: relative;
     display: flex;
+    margin-block: 6px;
     background: var(--bl-surface);
     border: 1px solid var(--bl-separator);
     border-radius: 8px;

@@ -3,19 +3,20 @@
     display: inline-flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 4px;
+    column-gap: 4px;
+    row-gap: 16px;
     max-width: 100%;
     padding: 2px;
     background: var(--bl-surface);
     border: 1px solid var(--bl-separator);
-    border-radius: var(--bl-radius-pill);
+    border-radius: 17px;
   }
   .bl-segmented__item {
     position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 40px;
+    min-width: 44px;
     padding: 6px 12px;
     overflow-wrap: anywhere;
     background: transparent;
@@ -30,11 +31,16 @@
       color var(--bl-duration-fast) ease,
       background-color var(--bl-duration-fast) ease;
   }
-  /* Invisible hit area: ~29px item + 8px above and below, meeting at the 4px gap midpoint. */
+  /* Invisible hit area: ~29px item + 8px above and below, meeting at the 16px row-gap midpoint
+     so a wrapped row never steals taps from the row above. No horizontal reach (items are 44px wide instead), so it never
+     counts toward the control's scroll width. */
   .bl-segmented__item::before {
     position: absolute;
-    inset: -8px -2px;
+    inset: -8px 0;
     content: '';
+  }
+  .bl-segmented--compact .bl-segmented__item::before {
+    inset: -9px 0;
   }
   .bl-segmented--compact .bl-segmented__item {
     padding: 6px 10px;

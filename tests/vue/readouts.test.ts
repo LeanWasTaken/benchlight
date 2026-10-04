@@ -115,6 +115,16 @@ describe('small readouts', () => {
     expect(err.classes()).toContain('bl-msg--err')
     expect(err.attributes('role')).toBe('alert')
   })
+
+  it('BlMsg wraps the slot in one text box so runs and links share a column', () => {
+    const wrapper = mount(BlMsg, {
+      slots: { default: 'Saved. Visit <a href="#">the settings page</a> to continue' }
+    })
+    const kids = [...wrapper.element.children]
+    expect(kids).toHaveLength(1)
+    expect(kids[0]!.className).toBe('bl-msg__text')
+    expect(kids[0]!.querySelector('a')).not.toBeNull()
+  })
 })
 
 describe('BlMeter', () => {
