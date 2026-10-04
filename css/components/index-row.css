@@ -95,17 +95,17 @@
     letter-spacing: var(--bl-tracking-heading);
     text-transform: none;
   }
-  @media (min-width: 640px) {
+  @media (min-width: 40em) {
     .bl-index-row {
       padding-block: 20px;
     }
     .bl-index-row--compact {
       padding-block: 12px;
     }
-    .bl-index--grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      column-gap: 40px;
-    }
+  }
+  .bl-index--grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+    column-gap: 40px;
   }
 }

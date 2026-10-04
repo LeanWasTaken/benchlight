@@ -129,6 +129,18 @@ test.describe('forced colors', () => {
     })
   }
 
+  test('telemetry cell dividers stay visible', async ({ page }) => {
+    await page.goto('/')
+    const divider = await page.evaluate(() => {
+      const style = getComputedStyle(document.querySelectorAll('.bl-telemetry__cell')[1]!)
+      return {
+        left: parseFloat(style.borderLeftWidth) > 0 && style.borderLeftStyle !== 'none',
+        shadow: style.boxShadow !== 'none'
+      }
+    })
+    expect(divider.left || divider.shadow).toBe(true)
+  })
+
   test('the ok message dot stays visible', async ({ page }) => {
     await page.goto('/')
     const dot = await page.evaluate(() => {

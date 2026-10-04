@@ -26,6 +26,18 @@
   }
   .bl-telemetry__cells {
     display: grid;
+    grid-template-columns: var(
+      --bl-telemetry-columns,
+      repeat(auto-fit, minmax(min(100%, 12rem), 1fr))
+    );
+    overflow: hidden;
+  }
+  /* Six cells lay out 3x2 when room allows instead of leaving an orphan. */
+  .bl-telemetry__cells:has(> :nth-child(6):last-child) {
+    grid-template-columns: var(
+      --bl-telemetry-columns,
+      repeat(auto-fit, minmax(min(100%, max(12rem, (100% - 2px) / 3)), 1fr))
+    );
   }
   .bl-telemetry__cell {
     display: flex;
@@ -34,8 +46,9 @@
     min-width: 0;
     padding: 16px;
   }
-  .bl-telemetry__cell + .bl-telemetry__cell {
-    border-top: 1px solid var(--bl-separator);
+  /* Dividers are shadows on the top-left edge of each cell; the grid clips the outer ones. */
+  .bl-telemetry__cell {
+    box-shadow: -1px -1px 0 0 var(--bl-separator);
   }
   .bl-telemetry__value {
     display: flex;
@@ -50,15 +63,15 @@
     font-variant-numeric: tabular-nums;
     color: var(--bl-ink-1);
   }
-  @media (min-width: 640px) {
+  @media (forced-colors: active) {
+    /* Shadows are removed in forced colours; draw the dividers as borders and let the clipped grid hide the outer ones. */
     .bl-telemetry__cells {
-      grid-auto-flow: column;
-      grid-auto-columns: minmax(0, 1fr);
-      grid-template-columns: var(--bl-telemetry-columns, none);
+      margin: -1px 0 0 -1px;
     }
-    .bl-telemetry__cell + .bl-telemetry__cell {
-      border-top: 0;
-      border-left: 1px solid var(--bl-separator);
+    .bl-telemetry__cell {
+      border-top: 1px solid CanvasText;
+      border-left: 1px solid CanvasText;
+      box-shadow: none;
     }
   }
 }

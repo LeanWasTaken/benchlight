@@ -119,7 +119,7 @@ export function renderApi(root: string): string {
     customPropertyDeclarations(readFileSync(join(root, 'css/tokens.css'), 'utf8'))
   )
   const registered = new Set(propertyNames(allCss))
-  const used = [...stripNoise(allCss).matchAll(/var\((--bl-[\w-]+)/g)].map((m) => m[1]!)
+  const used = [...stripNoise(allCss).matchAll(/var\(\s*(--bl-[\w-]+)/g)].map((m) => m[1]!)
   const hooks = sorted(used.filter((name) => !tokenDecls.has(name) && !registered.has(name)))
   const theme = [
     ...readFileSync(join(root, 'tailwind/theme.css'), 'utf8').matchAll(/^\s+(--[\w-]+):/gm)

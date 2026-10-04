@@ -5,6 +5,7 @@
     align-items: center;
     gap: 6px;
     width: fit-content;
+    min-width: 44px;
     max-width: 100%;
     overflow-wrap: anywhere;
     text-transform: uppercase;

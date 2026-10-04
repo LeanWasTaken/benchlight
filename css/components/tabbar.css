@@ -48,12 +48,12 @@
     letter-spacing: var(--bl-tracking-annotation);
     text-transform: uppercase;
   }
-  @media (min-width: 640px) {
+  @media (min-width: 40em) {
     .bl-tabbar {
       display: none;
     }
   }
-  @media (max-width: 639px) {
+  @media (max-width: 39.99em) {
     body:has(.bl-tabbar) {
       padding-bottom: 80px;
     }

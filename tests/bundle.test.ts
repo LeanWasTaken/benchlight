@@ -84,8 +84,9 @@ describe('buildDist', () => {
   })
 
   it('keeps media queries readable by the source browser floor', () => {
-    expect(dist.bundle).toContain('max-width:480px')
-    expect(dist.bundle).not.toMatch(/width[<>]=/)
+    expect(dist.bundle).toContain('max-width:30em')
+    // Container queries need Chrome 105 / Safari 16, which already read range syntax.
+    expect(dist.bundle).not.toMatch(/@media[^{]*width[<>]=/)
   })
 
   it('keeps hand-written vendor prefixes without adding duplicates', () => {

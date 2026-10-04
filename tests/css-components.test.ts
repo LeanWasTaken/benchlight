@@ -46,11 +46,7 @@ const REQUIRED: Record<string, string[]> = {
   field: ['.bl-input:focus-visible', '.bl-select', ".bl-range input[type='range']"],
   'link-arrow': ['.bl-link-arrow::before', '.bl-link-arrow--quiet'],
   'spec-panel': ['.bl-spec-row + .bl-spec-row', '.bl-spec-row__value a'],
-  telemetry: [
-    '.bl-ruler',
-    'var(--bl-telemetry-columns, none)',
-    '.bl-telemetry__cell + .bl-telemetry__cell'
-  ],
+  telemetry: ['.bl-ruler', '--bl-telemetry-columns', '.bl-telemetry__cell'],
   led: ['.bl-led--on', '.bl-led--danger'],
   eq: ['@keyframes bl-eq', '.bl-eq--active .bl-eq__bar'],
   marquee: ['@property --bl-mask-l', '.bl-marquee[data-overflowing]'],
@@ -110,15 +106,15 @@ describe('touch targets', () => {
 })
 
 describe('anchored behaviour', () => {
-  it('pins the tab bar to the viewport and hides it from 640px up', () => {
+  it('pins the tab bar to the viewport and hides it from 40em up', () => {
     const css = read('tabbar')
     expect(ruleBody(css, '.bl-tabbar').position).toBe('fixed')
-    expect(ruleBody(css, '.bl-tabbar', ['@media (min-width: 640px)']).display).toBe('none')
+    expect(ruleBody(css, '.bl-tabbar', ['@media (min-width: 40em)']).display).toBe('none')
   })
 
-  it('reserves room for the tab bar below 640px only', () => {
+  it('reserves room for the tab bar below 40em only', () => {
     const css = read('tabbar')
-    const narrow = ['@media (max-width: 639px)']
+    const narrow = ['@media (max-width: 39.99em)']
     expect(ruleBody(css, 'body:has(.bl-tabbar)', narrow)['padding-bottom']).toBe('80px')
     expect(ruleBody(css, 'html:has(.bl-tabbar)', narrow)['--bl-scroll-offset-bottom']).toBe('96px')
   })
@@ -248,9 +244,71 @@ describe('intrinsic wrapping (long tokens never widen the page)', () => {
     expect(value['overflow-wrap']).toBe('anywhere')
     expect(value['flex-wrap']).toBe('wrap')
     const panel = read('spec-panel')
-    expect(ruleBody(panel, '.bl-spec-row')['grid-template-columns']).toBe(
-      'minmax(0, 8rem) minmax(0, 1fr)'
-    )
+    expect(ruleBody(panel, '.bl-spec-row__label')['min-width']).toBe('0')
+    expect(ruleBody(panel, '.bl-spec-row__value')['min-width']).toBe('0')
     expect(ruleBody(panel, '.bl-spec-row__label')['overflow-wrap']).toBe('anywhere')
+  })
+})
+
+describe('container-aware layouts', () => {
+  const body = (name: string, selector: string, within: string[] = []) =>
+    ruleBody(read(name), selector, within)
+
+  it('sizes telemetry, spec panel and colophon intrinsically (no size containment)', () => {
+    for (const name of ['telemetry', 'spec-panel', 'colophon'])
+      expect(read(name)).not.toMatch(/container-type|@container|@media \((?:min|max)-width/)
+    expect(body('spec-panel', '.bl-spec-row')['flex-wrap']).toBe('wrap')
+    expect(body('spec-panel', '.bl-spec-row__label')['flex']).toBe('0 1 8rem')
+    expect(body('colophon', '.bl-colophon__inner')['flex-wrap']).toBe('wrap')
+  })
+
+  it('draws telemetry dividers as borders in forced colours', () => {
+    const cell = body('telemetry', '.bl-telemetry__cell', ['@media (forced-colors: active)'])
+    expect(cell['box-shadow']).toBe('none')
+    expect(cell['border-left']).toBe('1px solid CanvasText')
+  })
+
+  it('lays six telemetry cells out 3x2 unless columns are set', () => {
+    const six = body('telemetry', '.bl-telemetry__cells:has(> :nth-child(6):last-child)')
+    expect(six['grid-template-columns']).toMatch(/--bl-telemetry-columns/)
+    expect(six['grid-template-columns']).toContain('/ 3')
+  })
+
+  it('lets telemetry columns auto-fit and still honours --bl-telemetry-columns', () => {
+    expect(body('telemetry', '.bl-telemetry__cells')['grid-template-columns']).toMatch(
+      /^var\(\s*--bl-telemetry-columns,\s*repeat\(auto-fit, minmax\(min\(100%, 12rem\), 1fr\)\)\s*\)$/
+    )
+  })
+
+  it('keeps prev-next tracks and links shrinkable so long titles cannot widen the page', () => {
+    expect(body('prev-next', '.bl-prev-next')['grid-template-columns']).toBe(
+      'repeat(auto-fit, minmax(min(100%, 14rem), 1fr))'
+    )
+    expect(body('prev-next', '.bl-prev-next__link')['min-width']).toBe('0')
+    const title = body('prev-next', '.bl-prev-next__title')
+    expect(title['overflow-wrap']).toBe('anywhere')
+    expect(title['white-space']).toBeUndefined()
+    expect(body('prev-next', '.bl-prev-next__link:only-child')['max-width']).toContain('50%')
+  })
+
+  it('sizes the index grid from the container width without a breakpoint', () => {
+    expect(body('index-row', '.bl-index--grid')['grid-template-columns']).toBe(
+      'repeat(auto-fill, minmax(min(100%, 22rem), 1fr))'
+    )
+  })
+
+  it('gives the section head action room without collapsing the heading', () => {
+    const css = read('section-head')
+    expect(
+      ruleBody(css, '.bl-section-head:not(.bl-section-head--bar):has(> .bl-section-head__action)')[
+        'grid-template-columns'
+      ]
+    ).toBe('minmax(0, 1fr) fit-content(40%)')
+    expect(ruleBody(css, '.bl-section-head--bar')['flex-wrap']).toBe('wrap')
+    expect(ruleBody(css, '.bl-section-head__action')['flex-shrink']).toBeUndefined()
+  })
+
+  it('keeps the link-arrow hit area at least 44px wide', () => {
+    expect(body('link-arrow', '.bl-link-arrow')['min-width']).toBe('44px')
   })
 })
