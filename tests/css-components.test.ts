@@ -160,3 +160,97 @@ describe('text on tints (spec §4.1)', () => {
     expect(css).toMatch(/\.bl-msg--ok::before\s*\{[^}]*background:\s*var\(--bl-phosphor\)/)
   })
 })
+
+describe('intrinsic wrapping (long tokens never widen the page)', () => {
+  const type = readFileSync(new URL('../css/type.css', import.meta.url), 'utf8')
+  const tokens = readFileSync(new URL('../css/tokens.css', import.meta.url), 'utf8')
+
+  it('readout wraps and breaks long values', () => {
+    const css = read('readout')
+    expect(ruleBody(css, '.bl-readout')['flex-wrap']).toBe('wrap')
+    expect(ruleBody(css, '.bl-readout')['max-width']).toBe('100%')
+    expect(ruleBody(css, '.bl-readout__value')['min-width']).toBe('0')
+    expect(ruleBody(css, '.bl-readout__value')['overflow-wrap']).toBe('anywhere')
+  })
+
+  it('button shrinks to its container and breaks long labels', () => {
+    const btn = ruleBody(read('btn'), '.bl-btn')
+    expect(btn['max-width']).toBe('100%')
+    expect(btn['min-width']).toBe('0')
+    expect(btn['overflow-wrap']).toBe('anywhere')
+    expect(btn['text-align']).toBe('center')
+  })
+
+  it('field shrinks and breaks hint and label text', () => {
+    const css = read('field')
+    expect(ruleBody(css, '.bl-field')['min-width']).toBe('0')
+    expect(ruleBody(css, '.bl-field__hint')['overflow-wrap']).toBe('anywhere')
+    expect(ruleBody(css, '.bl-field__label')['overflow-wrap']).toBe('anywhere')
+  })
+
+  it('inputs reach 16px on coarse pointers only (no iOS focus zoom)', () => {
+    const css = read('field')
+    expect(ruleBody(css, '.bl-input', ['@media (pointer: coarse)'])['font-size']).toBe('1rem')
+    expect(ruleBody(css, '.bl-select', ['@media (pointer: coarse)'])['font-size']).toBe('1rem')
+    expect(ruleBody(css, '.bl-input')['font-size']).toBe('var(--bl-text-small)')
+  })
+
+  it('segmented clamps to its container and breaks item text', () => {
+    const css = read('segmented')
+    expect(ruleBody(css, '.bl-segmented')['max-width']).toBe('100%')
+    expect(ruleBody(css, '.bl-segmented__item')['overflow-wrap']).toBe('anywhere')
+  })
+
+  it('link-arrow and colophon items break long words', () => {
+    const arrow = ruleBody(read('link-arrow'), '.bl-link-arrow')
+    expect(arrow['max-width']).toBe('100%')
+    expect(arrow['overflow-wrap']).toBe('anywhere')
+    const items = ruleBody(read('colophon'), '.bl-colophon__items')
+    expect(items['min-width']).toBe('0')
+    expect(items['overflow-wrap']).toBe('anywhere')
+  })
+
+  it('prose contains media, tables and long text', () => {
+    const css = read('prose')
+    expect(ruleBody(css, '.bl-prose')['overflow-wrap']).toBe('break-word')
+    expect(ruleBody(css, '.bl-prose')['max-width']).toBe('min(var(--bl-layout-prose), 68ch)')
+    expect(ruleBody(css, '.bl-prose :is(img, video, iframe, svg, canvas)')['max-width']).toBe(
+      '100%'
+    )
+    const table = ruleBody(css, '.bl-prose table')
+    expect(table.display).toBe('block')
+    expect(table['overflow-x']).toBe('auto')
+    expect(ruleBody(css, '.bl-prose hr')['border-top']).toContain('var(--bl-separator)')
+    expect(ruleBody(css, '.bl-prose :not(pre) > code')['overflow-wrap']).toBe('anywhere')
+    expect(ruleBody(css, '.bl-prose ol')['padding-left']).toBe('1.75em')
+    expect(ruleBody(type, '.bl-lede')['max-width']).toBe('min(var(--bl-layout-prose), 68ch)')
+  })
+
+  it('index row, meta and section head break long tokens', () => {
+    const row = read('index-row')
+    expect(ruleBody(row, '.bl-index-row__title')['overflow-wrap']).toBe('break-word')
+    expect(ruleBody(row, '.bl-index-row__desc')['overflow-wrap']).toBe('break-word')
+    expect(ruleBody(read('meta'), '.bl-meta > *')['overflow-wrap']).toBe('anywhere')
+    expect(ruleBody(read('section-head'), '.bl-section-head__heading')['overflow-wrap']).toBe(
+      'break-word'
+    )
+  })
+
+  it('display type breaks and its fluid floors fit phone widths', () => {
+    expect(ruleBody(type, '.bl-display')['overflow-wrap']).toBe('break-word')
+    expect(tokens).toContain('--bl-text-display-xl: clamp(2.5rem, 1rem + 7vw, 6rem)')
+    expect(tokens).toContain('--bl-text-display-lg: clamp(1.875rem, 0.75rem + 5vw, 3.375rem)')
+  })
+
+  it('telemetry values and spec labels wrap inside their cells', () => {
+    const value = ruleBody(read('telemetry'), '.bl-telemetry__value')
+    expect(value['min-width']).toBe('0')
+    expect(value['overflow-wrap']).toBe('anywhere')
+    expect(value['flex-wrap']).toBe('wrap')
+    const panel = read('spec-panel')
+    expect(ruleBody(panel, '.bl-spec-row')['grid-template-columns']).toBe(
+      'minmax(0, 8rem) minmax(0, 1fr)'
+    )
+    expect(ruleBody(panel, '.bl-spec-row__label')['overflow-wrap']).toBe('anywhere')
+  })
+})

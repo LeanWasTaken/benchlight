@@ -1,11 +1,15 @@
 @layer components {
   .bl-readout {
     display: inline-flex;
+    flex-wrap: wrap;
+    max-width: 100%;
     align-items: baseline;
     gap: 8px;
     margin: 0;
   }
   .bl-readout__value {
+    min-width: 0;
+    overflow-wrap: anywhere;
     font-family: var(--bl-font-mono);
     font-size: 2rem;
     font-weight: 500;

@@ -70,7 +70,7 @@ describe('.bl-prose under a CSS reset', () => {
   const css = read('css/components/prose.css')
   it('restores ordered lists', () => {
     const rule = body(css, '.bl-prose ol')
-    expect(rule).toContain('padding-left: 20px;')
+    expect(rule).toContain('padding-left: 1.75em;')
     expect(rule).toContain('list-style: decimal;')
   })
   it('sizes and weights h4-h6 and strong explicitly', () => {

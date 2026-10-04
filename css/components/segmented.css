@@ -4,6 +4,7 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 4px;
+    max-width: 100%;
     padding: 2px;
     background: var(--bl-surface);
     border: 1px solid var(--bl-separator);
@@ -16,6 +17,7 @@
     justify-content: center;
     min-width: 40px;
     padding: 6px 12px;
+    overflow-wrap: anywhere;
     background: transparent;
     border: 0;
     border-radius: var(--bl-radius-pill);

@@ -51,6 +51,11 @@
   .bl-index-row__meta {
     margin-bottom: 8px;
   }
+  .bl-index-row__meta,
+  .bl-index-row__title,
+  .bl-index-row__desc {
+    overflow-wrap: break-word;
+  }
   .bl-index-row__title {
     margin-bottom: 6px;
     transition: color var(--bl-duration-fast) ease;

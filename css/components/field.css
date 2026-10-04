@@ -3,7 +3,12 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    min-width: 0;
     margin-bottom: 20px;
+  }
+  .bl-field__hint,
+  .bl-field__label {
+    overflow-wrap: anywhere;
   }
   .bl-field__hint {
     margin: 0;
@@ -22,6 +27,13 @@
     font-size: var(--bl-text-small);
     color: var(--bl-ink-1);
     transition: border-color var(--bl-duration-fast) ease;
+  }
+  /* iOS Safari zooms the page when a control under 16px takes focus. */
+  @media (pointer: coarse) {
+    .bl-input,
+    .bl-select {
+      font-size: 1rem;
+    }
   }
   .bl-input:hover,
   .bl-select:hover {

@@ -8,6 +8,7 @@
   }
   .bl-section-head__heading {
     margin: 0;
+    overflow-wrap: break-word;
     font-size: var(--bl-text-heading);
     font-weight: 600;
     line-height: var(--bl-leading-heading);
