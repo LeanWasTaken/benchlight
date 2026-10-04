@@ -39,7 +39,9 @@ describe('foundation CSS', () => {
   })
 
   it('narrows the gutter at 480px', () => {
-    expect(read('css/layout.css')).toContain('padding-inline: var(--bl-layout-gutter-narrow);')
+    expect(read('css/layout.css')).toContain(
+      'padding-inline: max(var(--bl-layout-gutter-narrow), env(safe-area-inset-left))'
+    )
   })
 
   it('hides bl-sr-only content without margin, padding or border', () => {

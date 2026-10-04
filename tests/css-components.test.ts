@@ -18,7 +18,7 @@ const REQUIRED: Record<string, string[]> = {
     ".bl-tabbar__item[aria-current='page']",
     'body:has(.bl-tabbar)',
     'html:has(.bl-tabbar)',
-    '--bl-scroll-offset-bottom: 96px'
+    '--bl-scroll-offset-bottom: calc(96px + env(safe-area-inset-bottom))'
   ],
   colophon: ['.bl-colophon__inner', '.bl-colophon__items a:hover'],
   'skip-link': ['.bl-skip-link:focus'],
@@ -115,8 +115,74 @@ describe('anchored behaviour', () => {
   it('reserves room for the tab bar below 40em only', () => {
     const css = read('tabbar')
     const narrow = ['@media (max-width: 39.99em)']
-    expect(ruleBody(css, 'body:has(.bl-tabbar)', narrow)['padding-bottom']).toBe('80px')
-    expect(ruleBody(css, 'html:has(.bl-tabbar)', narrow)['--bl-scroll-offset-bottom']).toBe('96px')
+    expect(ruleBody(css, 'body:has(.bl-tabbar)', narrow)['padding-bottom']).toBe(
+      'calc(80px + env(safe-area-inset-bottom))'
+    )
+    expect(ruleBody(css, 'html:has(.bl-tabbar)', narrow)['--bl-scroll-offset-bottom']).toBe(
+      'calc(96px + env(safe-area-inset-bottom))'
+    )
+  })
+
+  it('keeps the tab bar and the page column clear of device safe areas', () => {
+    const bar = ruleBody(read('tabbar'), '.bl-tabbar')
+    expect(bar.bottom).toBe('calc(12px + env(safe-area-inset-bottom))')
+    expect(bar.left).toBe('calc(12px + env(safe-area-inset-left))')
+    expect(bar.right).toBe('calc(12px + env(safe-area-inset-right))')
+    const layout = readFileSync(new URL('../css/layout.css', import.meta.url), 'utf8')
+    for (const within of [[], ['@media (max-width: 30em)']]) {
+      const gutter = ruleBody(layout, '.bl-col', within)['padding-inline']
+      expect(gutter).toMatch(
+        /^max\(var\(--bl-layout-gutter(-narrow)?\), env\(safe-area-inset-left\)\)/
+      )
+      expect(gutter).toMatch(
+        /max\(var\(--bl-layout-gutter(-narrow)?\), env\(safe-area-inset-right\)\)$/
+      )
+    }
+  })
+
+  it('shrinks tab bar items and truncates their labels instead of overflowing', () => {
+    const css = read('tabbar')
+    const item = ruleBody(css, '.bl-tabbar__item')
+    expect(item['min-width']).toBe('0')
+    expect(item['min-height']).toBe('44px')
+    expect(item.padding).toBe('8px 4px')
+    const label = ruleBody(css, '.bl-tabbar__label')
+    expect(label['text-overflow']).toBe('ellipsis')
+    expect(label['white-space']).toBe('nowrap')
+    expect(label['max-width']).toBe('100%')
+  })
+
+  it('scrolls the site bar nav sideways on one line, keeping the brand ellipsised and the switch fixed', () => {
+    const css = read('site-bar')
+    const wrap = ruleBody(css, '.bl-site-bar__navwrap')
+    expect(wrap['overflow-x']).toBe('auto')
+    expect(wrap['min-width']).toBe('0')
+    expect(wrap['scroll-padding-inline']).toBe('16px')
+    expect(wrap['scrollbar-width']).toBe('none')
+    expect(wrap['mask-image']!.replace(/\s+/g, '')).toContain(
+      'linear-gradient(toright,transparent,#00012px'
+    )
+    expect(wrap.padding).toBe('4px 12px')
+    expect(wrap.display).toBe('block')
+    expect(ruleBody(css, '.bl-site-bar__brand')['text-overflow']).toBe('ellipsis')
+    expect(ruleBody(css, '.bl-site-bar__brand')['min-width']).toBe('min(max-content, 7rem)')
+    expect(ruleBody(css, '.bl-site-bar__brand > svg')['vertical-align']).toBe('middle')
+    expect(ruleBody(css, '.bl-site-bar__actions')['flex-shrink']).toBe('0')
+    expect(ruleBody(css, '.bl-site-bar__link')['white-space']).toBe('nowrap')
+  })
+
+  it('hides the site bar nav below 40em only when a tab bar replaces it', () => {
+    const css = read('site-bar')
+    const narrow = ['@media (max-width: 39.99em)']
+    expect(ruleBody(css, 'html:has(.bl-tabbar) .bl-site-bar__navwrap', narrow).display).toBe('none')
+    expect(() => ruleBody(css, '.bl-site-bar__navwrap', narrow)).toThrow()
+  })
+
+  it('lets the site bar scroll away on short screens and zeroes the top scroll offset', () => {
+    const css = read('site-bar')
+    const short = ['@media (max-height: 30em)']
+    expect(ruleBody(css, '.bl-site-bar', short).position).toBe('static')
+    expect(ruleBody(css, 'html', short)['--bl-scroll-offset-top']).toBe('0px')
   })
 
   it('dims a disabled button and blocks pointer events on aria-disabled', () => {
