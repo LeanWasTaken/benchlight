@@ -1,6 +1,6 @@
 {
   "name": "benchlight",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "packageManager": "bun@1.4.2",
   "private": true,
   "description": "Benchlight, the design system for Krists's personal web projects",
