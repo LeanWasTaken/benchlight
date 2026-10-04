@@ -1,0 +1,61 @@
+@layer components {
+  .bl-telemetry {
+    overflow: hidden;
+    background: var(--bl-surface);
+    border: 1px solid var(--bl-separator);
+    border-radius: var(--bl-radius-card);
+  }
+  .bl-ruler {
+    height: 8px;
+    opacity: 0.6;
+    background:
+      repeating-linear-gradient(
+        90deg,
+        var(--bl-separator) 0,
+        var(--bl-separator) 1px,
+        transparent 1px,
+        transparent 8px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        var(--bl-ink-3) 0,
+        var(--bl-ink-3) 1px,
+        transparent 1px,
+        transparent 40px
+      );
+  }
+  .bl-telemetry__cells {
+    display: grid;
+  }
+  .bl-telemetry__cell {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    padding: 16px;
+  }
+  .bl-telemetry__cell + .bl-telemetry__cell {
+    border-top: 1px solid var(--bl-separator);
+  }
+  .bl-telemetry__value {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 28px;
+    font-family: var(--bl-font-mono);
+    font-size: var(--bl-text-annotation);
+    font-variant-numeric: tabular-nums;
+    color: var(--bl-ink-1);
+  }
+  @media (min-width: 640px) {
+    .bl-telemetry__cells {
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(0, 1fr);
+      grid-template-columns: var(--bl-telemetry-columns, none);
+    }
+    .bl-telemetry__cell + .bl-telemetry__cell {
+      border-top: 0;
+      border-left: 1px solid var(--bl-separator);
+    }
+  }
+}

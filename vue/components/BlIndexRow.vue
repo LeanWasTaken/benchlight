@@ -1,0 +1,40 @@
+<template>
+  <li class="bl-index__item">
+    <component
+      :is="tag"
+      v-bind="bindings"
+      class="bl-index-row"
+      :class="{ 'bl-index-row--compact': compact }"
+      :aria-current="selected ? 'true' : undefined"
+    >
+      <span v-if="$slots.icon" class="bl-index-row__icon" aria-hidden="true">
+        <slot name="icon" />
+      </span>
+      <span v-if="$slots.meta" class="bl-index-row__meta"><slot name="meta" /></span>
+      <span class="bl-index-row__title"><slot name="title" /></span>
+      <span v-if="$slots.default" class="bl-index-row__desc"><slot /></span>
+    </component>
+  </li>
+</template>
+
+<script setup lang="ts">
+  import { computed } from 'vue'
+  import { linkBindings, resolveTag } from '../internal/link'
+  import type { LinkAs, LinkTo } from '../types'
+
+  const props = defineProps<{
+    as?: LinkAs
+    to?: LinkTo
+    href?: string
+    selected?: boolean
+    compact?: boolean
+  }>()
+
+  const tag = computed(() => resolveTag(props.as, props.to, props.href, 'div'))
+  const bindings = computed(() => {
+    if (tag.value === 'div') return linkBindings('div', props.to, props.href)
+    if (tag.value === 'button')
+      return { ...linkBindings('button', props.to, props.href), type: 'button' }
+    return linkBindings(tag.value, props.to, props.href)
+  })
+</script>

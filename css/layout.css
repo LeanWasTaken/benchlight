@@ -1,0 +1,24 @@
+@layer components {
+  .bl-col {
+    width: 100%;
+    max-width: var(--bl-layout-column);
+    margin-inline: auto;
+    padding-inline: var(--bl-layout-gutter);
+  }
+  .bl-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  @media (max-width: 480px) {
+    .bl-col {
+      padding-inline: var(--bl-layout-gutter-narrow);
+    }
+  }
+}

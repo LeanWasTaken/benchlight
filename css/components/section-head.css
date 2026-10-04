@@ -1,0 +1,47 @@
+@layer components {
+  .bl-section-head {
+    margin-bottom: 20px;
+  }
+  .bl-section-head__eyebrow {
+    display: block;
+    margin: 0 0 4px;
+  }
+  .bl-section-head__heading {
+    margin: 0;
+    font-size: var(--bl-text-heading);
+    font-weight: 600;
+    line-height: var(--bl-leading-heading);
+    letter-spacing: var(--bl-tracking-heading);
+    color: var(--bl-ink-1);
+  }
+  .bl-section-head--ruled {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--bl-separator);
+  }
+  .bl-section-head--bar {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--bl-separator);
+  }
+  .bl-section-head--bar .bl-section-head__eyebrow {
+    margin: 0;
+  }
+  .bl-section-head__action {
+    flex-shrink: 0;
+  }
+  .bl-section-head:not(.bl-section-head--bar):has(> .bl-section-head__action) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    column-gap: 16px;
+  }
+  .bl-section-head:not(.bl-section-head--bar):has(> .bl-section-head__action)
+    > .bl-section-head__eyebrow {
+    grid-column: 1 / -1;
+  }
+}

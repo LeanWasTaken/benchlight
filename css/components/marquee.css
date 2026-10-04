@@ -1,0 +1,50 @@
+@property --bl-mask-l {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+
+@property --bl-mask-r {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 100%;
+}
+
+@layer components {
+  .bl-marquee {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .bl-marquee__content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .bl-marquee[data-overflowing] {
+    --bl-mask-l: 0%;
+    --bl-mask-r: 88%;
+    -webkit-mask: linear-gradient(
+        to right,
+        transparent 0,
+        #000 var(--bl-mask-l),
+        #000 var(--bl-mask-r),
+        transparent 100%
+      )
+      center / 100% 100% no-repeat;
+    mask: linear-gradient(
+        to right,
+        transparent 0,
+        #000 var(--bl-mask-l),
+        #000 var(--bl-mask-r),
+        transparent 100%
+      )
+      center / 100% 100% no-repeat;
+  }
+  .bl-marquee[data-overflowing] .bl-marquee__content {
+    will-change: transform;
+  }
+}

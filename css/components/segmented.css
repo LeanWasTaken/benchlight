@@ -1,0 +1,74 @@
+@layer components {
+  .bl-segmented {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    padding: 2px;
+    background: var(--bl-surface);
+    border: 1px solid var(--bl-separator);
+    border-radius: var(--bl-radius-pill);
+  }
+  .bl-segmented__item {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    padding: 6px 12px;
+    background: transparent;
+    border: 0;
+    border-radius: var(--bl-radius-pill);
+    font-family: var(--bl-font-mono);
+    font-size: var(--bl-text-annotation);
+    color: var(--bl-ink-2);
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      color var(--bl-duration-fast) ease,
+      background-color var(--bl-duration-fast) ease;
+  }
+  /* Invisible hit area: ~29px item + 8px above and below, meeting at the 4px gap midpoint. */
+  .bl-segmented__item::before {
+    position: absolute;
+    inset: -8px -2px;
+    content: '';
+  }
+  .bl-segmented--compact .bl-segmented__item {
+    padding: 6px 10px;
+    font-size: var(--bl-text-micro);
+    letter-spacing: var(--bl-tracking-annotation);
+    text-transform: uppercase;
+    color: var(--bl-ink-3);
+  }
+  .bl-segmented__item:hover {
+    color: var(--bl-ink-1);
+  }
+  .bl-segmented__item[aria-pressed='true'],
+  .bl-segmented__item[aria-current],
+  .bl-segmented__item:has(:checked) {
+    background: var(--bl-raised);
+    color: var(--bl-ink-1);
+    box-shadow:
+      var(--bl-shadow-thumb),
+      inset 0 0 0 1px var(--bl-control-border);
+  }
+  .bl-segmented__item:has(input:focus-visible) {
+    outline: 2px solid var(--bl-trace);
+    outline-offset: 2px;
+  }
+  .bl-segmented__item input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  @media (forced-colors: active) {
+    .bl-segmented__item[aria-pressed='true'],
+    .bl-segmented__item[aria-current],
+    .bl-segmented__item:has(:checked) {
+      forced-color-adjust: none;
+      background: Highlight;
+      color: HighlightText;
+    }
+  }
+}

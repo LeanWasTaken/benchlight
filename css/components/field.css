@@ -1,0 +1,56 @@
+@layer components {
+  .bl-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .bl-field__hint {
+    margin: 0;
+    font-size: var(--bl-text-small);
+    color: var(--bl-ink-2);
+  }
+  .bl-input,
+  .bl-select {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    background: var(--bl-raised);
+    border: 1px solid var(--bl-control-border);
+    border-radius: var(--bl-radius-chip);
+    font: inherit;
+    font-size: var(--bl-text-small);
+    color: var(--bl-ink-1);
+    transition: border-color var(--bl-duration-fast) ease;
+  }
+  .bl-input:hover,
+  .bl-select:hover {
+    border-color: var(--bl-ink-3);
+  }
+  .bl-input:focus-visible,
+  .bl-select:focus-visible {
+    border-color: var(--bl-trace);
+  }
+  .bl-input::placeholder {
+    color: var(--bl-ink-3);
+  }
+  .bl-select option {
+    background: var(--bl-raised);
+    color: var(--bl-ink-1);
+  }
+  .bl-range {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .bl-range input[type='range'] {
+    flex: 1;
+    min-width: 0;
+    min-height: 44px;
+    accent-color: var(--bl-trace);
+  }
+  .bl-range__value {
+    min-width: 56px;
+    text-align: right;
+  }
+}

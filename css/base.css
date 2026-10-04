@@ -1,0 +1,49 @@
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  html {
+    background: var(--bl-canvas);
+    font-family: var(--bl-font-sans);
+    -webkit-font-smoothing: antialiased;
+    scroll-padding-block: var(--bl-scroll-offset-top, 72px) var(--bl-scroll-offset-bottom, 0px);
+  }
+  body {
+    min-height: 100dvh;
+    margin: 0;
+    background: var(--bl-canvas);
+    color: var(--bl-ink-1);
+    font-size: var(--bl-text-body);
+    line-height: var(--bl-leading-body);
+    transition:
+      background-color var(--bl-duration-base) ease,
+      color var(--bl-duration-base) ease;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--bl-trace) 25%, transparent);
+  }
+  /* Doubled so a reset's :-moz-focusring rule (same layer, later source) cannot win. */
+  :focus-visible:focus-visible {
+    outline: 2px solid var(--bl-trace);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+  [tabindex='-1']:focus-visible {
+    outline: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

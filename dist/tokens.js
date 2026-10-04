@@ -1,0 +1,91 @@
+// tokens/tokens.ts
+var colorNames = [
+  "canvas",
+  "surface",
+  "raised",
+  "separator",
+  "control-border",
+  "ink-1",
+  "ink-2",
+  "ink-3",
+  "trace",
+  "copper",
+  "phosphor",
+  "danger"
+];
+var light = {
+  canvas: "#eff1f3",
+  surface: "#f8f9fa",
+  raised: "#ffffff",
+  separator: "#d9dde1",
+  "control-border": "#7f858c",
+  "ink-1": "#1a1d21",
+  "ink-2": "#4e555d",
+  "ink-3": "#646c75",
+  trace: "#2151cc",
+  copper: "#a6512a",
+  phosphor: "#1f7a46",
+  danger: "#a42d37"
+};
+var dark = {
+  canvas: "#101214",
+  surface: "#16191c",
+  raised: "#1c2024",
+  separator: "#2a2f35",
+  "control-border": "#69707a",
+  "ink-1": "#e8eaed",
+  "ink-2": "#a2a9b0",
+  "ink-3": "#8a929b",
+  trace: "#97b1ff",
+  copper: "#e8936a",
+  phosphor: "#7bd9a2",
+  danger: "#ff9098"
+};
+var tokens = {
+  color: { light, dark },
+  font: {
+    sans: "Geist, ui-sans-serif, system-ui, sans-serif",
+    mono: "'Geist Mono', ui-monospace, SFMono-Regular, monospace",
+    display: "'Bricolage Grotesque', 'Avenir Next Condensed', 'Arial Narrow', sans-serif"
+  },
+  text: {
+    micro: "0.6875rem",
+    annotation: "0.8125rem",
+    small: "0.9375rem",
+    body: "1.0625rem",
+    heading: "1.25rem",
+    "display-xl": "clamp(3.375rem, 9vw, 6rem)",
+    "display-lg": "clamp(2.25rem, 6vw, 3.375rem)",
+    "display-md": "clamp(1.875rem, 4.5vw, 2.5rem)"
+  },
+  leading: { body: "1.6", lede: "1.625", heading: "1.3", display: "0.95", "display-md": "1.05" },
+  tracking: {
+    annotation: "0.06em",
+    nav: "0.08em",
+    silkscreen: "0.12em",
+    heading: "-0.025em",
+    display: "-0.01em"
+  },
+  radius: { chip: "6px", card: "12px", pill: "9999px" },
+  layout: { column: "1080px", prose: "720px", gutter: "24px", "gutter-narrow": "16px" },
+  breakpoint: { sm: "640px", md: "768px", lg: "1024px", xl: "1280px" },
+  ease: { out: "cubic-bezier(0.32, 0.72, 0, 1)" },
+  duration: {
+    fast: "150ms",
+    base: "200ms",
+    rise: "500ms",
+    "rise-step": "60ms",
+    "page-leave": "140ms",
+    "page-enter": "180ms"
+  },
+  shadow: {
+    thumb: "0 1px 2px rgb(0 0 0 / 0.08)",
+    float: "0 12px 32px -12px rgb(0 0 0 / 0.3)",
+    well: "inset 0 1px 2px rgb(0 0 0 / 0.06)",
+    glow: "0 0 8px"
+  }
+};
+export {
+  colorNames,
+  tokens
+};

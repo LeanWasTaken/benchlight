@@ -1,0 +1,34 @@
+@layer components {
+  .bl-led {
+    display: inline-block;
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--bl-ink-3);
+  }
+  .bl-led--on {
+    background: var(--bl-phosphor);
+    box-shadow: var(--bl-shadow-glow) var(--bl-phosphor);
+  }
+  .bl-led--danger {
+    background: var(--bl-danger);
+  }
+  @media (forced-colors: active) {
+    .bl-led {
+      forced-color-adjust: none;
+      box-sizing: border-box;
+      background: Canvas;
+      border: 1px solid GrayText;
+    }
+    .bl-led--on {
+      background: Highlight;
+      border-color: Highlight;
+      box-shadow: none;
+    }
+    .bl-led--danger {
+      background: CanvasText;
+      border-color: CanvasText;
+    }
+  }
+}

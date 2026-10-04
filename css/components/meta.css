@@ -1,0 +1,17 @@
+@layer components {
+  .bl-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    margin: 0;
+    text-transform: uppercase;
+  }
+  .bl-meta__sep {
+    color: var(--bl-separator);
+  }
+  .bl-meta__key {
+    font-weight: 500;
+    color: var(--bl-ink-2);
+    transition: color var(--bl-duration-fast) ease;
+  }
+}
