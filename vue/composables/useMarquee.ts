@@ -10,7 +10,8 @@ export interface MarqueeOptions {
   overshoot?: number
 }
 
-// Pauses at both ends, never animates under reduced motion; mask edges follow the text.
+// Pauses at both ends, never animates under reduced motion (the CSS wraps the text instead); mask
+// edges follow the text. Re-measures on container, content and font changes.
 export function useMarquee(
   container: Ref<HTMLElement | null>,
   content: Ref<HTMLElement | null>,
