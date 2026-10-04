@@ -3,7 +3,12 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    min-width: 0;
     margin-bottom: 20px;
+  }
+  .bl-field__hint,
+  .bl-field__label {
+    overflow-wrap: anywhere;
   }
   .bl-field__hint {
     margin: 0;
@@ -23,6 +28,13 @@
     color: var(--bl-ink-1);
     transition: border-color var(--bl-duration-fast) ease;
   }
+  /* iOS Safari zooms the page when a control under 16px takes focus. */
+  @media (pointer: coarse) {
+    .bl-input,
+    .bl-select {
+      font-size: 1rem;
+    }
+  }
   .bl-input:hover,
   .bl-select:hover {
     border-color: var(--bl-ink-3);
@@ -40,17 +52,23 @@
   }
   .bl-range {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 12px;
+    gap: 0 12px;
   }
   .bl-range input[type='range'] {
     flex: 1;
-    min-width: 0;
+    min-width: 96px;
     min-height: 44px;
     accent-color: var(--bl-trace);
   }
+  /* Consumers reserve value width with --bl-range-value-width so the track length stays fixed. */
   .bl-range__value {
-    min-width: 56px;
+    flex: 0 1 auto;
+    min-width: var(--bl-range-value-width, 56px);
+    max-width: 50%;
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
     text-align: right;
   }
 }

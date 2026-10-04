@@ -10,7 +10,8 @@ export interface MarqueeOptions {
   overshoot?: number
 }
 
-// Pauses at both ends, never animates under reduced motion; mask edges follow the text.
+// Pauses at both ends, never animates under reduced motion (the CSS wraps the text instead); mask
+// edges follow the text. Re-measures on container, content and font changes.
 export function useMarquee(
   container: Ref<HTMLElement | null>,
   content: Ref<HTMLElement | null>,
@@ -20,6 +21,10 @@ export function useMarquee(
   const reduced = useReducedMotion()
   let animations: Animation[] = []
   let resizeTimer: ReturnType<typeof setTimeout> | null = null
+  let measured = ''
+  let disposed = false
+  let resizeObserver: ResizeObserver | null = null
+  let mutationObserver: MutationObserver | null = null
 
   function stop(): void {
     for (const animation of animations) animation.cancel()
@@ -34,6 +39,7 @@ export function useMarquee(
       overflowing.value = false
       return
     }
+    measured = `${text.scrollWidth}:${box.clientWidth}`
     const overflow = text.scrollWidth - box.clientWidth
     overflowing.value = overflow > 1
     if (!overflowing.value || reduced.value) return
@@ -66,20 +72,53 @@ export function useMarquee(
     ]
   }
 
-  function onResize(): void {
-    if (resizeTimer) clearTimeout(resizeTimer)
-    resizeTimer = setTimeout(refresh, 150)
+  // Observers fire on mount and for changes that leave the widths alone (animated transforms
+  // never do), so only a changed measurement restarts the animation.
+  function refreshIfChanged(): void {
+    const box = container.value
+    const text = content.value
+    if (box && text && measured === `${text.scrollWidth}:${box.clientWidth}`) return
+    refresh()
   }
+
+  function schedule(update: () => void): void {
+    if (resizeTimer) clearTimeout(resizeTimer)
+    resizeTimer = setTimeout(update, 150)
+  }
+
+  const onResize = (): void => schedule(refresh)
+  const onObserved = (): void => schedule(refreshIfChanged)
 
   watch(reduced, refresh)
   onMounted(() => {
     refresh()
     window.addEventListener('resize', onResize, { passive: true })
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(onObserved)
+      if (container.value) resizeObserver.observe(container.value)
+      if (content.value) resizeObserver.observe(content.value)
+    }
+    if (typeof MutationObserver !== 'undefined' && content.value) {
+      mutationObserver = new MutationObserver(onObserved)
+      mutationObserver.observe(content.value, {
+        childList: true,
+        characterData: true,
+        subtree: true
+      })
+    }
+    // Web fonts change glyph widths after the first measurement.
+    if (typeof document !== 'undefined' && document.fonts?.ready)
+      void document.fonts.ready.then(() => {
+        if (!disposed) onObserved()
+      })
   })
   onBeforeUnmount(() => {
+    disposed = true
     stop()
     if (resizeTimer) clearTimeout(resizeTimer)
     window.removeEventListener('resize', onResize)
+    resizeObserver?.disconnect()
+    mutationObserver?.disconnect()
   })
 
   return { overflowing, refresh }

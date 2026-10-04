@@ -9,6 +9,7 @@
     text-transform: uppercase;
     letter-spacing: var(--bl-tracking-display);
     line-height: var(--bl-leading-display);
+    overflow-wrap: break-word;
     color: var(--bl-ink-1);
   }
   .bl-display--xl {
@@ -40,6 +41,7 @@
   .bl-spec-row__label,
   .bl-telemetry__label,
   .bl-field__label {
+    overflow-wrap: anywhere;
     font-family: var(--bl-font-mono);
     font-size: var(--bl-text-micro);
     font-weight: 500;
@@ -48,7 +50,7 @@
     color: var(--bl-ink-3);
   }
   .bl-lede {
-    max-width: var(--bl-layout-prose);
+    max-width: min(var(--bl-layout-prose), 68ch);
     margin: 0;
     font-size: var(--bl-text-body);
     line-height: var(--bl-leading-lede);

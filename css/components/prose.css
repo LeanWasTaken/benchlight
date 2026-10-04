@@ -1,6 +1,7 @@
 @layer components {
   .bl-prose {
-    max-width: var(--bl-layout-prose);
+    max-width: min(var(--bl-layout-prose), 68ch);
+    overflow-wrap: break-word;
     font-size: var(--bl-text-body);
     line-height: var(--bl-leading-lede);
     color: var(--bl-ink-2);
@@ -60,7 +61,7 @@
   }
   .bl-prose ol {
     margin: 0 0 16px;
-    padding-left: 20px;
+    padding-left: 1.75em;
     list-style: decimal;
   }
   .bl-prose li {
@@ -84,6 +85,7 @@
   }
   .bl-prose :not(pre) > code {
     padding: 2px 4px;
+    overflow-wrap: anywhere;
     background: var(--bl-surface);
     border: 1px solid var(--bl-separator);
     border-radius: 4px;
@@ -110,5 +112,30 @@
     border-left: 2px solid var(--bl-separator);
     color: var(--bl-ink-2);
     font-style: italic;
+  }
+  .bl-prose :is(img, video, iframe, svg, canvas) {
+    max-width: 100%;
+    height: auto;
+  }
+  .bl-prose table {
+    display: block;
+    max-width: 100%;
+    margin: 16px 0;
+    overflow-x: auto;
+    border-collapse: collapse;
+  }
+  .bl-prose :is(th, td) {
+    padding: 8px 12px;
+    border: 1px solid var(--bl-separator);
+    text-align: left;
+  }
+  .bl-prose th {
+    font-weight: 600;
+    color: var(--bl-ink-1);
+  }
+  .bl-prose hr {
+    margin: 32px 0;
+    border: 0;
+    border-top: 1px solid var(--bl-separator);
   }
 }

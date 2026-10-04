@@ -19,6 +19,8 @@
   import { computed, inject, useAttrs, type StyleValue } from 'vue'
   import { FIELD_CONTEXT } from '../types'
 
+  // CSS: the track keeps at least 96px; set `--bl-range-value-width` to reserve room for the longest
+  // value (default 56px) so the track does not change length while dragging.
   const props = withDefaults(
     defineProps<{
       id?: string

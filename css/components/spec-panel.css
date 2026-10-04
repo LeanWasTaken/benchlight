@@ -7,19 +7,25 @@
     border-radius: var(--bl-radius-card);
   }
   .bl-spec-row {
-    display: grid;
-    grid-template-columns: 128px 1fr;
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 16px;
+    gap: 4px 16px;
     padding: 12px 16px;
   }
   .bl-spec-row + .bl-spec-row {
     border-top: 1px solid var(--bl-separator);
   }
   .bl-spec-row__label {
+    flex: 0 1 8rem;
+    min-width: 0;
     margin: 0;
+    overflow-wrap: anywhere;
+    hyphens: auto;
   }
   .bl-spec-row__value {
+    flex: 1 1 14rem;
+    min-width: 0;
     margin: 0;
     font-family: var(--bl-font-mono);
     font-size: var(--bl-text-annotation);
@@ -35,11 +41,5 @@
   }
   .bl-spec-row__value a:hover {
     text-decoration-thickness: 2px;
-  }
-  @media (max-width: 480px) {
-    .bl-spec-row {
-      grid-template-columns: 1fr;
-      gap: 4px;
-    }
   }
 }

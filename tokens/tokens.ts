@@ -59,8 +59,8 @@ export const tokens = {
     small: '0.9375rem',
     body: '1.0625rem',
     heading: '1.25rem',
-    'display-xl': 'clamp(3.375rem, 9vw, 6rem)',
-    'display-lg': 'clamp(2.25rem, 6vw, 3.375rem)',
+    'display-xl': 'clamp(2.5rem, 1rem + 7vw, 6rem)',
+    'display-lg': 'clamp(1.875rem, 0.75rem + 5vw, 3.375rem)',
     'display-md': 'clamp(1.875rem, 4.5vw, 2.5rem)'
   },
   leading: { body: '1.6', lede: '1.625', heading: '1.3', display: '0.95', 'display-md': '1.05' },
@@ -73,7 +73,7 @@ export const tokens = {
   },
   radius: { chip: '6px', card: '12px', pill: '9999px' },
   layout: { column: '1080px', prose: '720px', gutter: '24px', 'gutter-narrow': '16px' },
-  breakpoint: { sm: '640px', md: '768px', lg: '1024px', xl: '1280px' },
+  breakpoint: { xs: '480px', sm: '640px', md: '768px', lg: '1024px', xl: '1280px' },
   ease: { out: 'cubic-bezier(0.32, 0.72, 0, 1)' },
   duration: {
     fast: '150ms',

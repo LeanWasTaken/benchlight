@@ -9,7 +9,7 @@ classes.
 ## Install
 
 ```json
-"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.3.0"
+"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.4.0"
 ```
 
 The repo is private and the URL uses SSH on purpose: bun turns GitHub https URLs into API tarball
@@ -125,9 +125,10 @@ dependency pre-bundling. Tailwind is optional: only if the app uses it, add
 - Compact font subsets are listed in `fonts/subset/manifest.json`.
 - `playground/src/App.vue` is the markup reference.
 
-Size budget: `dist/benchlight.min.css` stays at or under 28,672 B (`wc -c dist/benchlight.min.css`,
-`tests/bundle.test.ts`) and the compact font subsets under 23,552 B in total (`tests/fonts.test.ts`).
-Raising either needs a CHANGELOG line.
+Size budget: `dist/benchlight.min.css` stays at or under 32,768 B (`wc -c dist/benchlight.min.css`,
+`tests/bundle.test.ts`; it was 28,672 B in v0.3) and the compact font subsets under 23,552 B in total
+(`tests/fonts.test.ts`). The guard is raised in round KiB when legitimate work needs it, and every
+raise gets a CHANGELOG line.
 
 ## Conventions
 
@@ -153,10 +154,32 @@ Raising either needs a CHANGELOG line.
    `tests/vue/barrel.test.ts`.
 5. A new composable also goes into `AUTO_IMPORTS` in `nuxt/module.ts`.
 6. Add it to the playground (`playground/src/App.vue`).
-7. `bun run build` regenerates `dist/` and `API.md`.
-8. Re-record the baselines on both platforms: `bunx playwright test --update-snapshots -g "renders every"`
+7. Add stress cases (long content, narrow container, flex/inline host) to `playground/src/Stress.vue`.
+8. `bun run build` regenerates `dist/` and `API.md`.
+9. Re-record the baselines on both platforms: `bunx playwright test --update-snapshots -g "renders every"`
    and `scripts/visual-linux.sh --update-snapshots -g "renders every"`.
-9. One commit per component.
+10. One commit per component.
+
+## Responsive rules
+
+- Breakpoints are `em`, so they follow the user's font size: `sm` 40em (640px) and `xs` 30em (480px).
+  The `md`, `lg` and `xl` tokens exist for Tailwind and consumers; the library CSS does not use them.
+- Components size by the space they are given, through intrinsic grids and wrapping rather than
+  viewport width, so they also work in a narrow card on a wide screen.
+- Long unbroken content (URLs, hashes, compound words) wraps instead of widening the page.
+- The stress suite is the contract: `/stress.html` renders every component with hostile content and
+  `tests/visual/stress.spec.ts` checks it (see Development).
+- **Gutter.** `BlIndexRow` and `BlPrevNext` links bleed 12px either side for the hover background, so
+  the host needs at least 12px of side padding. `.bl-col` provides 16-24px.
+- **Site bar.** The nav scrolls horizontally on one line when it does not fit. A brand under about
+  7rem never truncates; a longer one ends in an ellipsis; the appearance switch never moves. Below
+  40em the nav stays visible unless a `BlTabBar` is on the page. On screens under 30em tall the bar is
+  static instead of sticky. Bar controls have a negative `scroll-margin` so focusing one never scrolls
+  the page; as a side effect `scrollIntoView()` or a `#hash` aimed at a bar control lands up to about
+  34px off, so target page content instead.
+- **Tab bar.** Five tabs at most; labels end in an ellipsis.
+- **iOS safe areas.** Fixed bars, body padding, scroll offsets and `.bl-col` respect the insets, but
+  only when the page sets `<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">`.
 
 ## Vue component notes
 
@@ -175,12 +198,28 @@ Raising either needs a CHANGELOG line.
   otherwise `href`; `as` `'a'` (the default when `to` or `href` is set) receives `href`, else a
   string `to`; `as` any other tag receives neither. Misuse logs a `[benchlight]` warning in
   development.
-- **BlLog:** `offset` is the absolute index of `lines[0]`; set it when you trim a capped buffer so
-  rows are reused. **BlMsg** is a live region: keep it mounted and change its text, since inserting
+- **BlLog:** text is in `rem` and the default height is 12.5rem (`--bl-log-height`). `offset` is
+  the absolute index of `lines[0]`; set it when you trim a capped buffer so rows are reused. **BlMsg** is a live region: keep it mounted and change its text, since inserting
   it with `v-if` may not be announced.
 - **BlSiteBar** `lift` is reactive. **BlPrevNext** renders nothing without neighbours. `LinkTo`
   accepts any object, so typed router locations pass.
 - **BlMeter:** `:value="null"` renders an indeterminate meter.
+- **BlTelemetry:** `--bl-telemetry-columns` now applies at every width (it used to apply only from
+  640px). The default is auto-fit with 12rem cells; with no custom columns, six cells lay out 3x2 when
+  there is room.
+- **BlSpecPanel:** rows wrap: the label is 8rem and the value drops below it when narrow.
+- **BlColophon:** wraps, and is left-aligned when narrow.
+- **BlMsg:** content sits in `.bl-msg__text`; raw-CSS users should wrap their text in it.
+- **BlRange:** the track keeps at least 96px. `--bl-range-value-width` reserves room for the value
+  (default 56px), so the track does not change length while dragging.
+- **BlMeta:** `separator` draws dashes in CSS (`.bl-meta--sep`); the `.bl-meta__sep` element is gone.
+- **BlMarquee / `useMarquee`:** re-measures when the container, the content or the fonts change.
+  Under reduced motion, overflowing text wraps instead.
+- **BlSegmented:** wraps, with a 16px row gap.
+- **Inputs and selects:** 16px on coarse pointers, so iOS does not zoom on focus.
+- **BlProse:** the measure is `min(720px, 68ch)`; images, video and iframes are capped to the column;
+  tables scroll horizontally (`display: block`, so add `role="table"` if assistive tech should keep the
+  table semantics); display sizes are smaller on phones (`xl` is 40px at 320px wide).
 - **BlSectionHead:** bar mode renders `eyebrow` only (no `heading`). The `action` slot works in both
   modes.
 
@@ -206,17 +245,18 @@ TypeScript from `node_modules`. Types still come from `tokens/index.ts`.
 
 ## Development
 
-| Command                      | What it does                                                                                       |
-| ---------------------------- | -------------------------------------------------------------------------------------------------- |
-| `bun run check`              | lint, format check, typecheck, unit tests (incl. freshness, contrast, budgets)                     |
-| `bun run fixtures`           | packs the working tree, builds and verifies the Nuxt and Vite fixtures; not in `check`, runs in CI |
-| `bun run lint:workflows`     | actionlint over `.github/workflows` (needs Docker)                                                 |
-| `bun run build`              | regenerates tokens, theme, `js/prepaint-script.mjs`, `dist/` (CSS, JS), and `API.md`               |
-| `bun run playground`         | component showcase on Vite                                                                         |
-| `bun run test:visual`        | Playwright axe, keyboard and screenshot checks of the playground (also run in CI on Linux)         |
-| `scripts/visual-linux.sh`    | the same suite in CI's Linux image via Docker; add `--update-snapshots` to re-record Linux shots   |
-| `bun scripts/fetch-fonts.ts` | re-fetches the pinned Google font files and `css/fonts.css`                                        |
-| `scripts/subset-fonts.sh`    | re-cuts the compact font subsets with fontTools                                                    |
+| Command                                            | What it does                                                                                                                                                                                       |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bun run check`                                    | lint, format check, typecheck, unit tests (incl. freshness, contrast, budgets)                                                                                                                     |
+| `bun run fixtures`                                 | packs the working tree, builds and verifies the Nuxt and Vite fixtures; not in `check`, runs in CI                                                                                                 |
+| `bun run lint:workflows`                           | actionlint over `.github/workflows` (needs Docker)                                                                                                                                                 |
+| `bun run build`                                    | regenerates tokens, theme, `js/prepaint-script.mjs`, `dist/` (CSS, JS), and `API.md`                                                                                                               |
+| `bun run playground`                               | component showcase on Vite                                                                                                                                                                         |
+| `bun run test:visual`                              | Playwright axe, keyboard and screenshot checks of the playground (also run in CI on Linux)                                                                                                         |
+| `bunx playwright test tests/visual/stress.spec.ts` | the stress suite (desktop-light only); view the page with `bun run playground` at `/stress.html`. `STRESS_BREAK=overflow\|stack\|small\|overlap` breaks layout on purpose to prove the checks bite |
+| `scripts/visual-linux.sh`                          | the same suite in CI's Linux image via Docker; add `--update-snapshots` to re-record Linux shots                                                                                                   |
+| `bun scripts/fetch-fonts.ts`                       | re-fetches the pinned Google font files and `css/fonts.css`                                                                                                                                        |
+| `scripts/subset-fonts.sh`                          | re-cuts the compact font subsets with fontTools                                                                                                                                                    |
 
 ## Generated files
 

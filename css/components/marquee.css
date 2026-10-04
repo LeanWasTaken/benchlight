@@ -47,4 +47,19 @@
   .bl-marquee[data-overflowing] .bl-marquee__content {
     will-change: transform;
   }
+  /* No animation under reduced motion, so overflowing text wraps instead of hiding. */
+  @media (prefers-reduced-motion: reduce) {
+    .bl-marquee {
+      overflow: visible;
+    }
+    .bl-marquee__content {
+      min-width: 0;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+    .bl-marquee[data-overflowing] {
+      -webkit-mask: none;
+      mask: none;
+    }
+  }
 }
