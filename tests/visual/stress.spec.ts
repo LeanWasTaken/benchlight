@@ -38,9 +38,26 @@ const between = (min: number, max: number) =>
   widthVariants.filter((v) => v.width >= min && v.width <= max)
 
 // Elements that are meant to scroll or clip their own content.
-const SCROLLERS = 'pre, .bl-log, .bl-prose table, .bl-prose table *, .bl-marquee, .bl-sr-only'
+const SCROLLERS =
+  'pre, .bl-log, .bl-prose table, .bl-prose table *, .bl-marquee, .bl-sr-only, .bl-table--scroll .bl-table__scroller, .bl-table--scroll .bl-table__scroller *, .bl-table[data-stacked] thead, .bl-table[data-stacked] thead *'
+
+// A root font size applied after mount would not re-measure BlTable (it reacts to inline size only),
+// so it is applied before the app mounts, as a user's text-size setting is.
+const rootInit = new WeakSet<Page>()
 
 async function openVariant(page: Page, id: string, v: Variant): Promise<void> {
+  if (!rootInit.has(page)) {
+    rootInit.add(page)
+    await page.addInitScript(() => {
+      document.addEventListener('readystatechange', () => {
+        const m = /(?:^|; )stressRoot=(\d+)/.exec(document.cookie)
+        if (m) document.documentElement.style.fontSize = `${m[1]}%`
+      })
+    })
+  }
+  await page
+    .context()
+    .addCookies([{ name: 'stressRoot', value: String(v.root), url: 'http://localhost:4173' }])
   await page.setViewportSize({ width: v.width, height: HEIGHT })
   await page.goto(`/stress.html?case=${id}`)
   await page.evaluate(() => document.fonts.ready)
@@ -412,6 +429,59 @@ const metaSepNotLast: Probe = (page) =>
     return null
   })
 
+/** The table root does (true) or does not (false) carry data-stacked. */
+const stacked =
+  (expected: boolean): Probe =>
+  (page) =>
+    page.evaluate((expected) => {
+      const el = document.querySelector('.bl-table')
+      if (!el) return 'no .bl-table'
+      return el.hasAttribute('data-stacked') === expected
+        ? null
+        : `data-stacked is ${!expected}, expected ${expected}`
+    }, expected)
+
+/** Computed position of the first cell of the first body row is sticky (scroll-mode first column). */
+const firstCellSticky: Probe = (page) =>
+  page.evaluate(() => {
+    const el = document.querySelector('.bl-table--scroll tbody tr > :first-child')
+    if (!el) return 'no first body cell'
+    const position = getComputedStyle(el).position
+    return position === 'sticky' ? null : `first body cell position is ${position}`
+  })
+
+/** Stacked mode: the first td's label and the first line of its value share a line (tops within 4px). */
+const labelBesideValue: Probe = (page) =>
+  page.evaluate(() => {
+    const td = document.querySelector('.bl-table tbody td')
+    const label = td?.querySelector('.bl-table__label')
+    if (!td || !label) return 'no td or label'
+    const range = document.createRange()
+    const value = [...td.childNodes].find((n) => n !== label && (n.textContent ?? '').trim() !== '')
+    if (!value) return 'no value node'
+    range.selectNodeContents(value)
+    const first = range.getClientRects()[0]
+    if (!first) return 'value has no box'
+    const delta = Math.abs(label.getBoundingClientRect().top - first.top)
+    return delta <= 4 ? null : `label top is ${delta.toFixed(1)}px from the value's first line`
+  })
+
+/** Scroll mode after scrolling the scroller 200px: header and body first cells share a left edge. */
+const stickyAlignedAfterScroll: Probe = (page) =>
+  page.evaluate(async () => {
+    const scroller = document.querySelector<HTMLElement>('.bl-table__scroller')
+    if (!scroller) return 'no scroller'
+    if (scroller.scrollWidth <= scroller.clientWidth) return 'scroller does not overflow'
+    scroller.scrollLeft = 200
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    if (scroller.scrollLeft < 100) return `scrollLeft is ${scroller.scrollLeft}`
+    const head = document.querySelector('thead th:first-child')!.getBoundingClientRect().left
+    const body = document
+      .querySelector('tbody tr:first-child > :first-child')!
+      .getBoundingClientRect().left
+    return Math.abs(head - body) <= 1 ? null : `header left ${head} vs body left ${body}`
+  })
+
 interface Check {
   name: string
   variants: Variant[]
@@ -754,6 +824,101 @@ const cases: Case[] = [
         probe: minFontSize('.bl-log', 20)
       }
     ]
+  },
+
+  // Tables
+  {
+    id: 'table-wide',
+    checks: [
+      ...generic(),
+      { name: 'stacks-at-320', variants: only('w320'), probe: stacked(true) },
+      {
+        name: 'sort-strip-visible',
+        variants: only('w320'),
+        probe: visibleInViewport('.bl-table__sort-strip .bl-table__sort')
+      },
+      { name: 'label-beside-value', variants: only('w320'), probe: labelBesideValue }
+    ]
+  },
+  {
+    id: 'table-url',
+    checks: [
+      { name: 'no-page-overflow', variants: only('w320', 'w1280'), probe: noPageOverflow },
+      { name: 'not-clipped', variants: ALL, probe: clipped() }
+    ]
+  },
+  {
+    id: 'table-long-text',
+    checks: [
+      ...generic(),
+      { name: 'no-stack-at-1280', variants: only('w1280'), probe: stacked(false) }
+    ]
+  },
+  {
+    id: 'table-scroll',
+    checks: [
+      ...generic(),
+      { name: 'never-stacks', variants: only('w320'), probe: stacked(false) },
+      { name: 'first-column-sticky', variants: only('w320'), probe: firstCellSticky }
+    ]
+  },
+  {
+    id: 'table-scroll-primary',
+    checks: [
+      ...generic(),
+      { name: 'sticky-stays-aligned', variants: only('w320'), probe: stickyAlignedAfterScroll }
+    ]
+  },
+  { id: 'table-footer', checks: generic() },
+  { id: 'table-sort4', checks: generic() },
+  {
+    id: 'table-actions',
+    checks: [
+      ...generic(),
+      {
+        name: 'action-targets',
+        variants: only('w320', 'w1280'),
+        probe: minTarget('.bl-table__action', 44)
+      }
+    ]
+  },
+  {
+    id: 'pagination-many',
+    checks: [
+      ...generic(),
+      {
+        name: 'prev-next-targets',
+        variants: only('w320', 'w1280'),
+        probe: minTarget('.bl-pagination__prev, .bl-pagination__next', 44)
+      },
+      {
+        name: 'page-targets',
+        variants: only('w1280'),
+        probe: minTarget('.bl-pagination__page', 44)
+      }
+    ]
+  },
+  {
+    id: 'host-flex-table',
+    checks: [
+      ...generic(),
+      { name: 'root-width', variants: only('w320', 'w1280'), probe: minWidth('.bl-table', 100) }
+    ]
+  },
+  {
+    id: 'host-grid-table',
+    checks: [
+      ...generic(),
+      { name: 'root-width', variants: only('w320', 'w1280'), probe: minWidth('.bl-table', 100) },
+      { name: 'stacks-at-w320', variants: only('w320'), probe: stacked(true) }
+    ]
+  },
+  {
+    id: 'host-inline-table',
+    checks: [
+      ...generic(),
+      { name: 'root-width', variants: only('w320', 'w1280'), probe: minWidth('.bl-table', 100) }
+    ]
   }
 ]
 
@@ -887,3 +1052,91 @@ for (const width of [390, 1280]) {
     expect(Math.abs(centres.brand - centres.track)).toBeLessThanOrEqual(2)
   })
 }
+
+// the flex-host ratchet guard: a table stacked in a narrow flex host un-stacks when the host widens.
+test('a table stacked in a narrow flex host un-stacks when the host widens', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await page.goto('/stress.html?case=host-flex-table')
+  await page.evaluate(() => document.fonts.ready)
+  const host = page.locator('[data-host]')
+  await host.evaluate((el) => ((el as HTMLElement).style.width = '260px'))
+  await expect(page.locator('.bl-table')).toHaveAttribute('data-stacked', '')
+  await host.evaluate((el) => ((el as HTMLElement).style.width = '1100px'))
+  await expect(page.locator('.bl-table')).not.toHaveAttribute('data-stacked', '')
+})
+
+// Cascade guard: rule-anchored checks cannot see a base rule beating a modifier class.
+test('numeric cells are end-aligned and text cells start-aligned at desktop', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: HEIGHT })
+  await page.goto('/stress.html?case=table-footer')
+  await page.evaluate(() => document.fonts.ready)
+  const aligns = await page.evaluate(() => ({
+    num: [...document.querySelectorAll('.bl-table__num')].map(
+      (el) => getComputedStyle(el).textAlign
+    ),
+    text: getComputedStyle(document.querySelector('thead th:not(.bl-table__num)')!).textAlign
+  }))
+  expect(aligns.num.length).toBeGreaterThan(0)
+  expect(aligns.num.every((a) => a === 'end' || a === 'right')).toBe(true)
+  expect(['start', 'left']).toContain(aligns.text)
+})
+
+// A stacked caption is a normal block as wide as the card, not squeezed to min-content.
+test('a stacked table caption spans the card', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: HEIGHT })
+  await page.goto('/stress.html?case=table-wide')
+  await page.evaluate(() => document.fonts.ready)
+  await expect(page.locator('.bl-table')).toHaveAttribute('data-stacked', '')
+  const widths = await page.evaluate(() => ({
+    caption: document.querySelector('.bl-table caption')!.getBoundingClientRect().width,
+    root: document.querySelector('.bl-table')!.getBoundingClientRect().width
+  }))
+  expect(widths.caption).toBeGreaterThan(widths.root - 4)
+})
+
+// stacking hysteresis: sweeping the viewport 1px at a time across the boundary flips data-stacked at most once per direction.
+test('stacking flips at most once per direction across the boundary', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: HEIGHT })
+  await page.goto('/stress.html?case=table-sort4')
+  await page.evaluate(() => document.fonts.ready)
+  const settle = () =>
+    page.evaluate(
+      () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    )
+  const isStacked = () => page.evaluate(() => !!document.querySelector('.bl-table[data-stacked]'))
+  const at = async (width: number) => {
+    await page.setViewportSize({ width, height: HEIGHT })
+    await settle()
+    return isStacked()
+  }
+  // Coarse scan for the interval where a fresh layout changes mode.
+  let lo = 320
+  let hi = 1280
+  expect(await at(lo)).toBe(true)
+  expect(await at(hi)).toBe(false)
+  while (hi - lo > 8) {
+    const mid = Math.floor((lo + hi) / 2)
+    if (await at(mid)) lo = mid
+    else hi = mid
+  }
+  const from = lo - 40
+  const to = hi + 40
+  for (const direction of ['narrowing', 'widening'] as const) {
+    const widths: number[] = []
+    for (let w = from; w <= to; w++) widths.push(w)
+    if (direction === 'narrowing') widths.reverse()
+    await at(widths[0]!)
+    let previous = await isStacked()
+    let flips = 0
+    const trace: string[] = []
+    for (const width of widths) {
+      const now = await at(width)
+      if (now !== previous) {
+        flips++
+        trace.push(`${width}:${now}`)
+      }
+      previous = now
+    }
+    expect(flips, `${direction} flips at ${trace.join(' ')}`).toBeLessThanOrEqual(1)
+  }
+})

@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 
 test('the playground has no axe violations', async ({ page }) => {
   await page.goto('/')
@@ -201,4 +201,134 @@ test('invisible hit areas reach 44px at phone width', async ({ page }) => {
     expect(target.width, `${target.name} width`).toBeGreaterThanOrEqual(44)
     expect(target.height, `${target.name} height`).toBeGreaterThanOrEqual(44)
   }
+})
+
+test.describe('tables', () => {
+  const demo = (page: Page, name: string) => page.locator(`[data-demo="${name}"]`)
+
+  /** Put the keyboard position just before a demo so the next Tab enters it. */
+  async function focusBefore(page: Page, name: string): Promise<void> {
+    await page.goto('/')
+    await page.evaluate(() => document.fonts.ready)
+    // Tab only once the fit has settled: a stacked flip swaps header buttons for spans.
+    await page.locator(`[data-demo="${name}"] .bl-table[data-fit]:not([data-measuring])`).waitFor()
+    await page.evaluate(
+      () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))
+    )
+    await page.evaluate((name) => {
+      const before = document.querySelector(`[data-demo="${name}"]`)!
+        .previousElementSibling as HTMLElement
+      before.setAttribute('tabindex', '-1')
+      before.focus()
+    }, name)
+  }
+
+  const focusKind = (page: Page, name: string) =>
+    page.evaluate((name) => {
+      const el = document.activeElement as HTMLElement | null
+      const box = document.querySelector(`[data-demo="${name}"]`)!
+      if (!el || !box.contains(el)) return 'outside'
+      const r = el.getBoundingClientRect()
+      if (r.width === 0 || r.height === 0) return 'zero-size'
+      if (el.closest('.bl-pagination')) return 'page'
+      if (el.classList.contains('bl-table__action')) return 'action'
+      if (el.classList.contains('bl-table__sort')) return 'sort'
+      return 'other'
+    }, name)
+
+  test('Tab reaches sort buttons, then row links, then pagination', async ({ page }) => {
+    await focusBefore(page, 'table-default')
+    const kinds: string[] = []
+    for (let i = 0; i < 40; i++) {
+      await page.keyboard.press('Tab')
+      const kind = await focusKind(page, 'table-default')
+      if (kind === 'outside' && kinds.length) break
+      if (kinds.at(-1) !== kind) kinds.push(kind)
+    }
+    expect(kinds).toEqual(['sort', 'action', 'page'])
+  })
+
+  test('Enter on a sort button changes aria-sort', async ({ page }) => {
+    await focusBefore(page, 'table-default')
+    await page.keyboard.press('Tab')
+    expect(await focusKind(page, 'table-default')).toBe('sort')
+    const sorted = demo(page, 'table-default').locator('th[aria-sort]')
+    await expect(sorted).toHaveCount(0)
+    await page.keyboard.press('Enter')
+    await expect(sorted).toHaveCount(1)
+    await expect(sorted).toHaveAttribute('aria-sort', 'ascending')
+    await page.keyboard.press('Enter')
+    await expect(sorted).toHaveAttribute('aria-sort', 'descending')
+  })
+
+  test('Enter on a pagination button changes the first visible row', async ({ page }) => {
+    await page.goto('/')
+    const first = demo(page, 'table-default').locator('tbody tr:first-child > :first-child')
+    const before = await first.textContent()
+    const next = demo(page, 'table-default').locator('.bl-pagination__next')
+    await next.focus()
+    await page.keyboard.press('Enter')
+    await expect(first).not.toHaveText(before!)
+    // the page-change announcement lands in the polite live region
+    await expect(
+      demo(page, 'table-default').locator('.bl-pagination [aria-live="polite"]')
+    ).toHaveText(/6.10 of 12/)
+  })
+
+  test('Next keeps focus and stays disabled on the last page', async ({ page }) => {
+    await page.goto('/')
+    const next = demo(page, 'table-default').locator('.bl-pagination__next')
+    await next.focus()
+    await page.keyboard.press('Enter')
+    await page.keyboard.press('Enter')
+    await expect(next).toHaveAttribute('aria-disabled', 'true')
+    await page.keyboard.press('Enter')
+    await expect(next).toBeFocused()
+    await expect(next).toHaveAttribute('aria-disabled', 'true')
+    await expect(demo(page, 'table-default').locator('.bl-pagination [aria-live]')).toHaveText(
+      /11.12 of 12/
+    )
+  })
+
+  test('the stacked card is keyboard-reachable through the sort strip', async ({ page }) => {
+    await focusBefore(page, 'table-narrow')
+    await expect(demo(page, 'table-narrow').locator('.bl-table')).toHaveAttribute(
+      'data-stacked',
+      ''
+    )
+    const count = await demo(page, 'table-narrow')
+      .locator('.bl-table__sort-strip .bl-table__sort')
+      .count()
+    expect(count).toBe(2)
+    for (let i = 0; i < count; i++) {
+      await page.keyboard.press('Tab')
+      expect(await focusKind(page, 'table-narrow')).toBe('sort')
+      const inStrip = await page.evaluate(
+        () => !!document.activeElement?.closest('.bl-table__sort-strip')
+      )
+      expect(inStrip).toBe(true)
+    }
+  })
+
+  test('a plain row click forwards to the row link in an overflowing scroll table', async ({
+    page
+  }) => {
+    await page.setViewportSize({ width: 390, height: 900 })
+    await page.goto('/')
+    await page.evaluate(() => document.fonts.ready)
+    const scroller = demo(page, 'table-scroll').locator('.bl-table__scroller')
+    await expect(scroller).toHaveAttribute('tabindex', '0')
+    await page.evaluate(() => {
+      history.replaceState(null, '', '#tables')
+    })
+    await demo(page, 'table-scroll').locator('tbody tr:nth-child(2) td').nth(1).click()
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe('#scroll-row')
+  })
+
+  test('the pagination live region updates after Next', async ({ page }) => {
+    await page.goto('/')
+    const live = demo(page, 'table-default').locator('.bl-pagination [aria-live="polite"]')
+    await demo(page, 'table-default').locator('.bl-pagination__next').click()
+    await expect(live).toHaveText(/6.10 of 12/)
+  })
 })

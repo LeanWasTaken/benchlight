@@ -4,9 +4,31 @@
     <BlAppearanceSwitch />
     <BlButton variant="secondary">Back</BlButton>
     <BlLed state="on" />
+    <BlTable
+      v-model:sort="sort"
+      caption="Items"
+      :columns="columns"
+      :rows="rows"
+      row-key="name"
+      :page-size="2"
+      :row-link="rowLink"
+    />
   </main>
 </template>
 
-<script setup lang="ts">
-  import { BlAppearanceSwitch, BlButton, BlLed } from 'benchlight/vue'
+<script setup>
+  import { ref } from 'vue'
+  import { BlAppearanceSwitch, BlButton, BlLed, BlTable } from 'benchlight/vue'
+
+  const sort = ref(null)
+  const columns = [
+    { key: 'name', label: 'Name', sortable: true },
+    { key: 'value', label: 'Value', numeric: true, sortable: true }
+  ]
+  const rows = [
+    { name: 'alpha', value: 3 },
+    { name: 'beta', value: 1 },
+    { name: 'gamma', value: 2 }
+  ]
+  const rowLink = () => ({ href: '#row' })
 </script>

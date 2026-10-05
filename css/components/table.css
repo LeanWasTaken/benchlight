@@ -110,6 +110,12 @@
     box-shadow: inset -1px 0 var(--bl-separator);
   }
   /* Fit measurement (vue/internal/useTableFit.ts): the narrowest table that still reads well. */
+  /* No transitions while measuring: reduced motion gives every property a 0.01ms transition, and a
+     layout read in the same task would return the pre-change values, flipping the decision. */
+  .bl-table[data-measuring],
+  .bl-table[data-measuring] * {
+    transition-property: none !important;
+  }
   .bl-table[data-measuring] .bl-table__table {
     inline-size: min-content;
   }

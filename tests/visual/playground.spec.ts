@@ -3,6 +3,10 @@ import { expect, test } from '@playwright/test'
 test('playground renders every component', async ({ page }) => {
   await page.goto('/')
   await page.evaluate(() => document.fonts.ready)
+  // BlTable decides stacked/unstacked in an animation frame after fonts load; let it land.
+  await page.evaluate(
+    () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+  )
   // Linux Chromium rounds a fractional page height up or down between captures, so clip the
   // full-page shot to a whole-pixel box.
   const { width, height } = await page.evaluate(() => {
