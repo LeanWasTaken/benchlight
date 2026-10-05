@@ -9,7 +9,7 @@ classes.
 ## Install
 
 ```json
-"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.4.0"
+"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.5.0"
 ```
 
 The repo is private and the URL uses SSH on purpose: bun turns GitHub https URLs into API tarball
@@ -136,7 +136,8 @@ raise gets a CHANGELOG line.
 - Library CSS lives in `@layer base` / `@layer components`; utilities and your own CSS win without
   `!important`.
 - States are ARIA or native attributes (`aria-current`, `aria-pressed`, `:checked`, `:disabled`);
-  selected rows use `aria-current="true"`. Only `data-lifted` and `data-overflowing` are script-set.
+  selected rows use `aria-current="true"`. Only `data-lifted`, `data-overflowing`, `data-fit`,
+  `data-stacked` and `data-measuring` are script-set.
 - Appearance: `data-bl-appearance="light|dark"` on `<html>` (absent = auto), stored as
   `localStorage['bl-appearance']`.
 - Text on a tint is `ink-1`, `trace` or `danger`; copper and phosphor are marks only there.
@@ -148,6 +149,8 @@ raise gets a CHANGELOG line.
 
 1. `css/components/x.css`, in `@layer components`, prefixed `bl-`.
 2. Add it to `MODULES` in `scripts/lib/modules.ts`; the order is pinned by `tests/css-conventions.test.ts`.
+   If it needs another module's CSS, declare that in `REQUIRES` in the same file (the bundle CLI
+   warns when a requirement is missing).
 3. Import it in `css/index.css`, in the same order.
 4. `vue/components/BlX.vue`, with an inline literal `defineProps` type (consumers may lack
    TypeScript; `tests/vue/sfc-props.test.ts` enforces it). Export it from `vue/index.ts` and cover it in
@@ -222,6 +225,52 @@ raise gets a CHANGELOG line.
   table semantics); display sizes are smaller on phones (`xl` is 40px at 320px wide).
 - **BlSectionHead:** bar mode renders `eyebrow` only (no `heading`). The `action` slot works in both
   modes.
+
+## BlTable and BlPagination
+
+Full prop, slot and event lists are in [API.md](API.md). `table` needs the `layout` and `pagination`
+modules and `pagination` needs `layout` (the bundle CLI warns otherwise).
+
+- **Stacking is measured, not a breakpoint.** The table stacks into cards when its natural width does
+  not fit its container. The narrowest column is `--bl-table-min-col` (default 8rem) or the column's
+  `width`; text cells break long unbroken strings. Stacked tables show a "Sort by" strip (its buttons
+  carry `data-dir`). Before hydration a table stacks only below 30em (CSS fallback), so a wider one may
+  render unstacked for a frame until measured. The fit re-measures on container width, data and font
+  load, not when the user changes text size at runtime without a width change.
+- **Grid and flex hosts.** A BlTable inside a CSS grid or flex item needs `min-width: 0` (or
+  `min-inline-size: 0`) on that item; otherwise the item grows to the table's width and it never stacks.
+- **Scroll mode:** `scroll` never stacks; the table scrolls horizontally and the first column is sticky.
+- **Columns** are `{ key, label, align?, numeric?, sortable?, sortBy?, format?, width?, primary?, total? }`.
+  The primary column (the first unless one sets `primary`) is the row header. `v-model:sort` and
+  `v-model:page` are optional; set `rowKey` when sorting, paging or using row actions.
+- **Slots:** `caption`, `empty`, `footer` and the dynamic `cell-<key>` (`{ row, value, column }`) and
+  `head-<key>` (`{ column }`) per column key. The dynamic ones are not listed in API.md.
+- **`manual` mode** is for server-side sorting and paging: rows are shown as given, nothing is sorted
+  or sliced. Pass `totalRows` (a dev warning fires if `pageSize` is set without it) and `totals`.
+- **Row actions:** `rowLink(row)` (an `a`, RouterLink or similar, as with `LinkProps`) or
+  `@row-activate`; `rowLink` wins if both are set. The primary cell holds the real link or button.
+  Clicking anywhere on the row forwards to it, except on other controls and while text is selected.
+  Modifier-clicks work only on the link itself.
+- **Totals:** a column `total` of `'sum'`, `'avg'`, `'count'` or a function over all rows (not just the
+  page). `format(value)` formats the result. The footer renders the cells; the `footer` slot replaces
+  them.
+- **i18n:** `labels` (`total`, `empty`, `sortStrip`) and `paginationLabels` (`nav`, `prev`, `next`,
+  `page`, `pageOf`, `range`); `locale` sets the sort collation.
+- With async data, BlTable clamps `page` to 1 while there are no rows, so set the page after rows
+  arrive (or use `manual` with `totalRows`).
+- **BlPagination** renders nothing for a single page. Standalone: `total`, `pageSize`, `label`,
+  `v-model:page`.
+- **CSS-only use:** wrap a `table` in `div.bl-table` (modifiers `.bl-table--compact`,
+  `.bl-table--scroll`). Classes: `.bl-table__num`, `.bl-table__primary`, `.bl-table__label` (a
+  `span aria-hidden="true"` in each body cell), `.bl-table__sort`, `.bl-table__sort-strip`,
+  `.bl-table__action`, `.bl-table__empty`; pagination uses `.bl-pagination`, `__list`, `__item`,
+  `__page`, `__gap`, `__range` and `__compact` (the "Page X of Y" text shown under 30em, where `__item`
+  is hidden); `__prev` and `__next` are hook classes only and carry no styles. Add explicit roles
+  (`role="table"`, `rowgroup`, `row`, `columnheader`, `rowheader`, `cell`), because stacked layouts
+  drop native table semantics, and `data-label` on body cells (a `::before` fallback renders it when
+  there is no `.bl-table__label`). Mark a totals cell with nothing to show `data-empty` so it drops
+  out of the stacked card. Set `data-stacked` yourself, or rely on the stack-below-30em fallback.
+  `.bl-table--scroll` never stacks.
 
 ## CSS hooks
 

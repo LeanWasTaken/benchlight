@@ -27,3 +27,5 @@
 @import './components/index-row.css';
 @import './components/prev-next.css';
 @import './components/prose.css';
+@import './components/table.css';
+@import './components/pagination.css';

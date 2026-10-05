@@ -24,6 +24,8 @@
     line-height: var(--bl-leading-display-md);
   }
   .bl-annotation,
+  .bl-pagination__range,
+  .bl-pagination__compact,
   .bl-meta,
   .bl-colophon__items,
   .bl-range__value,
@@ -37,6 +39,9 @@
     color: var(--bl-ink-3);
   }
   .bl-silkscreen,
+  .bl-table thead th,
+  .bl-table__label,
+  .bl-table__sort-strip-label,
   .bl-section-head__eyebrow,
   .bl-spec-row__label,
   .bl-telemetry__label,

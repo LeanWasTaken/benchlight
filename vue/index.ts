@@ -29,6 +29,8 @@ export { default as BlIndex } from './components/BlIndex.vue'
 export { default as BlIndexRow } from './components/BlIndexRow.vue'
 export { default as BlPrevNext } from './components/BlPrevNext.vue'
 export { default as BlProse } from './components/BlProse.vue'
+export { default as BlPagination } from './components/BlPagination.vue'
+export { default as BlTable } from './components/BlTable.vue'
 
 export {
   APPEARANCE_ATTRIBUTE,
