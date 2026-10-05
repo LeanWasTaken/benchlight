@@ -86,3 +86,11 @@ describe('media query units', () => {
     for (const width of widths) expect(tokenEm.has(width!), `${file}: ${width}`).toBe(true)
   })
 })
+
+describe('container queries', () => {
+  it('never uses container queries (they collapse component roots in flex/inline hosts)', () => {
+    for (const file of listCssFiles(ROOT)) {
+      expect(read(file), file).not.toMatch(/container-type|@container/)
+    }
+  })
+})
