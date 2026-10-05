@@ -198,6 +198,10 @@
   } from '../internal/table'
   import type { LinkAs, LinkTo, PaginationLabels, TableColumn, TableLabels } from '../types'
 
+  /**
+   * Responsive table: stacks when its natural width does not fit (measured, not a breakpoint).
+   * Dynamic slots `cell-<key>` and `head-<key>` exist per column key. See README.
+   */
   const props = defineProps<{
     caption: string
     captionHidden?: boolean

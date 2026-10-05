@@ -50,6 +50,7 @@
   import { clampPage, pageCount, pageRange } from '../internal/table'
   import type { PaginationLabels } from '../types'
 
+  /** Page navigation. Renders nothing when there is a single page. See README. */
   const props = withDefaults(
     defineProps<{
       total: number
