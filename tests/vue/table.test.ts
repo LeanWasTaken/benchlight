@@ -137,3 +137,55 @@ describe('BlTable', () => {
     expect(html).not.toContain('data-fit')
   })
 })
+
+describe('BlTable pagination', () => {
+  const many = Array.from({ length: 25 }, (_, i) => ({
+    mac: `m${i}`,
+    name: `Device ${String(i + 1).padStart(2, '0')}`,
+    rssi: -i,
+    ip: `10.0.0.${i}`
+  }))
+
+  it('slices client-side and renders BlPagination', async () => {
+    const w = mount(BlTable, {
+      props: { caption: 'Clients', columns, rows: many, rowKey: 'mac', pageSize: 10, page: 2 }
+    })
+    expect(w.findAll('tbody tr')).toHaveLength(10)
+    expect(w.find('tbody th').text()).toBe('Device 11')
+    expect(w.find('nav.bl-pagination').attributes('aria-label')).toBe('Clients, pages')
+  })
+
+  it('resets to page 1 when the sort changes', async () => {
+    const w = mount(BlTable, {
+      props: { caption: 'C', columns, rows: many, rowKey: 'mac', pageSize: 10, page: 3 }
+    })
+    await w.find('thead button').trigger('click')
+    expect(w.emitted('update:page')!.at(-1)).toEqual([1])
+  })
+
+  it('clamps and emits when rows shrink (Review Focus 3)', async () => {
+    const w = mount(BlTable, {
+      props: { caption: 'C', columns, rows: many, rowKey: 'mac', pageSize: 10, page: 3 }
+    })
+    await w.setProps({ rows: many.slice(0, 12) })
+    expect(w.emitted('update:page')!.at(-1)).toEqual([2])
+    expect(w.findAll('tbody tr')).toHaveLength(2)
+  })
+
+  it('uses rows as given in manual mode with totalRows', () => {
+    const w = mount(BlTable, {
+      props: {
+        caption: 'C',
+        columns,
+        rows: many.slice(0, 10),
+        rowKey: 'mac',
+        pageSize: 10,
+        page: 4,
+        manual: true,
+        totalRows: 250
+      }
+    })
+    expect(w.findAll('tbody tr')).toHaveLength(10)
+    expect(w.find('.bl-pagination__range').text()).toBe('31–40 of 250')
+  })
+})

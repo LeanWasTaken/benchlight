@@ -24,6 +24,8 @@
     line-height: var(--bl-leading-display-md);
   }
   .bl-annotation,
+  .bl-pagination__range,
+  .bl-pagination__compact,
   .bl-meta,
   .bl-colophon__items,
   .bl-range__value,
