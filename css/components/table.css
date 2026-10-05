@@ -24,9 +24,12 @@
     font-weight: 500;
     color: var(--bl-ink-1);
   }
+  /* :where keeps the base alignment at zero specificity so .bl-table__end and __center win. */
+  .bl-table :where(th, td) {
+    text-align: start;
+  }
   .bl-table :is(th, td) {
     padding: 12px 16px;
-    text-align: start;
     vertical-align: top;
     overflow-wrap: break-word;
   }
@@ -118,7 +121,7 @@
     overflow-wrap: anywhere;
   }
   /* Stacked: each row becomes a card of label-value lines. */
-  .bl-table[data-stacked] :is(.bl-table__table, tbody, tfoot, tr, th) {
+  .bl-table[data-stacked] :is(.bl-table__table, caption, tbody, tfoot, tr, th) {
     display: block;
   }
   .bl-table[data-stacked] thead {
@@ -165,6 +168,10 @@
   .bl-table__sort-strip .bl-table__sort {
     margin-block: 0;
   }
+  /* A totals cell with nothing to show is not a line in the stacked card. */
+  .bl-table[data-stacked] td[data-empty] {
+    display: none;
+  }
   /* CSS-only stacked tables without label spans */
   .bl-table[data-stacked] td:not(:has(> .bl-table__label))::before {
     content: attr(data-label);
@@ -172,7 +179,8 @@
   }
   /* Before hydration (no data-fit), narrow screens stack too; CSS-only tables can set data-stacked. */
   @media (max-width: 29.99em) {
-    .bl-table:not([data-fit], .bl-table--scroll) :is(.bl-table__table, tbody, tfoot, tr, th, td) {
+    .bl-table:not([data-fit], .bl-table--scroll)
+      :is(.bl-table__table, caption, tbody, tfoot, tr, th, td) {
       display: block;
     }
     .bl-table:not([data-fit], .bl-table--scroll) thead {
@@ -186,6 +194,57 @@
       content: attr(data-label);
       display: block;
     }
+    .bl-table:not([data-fit], .bl-table--scroll) td[data-empty] {
+      display: none;
+    }
+  }
+  .bl-table__action {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 44px;
+    margin-block: -12px;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    text-align: start;
+    color: var(--bl-trace);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  /* Stacked cells have 2px padding, so the 44px target grows the cell instead of overlapping the card edge. */
+  .bl-table[data-stacked] .bl-table__action {
+    margin-block: 0;
+  }
+  .bl-table tbody tr[data-action] {
+    cursor: pointer;
+  }
+  @media (hover: hover) {
+    .bl-table__action:hover {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .bl-table tbody tr[data-action]:hover {
+      background: color-mix(in srgb, var(--bl-trace) 6%, transparent);
+    }
+    .bl-table--scroll tbody tr[data-action]:hover > :first-child {
+      background: color-mix(in srgb, var(--bl-trace) 6%, var(--bl-surface));
+    }
+  }
+  .bl-table tbody tr[data-action]:focus-within {
+    background: color-mix(in srgb, var(--bl-trace) 6%, transparent);
+  }
+  .bl-table--scroll tbody tr[data-action]:focus-within > :first-child {
+    background: color-mix(in srgb, var(--bl-trace) 6%, var(--bl-surface));
+  }
+  .bl-table > .bl-pagination {
+    margin: 0;
+    padding: 8px 16px;
+    border-top: 1px solid var(--bl-separator);
+  }
+  .bl-table__total > * {
+    font-weight: 500;
+    color: var(--bl-ink-1);
   }
   @media (forced-colors: active) {
     .bl-table--scroll tr > :first-child {

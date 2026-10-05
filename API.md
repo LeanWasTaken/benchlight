@@ -489,7 +489,7 @@ Exposed: none
 | `totalRows` | `number \| undefined` | no |  |
 | `totals` | `Record<string, string \| number> \| undefined` | no |  |
 
-Slots: `caption`, `empty`
+Slots: `caption`, `empty`, `footer`
 Events: `update:page`, `update:sort`
 Exposed: none
 
@@ -641,6 +641,7 @@ Exposed: none
 - `bl-table`
 - `bl-table--compact`
 - `bl-table--scroll`
+- `bl-table__action`
 - `bl-table__center`
 - `bl-table__empty`
 - `bl-table__end`
@@ -653,6 +654,7 @@ Exposed: none
 - `bl-table__sort-strip`
 - `bl-table__sort-strip-label`
 - `bl-table__table`
+- `bl-table__total`
 - `bl-telemetry`
 - `bl-telemetry__cell`
 - `bl-telemetry__cells`
