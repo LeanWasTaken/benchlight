@@ -31,6 +31,7 @@ const COMPONENTS = [
   'BlSpecRow',
   'BlTabBar',
   'BlTabBarItem',
+  'BlTable',
   'BlTelemetry',
   'BlTelemetryCell'
 ]
