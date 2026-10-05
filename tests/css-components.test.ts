@@ -79,6 +79,7 @@ const REQUIRED: Record<string, string[]> = {
     '.bl-table[data-fit]:not(.bl-table--scroll)',
     '.bl-table--scroll .bl-table__scroller',
     '.bl-table[data-measuring] .bl-table__table',
+    '.bl-table[data-measuring] *',
     '.bl-table[data-stacked] thead',
     '.bl-table tbody tr[data-action]:focus-within',
     '.bl-table__action',

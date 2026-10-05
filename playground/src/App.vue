@@ -200,6 +200,41 @@
         <blockquote>Fix things that, probably, weren't broken.</blockquote>
       </BlProse>
     </section>
+    <section id="tables">
+      <BlSectionHead eyebrow="Tables" heading="Connected clients" ruled />
+      <div class="pg-block" data-demo="table-default">
+        <BlTable
+          v-model:sort="sort"
+          v-model:page="tablePage"
+          caption="Connected clients"
+          :columns="clientColumns"
+          :rows="clients"
+          row-key="name"
+          :page-size="5"
+          :row-link="clientLink"
+        />
+      </div>
+      <BlSectionHead class="pg-block" eyebrow="Narrow card" heading="Always stacked" />
+      <div class="pg-card" data-demo="table-narrow">
+        <BlTable
+          caption="Connected clients, narrow"
+          :columns="clientColumns"
+          :rows="clients.slice(0, 4)"
+          row-key="name"
+        />
+      </div>
+      <BlSectionHead class="pg-block" eyebrow="Scroll mode" heading="Six columns" />
+      <div class="pg-block" data-demo="table-scroll">
+        <BlTable
+          scroll
+          caption="Connected clients, all columns"
+          :columns="clientColumnsWide"
+          :rows="clients.slice(0, 5)"
+          row-key="name"
+          :row-link="() => ({ href: '#scroll-row' })"
+        />
+      </div>
+    </section>
   </main>
 
   <BlColophon :items="['© 2026 Example', 'Remote', `Rev ${version}`]" />
@@ -264,10 +299,12 @@
     BlSpecPanel,
     BlTabBar,
     BlTabBarItem,
+    BlTable,
     BlTelemetry,
     BlTelemetryCell,
     riseDelay
   } from '../../vue'
+  import type { TableColumn } from '../../vue'
 
   const version = pkg.version
   const filter = ref<string | null>(null)
@@ -302,6 +339,36 @@
       href: 'https://github.com/example/project-one'
     }
   ]
+
+  const sort = ref<{ key: string; dir: 'asc' | 'desc' } | null>(null)
+  const tablePage = ref(1)
+  const clients = Array.from({ length: 12 }, (_, i) => ({
+    name: `client-${String(i + 1).padStart(2, '0')}`,
+    signal: -40 - ((i * 7) % 35),
+    address: `192.168.1.${20 + i}`,
+    uptime: `${(i * 5) % 24}h ${(i * 13) % 60}m`,
+    band: i % 2 ? '5 GHz' : '2.4 GHz',
+    channel: 1 + ((i * 4) % 11)
+  }))
+  const clientColumns: TableColumn<(typeof clients)[number]>[] = [
+    { key: 'name', label: 'Name', sortable: true },
+    {
+      key: 'signal',
+      label: 'Signal',
+      numeric: true,
+      sortable: true,
+      total: 'avg',
+      format: (v) => `${v} dBm`
+    },
+    { key: 'address', label: 'Address' },
+    { key: 'uptime', label: 'Uptime', numeric: true }
+  ]
+  const clientColumnsWide: TableColumn<(typeof clients)[number]>[] = [
+    ...clientColumns,
+    { key: 'band', label: 'Band' },
+    { key: 'channel', label: 'Channel', numeric: true }
+  ]
+  const clientLink = () => ({ href: '#tables' })
 
   const logLines = ref([
     '\x1b[0;32mI (1203) wifi: connected to home-5g, rssi -48\x1b[0m',

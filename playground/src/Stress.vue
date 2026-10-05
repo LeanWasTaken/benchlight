@@ -399,6 +399,128 @@
       </div>
     </section>
 
+    <!-- Tables -->
+    <section v-if="show('table-wide')" data-case="table-wide">
+      <h2 class="st-label">table-wide</h2>
+      <div data-box>
+        <BlTable caption="Wide table" :columns="wideColumns" :rows="wideRows" row-key="c1" />
+      </div>
+    </section>
+
+    <section v-if="show('table-url')" data-case="table-url">
+      <h2 class="st-label">table-url</h2>
+      <div data-box>
+        <BlTable caption="Unbroken URL" :columns="urlColumns" :rows="urlRows" row-key="id" />
+      </div>
+    </section>
+
+    <section v-if="show('table-long-text')" data-case="table-long-text">
+      <h2 class="st-label">table-long-text</h2>
+      <div data-box>
+        <BlTable caption="Long log text" :columns="logColumns" :rows="logRows" row-key="id" />
+      </div>
+    </section>
+
+    <section v-if="show('table-scroll')" data-case="table-scroll">
+      <h2 class="st-label">table-scroll</h2>
+      <div data-box>
+        <BlTable
+          scroll
+          caption="Wide scroll table"
+          :columns="wideColumns"
+          :rows="wideRows"
+          row-key="c1"
+        />
+      </div>
+    </section>
+
+    <section v-if="show('table-scroll-primary')" data-case="table-scroll-primary">
+      <h2 class="st-label">table-scroll-primary</h2>
+      <div data-box>
+        <BlTable
+          scroll
+          caption="Scroll table, primary column four"
+          :columns="primaryColumns"
+          :rows="wideRows"
+          row-key="c1"
+        />
+      </div>
+    </section>
+
+    <section v-if="show('table-footer')" data-case="table-footer">
+      <h2 class="st-label">table-footer</h2>
+      <div data-box>
+        <BlTable caption="Totals" :columns="footerColumns" :rows="footerRows" row-key="name" />
+      </div>
+    </section>
+
+    <section v-if="show('table-actions')" data-case="table-actions">
+      <h2 class="st-label">table-actions</h2>
+      <div data-box>
+        <BlTable
+          compact
+          caption="Row links"
+          :columns="footerColumns"
+          :rows="footerRows"
+          row-key="name"
+          :row-link="() => ({ href: '#row' })"
+        />
+      </div>
+    </section>
+
+    <section v-if="show('table-sort4')" data-case="table-sort4">
+      <h2 class="st-label">table-sort4</h2>
+      <div data-box>
+        <BlTable
+          caption="Four sortable columns"
+          :columns="sort4Columns"
+          :rows="footerRows"
+          row-key="name"
+        />
+      </div>
+    </section>
+
+    <section v-if="show('pagination-many')" data-case="pagination-many">
+      <h2 class="st-label">pagination-many</h2>
+      <div data-box>
+        <BlPagination :total="1000" :page-size="10" :page="50" label="Many pages" />
+      </div>
+    </section>
+
+    <section v-if="show('host-flex-table')" data-case="host-flex-table">
+      <h2 class="st-label">host-flex-table</h2>
+      <div data-box>
+        <div data-host style="display: flex">
+          <BlTable caption="Flex host" :columns="footerColumns" :rows="footerRows" row-key="name" />
+        </div>
+      </div>
+    </section>
+
+    <section v-if="show('host-grid-table')" data-case="host-grid-table">
+      <h2 class="st-label">host-grid-table</h2>
+      <div data-box>
+        <div data-host style="display: grid; grid-template-columns: 1fr">
+          <div style="min-inline-size: 0">
+            <BlTable caption="Grid host" :columns="wideColumns" :rows="wideRows" row-key="c1" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section v-if="show('host-inline-table')" data-case="host-inline-table">
+      <h2 class="st-label">host-inline-table</h2>
+      <div data-box>
+        <div data-host style="display: inline-block">
+          <BlTable
+            caption="Inline host"
+            :columns="footerColumns"
+            :rows="footerRows"
+            row-key="name"
+          />
+        </div>
+      </div>
+    </section>
+
     <!-- D3: page chrome; each rendered alone via ?case=<id> -->
     <template v-if="chrome">
       <div v-for="n in 12" :key="n" class="st-filler">Filler line {{ n }}</div>
@@ -440,10 +562,14 @@
     BlSpecPanel,
     BlSpecRow,
     BlTabBar,
+    BlPagination,
+    BlTable,
     BlTabBarItem,
     BlTelemetry,
     BlTelemetryCell
   } from '../../vue'
+
+  import type { TableColumn } from '../../vue'
 
   const hash = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
   const url =
@@ -455,6 +581,60 @@
   const twelve = Array.from({ length: 12 }, (_, i) => ({
     value: `o${i + 1}`,
     label: `Option ${i + 1}`
+  }))
+
+  const wideColumns = Array.from({ length: 9 }, (_, i) => ({
+    key: `c${i + 1}`,
+    label: `Column number ${i + 1} with a long label`,
+    sortable: i < 2
+  }))
+  const wideRows = Array.from({ length: 6 }, (_, r) =>
+    Object.fromEntries(
+      wideColumns.map((c, i) => [
+        c.key,
+        i === 2 && r === 0 ? url.slice(0, 70) : i === 3 && r === 1 ? hash : `r${r + 1}c${i + 1}`
+      ])
+    )
+  )
+  const primaryColumns = wideColumns.map((c, i) => ({ ...c, primary: i === 3 }))
+  const urlColumns = [
+    { key: 'id', label: 'ID' },
+    { key: 'url', label: 'URL' }
+  ]
+  const urlRows = [
+    { id: 'a', url: 'https://example.com/' + 'x'.repeat(180) },
+    { id: 'b', url: 'short' }
+  ]
+  const logColumns = [
+    { key: 'id', label: 'ID' },
+    { key: 'level', label: 'Level' },
+    { key: 'message', label: 'Message' }
+  ]
+  const logRows = [
+    {
+      id: 1,
+      level: 'info',
+      message: 'I (1203) wifi: ' + 'connected to the access point '.repeat(7).slice(0, 185)
+    },
+    { id: 2, level: 'warn', message: 'short message' }
+  ]
+  const footerColumns: TableColumn<(typeof footerRows)[number]>[] = [
+    { key: 'name', label: 'Name', total: 'count' },
+    { key: 'a', label: 'Alpha', numeric: true, total: 'sum' },
+    { key: 'b', label: 'Beta', numeric: true, total: 'avg' },
+    { key: 'c', label: 'Gamma', numeric: true }
+  ]
+  const sort4Columns: TableColumn<(typeof footerRows)[number]>[] = [
+    { key: 'name', label: 'Name', sortable: true },
+    { key: 'a', label: 'Alpha', numeric: true, sortable: true },
+    { key: 'b', label: 'Beta', numeric: true, sortable: true },
+    { key: 'c', label: 'Gamma', numeric: true, sortable: true }
+  ]
+  const footerRows = Array.from({ length: 4 }, (_, i) => ({
+    name: `Row ${i + 1}`,
+    a: 10 * (i + 1),
+    b: 3.5 * (i + 1),
+    c: 100 + i
   }))
 
   const words = [

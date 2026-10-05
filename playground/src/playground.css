@@ -42,3 +42,9 @@
 .pg-marquee {
   max-width: 220px;
 }
+.pg-card {
+  max-inline-size: 18rem;
+}
+.pg-main > section {
+  min-inline-size: 0;
+}
