@@ -80,6 +80,8 @@ const REQUIRED: Record<string, string[]> = {
     '.bl-table--scroll .bl-table__scroller',
     '.bl-table[data-measuring] .bl-table__table',
     '.bl-table[data-stacked] thead',
+    '.bl-table tbody tr[data-action]:focus-within',
+    '.bl-table__action',
     "[aria-sort='descending'] > .bl-table__sort .bl-table__sort-icon",
     '@media (forced-colors: active)'
   ],
@@ -283,6 +285,14 @@ describe('intrinsic wrapping (long tokens never widen the page)', () => {
     const items = ruleBody(read('colophon'), '.bl-colophon__items')
     expect(items['min-width']).toBe('0')
     expect(items['overflow-wrap']).toBe('anywhere')
+  })
+
+  it('table action underline is hover-gated', () => {
+    const css = read('table')
+    expect(
+      ruleBody(css, '.bl-table__action:hover', ['@media (hover: hover)'])['text-decoration']
+    ).toBe('underline')
+    expect(() => ruleBody(css, '.bl-table__action:hover')).toThrow()
   })
 
   it('prose contains media, tables and long text', () => {

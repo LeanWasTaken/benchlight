@@ -69,7 +69,13 @@
               <slot name="empty">{{ text.empty }}</slot>
             </td>
           </tr>
-          <tr v-for="(row, index) in visibleRows" :key="keyOf(row, index)" role="row">
+          <tr
+            v-for="(row, index) in visibleRows"
+            :key="keyOf(row, index)"
+            role="row"
+            :data-action="hasAction ? '' : undefined"
+            @click="hasAction ? forward($event) : undefined"
+          >
             <template v-for="column in columns" :key="column.key">
               <th
                 v-if="column.key === primaryKey"
@@ -79,7 +85,39 @@
                 :class="cellClass(column)"
                 :style="minStyle(column)"
               >
+                <template v-if="rowLink">
+                  <component
+                    :is="link.tag"
+                    v-for="(link, linkIndex) in [linkFor(row)]"
+                    :key="linkIndex"
+                    v-bind="link.bind"
+                    class="bl-table__action"
+                  >
+                    <slot
+                      :name="`cell-${column.key}`"
+                      :row="row"
+                      :value="row[column.key]"
+                      :column="column"
+                      >{{ formatCell(row, column) }}</slot
+                    >
+                  </component>
+                </template>
+                <button
+                  v-else-if="onRowActivate"
+                  type="button"
+                  class="bl-table__action"
+                  @click="onRowActivate(row)"
+                >
+                  <slot
+                    :name="`cell-${column.key}`"
+                    :row="row"
+                    :value="row[column.key]"
+                    :column="column"
+                    >{{ formatCell(row, column) }}</slot
+                  >
+                </button>
                 <slot
+                  v-else
                   :name="`cell-${column.key}`"
                   :row="row"
                   :value="row[column.key]"
@@ -106,6 +144,32 @@
             </template>
           </tr>
         </tbody>
+        <tfoot v-if="hasFooter && visibleRows.length" role="rowgroup">
+          <tr role="row" class="bl-table__total">
+            <slot name="footer" :rows="sortedRows">
+              <template v-for="column in columns" :key="column.key">
+                <th
+                  v-if="column.key === primaryKey"
+                  role="rowheader"
+                  scope="row"
+                  class="bl-table__primary"
+                >
+                  {{ totalLabel(column.key) }}
+                </th>
+                <td
+                  v-else
+                  role="cell"
+                  :class="cellClass(column)"
+                  :data-label="column.label"
+                  :data-empty="hasTotal(column.key) ? undefined : ''"
+                >
+                  <span class="bl-table__label" aria-hidden="true">{{ column.label }}</span>
+                  {{ totalsMap[column.key] ?? '' }}
+                </td>
+              </template>
+            </slot>
+          </tr>
+        </tfoot>
       </table>
     </div>
     <BlPagination
@@ -120,10 +184,18 @@
 </template>
 
 <script setup lang="ts" generic="Row extends Record<string, unknown>">
-  import { computed, ref, useId, watch } from 'vue'
+  import { computed, ref, useId, useSlots, watch } from 'vue'
   import BlPagination from './BlPagination.vue'
   import { useTableFit } from '../internal/useTableFit'
-  import { clampPage, formatCell, nextSort, pageSlice, sortRows } from '../internal/table'
+  import { linkBindings, resolveTag } from '../internal/link'
+  import {
+    clampPage,
+    computeTotals,
+    formatCell,
+    nextSort,
+    pageSlice,
+    sortRows
+  } from '../internal/table'
   import type { LinkAs, LinkTo, PaginationLabels, TableColumn, TableLabels } from '../types'
 
   const props = defineProps<{
@@ -195,9 +267,61 @@
       props.rows.length,
       props.columns,
       visibleRows.value.length,
+      currentPage.value,
       props.scroll
     ]
   })
+
+  const slots = useSlots()
+  const isDev = Boolean((import.meta as { env?: { DEV?: boolean } }).env?.DEV)
+  const hasAction = computed(() => !!props.rowLink || !!props.onRowActivate)
+  if (isDev && props.rowLink && props.onRowActivate)
+    console.warn('[benchlight] BlTable: rowLink and @row-activate are both set; rowLink wins.')
+  if (isDev && !props.rowKey && (sortable.value.length || hasAction.value))
+    console.warn('[benchlight] BlTable: set rowKey so rows keep identity when sorted or paged.')
+  if (isDev && props.manual && props.pageSize && props.totalRows === undefined)
+    console.warn('[benchlight] BlTable: manual paging needs totalRows.')
+
+  function linkFor(row: Row): {
+    tag: ReturnType<typeof resolveTag>
+    bind: Record<string, unknown>
+  } {
+    const link = props.rowLink!(row)
+    const tag = resolveTag(link.as, link.to, link.href, 'a')
+    return { tag, bind: linkBindings(tag, link.to, link.href) }
+  }
+
+  const INTERACTIVE = 'a, button, input, select, textarea, label, [tabindex], [contenteditable]'
+  function forward(event: MouseEvent): void {
+    if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)
+      return
+    const target = event.target as Element | null
+    const row = event.currentTarget as HTMLElement
+    // Only controls inside the row count; the scroller's own tabindex sits above it.
+    const hit = target?.closest(INTERACTIVE)
+    if (hit && row.contains(hit)) return
+    if (window.getSelection()?.toString()) return
+    row.querySelector<HTMLElement>('.bl-table__action')?.click()
+  }
+
+  const totalsMap = computed<Record<string, string | number>>(() =>
+    props.manual ? (props.totals ?? {}) : computeTotals(props.rows, props.columns)
+  )
+  const hasFooter = computed(
+    () =>
+      !!slots.footer ||
+      (props.manual
+        ? !!props.totals && Object.keys(props.totals).length > 0
+        : props.columns.some((c) => c.total))
+  )
+  function hasTotal(key: string): boolean {
+    const value = totalsMap.value[key]
+    return value !== undefined && value !== ''
+  }
+  function totalLabel(key: string): string {
+    const value = totalsMap.value[key]
+    return value === undefined || value === '' ? text.value.total : `${text.value.total} · ${value}`
+  }
 
   function toggleSort(key: string): void {
     sort.value = nextSort(sort.value, key)

@@ -42,6 +42,16 @@ describe('WCAG AA for text tokens', () => {
     }
   )
 
+  // An actionable BlTable row sits on a 6% trace tint; its trace link text must stay readable.
+  it.each(THEMES.flatMap((theme) => TINT_GROUNDS.map((bg) => [theme, bg] as const)))(
+    '%s trace on an actionable row tint over %s',
+    (theme, bg) => {
+      const c = tokens.color[theme]
+      const ground = mix(hexToRgb(c.trace), hexToRgb(c[bg]), 0.06)
+      expect(contrast(hexToRgb(c.trace), ground)).toBeGreaterThanOrEqual(4.5)
+    }
+  )
+
   it('shows why ink-3 is not allowed on a selected row tint', () => {
     const c = tokens.color.light
     const ground = mix(hexToRgb(c.trace), hexToRgb(c.canvas), 0.1)

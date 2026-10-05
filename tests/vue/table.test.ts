@@ -3,14 +3,22 @@ import { createSSRApp, h, nextTick, reactive } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 import { describe, expect, it, vi } from 'vitest'
 
-const fitState = vi.hoisted(() => ({ stacked: null as null | { value: boolean } }))
+const fitState = vi.hoisted(() => ({
+  stacked: null as null | { value: boolean },
+  overflowing: false
+}))
 vi.mock('../../vue/internal/useTableFit', async () => {
   const { ref } = await import('vue')
   return {
     useTableFit: () => {
       const stacked = ref(false)
       fitState.stacked = stacked
-      return { stacked, fitted: ref(false), overflowing: ref(false), measure: () => {} }
+      return {
+        stacked,
+        fitted: ref(false),
+        overflowing: ref(fitState.overflowing),
+        measure: () => {}
+      }
     }
   }
 })
@@ -187,5 +195,203 @@ describe('BlTable pagination', () => {
     })
     expect(w.findAll('tbody tr')).toHaveLength(10)
     expect(w.find('.bl-pagination__range').text()).toBe('31–40 of 250')
+  })
+})
+
+describe('BlTable row actions', () => {
+  it('renders the primary cell as a link and forwards plain row clicks', async () => {
+    const w = mount(BlTable, {
+      props: {
+        caption: 'C',
+        columns,
+        rows,
+        rowKey: 'mac',
+        rowLink: (r: Record<string, unknown>) => ({ href: `/c/${String(r.mac)}` })
+      },
+      attachTo: document.body
+    })
+    const link = w.find('tbody tr a.bl-table__action')
+    expect(link.attributes('href')).toBe('/c/a')
+    let clicks = 0
+    link.element.addEventListener('click', (e) => {
+      e.preventDefault()
+      clicks++
+    })
+    await w.find('tbody tr td').trigger('click')
+    expect(clicks).toBe(1)
+    await w.find('tbody tr td').trigger('click', { ctrlKey: true })
+    expect(clicks).toBe(1)
+    w.unmount()
+  })
+
+  it('forwards row clicks in an overflowing scroll table (scroller is focusable)', async () => {
+    fitState.overflowing = true
+    try {
+      const w = mount(BlTable, {
+        props: {
+          caption: 'C',
+          columns,
+          rows,
+          rowKey: 'mac',
+          scroll: true,
+          rowLink: (r: Record<string, unknown>) => ({ href: `/c/${String(r.mac)}` })
+        },
+        attachTo: document.body
+      })
+      expect(w.find('.bl-table__scroller').attributes('tabindex')).toBe('0')
+      let clicks = 0
+      w.find('tbody tr a.bl-table__action').element.addEventListener('click', (e) => {
+        e.preventDefault()
+        clicks++
+      })
+      await w.find('tbody tr td').trigger('click')
+      expect(clicks).toBe(1)
+      w.unmount()
+    } finally {
+      fitState.overflowing = false
+    }
+  })
+
+  it('calls @row-activate via a button, Enter-able, and ignores clicks on slot controls (Review Focus 4)', async () => {
+    const seen: string[] = []
+    const w = mount(BlTable, {
+      props: {
+        caption: 'C',
+        columns,
+        rows,
+        rowKey: 'mac',
+        onRowActivate: (r: Record<string, unknown>) => seen.push(String(r.mac))
+      },
+      slots: { 'cell-ip': () => h('button', { class: 'own' }, 'copy') },
+      attachTo: document.body
+    })
+    expect(w.find('tbody tr').attributes('data-action')).toBe('')
+    await w.find('tbody tr button.bl-table__action').trigger('click')
+    await w.findAll('tbody tr')[1]!.find('td').trigger('click')
+    await w.find('button.own').trigger('click')
+    expect(seen).toEqual(['a', 'b'])
+    w.unmount()
+  })
+
+  it('does not forward while text is selected', async () => {
+    const seen: string[] = []
+    const w = mount(BlTable, {
+      props: {
+        caption: 'C',
+        columns,
+        rows,
+        rowKey: 'mac',
+        onRowActivate: (r: Record<string, unknown>) => seen.push(String(r.mac))
+      },
+      attachTo: document.body
+    })
+    const selection = vi.spyOn(window, 'getSelection').mockReturnValue({
+      toString: () => 'Lamp'
+    } as Selection)
+    await w.find('tbody tr td').trigger('click')
+    expect(seen).toEqual([])
+    selection.mockRestore()
+    w.unmount()
+  })
+})
+
+describe('BlTable rowLink evaluation', () => {
+  it('calls rowLink once per row per render', () => {
+    const rowLink = vi.fn(() => ({ href: '#' }))
+    mount(BlTable, { props: { caption: 'C', columns, rows, rowKey: 'mac', rowLink } })
+    expect(rowLink).toHaveBeenCalledTimes(rows.length)
+  })
+})
+
+describe('BlTable dev warnings', () => {
+  it('warns when rowLink and @row-activate are both set, and when rowKey is missing', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    mount(BlTable, {
+      props: {
+        caption: 'C',
+        columns,
+        rows,
+        rowKey: 'mac',
+        rowLink: () => ({ href: '#' }),
+        onRowActivate: () => {}
+      }
+    })
+    expect(warn.mock.calls.flat().join(' ')).toContain('rowLink wins')
+    warn.mockClear()
+    mount(BlTable, { props: { caption: 'C', columns, rows } })
+    expect(warn.mock.calls.flat().join(' ')).toContain('set rowKey')
+    warn.mockClear()
+    mount(BlTable, { props: { caption: 'C', columns: [{ key: 'name', label: 'Device' }], rows } })
+    expect(warn).not.toHaveBeenCalled()
+    warn.mockClear()
+    mount(BlTable, {
+      props: { caption: 'C', columns, rows, rowKey: 'mac', manual: true, pageSize: 1 }
+    })
+    expect(warn.mock.calls.flat().join(' ')).toContain('manual paging needs totalRows')
+    warn.mockRestore()
+  })
+})
+
+describe('BlTable totals', () => {
+  const totalled = [
+    { key: 'name', label: 'Device' },
+    {
+      key: 'rssi',
+      label: 'Signal',
+      numeric: true,
+      total: 'avg' as const,
+      format: (v: unknown) => `${v} dBm`
+    },
+    { key: 'ip', label: 'Address', total: 'count' as const }
+  ]
+  it('renders a tfoot total row over all rows', () => {
+    const w = mount(BlTable, {
+      props: { caption: 'C', columns: totalled, rows, rowKey: 'mac', pageSize: 1 }
+    })
+    const cells = w.find('tfoot tr').findAll('th, td')
+    expect(cells[0]!.text()).toBe('Total')
+    expect(cells[1]!.text()).toContain('-51 dBm')
+    expect(cells[2]!.text()).toContain('2')
+  })
+  it('ignores column.total for the footer in manual mode without totals', () => {
+    const w = mount(BlTable, {
+      props: { caption: 'C', columns: totalled, rows, rowKey: 'mac', manual: true }
+    })
+    expect(w.find('tfoot').exists()).toBe(false)
+  })
+  it('marks footer cells with no total as empty', () => {
+    const w = mount(BlTable, {
+      props: { caption: 'C', columns: totalled, rows, rowKey: 'mac' }
+    })
+    const cells = w.find('tfoot tr').findAll('td')
+    expect(cells.every((c) => c.attributes('data-empty') === undefined)).toBe(true)
+    const partial = mount(BlTable, {
+      props: {
+        caption: 'C',
+        columns: [...totalled, { key: 'x', label: 'Extra' }],
+        rows,
+        rowKey: 'mac'
+      }
+    })
+    const last = partial.find('tfoot tr').findAll('td').at(-1)!
+    expect(last.attributes('data-empty')).toBe('')
+  })
+  it('uses totals in manual mode and the footer slot override', () => {
+    const manual = mount(BlTable, {
+      props: {
+        caption: 'C',
+        columns: totalled,
+        rows,
+        rowKey: 'mac',
+        manual: true,
+        totals: { rssi: '-50 dBm' }
+      }
+    })
+    expect(manual.find('tfoot').text()).toContain('-50 dBm')
+    const slotted = mount(BlTable, {
+      props: { caption: 'C', columns, rows, rowKey: 'mac' },
+      slots: { footer: () => h('td', { colspan: 3 }, 'custom') }
+    })
+    expect(slotted.find('tfoot td').text()).toBe('custom')
   })
 })
