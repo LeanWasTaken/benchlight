@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.5.0 - 2026-10-06
+
+Tables release: BlTable and BlPagination. No breaking changes.
+
+### Added
+
+- BlTable: `columns` + `rows` props, built-in sorting (`v-model:sort`, `locale` collation), and
+  measured stacking into cards when the table does not fit its container (`--bl-table-min-col`,
+  default 8rem; a "Sort by" strip replaces the headers while stacked). `scroll` mode scrolls
+  horizontally with a sticky first column instead of stacking.
+- BlTable paging (`pageSize`, `v-model:page`), `manual` mode for server-side sorting and paging
+  (`totalRows`, `totals`), row actions (`rowLink` or `@row-activate`, with a whole-row click
+  forwarder) and a totals footer (column `total`: `'sum'`, `'avg'`, `'count'` or a function).
+- BlPagination: standalone or inside BlTable, with a compact layout on narrow screens and a polite
+  live region for the visible range.
+- `table` and `pagination` CSS modules with a CSS-only class contract; `data-fit`, `data-stacked`
+  and `data-measuring` join the script-set attributes.
+- `REQUIRES` in the module map: the bundle CLI warns when a selected module needs another one
+  (`table` needs `layout` and `pagination`; `pagination` needs `layout`).
+- Tests ban `container-type` and `@container` in library CSS.
+- Stress cases for wide, long-text, scroll, paged, totals and action tables, including tables in
+  flex, inline and grid hosts.
+
+### Changed
+
+- Full-bundle guard raised from 32,768 to 38,912 bytes.
+
 ## 0.4.0 - 2026-10-04
 
 Responsiveness release. Layouts size by available space instead of viewport width, long content wraps,
