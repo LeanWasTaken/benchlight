@@ -2,7 +2,7 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { Features, transform } from 'lightningcss'
 import { tokens } from '../../tokens/tokens'
-import { MODULES, type ModuleName } from './modules'
+import { MODULES, REQUIRES, type ModuleName } from './modules'
 import { staticVars } from './render-tokens'
 
 // The source's browser floor: color-mix() sets Chrome 111 and Safari 16.2, :has() sets Firefox 121.
@@ -106,7 +106,11 @@ const blocks = (css: string): Set<string> =>
     [...css.matchAll(/\.(bl-[a-z0-9]+(?:-[a-z0-9]+)*?)(?=__|--|[^a-z0-9_-]|$)/g)].map((m) => m[1]!)
   )
 
-export function missingFoundations(names: readonly ModuleName[], root: string): string[] {
+export function missingFoundations(
+  names: readonly ModuleName[],
+  root: string,
+  requires: Partial<Record<ModuleName, readonly ModuleName[]>> = REQUIRES
+): string[] {
   const read = (name: ModuleName) => readFileSync(join(root, MODULES[name]), 'utf8')
   const typeBlocks = blocks(read('type'))
   const messages: string[] = []
@@ -122,6 +126,11 @@ export function missingFoundations(names: readonly ModuleName[], root: string): 
       !css.includes('prefers-reduced-motion')
     ) {
       messages.push(`${name} needs base (its reduced-motion rule lives in css/base.css)`)
+    }
+  }
+  for (const name of names) {
+    for (const dep of requires[name] ?? []) {
+      if (!names.includes(dep)) messages.push(`${name} needs ${dep}`)
     }
   }
   return messages

@@ -155,6 +155,18 @@ describe('missingFoundations', () => {
   it('does not ask for modules that are not needed', () => {
     expect(warn(['tokens', 'btn', 'led'])).toEqual([])
   })
+
+  it('names declared component requirements', () => {
+    const messages = missingFoundations(['tokens', 'base', 'type', 'btn'] as never, ROOT, {
+      btn: ['field']
+    } as never)
+    expect(messages).toContain('btn needs field')
+    expect(
+      missingFoundations(['tokens', 'base', 'type', 'btn', 'field'] as never, ROOT, {
+        btn: ['field']
+      } as never)
+    ).toEqual([])
+  })
 })
 
 describe('bundle CLI', () => {
