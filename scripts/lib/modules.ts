@@ -30,7 +30,8 @@ export const MODULES = {
   'index-row': 'css/components/index-row.css',
   'prev-next': 'css/components/prev-next.css',
   prose: 'css/components/prose.css',
-  table: 'css/components/table.css'
+  table: 'css/components/table.css',
+  pagination: 'css/components/pagination.css'
 } as const
 
 export type ModuleName = keyof typeof MODULES
@@ -38,5 +39,6 @@ export type ModuleName = keyof typeof MODULES
 // Component-to-component requirements the bundle CLI warns about when a module is selected
 // without them (CSS-derived `type`/`base` needs are detected separately in bundle.ts).
 export const REQUIRES: Partial<Record<ModuleName, readonly ModuleName[]>> = {
-  table: ['layout']
+  pagination: ['layout'],
+  table: ['layout', 'pagination']
 }

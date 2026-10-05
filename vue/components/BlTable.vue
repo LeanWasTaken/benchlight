@@ -108,13 +108,22 @@
         </tbody>
       </table>
     </div>
+    <BlPagination
+      v-if="pageSize"
+      v-model:page="currentPage"
+      :total="totalCount"
+      :page-size="pageSize"
+      :label="paginationLabels?.nav ?? `${caption}, pages`"
+      :labels="paginationLabels"
+    />
   </div>
 </template>
 
 <script setup lang="ts" generic="Row extends Record<string, unknown>">
-  import { computed, ref, useId } from 'vue'
+  import { computed, ref, useId, watch } from 'vue'
+  import BlPagination from './BlPagination.vue'
   import { useTableFit } from '../internal/useTableFit'
-  import { formatCell, nextSort, sortRows } from '../internal/table'
+  import { clampPage, formatCell, nextSort, pageSlice, sortRows } from '../internal/table'
   import type { LinkAs, LinkTo, PaginationLabels, TableColumn, TableLabels } from '../types'
 
   const props = defineProps<{
@@ -157,7 +166,27 @@
       ? props.rows.slice()
       : sortRows(props.rows, props.columns, sort.value, props.locale)
   )
-  const visibleRows = computed<Row[]>(() => sortedRows.value)
+  const totalCount = computed(() =>
+    props.manual ? (props.totalRows ?? props.rows.length) : props.rows.length
+  )
+  const currentPage = computed({
+    get: () => (props.pageSize ? clampPage(page.value, totalCount.value, props.pageSize) : 1),
+    set: (value: number) => {
+      page.value = value
+    }
+  })
+  watch(
+    () => [totalCount.value, props.pageSize, page.value] as const,
+    () => {
+      if (props.pageSize && currentPage.value !== page.value) page.value = currentPage.value
+    },
+    { immediate: true }
+  )
+  const visibleRows = computed<Row[]>(() =>
+    props.pageSize && !props.manual
+      ? pageSlice(sortedRows.value, currentPage.value, props.pageSize)
+      : sortedRows.value
+  )
 
   const fit = useTableFit(root, table, scroller, {
     enabled: () => !props.scroll,

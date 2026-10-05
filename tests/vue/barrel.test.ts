@@ -17,6 +17,7 @@ const COMPONENTS = [
   'BlMeta',
   'BlMeter',
   'BlMsg',
+  'BlPagination',
   'BlNavLink',
   'BlPrevNext',
   'BlProse',

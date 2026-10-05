@@ -33,6 +33,7 @@
 - `dist/modules/meter.min.css`
 - `dist/modules/motion.min.css`
 - `dist/modules/msg.min.css`
+- `dist/modules/pagination.min.css`
 - `dist/modules/prev-next.min.css`
 - `dist/modules/prose.min.css`
 - `dist/modules/readout.min.css`
@@ -69,6 +70,7 @@
 - `BlMeter`
 - `BlMsg`
 - `BlNavLink`
+- `BlPagination`
 - `BlPrevNext`
 - `BlProse`
 - `BlRange`
@@ -291,6 +293,21 @@ Exposed: none
 
 Slots: `default`
 Events: none
+Exposed: none
+
+### BlPagination
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `label` | `string` | yes |  |
+| `labels` | `Partial<PaginationLabels> \| undefined` | no |  |
+| `page` | `number \| undefined` | no | `1` |
+| `pageSize` | `number` | yes |  |
+| `siblings` | `number \| undefined` | no | `1` |
+| `total` | `number` | yes |  |
+
+Slots: none
+Events: `update:page`
 Exposed: none
 
 ### BlPrevNext
@@ -568,6 +585,13 @@ Exposed: none
 - `bl-page-enter-from`
 - `bl-page-leave-active`
 - `bl-page-leave-to`
+- `bl-pagination`
+- `bl-pagination__compact`
+- `bl-pagination__gap`
+- `bl-pagination__item`
+- `bl-pagination__list`
+- `bl-pagination__page`
+- `bl-pagination__range`
 - `bl-prev-next`
 - `bl-prev-next__icon`
 - `bl-prev-next__label`

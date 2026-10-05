@@ -158,7 +158,16 @@ describe('missingFoundations', () => {
 
   it('names layout for table (it relies on .bl-sr-only)', () => {
     expect(warn(['tokens', 'base', 'type', 'table']).join('\n')).toContain('table needs layout')
-    expect(warn(['tokens', 'base', 'type', 'layout', 'table'])).toEqual([])
+    expect(warn(['tokens', 'base', 'type', 'layout', 'pagination', 'table'])).toEqual([])
+  })
+
+  it('names pagination for table and layout for pagination', () => {
+    expect(warn(['tokens', 'base', 'type', 'layout', 'table']).join('\n')).toContain(
+      'table needs pagination'
+    )
+    expect(warn(['tokens', 'base', 'type', 'pagination']).join('\n')).toContain(
+      'pagination needs layout'
+    )
   })
 
   it('names declared component requirements', () => {

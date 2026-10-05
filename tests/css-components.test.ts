@@ -82,6 +82,11 @@ const REQUIRED: Record<string, string[]> = {
     '.bl-table[data-stacked] thead',
     "[aria-sort='descending'] > .bl-table__sort .bl-table__sort-icon",
     '@media (forced-colors: active)'
+  ],
+  pagination: [
+    ".bl-pagination__page[aria-current='page']",
+    ".bl-pagination [aria-disabled='true']",
+    '.bl-pagination__compact'
   ]
 }
 
