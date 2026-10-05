@@ -63,3 +63,36 @@ export interface FieldContext {
 
 // Provided by BlField; form controls (Benchlight's or your own) inject it for id and hint wiring.
 export const FIELD_CONTEXT: InjectionKey<FieldContext> = Symbol('bl-field')
+
+export interface TableColumn<Row = Record<string, unknown>> {
+  key: string
+  label: string
+  align?: 'start' | 'end' | 'center'
+  numeric?: boolean
+  sortable?: boolean
+  sortBy?: (row: Row) => string | number | null | undefined
+  format?: (value: unknown, row?: Row) => string
+  width?: string
+  primary?: boolean
+  total?: 'sum' | 'avg' | 'count' | ((rows: Row[]) => string | number)
+}
+
+export interface TableSort {
+  key: string
+  dir: 'asc' | 'desc'
+}
+
+export interface TableLabels {
+  total: string
+  empty: string
+  sortStrip: string
+}
+
+export interface PaginationLabels {
+  nav: string
+  prev: string
+  next: string
+  page: (n: number) => string
+  pageOf: (page: number, pages: number) => string
+  range: (from: number, to: number, total: number) => string
+}

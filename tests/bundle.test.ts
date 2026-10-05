@@ -97,8 +97,8 @@ describe('buildDist', () => {
     expect(count(/-webkit-font-smoothing:/g)).toBeGreaterThan(0)
   })
 
-  it('stays within the 32768-byte guard', () => {
-    expect(Buffer.byteLength(read('dist/benchlight.min.css'))).toBeLessThanOrEqual(32_768)
+  it('stays within the 38912-byte guard', () => {
+    expect(Buffer.byteLength(read('dist/benchlight.min.css'))).toBeLessThanOrEqual(38_912)
   })
 })
 
@@ -154,6 +154,11 @@ describe('missingFoundations', () => {
 
   it('does not ask for modules that are not needed', () => {
     expect(warn(['tokens', 'btn', 'led'])).toEqual([])
+  })
+
+  it('names layout for table (it relies on .bl-sr-only)', () => {
+    expect(warn(['tokens', 'base', 'type', 'table']).join('\n')).toContain('table needs layout')
+    expect(warn(['tokens', 'base', 'type', 'layout', 'table'])).toEqual([])
   })
 
   it('names declared component requirements', () => {

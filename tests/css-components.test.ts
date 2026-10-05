@@ -74,7 +74,15 @@ const REQUIRED: Record<string, string[]> = {
     '.bl-index-row:has(> .bl-index-row__icon)'
   ],
   'prev-next': ['.bl-prev-next__link--next', '.bl-prev-next__link:hover .bl-prev-next__title'],
-  prose: ['counter(bl-section, decimal-leading-zero)', '.bl-prose :not(pre) > code']
+  prose: ['counter(bl-section, decimal-leading-zero)', '.bl-prose :not(pre) > code'],
+  table: [
+    '.bl-table[data-fit]:not(.bl-table--scroll)',
+    '.bl-table--scroll .bl-table__scroller',
+    '.bl-table[data-measuring] .bl-table__table',
+    '.bl-table[data-stacked] thead',
+    "[aria-sort='descending'] > .bl-table__sort .bl-table__sort-icon",
+    '@media (forced-colors: active)'
+  ]
 }
 
 describe.each(Object.entries(REQUIRED))('css/components/%s.css', (name, selectors) => {

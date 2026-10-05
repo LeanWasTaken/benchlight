@@ -37,6 +37,9 @@
     color: var(--bl-ink-3);
   }
   .bl-silkscreen,
+  .bl-table thead th,
+  .bl-table__label,
+  .bl-table__sort-strip-label,
   .bl-section-head__eyebrow,
   .bl-spec-row__label,
   .bl-telemetry__label,

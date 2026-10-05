@@ -43,6 +43,7 @@
 - `dist/modules/spec-panel.min.css`
 - `dist/modules/switch.min.css`
 - `dist/modules/tabbar.min.css`
+- `dist/modules/table.min.css`
 - `dist/modules/telemetry.min.css`
 - `dist/modules/tints.min.css`
 - `dist/modules/tokens.min.css`
@@ -81,6 +82,7 @@
 - `BlSpecRow`
 - `BlTabBar`
 - `BlTabBarItem`
+- `BlTable`
 - `BlTelemetry`
 - `BlTelemetryCell`
 - `FIELD_CONTEXT`
@@ -447,6 +449,33 @@ Slots: `default`, `icon`
 Events: none
 Exposed: none
 
+### BlTable
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `caption` | `string` | yes |  |
+| `captionHidden` | `boolean \| undefined` | no |  |
+| `columns` | `TableColumn<Row>[]` | yes |  |
+| `compact` | `boolean \| undefined` | no |  |
+| `labels` | `Partial<TableLabels> \| undefined` | no |  |
+| `locale` | `string \| undefined` | no |  |
+| `manual` | `boolean \| undefined` | no |  |
+| `onRowActivate` | `((row: Row) => void) \| undefined` | no |  |
+| `page` | `number \| undefined` | no | `1` |
+| `pageSize` | `number \| undefined` | no |  |
+| `paginationLabels` | `Partial<PaginationLabels> \| undefined` | no |  |
+| `rowKey` | `string \| ((row: Row) => string \| number) \| undefined` | no |  |
+| `rowLink` | `((row: Row) => { as?: LinkAs \| undefined; to?: LinkTo \| undefined; href?: string \| undefined; }) \| undefined` | no |  |
+| `rows` | `Row[]` | yes |  |
+| `scroll` | `boolean \| undefined` | no |  |
+| `sort` | `{ key: string; dir: "asc" \| "desc"; } \| null \| undefined` | no | `null` |
+| `totalRows` | `number \| undefined` | no |  |
+| `totals` | `Record<string, string \| number> \| undefined` | no |  |
+
+Slots: `caption`, `empty`
+Events: `update:page`, `update:sort`
+Exposed: none
+
 ### BlTelemetry
 
 | prop | type | required | default |
@@ -585,6 +614,21 @@ Exposed: none
 - `bl-tabbar__icon`
 - `bl-tabbar__item`
 - `bl-tabbar__label`
+- `bl-table`
+- `bl-table--compact`
+- `bl-table--scroll`
+- `bl-table__center`
+- `bl-table__empty`
+- `bl-table__end`
+- `bl-table__label`
+- `bl-table__num`
+- `bl-table__primary`
+- `bl-table__scroller`
+- `bl-table__sort`
+- `bl-table__sort-icon`
+- `bl-table__sort-strip`
+- `bl-table__sort-strip-label`
+- `bl-table__table`
 - `bl-telemetry`
 - `bl-telemetry__cell`
 - `bl-telemetry__cells`
@@ -596,12 +640,14 @@ Exposed: none
 - `bl-tint-trace`
 
 ## CSS hooks (custom properties a consumer may set)
+- `--bl-col-min`
 - `--bl-log-height`
 - `--bl-meter-value`
 - `--bl-range-value-width`
 - `--bl-rise-delay`
 - `--bl-scroll-offset-bottom`
 - `--bl-scroll-offset-top`
+- `--bl-table-min-col`
 - `--bl-telemetry-columns`
 
 ## Tailwind theme variables
