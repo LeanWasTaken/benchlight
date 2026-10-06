@@ -143,6 +143,8 @@
           <BlReadout value="94.2" unit="Mbps" />
           <BlMeter :value="0.62" label="Download" />
           <BlMeter :value="null" label="Scanning" />
+          <BlMeter :value="0.52" label="Storage" show-label show-value />
+          <BlMeter :value="0.52" label="Memory" value-text="2.1 of 4 GB" show-label show-value />
         </div>
         <div>
           <BlMsg tone="ok">Saved. Rebooting in 3 s.</BlMsg>
