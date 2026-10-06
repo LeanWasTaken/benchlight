@@ -1,4 +1,30 @@
 @layer components {
+  .bl-meter-field {
+    margin: 16px 0;
+  }
+  .bl-meter-field__head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 4px 16px;
+    margin-bottom: 8px;
+    font-family: var(--bl-font-mono);
+    font-size: var(--bl-text-micro);
+    letter-spacing: var(--bl-tracking-annotation);
+    text-transform: uppercase;
+    color: var(--bl-ink-2);
+  }
+  .bl-meter-field__label,
+  .bl-meter-field__value {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .bl-meter-field__value {
+    margin-inline-start: auto;
+    font-variant-numeric: tabular-nums;
+    color: var(--bl-ink-1);
+  }
   .bl-meter {
     height: 4px;
     margin: 16px 0;
@@ -6,6 +32,9 @@
     border-radius: 2px;
     background: var(--bl-separator);
     box-shadow: 0 0 0 1px var(--bl-control-border);
+  }
+  .bl-meter-field > .bl-meter {
+    margin: 0;
   }
   .bl-meter__fill {
     width: calc(var(--bl-meter-value, 0) * 100%);

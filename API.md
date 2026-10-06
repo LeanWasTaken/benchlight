@@ -268,7 +268,10 @@ Exposed: none
 | prop | type | required | default |
 | --- | --- | --- | --- |
 | `label` | `string` | yes |  |
+| `showLabel` | `boolean \| undefined` | no |  |
+| `showValue` | `boolean \| undefined` | no |  |
 | `value` | `number \| null` | yes |  |
+| `valueText` | `string \| undefined` | no |  |
 
 Slots: none
 Events: none
@@ -579,6 +582,10 @@ Exposed: none
 - `bl-meta--sep`
 - `bl-meta__key`
 - `bl-meter`
+- `bl-meter-field`
+- `bl-meter-field__head`
+- `bl-meter-field__label`
+- `bl-meter-field__value`
 - `bl-meter__fill`
 - `bl-msg`
 - `bl-msg--err`

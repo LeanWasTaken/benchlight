@@ -174,6 +174,100 @@ describe('BlMeter', () => {
   })
 })
 
+describe('BlMeter label and value', () => {
+  const field = (props: Record<string, unknown>) =>
+    mount(BlMeter, { props: { value: 0.426, label: 'Download', ...props } })
+
+  it('renders the bare progressbar with neither flag', () => {
+    const wrapper = field({})
+    expect(wrapper.classes()).toEqual(['bl-meter'])
+    expect(wrapper.attributes('aria-valuetext')).toBeUndefined()
+    expect(wrapper.attributes('aria-labelledby')).toBeUndefined()
+    expect(wrapper.find('.bl-meter-field').exists()).toBe(false)
+  })
+
+  it('renders markup identical to the unflagged meter', () => {
+    expect(field({}).html()).toBe(
+      [
+        '<div class="bl-meter" role="progressbar" aria-label="Download" aria-valuemin="0" aria-valuemax="100" aria-valuenow="43">',
+        '  <div class="bl-meter__fill" style="--bl-meter-value: 0.426;"></div>',
+        '</div>'
+      ].join('\n')
+    )
+  })
+
+  it('puts every fallthrough attribute on the bar when unwrapped', () => {
+    const wrapper = field({}).vm.$el as HTMLElement
+    expect(wrapper.matches('.bl-meter[role=progressbar]')).toBe(true)
+    const attrs = mount(BlMeter, {
+      props: { value: 0.5, label: 'Download' },
+      attrs: { id: 'disk', class: 'x', style: 'color: red', 'aria-describedby': 'hint' }
+    })
+    expect(attrs.element.matches('[role=progressbar].bl-meter.x#disk')).toBe(true)
+    expect(attrs.attributes('aria-describedby')).toBe('hint')
+    expect(attrs.attributes('style')).toContain('color: red')
+  })
+
+  it('puts class and style on the wrapper and other attributes on the bar when wrapped', () => {
+    const wrapper = mount(BlMeter, {
+      props: { value: 0.5, label: 'Download', showValue: true },
+      attrs: { id: 'disk', class: 'x', style: 'color: red', 'aria-describedby': 'hint' }
+    })
+    expect(wrapper.classes()).toEqual(['bl-meter-field', 'x'])
+    expect(wrapper.attributes('style')).toContain('color: red')
+    expect(wrapper.attributes('id')).toBeUndefined()
+    const bar = wrapper.find('[role=progressbar]')
+    expect(bar.attributes('id')).toBe('disk')
+    expect(bar.attributes('aria-describedby')).toBe('hint')
+    expect(bar.classes()).toEqual(['bl-meter'])
+    expect(bar.attributes('style')).toBeUndefined()
+  })
+
+  it('renders no head while a value-only meter is indeterminate', () => {
+    expect(field({ value: null, showValue: true }).find('.bl-meter-field__head').exists()).toBe(
+      false
+    )
+  })
+
+  it('wraps the bar and labels it by the visible label', () => {
+    const wrapper = field({ showLabel: true })
+    expect(wrapper.classes()).toEqual(['bl-meter-field'])
+    const label = wrapper.find('.bl-meter-field__head .bl-meter-field__label')
+    expect(label.text()).toBe('Download')
+    const bar = wrapper.find('.bl-meter')
+    expect(bar.attributes('role')).toBe('progressbar')
+    expect(bar.attributes('aria-labelledby')).toBe(label.attributes('id'))
+    expect(bar.attributes('aria-label')).toBeUndefined()
+    expect(wrapper.find('.bl-meter-field__value').exists()).toBe(false)
+  })
+
+  it('keeps aria-label when only the value is shown', () => {
+    const wrapper = field({ showValue: true })
+    expect(wrapper.find('.bl-meter').attributes('aria-label')).toBe('Download')
+    expect(wrapper.find('.bl-meter-field__label').exists()).toBe(false)
+  })
+
+  it('shows a percentage, or valueText, as an aria-hidden value', () => {
+    const percent = field({ showValue: true }).find('.bl-meter-field__value')
+    expect(percent.text()).toBe('43%')
+    expect(percent.attributes('aria-hidden')).toBe('true')
+    const text = field({ showValue: true, valueText: '2.1 of 4 GB' })
+    expect(text.find('.bl-meter-field__value').text()).toBe('2.1 of 4 GB')
+  })
+
+  it('shows no value while indeterminate', () => {
+    const wrapper = field({ value: null, showLabel: true, showValue: true })
+    expect(wrapper.find('.bl-meter-field__label').exists()).toBe(true)
+    expect(wrapper.find('.bl-meter-field__value').exists()).toBe(false)
+  })
+
+  it('sets aria-valuetext on the progressbar', () => {
+    expect(field({ valueText: '2.1 of 4 GB' }).attributes('aria-valuetext')).toBe('2.1 of 4 GB')
+    const wrapped = field({ valueText: '2.1 of 4 GB', showValue: true })
+    expect(wrapped.find('.bl-meter').attributes('aria-valuetext')).toBe('2.1 of 4 GB')
+  })
+})
+
 describe('BlLog', () => {
   it('renders coloured spans line by line', () => {
     const wrapper = mount(BlLog, { props: { lines: ['\x1b[0;31mE oops\x1b[0m', 'plain'] } })

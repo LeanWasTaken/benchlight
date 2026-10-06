@@ -514,6 +514,7 @@ const cases: Case[] = [
   // D1: wrapping / intrinsic sizing
   { id: 'readout-long', checks: generic() },
   { id: 'button-long', checks: generic() },
+  { id: 'meter-long', checks: generic() },
   {
     id: 'button-icon-toolbar',
     checks: [{ name: 'no-page-overflow', variants: ALL, probe: noPageOverflow }, iconButtonsStay44]

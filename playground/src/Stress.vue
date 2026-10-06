@@ -67,6 +67,19 @@
       </div>
     </section>
 
+    <section v-if="show('meter-long')" data-case="meter-long">
+      <h2 class="st-label">meter-long</h2>
+      <div data-box>
+        <BlMeter
+          :value="0.62"
+          :label="german + ' ' + german"
+          :value-text="hash + ' of ' + hash"
+          show-label
+          show-value
+        />
+      </div>
+    </section>
+
     <section v-if="show('field-hint-url')" data-case="field-hint-url">
       <h2 class="st-label">field-hint-url</h2>
       <div data-box>
@@ -576,6 +589,7 @@
     BlLinkArrow,
     BlLog,
     BlMeta,
+    BlMeter,
     BlMsg,
     BlNavLink,
     BlPrevNext,

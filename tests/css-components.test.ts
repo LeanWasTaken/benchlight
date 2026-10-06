@@ -58,6 +58,8 @@ const REQUIRED: Record<string, string[]> = {
     'calc(var(--bl-meter-value, 0) * 100%)',
     '.bl-meter[data-indeterminate] .bl-meter__fill',
     '@keyframes bl-meter-slide',
+    '.bl-meter-field__head',
+    '.bl-meter-field__value',
     '@media (prefers-reduced-motion: reduce)'
   ],
   msg: ['.bl-msg--ok::before', '.bl-msg--err', '.bl-msg--info'],
@@ -269,6 +271,14 @@ describe('anchored behaviour', () => {
     expect(rule.color).toBe('HighlightText')
     expect(rule['forced-color-adjust']).toBe('none')
     expect(rule['box-shadow']).toBe('inset 0 0 0 2px HighlightText')
+  })
+
+  it('lets the meter field own the block margin and wrap its head', () => {
+    const css = read('meter')
+    expect(ruleBody(css, '.bl-meter-field').margin).toBe('16px 0')
+    expect(ruleBody(css, '.bl-meter-field > .bl-meter').margin).toBe('0')
+    expect(ruleBody(css, '.bl-meter-field__head')['flex-wrap']).toBe('wrap')
+    expect(ruleBody(css, '.bl-meter-field__value')['font-variant-numeric']).toBe('tabular-nums')
   })
 
   it('slides the switch thumb one 44px option per step', () => {

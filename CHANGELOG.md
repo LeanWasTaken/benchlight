@@ -7,6 +7,8 @@
 - BlButton: icon-only mode (`bl-btn--icon`, a 44px square, a circle with `pill`) when only the
   `icon` slot is filled; `label` sets `aria-label`; `pressed` renders `aria-pressed` on buttons;
   `variant="ghost"` (`bl-btn--ghost`).
+- BlMeter: `valueText` (`aria-valuetext`), `showLabel` and `showValue` render the label and value
+  visibly in a `bl-meter-field` wrapper; without them the markup is unchanged.
 
 ### Changed
 
