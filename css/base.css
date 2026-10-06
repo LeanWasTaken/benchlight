@@ -5,6 +5,9 @@
     box-sizing: border-box;
   }
   html {
+    /* Inherited: the page scrollbar and every scroller below it get a themed thumb on a
+       transparent track. Classic page scrollbars still take their own lane beside fixed bars. */
+    scrollbar-color: var(--bl-control-border) transparent;
     background: var(--bl-canvas);
     font-family: var(--bl-font-sans);
     -webkit-font-smoothing: antialiased;
@@ -20,6 +23,34 @@
     transition:
       background-color var(--bl-duration-base) ease,
       color var(--bl-duration-base) ease;
+  }
+  /* A 1px edge between the page and a classic page scrollbar, like the native track border. Its
+     width is the scrollbar's width capped at 1px (fixed boxes size against the viewport minus
+     scrollbars), so overlay scrollbars and pages that do not scroll get nothing. It lives on
+     `html`, not `body`: a body with transform, filter, contain or will-change would become the
+     fixed box's containing block. Only where `scrollbar-color` is supported, since elsewhere the
+     native scrollbar keeps its own track border. Absent when `html` reserves the gutter
+     (`overflow-y: scroll` or `scrollbar-gutter: stable`), because the scrollbar is then not
+     subtracted from `vw`. Hidden in RTL documents: Firefox and likely Safari move the page
+     scrollbar to the left there, while Chromium keeps it on the right, so a physical `right`
+     edge is only right in some browsers; the cosmetic edge is dropped in Chrome RTL as well.
+     CSS `zoom` on `html` skews `vw` against `%`, so with overlay scrollbars a stray 1px line can
+     appear at the right edge; reset the edge if you zoom the root. */
+  @supports (scrollbar-color: auto) {
+    html::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 41;
+      inline-size: max(0px, min(1px, 100vw - 100%));
+      background: var(--bl-separator);
+      pointer-events: none;
+    }
+    html:dir(rtl)::after {
+      display: none;
+    }
   }
   ::selection {
     background: color-mix(in srgb, var(--bl-trace) 25%, transparent);

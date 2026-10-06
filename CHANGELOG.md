@@ -15,6 +15,16 @@
 - The full-bundle size guard is raised from 38 KiB to 40 KiB for the button and meter additions.
 - Button hover rules now apply only inside `@media (hover: hover)`.
 
+### Fixed
+
+- Library scrollers (`.bl-log`, BlTable scroll mode, prose tables) use a thin scrollbar with a
+  `--bl-control-border` thumb on a transparent track instead of the browser's default grey one. The
+  page scrollbar and app scrollers inherit the same colours from `base` (default width).
+  A 1px `--bl-separator` edge marks a classic page scrollbar, like the native track border; it
+  is absent with overlay scrollbars, when `html` reserves the gutter (`overflow-y: scroll`,
+  `scrollbar-gutter: stable`) and in RTL documents, and only exists where `scrollbar-color` is
+  supported. `base` now uses `html::after` for it; reset it with `html::after { content: none }`.
+
 ## 0.5.0 - 2026-10-06
 
 Tables release: BlTable and BlPagination. No breaking changes.
