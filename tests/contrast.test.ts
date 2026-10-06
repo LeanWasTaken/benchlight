@@ -52,6 +52,63 @@ describe('WCAG AA for text tokens', () => {
     }
   )
 
+  // Pressed BlButton: primary is canvas text on a trace fill; secondary and ghost are trace text
+  // and a trace border on a 10% trace tint over the surface.
+  it.each(THEMES)('%s pressed primary button: canvas on trace is at least 4.5:1', (theme) => {
+    const c = tokens.color[theme]
+    expect(contrast(hexToRgb(c.canvas), hexToRgb(c.trace))).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it.each(THEMES.flatMap((theme) => SURFACES.map((bg) => [theme, bg] as const)))(
+    '%s pressed primary button: trace fill edge against %s is at least 3:1',
+    (theme, bg) => {
+      const c = tokens.color[theme]
+      expect(contrast(hexToRgb(c.trace), hexToRgb(c[bg]))).toBeGreaterThanOrEqual(3)
+    }
+  )
+
+  it.each(THEMES)('%s pressed secondary/ghost button: trace on the tint and its edge', (theme) => {
+    const c = tokens.color[theme]
+    const trace = hexToRgb(c.trace)
+    const ground = mix(trace, hexToRgb(c.surface), 0.1)
+    expect(contrast(trace, ground)).toBeGreaterThanOrEqual(4.5)
+    for (const bg of SURFACES) {
+      expect(contrast(trace, hexToRgb(c[bg]))).toBeGreaterThanOrEqual(3)
+    }
+  })
+
+  // Pressed danger is canvas text on a danger fill; pressed hover mixes the fill 12% toward ink-1,
+  // which only raises the contrast of the canvas text.
+  it.each(THEMES)('%s pressed danger button: canvas on danger, edge, and hover fill', (theme) => {
+    const c = tokens.color[theme]
+    const canvas = hexToRgb(c.canvas)
+    const danger = hexToRgb(c.danger)
+    expect(contrast(canvas, danger)).toBeGreaterThanOrEqual(4.5)
+    for (const bg of SURFACES) {
+      expect(contrast(danger, hexToRgb(c[bg]))).toBeGreaterThanOrEqual(3)
+    }
+    for (const fill of [c.trace, c.danger]) {
+      const hover = mix(hexToRgb(fill), hexToRgb(c['ink-1']), 0.88)
+      expect(contrast(canvas, hover)).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
+  it.each(THEMES)('%s pressed secondary/ghost hover: trace on a 16%% tint', (theme) => {
+    const c = tokens.color[theme]
+    const trace = hexToRgb(c.trace)
+    expect(contrast(trace, mix(trace, hexToRgb(c.surface), 0.16))).toBeGreaterThanOrEqual(4.5)
+  })
+
+  // The inset ring is the non-colour cue: canvas inside the filled states, trace on the tint.
+  it.each(THEMES)('%s pressed ring is at least 3:1 against its fill', (theme) => {
+    const c = tokens.color[theme]
+    for (const fill of [c.trace, c.danger]) {
+      expect(contrast(hexToRgb(c.canvas), hexToRgb(fill))).toBeGreaterThanOrEqual(3)
+    }
+    const tint = mix(hexToRgb(c.trace), hexToRgb(c.surface), 0.1)
+    expect(contrast(hexToRgb(c.trace), tint)).toBeGreaterThanOrEqual(3)
+  })
+
   it('shows why ink-3 is not allowed on a selected row tint', () => {
     const c = tokens.color.light
     const ground = mix(hexToRgb(c.trace), hexToRgb(c.canvas), 0.1)

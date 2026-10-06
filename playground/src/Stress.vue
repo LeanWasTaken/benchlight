@@ -41,6 +41,32 @@
       </div>
     </section>
 
+    <section v-if="show('button-icon-row')" data-case="button-icon-row">
+      <h2 class="st-label">button-icon-row</h2>
+      <div data-box style="display: flex; flex-wrap: wrap; gap: 8px">
+        <BlButton v-for="n in 12" :key="n" variant="secondary" :label="`Action ${n}`">
+          <template #icon>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M3 3l10 10M13 3L3 13" />
+            </svg>
+          </template>
+        </BlButton>
+      </div>
+    </section>
+
+    <section v-if="show('button-icon-toolbar')" data-case="button-icon-toolbar">
+      <h2 class="st-label">button-icon-toolbar</h2>
+      <div data-box style="display: flex; flex-wrap: nowrap; gap: 8px; overflow: hidden">
+        <BlButton v-for="n in 12" :key="n" variant="ghost" :label="`Tool ${n}`">
+          <template #icon>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M3 8h10" />
+            </svg>
+          </template>
+        </BlButton>
+      </div>
+    </section>
+
     <section v-if="show('field-hint-url')" data-case="field-hint-url">
       <h2 class="st-label">field-hint-url</h2>
       <div data-box>

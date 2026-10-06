@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createSSRApp, defineComponent, h, markRaw, nextTick, ref } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 import BlAppearanceSwitch from '../../vue/components/BlAppearanceSwitch.vue'
@@ -291,6 +291,8 @@ describe('BlSegmented', () => {
 })
 
 describe('BlButton', () => {
+  afterEach(() => vi.restoreAllMocks())
+
   it('defaults to a primary type=button', () => {
     const wrapper = mount(BlButton, { slots: { default: 'Save' } })
     expect(wrapper.element.tagName).toBe('BUTTON')
@@ -359,6 +361,131 @@ describe('BlButton', () => {
     mount(BlNavLink, { props: { as: markRaw(RouterLinkLike), to: '/projects' } })
     expect(warn).not.toHaveBeenCalled()
     warn.mockRestore()
+  })
+
+  describe('icon-only', () => {
+    const icon = '<svg />'
+    it('adds bl-btn--icon when only the icon slot is filled', () => {
+      const wrapper = mount(BlButton, { props: { label: 'Close' }, slots: { icon } })
+      expect(wrapper.classes()).toContain('bl-btn--icon')
+    })
+
+    it('treats a whitespace-only or comment-only default slot as empty', () => {
+      const blank = mount(BlButton, { props: { label: 'x' }, slots: { icon, default: '  \n ' } })
+      expect(blank.classes()).toContain('bl-btn--icon')
+      const comment = mount(BlButton, {
+        props: { label: 'x' },
+        slots: { icon, default: '<!-- note -->' }
+      })
+      expect(comment.classes()).toContain('bl-btn--icon')
+    })
+
+    it('treats a v-if=false default slot as empty', () => {
+      const Host = defineComponent({
+        components: { BlButton },
+        props: { show: Boolean },
+        template: `<BlButton label="x"><template #icon><svg /></template><template v-if="show">Save</template></BlButton>`
+      })
+      const wrapper = mount(Host)
+      expect(wrapper.classes()).toContain('bl-btn--icon')
+      return wrapper.setProps({ show: true }).then(() => {
+        expect(wrapper.classes()).not.toContain('bl-btn--icon')
+        expect(wrapper.text()).toBe('Save')
+      })
+    })
+
+    it('does not add the class with text, or without an icon', () => {
+      const text = mount(BlButton, { slots: { icon, default: 'Save' } })
+      expect(text.classes()).not.toContain('bl-btn--icon')
+      expect(mount(BlButton).classes()).not.toContain('bl-btn--icon')
+    })
+
+    it('keeps the pill modifier alongside the icon one', () => {
+      const wrapper = mount(BlButton, { props: { pill: true, label: 'x' }, slots: { icon } })
+      expect(wrapper.classes()).toEqual(['bl-btn', 'bl-btn--pill', 'bl-btn--icon'])
+    })
+  })
+
+  describe('label', () => {
+    const icon = '<svg />'
+    it('sets aria-label on a button, a link and a router link', () => {
+      expect(mount(BlButton, { props: { label: 'Copy' } }).attributes('aria-label')).toBe('Copy')
+      expect(
+        mount(BlButton, { props: { label: 'Copy', href: '/x' } }).attributes('aria-label')
+      ).toBe('Copy')
+      const router = mount(BlButton, { props: { label: 'Copy', as: RouterLinkLike, to: '/x' } })
+      expect(router.attributes('aria-label')).toBe('Copy')
+    })
+
+    it('warns once when a button becomes icon-only and unnamed after mount', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const Host = defineComponent({
+        components: { BlButton },
+        props: { text: Boolean },
+        template: `<BlButton><template #icon><svg /></template><template v-if="text">Save</template></BlButton>`
+      })
+      const wrapper = mount(Host, { props: { text: true } })
+      expect(warn).not.toHaveBeenCalled()
+      await wrapper.setProps({ text: false })
+      await nextTick()
+      expect(warn).toHaveBeenCalledTimes(1)
+      await wrapper.setProps({ text: true })
+      await wrapper.setProps({ text: false })
+      expect(warn).toHaveBeenCalledTimes(1)
+    })
+
+    it('warns when label is set on a button with visible text', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      mount(BlButton, { props: { label: 'Submit form' }, slots: { default: 'Send' } })
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('`label`'))
+    })
+
+    it('does not warn about label when the button has no visible text', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      mount(BlButton, { props: { label: 'Close' } })
+      mount(BlButton, { props: { label: 'Close' }, slots: { default: '  ' } })
+      expect(warn).not.toHaveBeenCalled()
+    })
+
+    it('warns only when icon-only and unnamed', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      mount(BlButton, { slots: { icon } })
+      expect(warn).toHaveBeenCalledTimes(1)
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('[benchlight] BlButton'))
+      warn.mockClear()
+      mount(BlButton, { props: { label: 'Close' }, slots: { icon } })
+      mount(BlButton, { attrs: { 'aria-label': 'Close' }, slots: { icon } })
+      mount(BlButton, { attrs: { 'aria-labelledby': 'x' }, slots: { icon } })
+      mount(BlButton, { slots: { icon, default: 'Save' } })
+      expect(warn).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('pressed', () => {
+    it('renders aria-pressed true and false on a button', () => {
+      expect(mount(BlButton, { props: { pressed: true } }).attributes('aria-pressed')).toBe('true')
+      expect(mount(BlButton, { props: { pressed: false } }).attributes('aria-pressed')).toBe(
+        'false'
+      )
+    })
+
+    it('omits aria-pressed when undefined', () => {
+      expect(mount(BlButton).attributes('aria-pressed')).toBeUndefined()
+    })
+
+    it('ignores pressed on a link and warns', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const wrapper = mount(BlButton, { props: { href: '/x', pressed: true } })
+      expect(wrapper.attributes('aria-pressed')).toBeUndefined()
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('[benchlight] BlButton'))
+    })
+  })
+
+  it('maps the ghost variant to bl-btn--ghost', () => {
+    expect(mount(BlButton, { props: { variant: 'ghost' } }).classes()).toEqual([
+      'bl-btn',
+      'bl-btn--ghost'
+    ])
   })
 })
 

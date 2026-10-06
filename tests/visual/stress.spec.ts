@@ -498,10 +498,30 @@ const generic = (variants: Variant[] = ALL): Check[] => [
   { name: 'not-clipped', variants, probe: clipped() }
 ]
 
+const iconButtonsStay44: Check = {
+  name: 'icon-buttons-stay-44px',
+  variants: ALL,
+  probe: (page) =>
+    page.evaluate(() => {
+      const bad = [...document.querySelectorAll<HTMLElement>('.bl-btn--icon')]
+        .map((el) => el.getBoundingClientRect())
+        .filter((r) => r.width < 43.5 || r.height < 43.5)
+      return bad.length ? `${bad.length} icon buttons below 44px` : null
+    })
+}
+
 const cases: Case[] = [
   // D1: wrapping / intrinsic sizing
   { id: 'readout-long', checks: generic() },
   { id: 'button-long', checks: generic() },
+  {
+    id: 'button-icon-toolbar',
+    checks: [{ name: 'no-page-overflow', variants: ALL, probe: noPageOverflow }, iconButtonsStay44]
+  },
+  {
+    id: 'button-icon-row',
+    checks: [...generic(), iconButtonsStay44]
+  },
   { id: 'field-hint-url', checks: generic() },
   { id: 'segmented-long', checks: generic() },
   { id: 'link-arrow-long', checks: generic() },

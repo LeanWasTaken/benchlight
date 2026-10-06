@@ -1,10 +1,5 @@
 import type { LinkAs, LinkTo } from '../types'
-
-const isDev = Boolean((import.meta as { env?: { DEV?: boolean } }).env?.DEV)
-
-function warn(message: string): void {
-  if (isDev) console.warn(`[benchlight] ${message}`)
-}
+import { warn } from './dev'
 
 // The rendered tag: an explicit `as`, else an anchor when there is a link target, else the fallback.
 export function resolveTag(

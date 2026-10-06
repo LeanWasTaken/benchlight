@@ -124,12 +124,14 @@ Exposed: none
 | `as` | `LinkAs \| undefined` | no |  |
 | `disabled` | `boolean \| undefined` | no |  |
 | `href` | `string \| undefined` | no |  |
+| `label` | `string \| undefined` | no |  |
 | `pill` | `boolean \| undefined` | no |  |
+| `pressed` | `boolean \| undefined` | no | `undefined` |
 | `to` | `LinkTo \| undefined` | no |  |
 | `type` | `"button" \| "submit" \| "reset" \| undefined` | no | `"button"` |
-| `variant` | `"primary" \| "secondary" \| "danger" \| undefined` | no | `"primary"` |
+| `variant` | `"primary" \| "secondary" \| "danger" \| "ghost" \| undefined` | no | `"primary"` |
 
-Slots: `default`, `icon`
+Slots: `icon`
 Events: none
 Exposed: none
 
@@ -533,6 +535,8 @@ Exposed: none
 - `bl-ansi-97`
 - `bl-btn`
 - `bl-btn--danger`
+- `bl-btn--ghost`
+- `bl-btn--icon`
 - `bl-btn--pill`
 - `bl-btn--secondary`
 - `bl-btn__icon`

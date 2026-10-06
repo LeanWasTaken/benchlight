@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- BlButton: icon-only mode (`bl-btn--icon`, a 44px square, a circle with `pill`) when only the
+  `icon` slot is filled; `label` sets `aria-label`; `pressed` renders `aria-pressed` on buttons;
+  `variant="ghost"` (`bl-btn--ghost`).
+
+### Changed
+
+- The full-bundle size guard is raised from 38 KiB to 40 KiB for the button and meter additions.
+- Button hover rules now apply only inside `@media (hover: hover)`.
+
 ## 0.5.0 - 2026-10-06
 
 Tables release: BlTable and BlPagination. No breaking changes.

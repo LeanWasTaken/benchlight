@@ -206,6 +206,13 @@ raise gets a CHANGELOG line.
   it with `v-if` may not be announced.
 - **BlSiteBar** `lift` is reactive. **BlPrevNext** renders nothing without neighbours. `LinkTo`
   accepts any object, so typed router locations pass.
+- **BlButton:** fill only the `icon` slot for an icon-only button (`bl-btn--icon`, 44px square;
+  `pill` makes it a circle) and name it with `label` (sets `aria-label`; it is for icon-only buttons and
+  replaces visible text as the accessible name, so a dev warning flags it on a button with text).
+  `pressed` makes a toggle button (`aria-pressed`, all variants; ignored on links) with an inset ring
+  as well as a colour change. `variant="ghost"` is transparent until hovered. The dev warnings run
+  after mount and again whenever the props, attributes or slot content change. With raw CSS, add `bl-btn--icon`, `bl-btn--ghost`
+  or `aria-pressed` yourself.
 - **BlMeter:** `:value="null"` renders an indeterminate meter.
 - **BlTelemetry:** `--bl-telemetry-columns` now applies at every width (it used to apply only from
   640px). The default is auto-fit with 12rem cells; with no custom columns, six cells lay out 3x2 when
