@@ -1,7 +1,7 @@
 // @vitest-environment node
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { ruleBody } from './helpers/css'
+import { parseRules, ruleBody } from './helpers/css'
 
 const read = (name: string) =>
   readFileSync(new URL(`../css/components/${name}.css`, import.meta.url), 'utf8')
@@ -522,5 +522,60 @@ describe('container-aware layouts', () => {
 
   it('keeps the link-arrow hit area at least 44px wide', () => {
     expect(body('link-arrow', '.bl-link-arrow')['min-width']).toBe('44px')
+  })
+})
+
+describe('themed scrollbars', () => {
+  // Each scroller is styled in its own component file so a module bundle stays self-contained.
+  const scrollers: Record<string, string[]> = {
+    log: ['.bl-log'],
+    table: ['.bl-table', '.bl-table--scroll .bl-table__scroller'],
+    prose: ['.bl-prose pre', '.bl-prose table']
+  }
+
+  it.each(Object.entries(scrollers).flatMap(([file, list]) => list.map((s) => [file, s] as const)))(
+    '%s: %s gets a thin, visible, themed thumb',
+    (file, selector) => {
+      const rule = ruleBody(read(file), selector)
+      expect(rule['scrollbar-width']).toBe('thin')
+      expect(rule['scrollbar-color']).toBe('var(--bl-control-border) transparent')
+    }
+  )
+
+  it('themes the page scrollbar on a transparent track, inherited by every scroller', () => {
+    const root = ruleBody(readFileSync(new URL('../css/base.css', import.meta.url), 'utf8'), 'html')
+    expect(root['scrollbar-color']).toBe('var(--bl-control-border) transparent')
+    expect(root['scrollbar-width']).toBeUndefined()
+  })
+  it('draws a 1px edge beside a classic page scrollbar only', () => {
+    const supports = ['@supports (scrollbar-color: auto)']
+    const edge = ruleBody(
+      readFileSync(new URL('../css/base.css', import.meta.url), 'utf8'),
+      'html::after',
+      supports
+    )
+    expect(edge['position']).toBe('fixed')
+    expect(edge['inline-size']).toBe('max(0px, min(1px, 100vw - 100%))')
+    expect(edge['pointer-events']).toBe('none')
+    const base = readFileSync(new URL('../css/base.css', import.meta.url), 'utf8')
+    expect(ruleBody(base, 'html:dir(rtl)::after', supports).display).toBe('none')
+  })
+
+  it('themes every scrolling rule in the library, except the hidden-scrollbar nav', () => {
+    for (const file of readdirSync(new URL('../css/components', import.meta.url))) {
+      const name = file.replace(/\.css$/, '')
+      for (const rule of parseRules(read(name))) {
+        const d = rule.declarations
+        const scrolls = ['overflow', 'overflow-x', 'overflow-y'].some((p) =>
+          /\b(auto|scroll)\b/.test(d[p] ?? '')
+        )
+        if (!scrolls) continue
+        if (d['scrollbar-width'] === 'none') continue
+        expect(d['scrollbar-color'], `${name}.css: ${rule.selectors.join(', ')}`).toBe(
+          'var(--bl-control-border) transparent'
+        )
+      }
+    }
+    expect(ruleBody(read('site-bar'), '.bl-site-bar__navwrap')['scrollbar-width']).toBe('none')
   })
 })

@@ -355,3 +355,27 @@ test.describe('tables', () => {
     await expect(live).toHaveText(/6.10 of 12/)
   })
 })
+
+test.describe('themed scrollbars', () => {
+  const read = () => {
+    const style = getComputedStyle(document.querySelector('pre.bl-log')!)
+    return { width: style.scrollbarWidth, color: style.scrollbarColor }
+  }
+
+  test('the log scrollbar is thin and themed in dark mode', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await page.goto('/')
+    const { width, color } = await page.evaluate(read)
+    expect(width).toBe('thin')
+    // --bl-control-border (#69707a) thumb on a transparent track.
+    expect(color).toBe('rgb(105, 112, 122) rgba(0, 0, 0, 0)')
+  })
+
+  test.describe('forced colors', () => {
+    test.use({ forcedColors: 'active' })
+    test('the log keeps the system scrollbar colours', async ({ page }) => {
+      await page.goto('/')
+      expect((await page.evaluate(read)).color).toBe('auto')
+    })
+  })
+})

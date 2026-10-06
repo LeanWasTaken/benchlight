@@ -133,6 +133,8 @@ raise gets a CHANGELOG line.
 ## Conventions
 
 - Everything global is prefixed: `.bl-*`, `--bl-*`, `bl-*` keyframes, `Bl*` components.
+- `base` uses `html::after` for the 1px page scrollbar edge; reset it with
+  `html::after { content: none }` if you need the pseudo-element.
 - Library CSS lives in `@layer base` / `@layer components`; utilities and your own CSS win without
   `!important`.
 - States are ARIA or native attributes (`aria-current`, `aria-pressed`, `:checked`, `:disabled`);

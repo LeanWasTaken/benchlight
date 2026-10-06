@@ -97,6 +97,8 @@
     margin: 16px 0;
     padding: 16px;
     overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--bl-control-border) transparent;
     background: var(--bl-surface);
     border: 1px solid var(--bl-separator);
     border-radius: var(--bl-radius-card);
@@ -122,6 +124,8 @@
     max-width: 100%;
     margin: 16px 0;
     overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--bl-control-border) transparent;
     border-collapse: collapse;
   }
   .bl-prose :is(th, td) {
