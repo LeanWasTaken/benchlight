@@ -121,13 +121,36 @@ test.describe('forced colors', () => {
     '.bl-meter__fill',
     '.bl-eq__bar',
     '.bl-segmented__item[aria-pressed="true"]',
-    '.bl-segmented__item:has(:checked)'
+    '.bl-segmented__item:has(:checked)',
+    '.bl-btn[aria-pressed="true"]'
   ]) {
     test(`${selector} stays visible`, async ({ page }) => {
       await page.goto('/')
       expect(await page.evaluate(visible, { selector })).toBe(true)
     })
   }
+
+  test('a hovered pressed button keeps Highlight colours', async ({ page }) => {
+    await page.goto('/')
+    const button = page.locator('.bl-btn--secondary[aria-pressed="true"]').first()
+    await button.scrollIntoViewIfNeeded()
+    await button.hover()
+    await page.waitForTimeout(400)
+    const colours = await button.evaluate((el) => {
+      const probe = document.createElement('span')
+      probe.style.cssText = 'color: HighlightText; background: Highlight'
+      document.body.append(probe)
+      const expected = getComputedStyle(probe)
+      const out = {
+        background: [getComputedStyle(el).backgroundColor, expected.backgroundColor],
+        color: [getComputedStyle(el).color, expected.color]
+      }
+      probe.remove()
+      return out
+    })
+    expect(colours.background[0]).toBe(colours.background[1])
+    expect(colours.color[0]).toBe(colours.color[1])
+  })
 
   test('telemetry cell dividers stay visible', async ({ page }) => {
     await page.goto('/')

@@ -187,6 +187,7 @@
   import { computed, ref, useId, useSlots, watch } from 'vue'
   import BlPagination from './BlPagination.vue'
   import { useTableFit } from '../internal/useTableFit'
+  import { warn } from '../internal/dev'
   import { linkBindings, resolveTag } from '../internal/link'
   import {
     clampPage,
@@ -277,14 +278,13 @@
   })
 
   const slots = useSlots()
-  const isDev = Boolean((import.meta as { env?: { DEV?: boolean } }).env?.DEV)
   const hasAction = computed(() => !!props.rowLink || !!props.onRowActivate)
-  if (isDev && props.rowLink && props.onRowActivate)
-    console.warn('[benchlight] BlTable: rowLink and @row-activate are both set; rowLink wins.')
-  if (isDev && !props.rowKey && (sortable.value.length || hasAction.value))
-    console.warn('[benchlight] BlTable: set rowKey so rows keep identity when sorted or paged.')
-  if (isDev && props.manual && props.pageSize && props.totalRows === undefined)
-    console.warn('[benchlight] BlTable: manual paging needs totalRows.')
+  if (props.rowLink && props.onRowActivate)
+    warn('BlTable: rowLink and @row-activate are both set; rowLink wins.')
+  if (!props.rowKey && (sortable.value.length || hasAction.value))
+    warn('BlTable: set rowKey so rows keep identity when sorted or paged.')
+  if (props.manual && props.pageSize && props.totalRows === undefined)
+    warn('BlTable: manual paging needs totalRows.')
 
   function linkFor(row: Row): {
     tag: ReturnType<typeof resolveTag>

@@ -40,6 +40,9 @@ const REQUIRED: Record<string, string[]> = {
     '.bl-btn--secondary',
     '.bl-btn--danger',
     '.bl-btn--pill',
+    '.bl-btn--ghost',
+    '.bl-btn--icon',
+    ".bl-btn[aria-pressed='true']",
     '.bl-btn:disabled',
     'pointer-events: none'
   ],
@@ -207,6 +210,65 @@ describe('anchored behaviour', () => {
     expect(disabled.opacity).toBe('0.45')
     expect(disabled.cursor).toBe('not-allowed')
     expect(ruleBody(css, ".bl-btn[aria-disabled='true']")['pointer-events']).toBe('none')
+  })
+
+  it('gates button hover behind (hover: hover)', () => {
+    const css = read('btn')
+    const gate = ['@media (hover: hover)']
+    for (const selector of [
+      '.bl-btn:hover',
+      '.bl-btn--secondary:hover',
+      '.bl-btn--danger:hover',
+      '.bl-btn--ghost:hover'
+    ]) {
+      expect(ruleBody(css, selector, gate).background).toBeDefined()
+      expect(() => ruleBody(css, selector)).toThrow()
+    }
+  })
+
+  it('makes the icon button a 44px square, a circle with pill', () => {
+    const css = read('btn')
+    const icon = ruleBody(css, '.bl-btn--icon')
+    expect(icon['inline-size']).toBe('44px')
+    expect(icon.padding).toBe('0')
+    expect(ruleBody(css, '.bl-btn--pill.bl-btn--icon').padding).toBe('0')
+    expect(ruleBody(css, '.bl-btn--icon .bl-btn__icon').width).toBe('18px')
+  })
+
+  it('marks pressed with an inset ring on every variant, not hue alone', () => {
+    const css = read('btn')
+    expect(ruleBody(css, ".bl-btn[aria-pressed='true']")['box-shadow']).toBe(
+      'inset 0 0 0 2px var(--bl-canvas)'
+    )
+    expect(ruleBody(css, ".bl-btn--danger[aria-pressed='true']").background).toBe(
+      'var(--bl-danger)'
+    )
+    const tinted = ruleBody(css, ".bl-btn--ghost[aria-pressed='true']")
+    expect(tinted['box-shadow']).toBe('inset 0 0 0 1px var(--bl-trace)')
+  })
+
+  it('gives pressed buttons hover feedback only where hover exists', () => {
+    const css = read('btn')
+    const gate = ['@media (hover: hover)']
+    for (const selector of [
+      ".bl-btn[aria-pressed='true']:hover",
+      ".bl-btn--danger[aria-pressed='true']:hover",
+      ".bl-btn--secondary[aria-pressed='true']:hover",
+      ".bl-btn--ghost[aria-pressed='true']:hover"
+    ]) {
+      expect(ruleBody(css, selector, gate).background).toBeDefined()
+      expect(() => ruleBody(css, selector)).toThrow()
+    }
+  })
+
+  it('keeps the pressed state visible in forced colors', () => {
+    const rule = ruleBody(read('btn'), ".bl-btn[aria-pressed='true']", [
+      '@media (forced-colors: active)'
+    ])
+    expect(rule.background).toBe('Highlight')
+    expect(rule.color).toBe('HighlightText')
+    expect(rule['forced-color-adjust']).toBe('none')
+    expect(rule['box-shadow']).toBe('inset 0 0 0 2px HighlightText')
   })
 
   it('slides the switch thumb one 44px option per step', () => {
