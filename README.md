@@ -325,6 +325,36 @@ An on/off switch on a native checkbox (`role="switch"`). Full prop list is in [A
 - The thumb moves with a logical inset, so RTL flips it. "On" is shown by position and an inner mark,
   not colour alone.
 
+## BlMedia
+
+A figure beside a body, with an optional aside. Layout only: it adds no semantics, so give the
+figure its own `alt`/`aria-label` and choose `as` to fit the surrounding list or article. Full prop
+list is in [API.md](API.md).
+
+```vue
+<BlMedia as="li" align="center">
+  <template #figure><img src="/thumb.png" alt="" /></template>
+  <strong>Project title</strong>
+  <template #aside>v2</template>
+</BlMedia>
+```
+
+```html
+<li class="bl-media bl-media--center">
+  <div class="bl-media__figure"><img src="/thumb.png" alt="" /></div>
+  <div class="bl-media__body"><strong>Project title</strong></div>
+  <div class="bl-media__aside">v2</div>
+</li>
+```
+
+- Slots: `figure`, default (the body) and `aside`. The `figure` and `aside` wrappers are omitted when
+  their slot renders nothing, including `v-if` placeholders and whitespace.
+- Props: `as` (`div`, `li` or `article`; default `div`) and `align` (`start`, the default, or
+  `center`, which adds `.bl-media--center`).
+- `--bl-media-size` sets the figure's `img`, `video` and `svg` size (default 64px).
+- Wrapping rule: the body asks for 12rem beside the figure and wraps below it when it cannot get
+  that, with no measuring. Long unbroken text breaks inside the body.
+
 ## CSS hooks
 
 `--bl-scroll-offset-top` and `--bl-scroll-offset-bottom` keep focused elements clear of fixed chrome

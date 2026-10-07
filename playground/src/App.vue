@@ -288,6 +288,19 @@
         <BlButton type="reset">Reset</BlButton>
         <span data-demo="toggle-state" aria-hidden="true" class="bl-sr-only">{{ autoJoin }}</span>
       </form>
+      <ul class="pg-block" data-demo="media" style="list-style: none; padding: 0; margin: 0">
+        <BlMedia as="li" align="center">
+          <template #figure>
+            <svg viewBox="0 0 64 64" role="img" aria-label="Thumbnail">
+              <rect width="64" height="64" rx="6" fill="var(--bl-raised)" />
+              <circle cx="32" cy="32" r="14" fill="var(--bl-trace)" />
+            </svg>
+          </template>
+          <strong>Project title</strong>
+          <BlMeta :items="['Updated 3m ago', 'Draft']" />
+          <template #aside><span style="font-family: var(--bl-font-mono)">v2</span></template>
+        </BlMedia>
+      </ul>
     </section>
   </main>
 
@@ -337,6 +350,7 @@
     BlLinkArrow,
     BlLog,
     BlMarquee,
+    BlMedia,
     BlMeta,
     BlMeter,
     BlMsg,

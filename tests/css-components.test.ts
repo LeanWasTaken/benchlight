@@ -8,6 +8,13 @@ const read = (name: string) =>
 
 // Selectors each component must define; states are ARIA or native attributes.
 const REQUIRED: Record<string, string[]> = {
+  media: [
+    '.bl-media',
+    '.bl-media--center',
+    '.bl-media__figure',
+    '.bl-media__body',
+    '.bl-media__aside'
+  ],
   toggle: [
     '.bl-toggle',
     '.bl-toggle__control',
@@ -683,5 +690,13 @@ describe('toggle', () => {
   })
   it('gates hover behind (hover: hover)', () => {
     expect(css.replace(/@media \(hover: hover\)\s*\{[\s\S]*?\n {2}\}/, '')).not.toMatch(/:hover/)
+  })
+})
+
+describe('media', () => {
+  it('lets the body wrap below the figure instead of overflowing', () => {
+    const body = ruleBody(read('media'), '.bl-media__body')
+    expect(body['flex']).toBe('1 1 12rem')
+    expect(body['min-inline-size']).toBe('0')
   })
 })
