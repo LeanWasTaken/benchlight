@@ -379,3 +379,44 @@ test.describe('themed scrollbars', () => {
     })
   })
 })
+
+test.describe('BlSelect chevron', () => {
+  for (const scheme of ['light', 'dark'] as const) {
+    test(`the themed chevron is drawn and inset 16px (${scheme})`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme: scheme })
+      await page.goto('/')
+      const wrap = page.locator('.bl-select-wrap').first()
+      await wrap.scrollIntoViewIfNeeded()
+      const style = await wrap.evaluate((el) => {
+        const s = getComputedStyle(el, '::after')
+        return { right: s.right, width: s.width, bg: s.backgroundColor, mask: s.maskImage }
+      })
+      expect(style.right).toBe('16px')
+      expect(style.width).toBe('10px')
+      expect(style.mask).not.toBe('none')
+      const box = (await wrap.boundingBox())!
+      // The chevron's box is 10px wide, 16px inside the border edge; border is 1px.
+      const clip = { x: box.x + box.width - 26, y: box.y, width: 10, height: box.height }
+      const withChevron = await page.screenshot({ clip })
+      await page.addStyleTag({ content: '.bl-select-wrap::after { display: none !important }' })
+      const without = await page.screenshot({ clip })
+      expect(withChevron.equals(without)).toBe(false)
+    })
+  }
+
+  test.describe('forced colors', () => {
+    test.use({ forcedColors: 'active' })
+    test('the chevron stays visible', async ({ page }) => {
+      await page.goto('/')
+      const wrap = page.locator('.bl-select-wrap').first()
+      await wrap.scrollIntoViewIfNeeded()
+      const bg = await wrap.evaluate((el) => getComputedStyle(el, '::after').backgroundColor)
+      expect(bg).not.toBe('rgba(0, 0, 0, 0)')
+      const box = (await wrap.boundingBox())!
+      const clip = { x: box.x + box.width - 26, y: box.y, width: 10, height: box.height }
+      const withChevron = await page.screenshot({ clip })
+      await page.addStyleTag({ content: '.bl-select-wrap::after { display: none !important }' })
+      expect((await page.screenshot({ clip })).equals(withChevron)).toBe(false)
+    })
+  })
+})

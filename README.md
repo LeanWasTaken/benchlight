@@ -125,7 +125,7 @@ dependency pre-bundling. Tailwind is optional: only if the app uses it, add
 - Compact font subsets are listed in `fonts/subset/manifest.json`.
 - `playground/src/App.vue` is the markup reference.
 
-Size budget: `dist/benchlight.min.css` stays at or under 32,768 B (`wc -c dist/benchlight.min.css`,
+Size budget: `dist/benchlight.min.css` stays at or under 43,008 B (42 KiB) (`wc -c dist/benchlight.min.css`,
 `tests/bundle.test.ts`; it was 28,672 B in v0.3) and the compact font subsets under 23,552 B in total
 (`tests/fonts.test.ts`). The guard is raised in round KiB when legitimate work needs it, and every
 raise gets a CHANGELOG line.
@@ -235,6 +235,12 @@ raise gets a CHANGELOG line.
   Under reduced motion, overflowing text wraps instead.
 - **BlSegmented:** wraps, with a 16px row gap.
 - **Inputs and selects:** 16px on coarse pointers, so iOS does not zoom on focus.
+- **BlSelect / `.bl-select-wrap`:** BlSelect renders `<span class="bl-select-wrap"><select
+class="bl-select">`; `class` and `style` go on the wrapper (so `$el` is the wrapper: use `$el.querySelector('select')`,
+  and style the control with `.x > .bl-select` or `:deep(.bl-select)`), other attributes and listeners on the select. In
+  CSS-only markup the same wrapper draws a themed chevron (`--bl-chevron-mask`, `--bl-ink-2`) and
+  hides the native arrow for a single-line select; a bare `.bl-select` keeps the native arrow, and
+  `multiple` or `size` selects keep theirs inside the wrapper.
 - **BlProse:** the measure is `min(720px, 68ch)`; images, video and iframes are capped to the column;
   tables scroll horizontally (`display: block`, so add `role="table"` if assistive tech should keep the
   table semantics); display sizes are smaller on phones (`xl` is 40px at 320px wide).

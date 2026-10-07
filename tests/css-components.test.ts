@@ -525,6 +525,58 @@ describe('container-aware layouts', () => {
   })
 })
 
+describe('select chevron', () => {
+  const css = read('field')
+
+  it('drops the native arrow only for a single-line select inside the wrapper', () => {
+    const rule = ruleBody(css, '.bl-select-wrap > .bl-select:not([multiple], [size])')
+    expect(rule.appearance).toBe('none')
+    expect(rule['padding-inline-end']).toBe('40px')
+    expect(ruleBody(css, '.bl-select')['appearance']).toBeUndefined()
+  })
+
+  it('lays the wrapper out like the full-width select', () => {
+    const wrap = ruleBody(css, '.bl-select-wrap')
+    expect(wrap.display).toBe('block')
+    expect(wrap.position).toBe('relative')
+    expect(wrap['min-width']).toBe('0')
+    expect(wrap['--bl-chevron-mask']).toBeUndefined()
+  })
+
+  it('draws the chevron as a themed mask, inset 16px, ignoring the pointer', () => {
+    const chevron = ruleBody(css, '.bl-select-wrap::after')
+    for (const prop of ['-webkit-mask', 'mask']) {
+      expect(chevron[prop]).toMatch(
+        /^var\(\s*--bl-chevron-mask,\s*url\("data:image\/svg\+xml,.*"\)\s*\) center \/ contain no-repeat$/
+      )
+    }
+    expect(chevron.background).toBe('var(--bl-ink-2)')
+    expect(chevron['inset-inline-end']).toBe('16px')
+    expect(chevron['pointer-events']).toBe('none')
+    expect(chevron).not.toHaveProperty('right')
+  })
+
+  it('brightens on hover only where hover exists, and dims when disabled', () => {
+    const sel = '.bl-select-wrap:hover:not(:has(> .bl-select:disabled))::after'
+    const hover = ruleBody(css, sel, ['@media (hover: hover)'])
+    expect(hover.background).toBe('var(--bl-ink-1)')
+    expect(() => ruleBody(css, sel)).toThrow()
+    const off = ruleBody(css, '.bl-select-wrap:has(> .bl-select:disabled)::after')
+    expect(off.opacity).toBe('0.45')
+  })
+
+  it('keeps the chevron visible in forced colors', () => {
+    const forced = ruleBody(css, '.bl-select-wrap::after', ['@media (forced-colors: active)'])
+    expect(forced['forced-color-adjust']).toBe('none')
+    expect(forced.background).toBe('CanvasText')
+    const off = ruleBody(css, '.bl-select-wrap:has(> .bl-select:disabled)::after', [
+      '@media (forced-colors: active)'
+    ])
+    expect(off.background).toBe('GrayText')
+    expect(off.opacity).toBe('1')
+  })
+})
+
 describe('themed scrollbars', () => {
   // Each scroller is styled in its own component file so a module bundle stays self-contained.
   const scrollers: Record<string, string[]> = {

@@ -562,6 +562,50 @@ describe('form controls', () => {
     expect(wrapper.emitted('update:modelValue')).toEqual([['b']])
   })
 
+  it('BlSelect wraps the select and splits attrs between them', () => {
+    const wrapper = mount(BlSelect, {
+      props: { options: [{ value: 'a', label: 'Alpha' }] },
+      attrs: {
+        class: 'extra',
+        style: 'margin: 4px',
+        id: 'net',
+        'aria-label': 'Network',
+        'data-test': 'x',
+        name: 'net'
+      }
+    })
+    expect(wrapper.element.tagName).toBe('SPAN')
+    expect(wrapper.classes()).toEqual(['bl-select-wrap', 'extra'])
+    expect(wrapper.attributes('style')).toContain('margin')
+    expect(wrapper.attributes('id')).toBeUndefined()
+    expect(wrapper.attributes('data-test')).toBeUndefined()
+    const select = wrapper.find('select')
+    expect(select.classes()).toEqual(['bl-select'])
+    expect(select.attributes('id')).toBe('net')
+    expect(select.attributes('aria-label')).toBe('Network')
+    expect(select.attributes('data-test')).toBe('x')
+    expect(select.attributes('name')).toBe('net')
+    expect(select.attributes('style')).toBeUndefined()
+  })
+
+  it('BlSelect wires to a BlField, and an own id or aria-describedby wins', async () => {
+    const own = ref<Record<string, unknown>>({})
+    const Host = defineComponent({
+      setup: () => () =>
+        h(BlField, { label: 'Network', hint: 'Pick one' }, () =>
+          h(BlSelect, { options: [{ value: 'a', label: 'Alpha' }], ...own.value })
+        )
+    })
+    const wrapper = mount(Host)
+    const id = wrapper.find('label').attributes('for')
+    expect(wrapper.find('select').attributes('id')).toBe(id)
+    expect(wrapper.find('select').attributes('aria-describedby')).toBe(`${id}-hint`)
+    own.value = { id: 'mine', 'aria-describedby': 'other' }
+    await nextTick()
+    expect(wrapper.find('select').attributes('id')).toBe('mine')
+    expect(wrapper.find('select').attributes('aria-describedby')).toBe('other')
+  })
+
   it('BlRange shows the formatted value and exposes it to screen readers', () => {
     const wrapper = mount(BlRange, {
       props: { modelValue: -12, min: -60, max: 0, format: (v: number) => `${v} dB` }
