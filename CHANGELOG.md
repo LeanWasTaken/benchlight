@@ -25,6 +25,7 @@
 
 ### Fixed
 
+- Input and select hover borders apply only on hover-capable pointers.
 - The BlSiteBar nav edge fade also ships `-webkit-mask-image`, so Chromium before 120 fades the
   nav edges instead of showing them hard-cut.
 - Library scrollers (`.bl-log`, BlTable scroll mode, prose tables) use a thin scrollbar with a

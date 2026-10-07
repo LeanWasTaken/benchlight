@@ -228,6 +228,15 @@ describe('anchored behaviour', () => {
     }
   })
 
+  it('gates field hover behind (hover: hover)', () => {
+    const css = read('field')
+    const gate = ['@media (hover: hover)']
+    for (const selector of ['.bl-input:hover', '.bl-select:hover']) {
+      expect(ruleBody(css, selector, gate)['border-color']).toBe('var(--bl-ink-3)')
+      expect(() => ruleBody(css, selector)).toThrow()
+    }
+  })
+
   it('makes the icon button a 44px square, a circle with pill', () => {
     const css = read('btn')
     const icon = ruleBody(css, '.bl-btn--icon')
