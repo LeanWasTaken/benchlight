@@ -93,12 +93,14 @@ describe('buildDist', () => {
     const count = (re: RegExp) => dist.bundle.match(re)?.length ?? 0
     const prefixed = count(/-webkit-mask:/g)
     expect(prefixed).toBeGreaterThan(0)
-    expect(prefixed).toBe(count(/(?<!-webkit-)mask:/g))
+    expect(prefixed).toBe(count(/(?<![-\w])mask:/g))
+    const prefixedImage = count(/-webkit-mask-image:/g)
+    expect(prefixedImage).toBe(count(/(?<![-\w])mask-image:/g))
     expect(count(/-webkit-font-smoothing:/g)).toBeGreaterThan(0)
   })
 
-  it('stays within the 40960-byte guard', () => {
-    expect(Buffer.byteLength(read('dist/benchlight.min.css'))).toBeLessThanOrEqual(40_960)
+  it('stays within the 43008-byte guard', () => {
+    expect(Buffer.byteLength(read('dist/benchlight.min.css'))).toBeLessThanOrEqual(43_008)
   })
 })
 

@@ -91,6 +91,22 @@
       </div>
     </section>
 
+    <section v-if="show('select-long')" data-case="select-long">
+      <h2 class="st-label">select-long</h2>
+      <div data-box>
+        <BlField v-slot="{ id }" label="Region">
+          <BlSelect
+            :id="id"
+            model-value="long"
+            :options="[
+              { value: 'long', label: german + ' ' + german + ' ' + hash },
+              { value: 'short', label: 'Short' }
+            ]"
+          />
+        </BlField>
+      </div>
+    </section>
+
     <section v-if="show('segmented-long')" data-case="segmented-long">
       <h2 class="st-label">segmented-long</h2>
       <div data-box>
@@ -598,6 +614,7 @@
     BlReadout,
     BlSectionHead,
     BlSegmented,
+    BlSelect,
     BlSiteBar,
     BlSpecPanel,
     BlSpecRow,

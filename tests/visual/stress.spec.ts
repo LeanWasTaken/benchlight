@@ -524,6 +524,29 @@ const cases: Case[] = [
     checks: [...generic(), iconButtonsStay44]
   },
   { id: 'field-hint-url', checks: generic() },
+  {
+    id: 'select-long',
+    checks: [
+      ...generic(),
+      {
+        name: 'text-stays-clear-of-chevron',
+        variants: ALL,
+        probe: (page) =>
+          page.evaluate(() => {
+            const select = document.querySelector<HTMLElement>('.bl-select')!
+            const wrap = select.parentElement!
+            const s = select.getBoundingClientRect()
+            const w = wrap.getBoundingClientRect()
+            if (Math.abs(s.width - w.width) > 0.5) return 'wrapper and select differ in width'
+            const pad = parseFloat(getComputedStyle(select).paddingInlineEnd)
+            // Chevron: 10px wide, 16px from the end edge; text must stop before it.
+            if (pad < 10 + 16 + 8)
+              return `padding-inline-end ${pad}px leaves text under the chevron`
+            return null
+          })
+      }
+    ]
+  },
   { id: 'segmented-long', checks: generic() },
   { id: 'link-arrow-long', checks: generic() },
   { id: 'colophon-unbreakable', checks: generic() },

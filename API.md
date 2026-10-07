@@ -628,6 +628,7 @@ Exposed: none
 - `bl-segmented--compact`
 - `bl-segmented__item`
 - `bl-select`
+- `bl-select-wrap`
 - `bl-silkscreen`
 - `bl-site-bar`
 - `bl-site-bar__actions`
@@ -677,6 +678,7 @@ Exposed: none
 - `bl-tint-trace`
 
 ## CSS hooks (custom properties a consumer may set)
+- `--bl-chevron-mask`
 - `--bl-col-min`
 - `--bl-log-height`
 - `--bl-meter-value`

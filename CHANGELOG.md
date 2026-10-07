@@ -12,8 +12,16 @@
 
 ### Changed
 
-- The full-bundle size guard is raised from 38 KiB to 40 KiB for the button and meter additions.
+- The full-bundle size guard is raised from 38 KiB to 42 KiB for the button, meter and select
+  chevron additions.
 - Button hover rules now apply only inside `@media (hover: hover)`.
+- BlSelect draws its chevron with theme tokens (`--bl-ink-2`, `--bl-ink-1` on hover) inside a
+  `bl-select-wrap` span, 16px from the edge, instead of the browser's native arrow; the mask
+  can be replaced with `--bl-chevron-mask`. `class` and `style` now land on the wrapper, so the
+  component root is `span.bl-select-wrap` instead of `select`: style the control with
+  `.x > .bl-select` or `:deep(.bl-select)`, and use `$el.querySelector('select')` where `$el` was
+  the select. Listeners and other attributes still reach the `<select>`. A bare `.bl-select` is
+  unchanged.
 
 ### Fixed
 
