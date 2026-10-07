@@ -17,6 +17,8 @@
 
 ### Fixed
 
+- The BlSiteBar nav edge fade also ships `-webkit-mask-image`, so Chromium before 120 fades the
+  nav edges instead of showing them hard-cut.
 - Library scrollers (`.bl-log`, BlTable scroll mode, prose tables) use a thin scrollbar with a
   `--bl-control-border` thumb on a transparent track instead of the browser's default grey one. The
   page scrollbar and app scrollers inherit the same colours from `base` (default width).
