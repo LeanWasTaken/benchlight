@@ -53,6 +53,13 @@
     overflow-x: auto;
     scroll-padding-inline: 16px;
     scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 12px,
+      #000 calc(100% - 12px),
+      transparent
+    );
     mask-image: linear-gradient(
       to right,
       transparent,
