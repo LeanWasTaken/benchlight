@@ -301,6 +301,20 @@
           <template #aside><span style="font-family: var(--bl-font-mono)">v2</span></template>
         </BlMedia>
       </ul>
+      <div class="pg-block" data-demo="disclosure">
+        <BlDisclosure v-model:open="faqA" summary="What does this do?" name="faq">
+          <p>It shows one answer at a time.</p>
+        </BlDisclosure>
+        <BlDisclosure v-model:open="faqB" summary="Can several be open?" name="faq">
+          <p>Not in a named group; the browser closes the other one.</p>
+        </BlDisclosure>
+        <BlDisclosure summary="Independent section">
+          <p>Without a name it opens and closes on its own.</p>
+        </BlDisclosure>
+        <span data-demo="faq-state" class="bl-sr-only" aria-hidden="true"
+          >{{ faqA }}/{{ faqB }}</span
+        >
+      </div>
     </section>
   </main>
 
@@ -350,6 +364,7 @@
     BlLinkArrow,
     BlLog,
     BlMarquee,
+    BlDisclosure,
     BlMedia,
     BlMeta,
     BlMeter,
@@ -380,6 +395,8 @@
   const sizeChoice = ref('M')
   const wifi = ref(true)
   const autoJoin = ref(true)
+  const faqA = ref(true)
+  const faqB = ref(false)
   const pressedOff = ref(false)
   const muted = ref(false)
   const bold = ref(false)
