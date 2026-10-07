@@ -1,0 +1,261 @@
+import { mount, type VueWrapper } from '@vue/test-utils'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { defineComponent, h, nextTick, ref } from 'vue'
+import BlDialog from '../../vue/components/BlDialog.vue'
+import { toastFocus, toastHosts } from '../../vue/internal/toastHosts'
+
+let wrappers: VueWrapper[] = []
+afterEach(() => {
+  wrappers.forEach((w) => w.unmount())
+  wrappers = []
+  vi.restoreAllMocks()
+  toastHosts.value = []
+  toastFocus.returnTarget = null
+})
+
+function open(props: Record<string, unknown> = {}, slots: Record<string, unknown> = {}) {
+  const w = mount(BlDialog, {
+    props: { open: false, title: 'Rename', ...props },
+    slots: { default: 'Body', ...slots },
+    attachTo: document.body
+  })
+  wrappers.push(w)
+  return w
+}
+const dialogEl = (w: VueWrapper) => w.element as HTMLDialogElement
+function esc(w: VueWrapper) {
+  const ev = new Event('cancel', { cancelable: true })
+  dialogEl(w).dispatchEvent(ev)
+  if (!ev.defaultPrevented) dialogEl(w).close()
+}
+
+describe('BlDialog', () => {
+  it('names itself by the title and describes itself by the description', () => {
+    const w = open({ description: 'Pick a new name' })
+    const d = dialogEl(w)
+    expect(d.getAttribute('aria-labelledby')).toBe(w.get('.bl-dialog__title').attributes('id'))
+    expect(d.getAttribute('aria-describedby')).toBe(
+      w.get('.bl-dialog__description').attributes('id')
+    )
+    expect(d.hasAttribute('open')).toBe(false) // never rendered open
+  })
+
+  it('omits aria-describedby without a description', () => {
+    expect(dialogEl(open()).hasAttribute('aria-describedby')).toBe(false)
+  })
+
+  it('opens with showModal when open turns true, and when mounted open', async () => {
+    const w = open()
+    const spy = vi.spyOn(dialogEl(w), 'showModal')
+    await w.setProps({ open: true })
+    expect(spy).toHaveBeenCalledOnce()
+    expect(dialogEl(w).open).toBe(true)
+    const m = open({ open: true })
+    await nextTick()
+    expect(dialogEl(m).open).toBe(true)
+  })
+
+  it.each([
+    ['button', (w: VueWrapper) => w.get('.bl-dialog__close').trigger('click')],
+    ['escape', (w: VueWrapper) => esc(w)],
+    ['native', (w: VueWrapper) => dialogEl(w).close('done')]
+  ] as const)('closes with reason %s and emits update:open once', async (reason, act) => {
+    const w = open({ open: true })
+    await nextTick()
+    await act(w)
+    expect(w.emitted('update:open')).toEqual([[false]])
+    const close = w.emitted('close')!
+    expect(close).toHaveLength(1)
+    expect((close[0]![0] as { reason: string }).reason).toBe(reason)
+  })
+
+  it('passes the returnValue given to close()', async () => {
+    const w = open({ open: true })
+    await nextTick()
+    dialogEl(w).close('confirm')
+    expect((w.emitted('close')![0]![0] as { returnValue: string }).returnValue).toBe('confirm')
+  })
+
+  it('reports program when the parent closes it, without echoing update:open', async () => {
+    const w = open({ open: true })
+    await nextTick()
+    await w.setProps({ open: false })
+    expect(dialogEl(w).open).toBe(false)
+    expect(w.emitted('update:open')).toBeUndefined()
+    expect((w.emitted('close')![0]![0] as { reason: string }).reason).toBe('program')
+  })
+
+  it('closes on a backdrop click only when the press also started on the backdrop', async () => {
+    const w = open({ open: true })
+    await nextTick()
+    const d = dialogEl(w)
+    // press in the panel, release on the backdrop: not a backdrop click
+    w.get('.bl-dialog__panel').trigger('pointerdown')
+    d.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    expect(d.open).toBe(true)
+    d.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+    d.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    expect(d.open).toBe(false)
+    expect((w.emitted('close')![0]![0] as { reason: string }).reason).toBe('backdrop')
+  })
+
+  it('dismissible=false: no close button, closedby=none, Esc and backdrop ignored', async () => {
+    const w = open({ open: true, dismissible: false }, { footer: '<button>OK</button>' })
+    await nextTick()
+    expect(w.find('.bl-dialog__close').exists()).toBe(false)
+    expect(dialogEl(w).getAttribute('closedby')).toBe('none')
+    esc(w)
+    dialogEl(w).dispatchEvent(new Event('pointerdown', { bubbles: true }))
+    dialogEl(w).dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    expect(dialogEl(w).open).toBe(true)
+    expect(w.emitted('close')).toBeUndefined()
+  })
+
+  it('warns when dismissible=false leaves no way out', async () => {
+    const spy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    open({ open: true, dismissible: false })
+    await nextTick()
+    expect(spy).toHaveBeenCalledWith(expect.stringContaining('BlDialog'))
+  })
+
+  it('restores focus to the opener only when focus was lost', async () => {
+    const opener = document.createElement('button')
+    document.body.append(opener)
+    opener.focus()
+    const w = open()
+    await w.setProps({ open: true })
+    w.get<HTMLElement>('.bl-dialog__close').element.focus()
+    await w.get('.bl-dialog__close').trigger('click')
+    expect(document.activeElement).toBe(opener)
+    opener.remove()
+  })
+
+  it('sets and removes the scrollbar gutter property and the toast host', async () => {
+    const w = open()
+    await w.setProps({ open: true })
+    expect(document.documentElement.style.getPropertyValue('--bl-dialog-gutter')).toMatch(/px$/)
+    expect(toastHosts.value).toEqual([w.get('.bl-dialog__toasts').element])
+    await w.setProps({ open: false })
+    expect(document.documentElement.style.getPropertyValue('--bl-dialog-gutter')).toBe('')
+    expect(toastHosts.value).toEqual([])
+  })
+
+  it('releases the toast host when it starts closing, not in the async close event', async () => {
+    const w = open()
+    await w.setProps({ open: true })
+    // A real browser fires close a task later; hold it back to see what happens first.
+    const close = vi.spyOn(dialogEl(w), 'close').mockImplementation(() => {})
+    await w.setProps({ open: false })
+    expect(toastHosts.value).toEqual([])
+    close.mockRestore()
+    dialogEl(w).close()
+    expect(w.emitted('close')).toHaveLength(1)
+  })
+
+  it('returns focus to where it was before the toast when opened from a toast action', async () => {
+    const before = document.createElement('button')
+    const toaster = document.createElement('section')
+    toaster.className = 'bl-toaster'
+    const action = document.createElement('button')
+    toaster.append(action)
+    document.body.append(before, toaster)
+    toastFocus.returnTarget = before
+    action.focus()
+    const w = open()
+    await w.setProps({ open: true })
+    action.remove() // the action's toast is dismissed right after it runs
+    w.get<HTMLElement>('.bl-dialog__close').element.focus()
+    await w.get('.bl-dialog__close').trigger('click')
+    expect(document.activeElement).toBe(before)
+    before.remove()
+    toaster.remove()
+  })
+
+  it('treats an opener inside a leaving toast as gone', async () => {
+    const before = document.createElement('button')
+    const toast = document.createElement('li')
+    toast.className = 'bl-toaster'
+    const action = document.createElement('button')
+    toast.append(action)
+    document.body.append(before, toast)
+    toastFocus.returnTarget = before
+    action.focus()
+    const w = open()
+    await w.setProps({ open: true })
+    toast.classList.add('bl-toast-leave-active') // still connected while it animates out
+    action.focus() // where the browser's own restore would put it
+    await w.setProps({ open: false })
+    expect(document.activeElement).toBe(before)
+    before.remove()
+    toast.remove()
+  })
+
+  it('keeps focus that a close handler moved', async () => {
+    const opener = document.createElement('button')
+    const other = document.createElement('button')
+    document.body.append(opener, other)
+    opener.focus()
+    const w = open({ onClose: () => other.focus() })
+    await w.setProps({ open: true })
+    w.get<HTMLElement>('.bl-dialog__close').element.focus()
+    await w.get('.bl-dialog__close').trigger('click')
+    expect(document.activeElement).toBe(other)
+    opener.remove()
+    other.remove()
+  })
+
+  it('keeps one gutter measurement across nested dialogs', async () => {
+    const root = document.documentElement.style
+    const a = open()
+    const b = open({ title: 'Inner' })
+    await a.setProps({ open: true })
+    const first = root.getPropertyValue('--bl-dialog-gutter')
+    await b.setProps({ open: true })
+    await b.setProps({ open: false })
+    expect(root.getPropertyValue('--bl-dialog-gutter')).toBe(first)
+    await a.setProps({ open: false })
+    expect(root.getPropertyValue('--bl-dialog-gutter')).toBe('')
+  })
+
+  it('closes quietly and restores focus when unmounted while open', async () => {
+    const opener = document.createElement('button')
+    document.body.append(opener)
+    opener.focus()
+    const w = open()
+    await w.setProps({ open: true })
+    w.get<HTMLElement>('.bl-dialog__close').element.focus()
+    w.unmount()
+    wrappers = wrappers.filter((x) => x !== w)
+    expect(w.emitted('close')).toBeUndefined()
+    expect(document.activeElement).toBe(opener)
+    expect(toastHosts.value).toEqual([])
+    opener.remove()
+  })
+
+  it('uses labels.close for the close button name', async () => {
+    const w = open({ open: true, labels: { close: 'Sulgeda' } })
+    expect(w.get('.bl-dialog__close').attributes('aria-label')).toBe('Sulgeda')
+  })
+
+  it('round-trips v-model', async () => {
+    const Host = defineComponent({
+      setup() {
+        const isOpen = ref(true)
+        return () =>
+          h(BlDialog, {
+            open: isOpen.value,
+            'onUpdate:open': (v: boolean) => (isOpen.value = v),
+            title: 'T'
+          })
+      }
+    })
+    const w = mount(Host, { attachTo: document.body })
+    wrappers.push(w)
+    await nextTick()
+    const d = w.get('dialog').element as HTMLDialogElement
+    expect(d.open).toBe(true)
+    d.close()
+    await nextTick()
+    expect(d.open).toBe(false)
+  })
+})

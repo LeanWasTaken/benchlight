@@ -21,6 +21,7 @@
 - `dist/modules/base.min.css`
 - `dist/modules/btn.min.css`
 - `dist/modules/colophon.min.css`
+- `dist/modules/dialog.min.css`
 - `dist/modules/disclosure.min.css`
 - `dist/modules/eq.min.css`
 - `dist/modules/field.min.css`
@@ -60,6 +61,7 @@
 - `BlAppearanceSwitch`
 - `BlButton`
 - `BlColophon`
+- `BlDialog`
 - `BlDisclosure`
 - `BlEqBars`
 - `BlField`
@@ -149,6 +151,20 @@ Exposed: none
 
 Slots: `actions`, `default`
 Events: none
+Exposed: none
+
+### BlDialog
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `description` | `string \| undefined` | no |  |
+| `dismissible` | `boolean \| undefined` | no | `true` |
+| `labels` | `Partial<DialogLabels> \| undefined` | no |  |
+| `open` | `boolean` | yes |  |
+| `title` | `string` | yes |  |
+
+Slots: `default`, `footer`
+Events: `close`, `update:open`
 Exposed: none
 
 ### BlDisclosure
@@ -591,6 +607,14 @@ Exposed: none
 - `bl-colophon`
 - `bl-colophon__inner`
 - `bl-colophon__items`
+- `bl-dialog`
+- `bl-dialog__body`
+- `bl-dialog__close`
+- `bl-dialog__description`
+- `bl-dialog__foot`
+- `bl-dialog__head`
+- `bl-dialog__panel`
+- `bl-dialog__title`
 - `bl-disclosure`
 - `bl-disclosure__body`
 - `bl-disclosure__chevron`
@@ -741,6 +765,7 @@ Exposed: none
 ## CSS hooks (custom properties a consumer may set)
 - `--bl-chevron-mask`
 - `--bl-col-min`
+- `--bl-dialog-width`
 - `--bl-log-height`
 - `--bl-media-size`
 - `--bl-meter-value`

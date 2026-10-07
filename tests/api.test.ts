@@ -20,6 +20,15 @@ describe('API.md slots', () => {
   it('lists the BlMedia figure and aside slots', () => {
     expect(slotsOf('BlMedia')).toBe('`aside`, `default`, `figure`')
   })
+  it('lists the BlDialog footer slot', () => {
+    expect(slotsOf('BlDialog')).toBe('`default`, `footer`')
+  })
+})
+
+describe('API.md CSS hooks', () => {
+  it('leaves out properties the components set internally', () => {
+    expect(api()).not.toContain('`--bl-dialog-gutter`')
+  })
 })
 
 describe('Nuxt auto-imports', () => {

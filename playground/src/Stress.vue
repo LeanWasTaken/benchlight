@@ -614,6 +614,13 @@
       </div>
     </section>
 
+    <section v-if="show('dialog-long')" data-case="dialog-long">
+      <h2 class="st-label">dialog-long</h2>
+      <BlDialog :open="true" :title="dialogTitle">
+        <p v-for="n in 60" :key="n">Paragraph {{ n }} of a body long enough to scroll.</p>
+      </BlDialog>
+    </section>
+
     <section v-if="show('toggle-rtl')" data-case="toggle-rtl">
       <h2 class="st-label">toggle-rtl</h2>
       <div data-box dir="rtl">
@@ -669,6 +676,7 @@
     BlPagination,
     BlTable,
     BlToggle,
+    BlDialog,
     BlDisclosure,
     BlTabBarItem,
     BlTelemetry,
@@ -681,6 +689,8 @@
   const url =
     'https://example.com/very/long/path/that/never/breaks/ever/and/keeps/going/forever/index.html'
   const german = 'Donaudampfschifffahrtsgesellschaftskapitaenspatent'
+  // 39 words plus one unbroken 80-character token.
+  const dialogTitle = `${'Rename '.repeat(39)}${'x'.repeat(80)}`
   const wideImage = `data:image/svg+xml;utf8,${encodeURIComponent(
     '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="60"><rect width="1200" height="60" fill="#888"/></svg>'
   )}`

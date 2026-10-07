@@ -34,6 +34,7 @@ export { default as BlTable } from './components/BlTable.vue'
 export { default as BlToggle } from './components/BlToggle.vue'
 export { default as BlMedia } from './components/BlMedia.vue'
 export { default as BlDisclosure } from './components/BlDisclosure.vue'
+export { default as BlDialog } from './components/BlDialog.vue'
 
 export {
   APPEARANCE_ATTRIBUTE,

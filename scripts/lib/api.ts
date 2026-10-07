@@ -109,6 +109,9 @@ function componentSection(root: string): string {
     .join('\n\n')
 }
 
+// Custom properties the components set themselves; read in CSS, but not for consumers.
+const INTERNAL_HOOKS = new Set(['--bl-dialog-gutter'])
+
 export function renderApi(root: string): string {
   const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
     exports: Record<string, unknown>
@@ -120,7 +123,11 @@ export function renderApi(root: string): string {
   )
   const registered = new Set(propertyNames(allCss))
   const used = [...stripNoise(allCss).matchAll(/var\(\s*(--bl-[\w-]+)/g)].map((m) => m[1]!)
-  const hooks = sorted(used.filter((name) => !tokenDecls.has(name) && !registered.has(name)))
+  const hooks = sorted(
+    used.filter(
+      (name) => !tokenDecls.has(name) && !registered.has(name) && !INTERNAL_HOOKS.has(name)
+    )
+  )
   const theme = [
     ...readFileSync(join(root, 'tailwind/theme.css'), 'utf8').matchAll(/^\s+(--[\w-]+):/gm)
   ].map((m) => m[1]!)

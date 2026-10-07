@@ -43,6 +43,11 @@ describe('forced colors', () => {
     for (const selector of selectors) expect(block).toContain(selector)
     expect(block).toContain('forced-color-adjust: none;')
   })
+  it('dialog panel keeps an edge in forced colors', () => {
+    const block = forced(read('css/components/dialog.css'))
+    expect(block).toContain('.bl-dialog__panel')
+    expect(block).toContain('CanvasText')
+  })
 })
 
 describe('non-text contrast', () => {
