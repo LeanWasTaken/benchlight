@@ -1,6 +1,20 @@
 # Changelog
 
-## Unreleased
+## 0.6.0 - 2026-10-08
+
+Building-blocks release: BlToggle, BlMedia, BlDisclosure, BlDialog and BlToast (`useToast`), plus
+icon-only, pressed and ghost buttons and visible meter labels. Per the README rule (changing a
+component contract is breaking; minor bump while 0.x), this is a minor bump with one breaking item.
+
+### Breaking
+
+- BlSelect draws its chevron with theme tokens (`--bl-ink-2`, `--bl-ink-1` on hover) inside a
+  `bl-select-wrap` span, 16px from the edge, instead of the browser's native arrow; the mask
+  can be replaced with `--bl-chevron-mask`. `class` and `style` now land on the wrapper, so the
+  component root is `span.bl-select-wrap` instead of `select`: style the control with
+  `.x > .bl-select` or `:deep(.bl-select)`, and use `$el.querySelector('select')` where `$el` was
+  the select. Listeners and other attributes still reach the `<select>`. A bare `.bl-select` is
+  unchanged.
 
 ### Added
 
@@ -19,18 +33,9 @@
 
 ### Changed
 
-- The full-bundle size guard is raised from 43,008 B (42 KiB) to 53,248 B (52 KiB) for the v0.6
-  components.
-- The full-bundle size guard is raised from 38 KiB to 42 KiB for the button, meter and select
-  chevron additions.
+- The full-bundle size guard is raised from 38,912 B (38 KiB) to 53,248 B (52 KiB) for the v0.6
+  components and the button, meter and select chevron additions.
 - Button hover rules now apply only inside `@media (hover: hover)`.
-- BlSelect draws its chevron with theme tokens (`--bl-ink-2`, `--bl-ink-1` on hover) inside a
-  `bl-select-wrap` span, 16px from the edge, instead of the browser's native arrow; the mask
-  can be replaced with `--bl-chevron-mask`. `class` and `style` now land on the wrapper, so the
-  component root is `span.bl-select-wrap` instead of `select`: style the control with
-  `.x > .bl-select` or `:deep(.bl-select)`, and use `$el.querySelector('select')` where `$el` was
-  the select. Listeners and other attributes still reach the `<select>`. A bare `.bl-select` is
-  unchanged.
 
 ### Fixed
 
