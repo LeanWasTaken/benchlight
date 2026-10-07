@@ -1,35 +1,50 @@
 .pg-main {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 72px;
   padding-block: 56px 64px;
 }
-.pg-block {
-  margin-top: 40px;
+.pg-main > section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  align-content: start;
+  min-inline-size: 0;
+}
+.pg-main > section > :is(h2, h3, div, ul, form, p) {
+  margin-block: 0;
 }
 .pg-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  margin-block: 16px;
 }
 .pg-stack {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   max-width: 720px;
 }
 .pg-swatches {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(150px, 100%), 1fr));
   gap: 12px;
 }
-.pg-swatch {
+.pg-swatch,
+.pg-tint {
   display: grid;
   gap: 8px;
   padding: 10px;
+  border-radius: 8px;
+}
+.pg-swatch {
   background: var(--bl-surface);
   border: 1px solid var(--bl-separator);
-  border-radius: 8px;
+}
+.pg-tint {
+  color: var(--bl-ink-1);
+  border: 1px solid var(--bl-separator);
 }
 .pg-chip {
   height: 36px;
@@ -39,12 +54,30 @@
 .pg-dim {
   color: var(--bl-ink-3);
 }
+.pg-mono {
+  font-family: var(--bl-font-mono);
+}
 .pg-marquee {
   max-width: 220px;
 }
 .pg-card {
   max-inline-size: 18rem;
 }
-.pg-main > section {
-  min-inline-size: 0;
+.pg-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pg-media-large {
+  --bl-media-size: 96px;
+}
+.pg-dialog-wide {
+  --bl-dialog-width: 48rem;
+}
+.pg-scroller {
+  max-height: 6rem;
+  overflow: auto;
 }
