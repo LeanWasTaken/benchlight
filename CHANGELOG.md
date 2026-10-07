@@ -44,6 +44,8 @@
   is absent with overlay scrollbars, when `html` reserves the gutter (`overflow-y: scroll`,
   `scrollbar-gutter: stable`) and in RTL documents, and only exists where `scrollbar-color` is
   supported. `base` now uses `html::after` for it; reset it with `html::after { content: none }`.
+- A stacked BlTable no longer jumps in height for one frame under reduced motion when a parent
+  re-render (a new `rows` array) makes it re-measure.
 
 ## 0.5.0 - 2026-10-06
 
