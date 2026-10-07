@@ -362,3 +362,29 @@ test.describe('motion', () => {
     await expect(page.locator('.bl-dialog[open]')).toHaveCount(0)
   })
 })
+
+test.describe('BlTable', () => {
+  test('stays steady when an unrelated re-render re-measures it', async ({ page }) => {
+    await page.goto('/')
+    await page.evaluate(() => document.fonts.ready)
+    const table = demo(page, 'table-narrow').locator('.bl-table')
+    await expect(table).toHaveAttribute('data-stacked', '')
+    // Let the first stack (a real layout change) finish before sampling.
+    await page.evaluate(async () => {
+      await Promise.all(document.getAnimations().map((a) => a.finished))
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
+    })
+    // The toggle re-renders the playground, which passes the table a new rows array.
+    const heights = await page.evaluate(async () => {
+      const el = document.querySelector('[data-demo="table-narrow"] .bl-table')!
+      const out = [el.getBoundingClientRect().height]
+      document.querySelector<HTMLInputElement>('[data-demo="toggle"] input')!.click()
+      for (let i = 0; i < 4; i++) {
+        await new Promise(requestAnimationFrame)
+        out.push(el.getBoundingClientRect().height)
+      }
+      return out
+    })
+    expect(new Set(heights).size, `heights ${heights.join(', ')}`).toBe(1)
+  })
+})

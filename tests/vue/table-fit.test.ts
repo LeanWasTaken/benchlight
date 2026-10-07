@@ -84,6 +84,25 @@ describe('useTableFit', () => {
     wrapper.unmount()
   })
 
+  it('restores data-stacked and flushes it before dropping data-measuring', () => {
+    const { result, wrapper, root } = setup(600, 400)
+    root.setAttribute('data-stacked', '')
+    // A layout read while measuring styles still kill transitions; it must see the stacked state.
+    const flushed: string[] = []
+    Object.defineProperty(root, 'offsetWidth', {
+      get: () => {
+        flushed.push(`${root.hasAttribute('data-stacked')}/${root.hasAttribute('data-measuring')}`)
+        return 400
+      },
+      configurable: true
+    })
+    result.measure()
+    expect(flushed).toEqual(['true/true'])
+    expect(root.hasAttribute('data-measuring')).toBe(false)
+    expect(root.hasAttribute('data-stacked')).toBe(true)
+    wrapper.unmount()
+  })
+
   it('re-measures only when the inline size changes', () => {
     const { result, wrapper, measuring } = setup(300, 400)
     expect(result.stacked.value).toBe(false)
