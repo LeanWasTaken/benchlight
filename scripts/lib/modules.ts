@@ -31,7 +31,8 @@ export const MODULES = {
   'prev-next': 'css/components/prev-next.css',
   prose: 'css/components/prose.css',
   table: 'css/components/table.css',
-  pagination: 'css/components/pagination.css'
+  pagination: 'css/components/pagination.css',
+  toggle: 'css/components/toggle.css'
 } as const
 
 export type ModuleName = keyof typeof MODULES

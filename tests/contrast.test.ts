@@ -131,3 +131,21 @@ describe('non-text contrast for control edges (WCAG 1.4.11)', () => {
     expect(contrast(hexToRgb(c['control-border']), hexToRgb(c[bg]))).toBeGreaterThanOrEqual(3)
   })
 })
+
+describe('BlToggle', () => {
+  it.each(THEMES)('%s: thumb (raised) on the checked track (trace) is at least 3:1', (theme) => {
+    const c = tokens.color[theme]
+    expect(contrast(hexToRgb(c.raised), hexToRgb(c.trace))).toBeGreaterThanOrEqual(3)
+  })
+  it.each(THEMES.flatMap((t) => SURFACES.map((s) => [t, s] as const)))(
+    '%s: the checked track (trace) on %s is at least 3:1',
+    (theme, bg) => {
+      const c = tokens.color[theme]
+      expect(contrast(hexToRgb(c.trace), hexToRgb(c[bg]))).toBeGreaterThanOrEqual(3)
+    }
+  )
+  it.each(THEMES)('%s: the unchecked edge (control-border) on surface is at least 3:1', (theme) => {
+    const c = tokens.color[theme]
+    expect(contrast(hexToRgb(c['control-border']), hexToRgb(c.surface))).toBeGreaterThanOrEqual(3)
+  })
+})

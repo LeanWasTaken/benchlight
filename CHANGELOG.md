@@ -9,9 +9,12 @@
   `variant="ghost"` (`bl-btn--ghost`).
 - BlMeter: `valueText` (`aria-valuetext`), `showLabel` and `showValue` render the label and value
   visibly in a `bl-meter-field` wrapper; without them the markup is unchanged.
+- BlToggle: an on/off switch on a native checkbox (`role="switch"`), with hint, form posting and RTL.
 
 ### Changed
 
+- The full-bundle size guard is raised from 43,008 B (42 KiB) to 47,104 B (46 KiB) for the v0.6
+  components.
 - The full-bundle size guard is raised from 38 KiB to 42 KiB for the button, meter and select
   chevron additions.
 - Button hover rules now apply only inside `@media (hover: hover)`.

@@ -8,6 +8,16 @@ const read = (name: string) =>
 
 // Selectors each component must define; states are ARIA or native attributes.
 const REQUIRED: Record<string, string[]> = {
+  toggle: [
+    '.bl-toggle',
+    '.bl-toggle__control',
+    '.bl-toggle__input',
+    '.bl-toggle__track',
+    '.bl-toggle__thumb',
+    '.bl-toggle__label',
+    '.bl-toggle__hint',
+    '.bl-toggle__input:checked + .bl-toggle__track'
+  ],
   'site-bar': [
     '.bl-site-bar[data-lifted]',
     '.bl-site-bar__brand',
@@ -638,5 +648,40 @@ describe('themed scrollbars', () => {
       }
     }
     expect(ruleBody(read('site-bar'), '.bl-site-bar__navwrap')['scrollbar-width']).toBe('none')
+  })
+})
+
+describe('toggle', () => {
+  const css = read('toggle')
+  it('is a 44px row with a 40x24 track', () => {
+    expect(ruleBody(css, '.bl-toggle__control')['min-block-size']).toBe('44px')
+    const track = ruleBody(css, '.bl-toggle__track')
+    expect(track['inline-size']).toBe('40px')
+    expect(track['block-size']).toBe('24px')
+  })
+  it('reads as disabled in forced colors whether on or off', () => {
+    const forced = ['@media (forced-colors: active)']
+    expect(ruleBody(css, '.bl-toggle__input:disabled + .bl-toggle__track', forced).background).toBe(
+      'Canvas'
+    )
+    expect(
+      ruleBody(css, '.bl-toggle__control:has(> .bl-toggle__input:disabled)', forced).color
+    ).toBe('GrayText')
+    // Declared after the :checked rules of equal specificity, so disabled wins when both match.
+    const rules = parseRules(css).filter((r) => r.within.includes(forced[0]!))
+    const at = (sel: string) => rules.findIndex((r) => r.selectors.includes(sel))
+    expect(at('.bl-toggle__input:disabled + .bl-toggle__track')).toBeGreaterThan(
+      at('.bl-toggle__input:checked + .bl-toggle__track')
+    )
+  })
+  it('moves the thumb with a logical inset so RTL flips it', () => {
+    expect(
+      ruleBody(css, '.bl-toggle__input:checked + .bl-toggle__track .bl-toggle__thumb')[
+        'inset-inline-start'
+      ]
+    ).toBe('calc(100% - 20px)')
+  })
+  it('gates hover behind (hover: hover)', () => {
+    expect(css.replace(/@media \(hover: hover\)\s*\{[\s\S]*?\n {2}\}/, '')).not.toMatch(/:hover/)
   })
 })
