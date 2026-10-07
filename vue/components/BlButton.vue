@@ -17,18 +17,9 @@
 </template>
 
 <script setup lang="ts">
-  import {
-    Comment,
-    Fragment,
-    Text,
-    computed,
-    onBeforeUpdate,
-    shallowRef,
-    useAttrs,
-    useSlots,
-    watchEffect
-  } from 'vue'
+  import { computed, onBeforeUpdate, shallowRef, useAttrs, useSlots, watchEffect } from 'vue'
   import type { VNode } from 'vue'
+  import { hasContent } from '../internal/slots'
   import { isDev, warn } from '../internal/dev'
   import { linkBindings, resolveTag } from '../internal/link'
   import type { LinkAs, LinkTo } from '../types'
@@ -51,16 +42,6 @@
   const slots = useSlots()
   const attrs = useAttrs()
 
-  function hasContent(nodes: VNode[]): boolean {
-    return nodes.some((node) => {
-      if (node.type === Comment) return false
-      if (node.type === Text)
-        return typeof node.children === 'string' && node.children.trim() !== ''
-      if (node.type === Fragment)
-        return Array.isArray(node.children) && hasContent(node.children as VNode[])
-      return true
-    })
-  }
   // The default slot is evaluated once per render and reused for both the icon-only check
   // and the rendered content.
   let cache: VNode[] | undefined

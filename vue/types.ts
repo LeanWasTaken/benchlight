@@ -96,3 +96,31 @@ export interface PaginationLabels {
   pageOf: (page: number, pages: number) => string
   range: (from: number, to: number, total: number) => string
 }
+
+export interface DialogLabels {
+  close: string
+}
+
+export type DialogCloseReason = 'button' | 'backdrop' | 'escape' | 'program' | 'native'
+
+export type ToastTone = 'neutral' | 'success' | 'danger'
+
+export interface ToastAction {
+  label: string
+  onClick: () => void
+}
+
+export interface ToastOptions {
+  message: string
+  tone?: ToastTone
+  action?: ToastAction
+  // ms; default 5000, or 0 (stays until dismissed) when `action` is set
+  duration?: number
+  id?: string
+}
+
+export interface ToasterLabels {
+  region: string
+  dismiss: string
+  actionHint: (label: string) => string
+}
