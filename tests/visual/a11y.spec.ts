@@ -420,3 +420,59 @@ test.describe('BlSelect chevron', () => {
     })
   })
 })
+
+test('no axe violations with a dialog open', async ({ page }) => {
+  await page.goto('/')
+  await page.locator('[data-demo="dialog"]').getByRole('button', { name: 'Rename' }).click()
+  const results = await new AxeBuilder({ page }).include('.bl-dialog[open]').analyze()
+  expect(results.violations.map((v) => `${v.id}: ${v.nodes.length}`)).toEqual([])
+})
+
+test('no axe violations with three toasts visible', async ({ page }) => {
+  await page.goto('/')
+  const t = page.locator('[data-demo="toast"]')
+  for (const name of ['Toast', 'Success', 'With action'])
+    await t.getByRole('button', { name }).click()
+  await expect(page.locator('.bl-toast')).toHaveCount(3)
+  const results = await new AxeBuilder({ page }).include('.bl-toaster').analyze()
+  expect(results.violations.map((v) => `${v.id}: ${v.nodes.length}`)).toEqual([])
+})
+
+test.describe('forced colors: v0.6 blocks', () => {
+  test.use({ forcedColors: 'active' })
+  test('dialog, toast, disclosure and toggle keep visible edges and marks', async ({ page }) => {
+    await page.goto('/')
+    await page.locator('[data-demo="toast"]').getByRole('button', { name: 'Success' }).click()
+    // Chromium forces opaque fills to Canvas, so compare against the page ground, not transparent.
+    const paints = (selector: string) =>
+      page
+        .locator(selector)
+        .first()
+        .evaluate((el) => {
+          const ground = getComputedStyle(document.body).backgroundColor
+          return getComputedStyle(el).backgroundColor !== ground
+        })
+    expect(await paints('.bl-toast__mark')).toBe(true)
+    expect(await paints('.bl-disclosure__chevron')).toBe(true)
+    const [on, off] = await page
+      .locator('[data-demo="toggle"] .bl-toggle__track')
+      .evaluateAll((els) => els.slice(0, 2).map((el) => getComputedStyle(el).backgroundColor))
+    expect(on, 'checked and unchecked toggle tracks differ').not.toBe(off)
+    await page.locator('[data-demo="dialog"]').getByRole('button', { name: 'Rename' }).click()
+    const [edge, text] = await page
+      .locator('.bl-dialog[open] .bl-dialog__panel')
+      .evaluate((el) => [
+        getComputedStyle(el).borderTopColor,
+        getComputedStyle(document.body).color
+      ])
+    // Forced colors forces borders anyway; this checks the edge is visible, not that the rule exists.
+    expect(edge).toBe(text) // CanvasText
+    // axe reads the author colours, not the system palette that forced colors applies (the
+    // computed colours above are black on white), so its contrast rule is a false positive here.
+    const axe = await new AxeBuilder({ page })
+      .include('.bl-dialog[open]')
+      .disableRules(['color-contrast'])
+      .analyze()
+    expect(axe.violations.map((v) => v.id)).toEqual([])
+  })
+})
