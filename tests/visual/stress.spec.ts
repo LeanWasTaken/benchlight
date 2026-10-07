@@ -584,6 +584,7 @@ const cases: Case[] = [
     ]
   },
   { id: 'meta-hash', checks: generic() },
+  { id: 'media-unbroken', checks: generic() },
   { id: 'section-head-compound', checks: generic() },
   { id: 'display-xl', checks: generic(between(320, 390)) },
   {

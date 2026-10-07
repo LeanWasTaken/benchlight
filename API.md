@@ -29,6 +29,7 @@
 - `dist/modules/link-arrow.min.css`
 - `dist/modules/log.min.css`
 - `dist/modules/marquee.min.css`
+- `dist/modules/media.min.css`
 - `dist/modules/meta.min.css`
 - `dist/modules/meter.min.css`
 - `dist/modules/motion.min.css`
@@ -67,6 +68,7 @@
 - `BlLinkArrow`
 - `BlLog`
 - `BlMarquee`
+- `BlMedia`
 - `BlMeta`
 - `BlMeter`
 - `BlMsg`
@@ -252,6 +254,17 @@ Exposed: none
 Slots: `default`
 Events: none
 Exposed: `refresh`
+
+### BlMedia
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `align` | `"start" \| "center" \| undefined` | no |  |
+| `as` | `"div" \| "li" \| "article" \| undefined` | no |  |
+
+Slots: `aside`, `default`, `figure`
+Events: none
+Exposed: none
 
 ### BlMeta
 
@@ -595,6 +608,11 @@ Exposed: none
 - `bl-log`
 - `bl-marquee`
 - `bl-marquee__content`
+- `bl-media`
+- `bl-media--center`
+- `bl-media__aside`
+- `bl-media__body`
+- `bl-media__figure`
 - `bl-meta`
 - `bl-meta--sep`
 - `bl-meta__key`
@@ -705,6 +723,7 @@ Exposed: none
 - `--bl-chevron-mask`
 - `--bl-col-min`
 - `--bl-log-height`
+- `--bl-media-size`
 - `--bl-meter-value`
 - `--bl-range-value-width`
 - `--bl-rise-delay`

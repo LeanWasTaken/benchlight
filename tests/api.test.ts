@@ -12,6 +12,16 @@ describe('API.md', () => {
   }, 120_000)
 })
 
+const api = () => readFileSync(join(ROOT, 'API.md'), 'utf8')
+const slotsOf = (component: string) =>
+  new RegExp(`### ${component}\\n[\\s\\S]*?\\nSlots: (.*)`).exec(api())?.[1] ?? ''
+
+describe('API.md slots', () => {
+  it('lists the BlMedia figure and aside slots', () => {
+    expect(slotsOf('BlMedia')).toBe('`aside`, `default`, `figure`')
+  })
+})
+
 describe('Nuxt auto-imports', () => {
   it('cover every runtime helper the barrel exports', () => {
     const helpers = barrelExports(ROOT).filter(

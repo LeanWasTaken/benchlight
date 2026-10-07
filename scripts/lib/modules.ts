@@ -32,7 +32,8 @@ export const MODULES = {
   prose: 'css/components/prose.css',
   table: 'css/components/table.css',
   pagination: 'css/components/pagination.css',
-  toggle: 'css/components/toggle.css'
+  toggle: 'css/components/toggle.css',
+  media: 'css/components/media.css'
 } as const
 
 export type ModuleName = keyof typeof MODULES

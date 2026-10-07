@@ -196,6 +196,21 @@
       </div>
     </section>
 
+    <section v-if="show('media-unbroken')" data-case="media-unbroken">
+      <h2 class="st-label">media-unbroken</h2>
+      <div data-box>
+        <BlMedia>
+          <template #figure>
+            <svg viewBox="0 0 64 64" role="img" aria-label="Thumbnail">
+              <rect width="64" height="64" rx="6" fill="currentColor" />
+            </svg>
+          </template>
+          https://example.com/{{ 'a'.repeat(120) }}
+          <template #aside><BlButton>Open</BlButton></template>
+        </BlMedia>
+      </div>
+    </section>
+
     <section v-if="show('section-head-compound')" data-case="section-head-compound">
       <h2 class="st-label">section-head-compound</h2>
       <div data-box>
@@ -623,6 +638,7 @@
     BlInput,
     BlLinkArrow,
     BlLog,
+    BlMedia,
     BlMeta,
     BlMeter,
     BlMsg,

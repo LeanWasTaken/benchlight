@@ -10,6 +10,7 @@
 - BlMeter: `valueText` (`aria-valuetext`), `showLabel` and `showValue` render the label and value
   visibly in a `bl-meter-field` wrapper; without them the markup is unchanged.
 - BlToggle: an on/off switch on a native checkbox (`role="switch"`), with hint, form posting and RTL.
+- BlMedia: a figure beside a body with an optional aside; wraps intrinsically when narrow.
 
 ### Changed
 

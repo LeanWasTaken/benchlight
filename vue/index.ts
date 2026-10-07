@@ -32,6 +32,7 @@ export { default as BlProse } from './components/BlProse.vue'
 export { default as BlPagination } from './components/BlPagination.vue'
 export { default as BlTable } from './components/BlTable.vue'
 export { default as BlToggle } from './components/BlToggle.vue'
+export { default as BlMedia } from './components/BlMedia.vue'
 
 export {
   APPEARANCE_ATTRIBUTE,
