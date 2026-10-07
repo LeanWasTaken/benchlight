@@ -125,7 +125,7 @@ dependency pre-bundling. Tailwind is optional: only if the app uses it, add
 - Compact font subsets are listed in `fonts/subset/manifest.json`.
 - `playground/src/App.vue` is the markup reference.
 
-Size budget: `dist/benchlight.min.css` stays at or under 49,152 B (48 KiB) (`wc -c dist/benchlight.min.css`,
+Size budget: `dist/benchlight.min.css` stays at or under 52,224 B (51 KiB) (`wc -c dist/benchlight.min.css`,
 `tests/bundle.test.ts`; it was 28,672 B in v0.3) and the compact font subsets under 23,552 B in total
 (`tests/fonts.test.ts`). The guard is raised in round KiB when legitimate work needs it, and every
 raise gets a CHANGELOG line.
@@ -383,10 +383,77 @@ A collapsible section on native `<details>`. Full prop list is in [API.md](API.m
 - The summary is not a heading; wrap the disclosure if you need one.
 - The chevron reuses `--bl-chevron-mask`.
 
+## BlDialog
+
+A modal on native `<dialog>` and `showModal()`: a centred box from 40em up, a bottom sheet below.
+Full prop list is in [API.md](API.md). `dialog` needs the `btn` module for its close button (the
+bundle CLI warns otherwise).
+
+```vue
+<BlDialog v-model:open="renameOpen" title="Rename item" description="Names show in lists.">
+  <BlField label="Name"><BlInput v-model="name" autofocus /></BlField>
+  <template #footer>
+    <BlButton variant="secondary" @click="renameOpen = false">Cancel</BlButton>
+    <BlButton @click="save">Save</BlButton>
+  </template>
+</BlDialog>
+```
+
+```html
+<dialog class="bl-dialog" aria-labelledby="t" aria-describedby="d">
+  <div class="bl-dialog__panel">
+    <div class="bl-dialog__head">
+      <h2 class="bl-dialog__title" id="t">Rename item</h2>
+      <button class="bl-btn bl-btn--ghost bl-btn--icon bl-dialog__close" aria-label="Close">
+        …
+      </button>
+    </div>
+    <p class="bl-dialog__description" id="d">Names show in lists.</p>
+    <div class="bl-dialog__body">…</div>
+    <div class="bl-dialog__foot">…</div>
+  </div>
+</dialog>
+```
+
+- Props: `open` (`v-model:open`), `title`, `description`, `dismissible` (default `true`) and
+  `labels` (`{ close }`, default `'Close'`). Slots: default (the body, which scrolls) and `footer`.
+- Emits `update:open(false)` and `close({ reason, returnValue })` exactly once per close. `reason`
+  is `'button'` (the ×), `'backdrop'`, `'escape'` (Esc, the back gesture, `requestClose()` or a
+  `request-close` invoker, which all fire `cancel`), `'program'` (the parent set `open` to false;
+  no `update:open` echo) or `'native'` (`<form method="dialog">`, a `close` invoker command).
+  `returnValue` is the string given to `close()`, or `''`.
+- A backdrop click counts only when the press also started on the backdrop, so a drag from inside
+  the panel does not close.
+- `dismissible: false` drops the ×, ignores backdrop clicks and renders `closedby="none"`, which
+  blocks Esc and the Android back gesture in Chrome 134+ and Firefox 141+; `cancel` is also
+  prevented for Safari. Chromium before 134 may still close on a repeated Esc or back gesture
+  (its CloseWatcher anti-abuse rule); the close is then reported as `'escape'` or `'native'`
+  and `v-model` stays in step. In development a warning fires when the footer is empty, since
+  nothing could close the dialog.
+- Focus: the browser focuses the first focusable element, which is the × in a dismissible dialog.
+  Put `autofocus` on the least destructive action or on the first field. On close, focus returns
+  to the opener unless a `@close` handler moved it elsewhere; unmounting an open dialog closes
+  it quietly (no emits) and restores focus too.
+- Scroll lock: `html:has(dialog.bl-dialog[open]:modal)` hides the `html` overflow; the component
+  measures the scrollbar it removes into `--bl-dialog-gutter` so the page does not shift. An app
+  that scrolls `body` instead of `html` is not locked. CSS-only users get no compensation; opt
+  in with `html { scrollbar-gutter: stable }`.
+- Below 40em the dialog is a bottom sheet clear of the safe areas. `dvh` does not shrink for the
+  iOS keyboard, so a field near the bottom of a sheet can sit behind it.
+- Known limitation: setting `open` to false and back to true within one task (before the
+  browser's async `close` event) leaves the dialog closed; the late `close` then emits
+  `update:open(false)`, so state stays consistent and the reopen is dropped.
+- CSS-only: the classes work on any `<dialog>`. Call `showModal()`/`close()` yourself, wire the
+  ids and add `closedby="none"` for a non-dismissible dialog. Backdrop-click closing, gutter
+  compensation, focus-restore hardening and in-dialog toasts are Vue-only.
+
 ## CSS hooks
 
 `--bl-scroll-offset-top` and `--bl-scroll-offset-bottom` keep focused elements clear of fixed chrome
 such as the sticky site bar and the mobile tab bar.
+
+`--bl-dialog-width` sets the width of a centred BlDialog (default `32rem`, never wider than the
+viewport less 32px). `--bl-dialog-gutter` is internal: BlDialog sets it on `html` while open.
 
 ## API contract
 

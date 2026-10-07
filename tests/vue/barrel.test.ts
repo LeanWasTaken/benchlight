@@ -36,6 +36,7 @@ const COMPONENTS = [
   'BlToggle',
   'BlMedia',
   'BlDisclosure',
+  'BlDialog',
   'BlTelemetry',
   'BlTelemetryCell'
 ]

@@ -1,0 +1,166 @@
+@layer components {
+  /* UA resets: the panel paints the surface; the dialog is only a positioned box. Every
+     position rule keys on .bl-dialog / [open], never :modal, which a closing dialog loses
+     before its exit ends in Firefox and Safari. */
+  .bl-dialog {
+    inline-size: min(var(--bl-dialog-width, 32rem), 100% - 32px);
+    max-inline-size: none;
+    max-block-size: min(85dvh, 48rem);
+    margin: auto;
+    padding: 0;
+    overflow: visible;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    opacity: 0;
+    scale: 0.98;
+    transition:
+      opacity var(--bl-duration-base) ease,
+      scale var(--bl-duration-base) var(--bl-ease-out),
+      translate var(--bl-duration-base) var(--bl-ease-out);
+  }
+  .bl-dialog[open] {
+    display: flex;
+    opacity: 1;
+    scale: none;
+  }
+  .bl-dialog::backdrop {
+    background: color-mix(in srgb, var(--bl-canvas) 70%, transparent);
+    opacity: 0;
+    transition: opacity var(--bl-duration-base) ease;
+  }
+  .bl-dialog[open]::backdrop {
+    opacity: 1;
+  }
+  @starting-style {
+    .bl-dialog[open] {
+      opacity: 0;
+      scale: 0.98;
+    }
+    .bl-dialog[open]::backdrop {
+      opacity: 0;
+    }
+  }
+  /* Exit animations need `overlay` (Chromium only); elsewhere the dialog closes instantly
+     instead of flashing at its in-flow position. */
+  @supports (overlay: auto) {
+    .bl-dialog,
+    .bl-dialog::backdrop {
+      transition-property: opacity, scale, translate, display, overlay;
+      transition-behavior: allow-discrete;
+    }
+  }
+  .bl-dialog__panel {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    inline-size: 100%;
+    min-block-size: 0;
+    max-block-size: 100%;
+    color: var(--bl-ink-1);
+    background: var(--bl-surface);
+    border: 1px solid var(--bl-separator);
+    border-radius: var(--bl-radius-card);
+    box-shadow: var(--bl-shadow-float);
+  }
+  .bl-dialog__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding-block: 12px 4px;
+    padding-inline: 20px 12px;
+  }
+  .bl-dialog__title {
+    flex: 1;
+    min-inline-size: 0;
+    margin: 0;
+    padding-block: 10px;
+    font-size: var(--bl-text-heading);
+    line-height: var(--bl-leading-heading);
+    overflow-wrap: anywhere;
+  }
+  .bl-dialog__close {
+    flex: none;
+  }
+  .bl-dialog__description {
+    margin: 0;
+    padding-inline: 20px;
+    color: var(--bl-ink-2);
+    overflow-wrap: anywhere;
+  }
+  .bl-dialog__body {
+    flex: 1 1 auto;
+    min-block-size: 0;
+    padding: 12px 20px 20px;
+    overflow: auto;
+    overscroll-behavior: contain;
+    overflow-wrap: anywhere;
+    scrollbar-width: thin;
+    scrollbar-color: var(--bl-control-border) transparent;
+  }
+  .bl-dialog__foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 20px 20px;
+    border-block-start: 1px solid var(--bl-separator);
+  }
+  /* Scroll lock: CSS only. BlDialog measures the scrollbar it removes into --bl-dialog-gutter. */
+  html:has(dialog.bl-dialog[open]:modal) {
+    overflow: hidden;
+    padding-inline-end: var(--bl-dialog-gutter, 0px);
+  }
+  /* Below 40em: a bottom sheet. */
+  @media (max-width: 39.99em) {
+    .bl-dialog {
+      inline-size: 100%;
+      max-block-size: 90dvh;
+      margin: auto 0 0;
+      scale: none;
+      translate: 0 100%;
+    }
+    .bl-dialog[open] {
+      translate: none;
+    }
+    @starting-style {
+      .bl-dialog[open] {
+        scale: none;
+        translate: 0 100%;
+      }
+    }
+    .bl-dialog__panel {
+      padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
+      border-block-end: 0;
+      border-end-start-radius: 0;
+      border-end-end-radius: 0;
+    }
+    .bl-dialog__foot,
+    .bl-dialog__body:not(:has(+ .bl-dialog__foot)) {
+      padding-block-end: calc(20px + env(safe-area-inset-bottom));
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bl-dialog,
+    .bl-dialog[open] {
+      scale: none;
+      translate: none;
+    }
+    /* base.css gives every element a 0.01ms transition here; on html it would make the gutter
+       padding trail the scrollbar by a frame, shifting the page on open and close. */
+    html:has(dialog.bl-dialog) {
+      transition-property: none;
+    }
+    @starting-style {
+      .bl-dialog[open] {
+        scale: none;
+        translate: none;
+      }
+    }
+  }
+  @media (forced-colors: active) {
+    .bl-dialog__panel {
+      border-color: CanvasText;
+    }
+  }
+}

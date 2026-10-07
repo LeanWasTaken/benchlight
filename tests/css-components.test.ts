@@ -8,6 +8,19 @@ const read = (name: string) =>
 
 // Selectors each component must define; states are ARIA or native attributes.
 const REQUIRED: Record<string, string[]> = {
+  dialog: [
+    '.bl-dialog',
+    '.bl-dialog[open]',
+    '.bl-dialog::backdrop',
+    '.bl-dialog__panel',
+    '.bl-dialog__head',
+    '.bl-dialog__title',
+    '.bl-dialog__close',
+    '.bl-dialog__description',
+    '.bl-dialog__body',
+    '.bl-dialog__foot',
+    'html:has(dialog.bl-dialog[open]:modal)'
+  ],
   media: [
     '.bl-media',
     '.bl-media--center',
@@ -734,5 +747,35 @@ describe('disclosure', () => {
     }
     expect(css).toMatch(/:hover/)
     expect(ungated).not.toMatch(/:hover/)
+  })
+})
+
+describe('dialog', () => {
+  const css = read('dialog')
+  it('transitions display only where overlay is supported', () => {
+    expect(
+      ruleBody(css, '.bl-dialog', ['@supports (overlay: auto)'])['transition-property']
+    ).toContain('display')
+    expect(ruleBody(css, '.bl-dialog').transition).not.toContain('display')
+  })
+  it('ends the open state on scale: none, not a transform', () => {
+    expect(ruleBody(css, '.bl-dialog[open]').scale).toBe('none')
+  })
+  it('slides the bottom sheet in from below 40em', () => {
+    expect(ruleBody(css, '.bl-dialog', ['@media (max-width: 39.99em)']).translate).toBe('0 100%')
+  })
+  it('drops movement under reduced motion', () => {
+    const reduce = ['@media (prefers-reduced-motion: reduce)']
+    expect(ruleBody(css, '.bl-dialog', reduce).translate).toBe('none')
+    expect(ruleBody(css, '.bl-dialog[open]', reduce).translate).toBe('none')
+  })
+  it('keeps the gutter padding in step with the scrollbar under reduced motion', () => {
+    const reduce = ['@media (prefers-reduced-motion: reduce)']
+    expect(ruleBody(css, 'html:has(dialog.bl-dialog)', reduce)['transition-property']).toBe('none')
+  })
+  it('pads the locked page by the measured scrollbar gutter', () => {
+    expect(ruleBody(css, 'html:has(dialog.bl-dialog[open]:modal)')['padding-inline-end']).toBe(
+      'var(--bl-dialog-gutter, 0px)'
+    )
   })
 })

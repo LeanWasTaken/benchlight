@@ -34,7 +34,8 @@ export const MODULES = {
   pagination: 'css/components/pagination.css',
   toggle: 'css/components/toggle.css',
   media: 'css/components/media.css',
-  disclosure: 'css/components/disclosure.css'
+  disclosure: 'css/components/disclosure.css',
+  dialog: 'css/components/dialog.css'
 } as const
 
 export type ModuleName = keyof typeof MODULES
@@ -42,6 +43,7 @@ export type ModuleName = keyof typeof MODULES
 // Component-to-component requirements the bundle CLI warns about when a module is selected
 // without them (CSS-derived `type`/`base` needs are detected separately in bundle.ts).
 export const REQUIRES: Partial<Record<ModuleName, readonly ModuleName[]>> = {
+  dialog: ['btn'],
   pagination: ['layout'],
   table: ['layout', 'pagination']
 }

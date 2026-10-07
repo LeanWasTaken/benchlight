@@ -12,10 +12,12 @@
 - BlToggle: an on/off switch on a native checkbox (`role="switch"`), with hint, form posting and RTL.
 - BlMedia: a figure beside a body with an optional aside; wraps intrinsically when narrow.
 - BlDisclosure: a collapsible section on native `<details>`, with exclusive groups via `name`.
+- BlDialog: a modal on native `<dialog>`, centred from 40em and a bottom sheet below, with close
+  reasons, focus restore and a scroll lock.
 
 ### Changed
 
-- The full-bundle size guard is raised from 43,008 B (42 KiB) to 49,152 B (48 KiB) for the v0.6
+- The full-bundle size guard is raised from 43,008 B (42 KiB) to 52,224 B (51 KiB) for the v0.6
   components.
 - The full-bundle size guard is raised from 38 KiB to 42 KiB for the button, meter and select
   chevron additions.

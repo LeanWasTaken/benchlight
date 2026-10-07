@@ -518,6 +518,26 @@ const cases: Case[] = [
   { id: 'toggle-long', checks: generic() },
   { id: 'disclosure-long', checks: generic() },
   {
+    id: 'dialog-long',
+    checks: [
+      {
+        name: 'panel-inside-viewport',
+        variants: ALL,
+        probe: (page) =>
+          page.evaluate(() => {
+            const r = document.querySelector('.bl-dialog__panel')!.getBoundingClientRect()
+            const fits =
+              r.left >= -0.5 && r.right <= innerWidth + 0.5 && r.bottom <= innerHeight + 0.5
+            const body = document.querySelector<HTMLElement>('.bl-dialog__body')!
+            return fits && body.scrollHeight > body.clientHeight
+              ? null
+              : 'panel overflows or body does not scroll'
+          })
+      },
+      iconButtonsStay44
+    ]
+  },
+  {
     id: 'toggle-rtl',
     checks: [
       ...generic(),

@@ -315,6 +315,28 @@
           >{{ faqA }}/{{ faqB }}</span
         >
       </div>
+      <div class="pg-block pg-row" data-demo="dialog">
+        <BlButton variant="secondary" @click="dialogOpen = true">Rename</BlButton>
+        <BlButton variant="secondary" @click="lockedOpen = true">Delete project</BlButton>
+        <BlDialog
+          v-model:open="dialogOpen"
+          title="Rename item"
+          description="Names show in lists and exports."
+        >
+          <BlField label="Name"><BlInput v-model="itemName" /></BlField>
+          <template #footer>
+            <BlButton variant="secondary" @click="dialogOpen = false">Cancel</BlButton>
+            <BlButton @click="dialogOpen = false">Save</BlButton>
+          </template>
+        </BlDialog>
+        <BlDialog v-model:open="lockedOpen" title="Delete project?" :dismissible="false">
+          <p>This cannot be undone.</p>
+          <template #footer>
+            <BlButton variant="secondary" autofocus @click="lockedOpen = false">Keep</BlButton>
+            <BlButton variant="danger" @click="lockedOpen = false">Delete</BlButton>
+          </template>
+        </BlDialog>
+      </div>
     </section>
   </main>
 
@@ -364,6 +386,7 @@
     BlLinkArrow,
     BlLog,
     BlMarquee,
+    BlDialog,
     BlDisclosure,
     BlMedia,
     BlMeta,
@@ -397,6 +420,9 @@
   const autoJoin = ref(true)
   const faqA = ref(true)
   const faqB = ref(false)
+  const dialogOpen = ref(false)
+  const lockedOpen = ref(false)
+  const itemName = ref('Item 1')
   const pressedOff = ref(false)
   const muted = ref(false)
   const bold = ref(false)
