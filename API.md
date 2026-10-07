@@ -21,6 +21,7 @@
 - `dist/modules/base.min.css`
 - `dist/modules/btn.min.css`
 - `dist/modules/colophon.min.css`
+- `dist/modules/disclosure.min.css`
 - `dist/modules/eq.min.css`
 - `dist/modules/field.min.css`
 - `dist/modules/index-row.min.css`
@@ -59,6 +60,7 @@
 - `BlAppearanceSwitch`
 - `BlButton`
 - `BlColophon`
+- `BlDisclosure`
 - `BlEqBars`
 - `BlField`
 - `BlIndex`
@@ -147,6 +149,18 @@ Exposed: none
 
 Slots: `actions`, `default`
 Events: none
+Exposed: none
+
+### BlDisclosure
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `name` | `string \| undefined` | no |  |
+| `open` | `boolean \| undefined` | no |  |
+| `summary` | `string \| undefined` | no |  |
+
+Slots: `default`, `summary`
+Events: `update:open`
 Exposed: none
 
 ### BlEqBars
@@ -577,6 +591,11 @@ Exposed: none
 - `bl-colophon`
 - `bl-colophon__inner`
 - `bl-colophon__items`
+- `bl-disclosure`
+- `bl-disclosure__body`
+- `bl-disclosure__chevron`
+- `bl-disclosure__summary`
+- `bl-disclosure__title`
 - `bl-display`
 - `bl-display--lg`
 - `bl-display--md`

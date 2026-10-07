@@ -602,6 +602,18 @@
       </div>
     </section>
 
+    <section v-if="show('disclosure-long')" data-case="disclosure-long">
+      <h2 class="st-label">disclosure-long</h2>
+      <div data-box>
+        <BlDisclosure
+          :summary="`${'Why does this summary run on for so many words '.repeat(3)}and ends in https://example.com/${'a'.repeat(80)}`"
+          open
+        >
+          <p>https://example.com/{{ 'b'.repeat(120) }}</p>
+        </BlDisclosure>
+      </div>
+    </section>
+
     <section v-if="show('toggle-rtl')" data-case="toggle-rtl">
       <h2 class="st-label">toggle-rtl</h2>
       <div data-box dir="rtl">
@@ -657,6 +669,7 @@
     BlPagination,
     BlTable,
     BlToggle,
+    BlDisclosure,
     BlTabBarItem,
     BlTelemetry,
     BlTelemetryCell

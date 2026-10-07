@@ -11,10 +11,11 @@
   visibly in a `bl-meter-field` wrapper; without them the markup is unchanged.
 - BlToggle: an on/off switch on a native checkbox (`role="switch"`), with hint, form posting and RTL.
 - BlMedia: a figure beside a body with an optional aside; wraps intrinsically when narrow.
+- BlDisclosure: a collapsible section on native `<details>`, with exclusive groups via `name`.
 
 ### Changed
 
-- The full-bundle size guard is raised from 43,008 B (42 KiB) to 47,104 B (46 KiB) for the v0.6
+- The full-bundle size guard is raised from 43,008 B (42 KiB) to 49,152 B (48 KiB) for the v0.6
   components.
 - The full-bundle size guard is raised from 38 KiB to 42 KiB for the button, meter and select
   chevron additions.

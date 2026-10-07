@@ -55,3 +55,19 @@ test.describe('BlToggle', () => {
     })
   })
 })
+
+test.describe('BlDisclosure', () => {
+  test('opening one in a named group closes its sibling', async ({ page }) => {
+    await page.goto('/')
+    const [a, b] = [
+      demo(page, 'disclosure').locator('details').nth(0),
+      demo(page, 'disclosure').locator('details').nth(1)
+    ]
+    await expect(a).toHaveAttribute('open', '')
+    await b.locator('summary').click()
+    await expect(b).toHaveAttribute('open', '')
+    await expect(a).not.toHaveAttribute('open', '')
+    // Both v-models followed the browser, including the sibling it closed.
+    await expect(page.locator('[data-demo="faq-state"]')).toHaveText('false/true')
+  })
+})

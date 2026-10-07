@@ -125,7 +125,7 @@ dependency pre-bundling. Tailwind is optional: only if the app uses it, add
 - Compact font subsets are listed in `fonts/subset/manifest.json`.
 - `playground/src/App.vue` is the markup reference.
 
-Size budget: `dist/benchlight.min.css` stays at or under 47,104 B (46 KiB) (`wc -c dist/benchlight.min.css`,
+Size budget: `dist/benchlight.min.css` stays at or under 49,152 B (48 KiB) (`wc -c dist/benchlight.min.css`,
 `tests/bundle.test.ts`; it was 28,672 B in v0.3) and the compact font subsets under 23,552 B in total
 (`tests/fonts.test.ts`). The guard is raised in round KiB when legitimate work needs it, and every
 raise gets a CHANGELOG line.
@@ -354,6 +354,34 @@ list is in [API.md](API.md).
 - `--bl-media-size` sets the figure's `img`, `video` and `svg` size (default 64px).
 - Wrapping rule: the body asks for 12rem beside the figure and wraps below it when it cannot get
   that, with no measuring. Long unbroken text breaks inside the body.
+
+## BlDisclosure
+
+A collapsible section on native `<details>`. Full prop list is in [API.md](API.md).
+
+```vue
+<BlDisclosure v-model:open="faqA" summary="What does this do?" name="faq">
+  <p>It shows one answer at a time.</p>
+</BlDisclosure>
+```
+
+```html
+<details class="bl-disclosure" name="faq" open>
+  <summary class="bl-disclosure__summary">
+    <span class="bl-disclosure__title">What does this do?</span>
+    <span class="bl-disclosure__chevron" aria-hidden="true"></span>
+  </summary>
+  <div class="bl-disclosure__body"><p>It shows one answer at a time.</p></div>
+</details>
+```
+
+- Props: `summary` (or the `summary` slot for rich content), `open` and `name`; emits `update:open`.
+- `name` groups disclosures so opening one closes the others (Chrome 120+, Safari 17.2+, Firefox
+  130+; older browsers open them independently). The browser-closed sibling also emits
+  `update:open(false)`, so each `v-model` stays in step.
+- `open` without `v-model` is the initial state only.
+- The summary is not a heading; wrap the disclosure if you need one.
+- The chevron reuses `--bl-chevron-mask`.
 
 ## CSS hooks
 

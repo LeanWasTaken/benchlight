@@ -15,6 +15,14 @@ const REQUIRED: Record<string, string[]> = {
     '.bl-media__body',
     '.bl-media__aside'
   ],
+  disclosure: [
+    '.bl-disclosure',
+    '.bl-disclosure__summary',
+    '.bl-disclosure__title',
+    '.bl-disclosure__chevron',
+    '.bl-disclosure__body',
+    '.bl-disclosure[open] > .bl-disclosure__summary .bl-disclosure__chevron'
+  ],
   toggle: [
     '.bl-toggle',
     '.bl-toggle__control',
@@ -698,5 +706,33 @@ describe('media', () => {
     const body = ruleBody(read('media'), '.bl-media__body')
     expect(body['flex']).toBe('1 1 12rem')
     expect(body['min-inline-size']).toBe('0')
+  })
+})
+
+describe('disclosure', () => {
+  const css = read('disclosure')
+  it('has a 44px summary row', () => {
+    expect(ruleBody(css, '.bl-disclosure__summary')['min-block-size']).toBe('44px')
+  })
+  it('gates hover behind (hover: hover)', () => {
+    // Strip every (hover: hover) block, nested ones included, by brace depth.
+    let ungated = ''
+    for (let i = 0; i < css.length;) {
+      const at = css.indexOf('@media (hover: hover)', i)
+      if (at < 0) {
+        ungated += css.slice(i)
+        break
+      }
+      ungated += css.slice(i, at)
+      let depth = 0
+      let j = css.indexOf('{', at)
+      for (; j < css.length; j++) {
+        if (css[j] === '{') depth++
+        else if (css[j] === '}' && --depth === 0) break
+      }
+      i = j + 1
+    }
+    expect(css).toMatch(/:hover/)
+    expect(ungated).not.toMatch(/:hover/)
   })
 })
