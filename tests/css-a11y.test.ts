@@ -36,7 +36,8 @@ describe('forced colors', () => {
     ['msg', ['.bl-msg--ok::before']],
     ['segmented', [".bl-segmented__item[aria-pressed='true']"]],
     ['toggle', ['.bl-toggle__track', '.bl-toggle__input:checked + .bl-toggle__track']],
-    ['disclosure', ['.bl-disclosure__chevron']]
+    ['disclosure', ['.bl-disclosure__chevron']],
+    ['toast', ['.bl-toast', '.bl-toast__mark', '.bl-toast--danger .bl-toast__mark']]
   ]
   it.each(files)('%s keeps its state visible', (name, selectors) => {
     const block = forced(read(`css/components/${name}.css`))

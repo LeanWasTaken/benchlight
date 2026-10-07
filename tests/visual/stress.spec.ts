@@ -558,6 +558,31 @@ const cases: Case[] = [
     ]
   },
   {
+    id: 'toast-six',
+    checks: [
+      { name: 'no-page-overflow', variants: ALL, probe: noPageOverflow },
+      {
+        name: 'toasts-inside-viewport-44px-buttons',
+        variants: ALL,
+        probe: (page) =>
+          page.evaluate(() => {
+            const out = [...document.querySelectorAll('.bl-toast')].filter((el) => {
+              const r = el.getBoundingClientRect()
+              return r.left < -0.5 || r.right > innerWidth + 0.5
+            })
+            const small = [...document.querySelectorAll('.bl-toast .bl-btn')].filter((el) => {
+              const r = el.getBoundingClientRect()
+              return r.width < 43.5 || r.height < 43.5
+            })
+            return out.length || small.length
+              ? `${out.length} toasts outside, ${small.length} small buttons`
+              : null
+          })
+      }
+    ]
+  },
+  { id: 'dialog-toast', checks: generic() },
+  {
     id: 'button-icon-toolbar',
     checks: [{ name: 'no-page-overflow', variants: ALL, probe: noPageOverflow }, iconButtonsStay44]
   },

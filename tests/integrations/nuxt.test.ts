@@ -95,7 +95,8 @@ describe('nuxt module', () => {
       'useMarquee',
       'useFollowScroll',
       'riseDelay',
-      'ansiToSegments'
+      'ansiToSegments',
+      'useToast'
     ])
     expect(new Set(imports.map((entry) => entry.from))).toEqual(new Set(['/pkg/nuxt/../vue/index']))
   })

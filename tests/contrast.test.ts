@@ -149,3 +149,13 @@ describe('BlToggle', () => {
     expect(contrast(hexToRgb(c['control-border']), hexToRgb(c.surface))).toBeGreaterThanOrEqual(3)
   })
 })
+
+describe('toast marks', () => {
+  it.each(THEMES.flatMap((t) => (['phosphor', 'danger'] as const).map((m) => [t, m] as const)))(
+    '%s %s mark on raised is at least 3:1',
+    (theme, mark) => {
+      const c = tokens.color[theme]
+      expect(contrast(hexToRgb(c[mark]), hexToRgb(c.raised))).toBeGreaterThanOrEqual(3)
+    }
+  )
+})

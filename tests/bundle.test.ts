@@ -99,8 +99,8 @@ describe('buildDist', () => {
     expect(count(/-webkit-font-smoothing:/g)).toBeGreaterThan(0)
   })
 
-  it('stays within the 52224-byte guard', () => {
-    expect(Buffer.byteLength(read('dist/benchlight.min.css'))).toBeLessThanOrEqual(52_224)
+  it('stays within the 53248-byte guard', () => {
+    expect(Buffer.byteLength(read('dist/benchlight.min.css'))).toBeLessThanOrEqual(53_248)
   })
 })
 

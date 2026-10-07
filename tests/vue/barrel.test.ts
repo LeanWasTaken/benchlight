@@ -37,6 +37,7 @@ const COMPONENTS = [
   'BlMedia',
   'BlDisclosure',
   'BlDialog',
+  'BlToaster',
   'BlTelemetry',
   'BlTelemetryCell'
 ]
@@ -49,6 +50,7 @@ const HELPERS = [
   'useFollowScroll',
   'riseDelay',
   'ansiToSegments',
+  'useToast',
   'APPEARANCE_ATTRIBUTE',
   'APPEARANCE_STORAGE_KEY',
   'FIELD_CONTEXT'

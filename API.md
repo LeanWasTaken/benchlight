@@ -50,6 +50,7 @@
 - `dist/modules/table.min.css`
 - `dist/modules/telemetry.min.css`
 - `dist/modules/tints.min.css`
+- `dist/modules/toast.min.css`
 - `dist/modules/toggle.min.css`
 - `dist/modules/tokens.min.css`
 - `dist/modules/type.min.css`
@@ -94,6 +95,7 @@
 - `BlTable`
 - `BlTelemetry`
 - `BlTelemetryCell`
+- `BlToaster`
 - `BlToggle`
 - `FIELD_CONTEXT`
 - `ansiToSegments`
@@ -103,6 +105,7 @@
 - `useMarquee`
 - `useReducedMotion`
 - `useScrollLifted`
+- `useToast`
 
 ## Nuxt auto-imports
 - `ansiToSegments`
@@ -112,6 +115,7 @@
 - `useMarquee`
 - `useReducedMotion`
 - `useScrollLifted`
+- `useToast`
 
 ## Components
 
@@ -563,6 +567,17 @@ Slots: `default`
 Events: none
 Exposed: none
 
+### BlToaster
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `labels` | `Partial<ToasterLabels> \| undefined` | no |  |
+| `max` | `number \| undefined` | no | `3` |
+
+Slots: none
+Events: none
+Exposed: none
+
 ### BlToggle
 
 | prop | type | required | default |
@@ -615,6 +630,7 @@ Exposed: none
 - `bl-dialog__head`
 - `bl-dialog__panel`
 - `bl-dialog__title`
+- `bl-dialog__toasts`
 - `bl-disclosure`
 - `bl-disclosure__body`
 - `bl-disclosure__chevron`
@@ -754,6 +770,20 @@ Exposed: none
 - `bl-tint-danger`
 - `bl-tint-phosphor`
 - `bl-tint-trace`
+- `bl-toast`
+- `bl-toast--danger`
+- `bl-toast--success`
+- `bl-toast-enter-active`
+- `bl-toast-enter-from`
+- `bl-toast-leave-active`
+- `bl-toast-leave-to`
+- `bl-toast-move`
+- `bl-toast__action`
+- `bl-toast__dismiss`
+- `bl-toast__mark`
+- `bl-toast__message`
+- `bl-toaster`
+- `bl-toaster__list`
 - `bl-toggle`
 - `bl-toggle__control`
 - `bl-toggle__hint`

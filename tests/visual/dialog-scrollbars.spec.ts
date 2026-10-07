@@ -21,3 +21,21 @@ for (const length of ['long', 'short'] as const) {
     expect(await x()).toBeCloseTo(before, 0)
   })
 }
+
+test('opening a dialog does not move a visible toast sideways', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop-light', 'one project is enough')
+  await page.goto('/')
+  expect(
+    await page.evaluate(() => innerWidth - document.documentElement.clientWidth)
+  ).toBeGreaterThan(0)
+  await page.locator('[data-demo="toast"]').getByRole('button', { name: 'Toast' }).click()
+  const gap = () =>
+    page
+      .locator('.bl-toast')
+      .first()
+      .evaluate((el) => innerWidth - el.getBoundingClientRect().right)
+  const before = await gap()
+  await page.locator('[data-demo="dialog"]').getByRole('button', { name: 'Rename' }).click()
+  await expect(page.locator('.bl-dialog[open] .bl-toast')).toBeVisible()
+  expect(await gap()).toBeCloseTo(before, 0)
+})
