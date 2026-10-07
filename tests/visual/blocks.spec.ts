@@ -335,3 +335,30 @@ test.describe('BlToast', () => {
     if (bar) expect(t.y + t.height).toBeLessThanOrEqual(bar.y)
   })
 })
+
+test.describe('motion', () => {
+  test.use({ reducedMotion: 'no-preference' })
+  test('the dialog animates in and out without an in-flow flash', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'desktop-light', 'one project is enough')
+    await page.goto('/')
+    await demo(page, 'dialog').getByRole('button', { name: 'Rename' }).click()
+    const dialog = page.locator('.bl-dialog[open]')
+    await expect(dialog).toHaveCSS('opacity', '1')
+    const open = (await dialog.boundingBox())!
+    // close and sample in one evaluate, so the samples are of the exit transition
+    const tops = await page.evaluate(async () => {
+      const el = document.querySelector<HTMLDialogElement>('.bl-dialog[open]')!
+      el.querySelector<HTMLElement>('.bl-dialog__close')!.click()
+      const tops: number[] = []
+      for (let i = 0; i < 20; i++) {
+        await new Promise(requestAnimationFrame)
+        const r = el.getBoundingClientRect()
+        if (r.height > 0) tops.push(r.top)
+      }
+      return tops
+    })
+    expect(tops.length, 'sampled during the exit').toBeGreaterThan(2)
+    for (const top of tops) expect(Math.abs(top - open.y)).toBeLessThan(40)
+    await expect(page.locator('.bl-dialog[open]')).toHaveCount(0)
+  })
+})
