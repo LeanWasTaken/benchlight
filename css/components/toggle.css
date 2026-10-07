@@ -1,0 +1,155 @@
+@layer components {
+  .bl-toggle {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    max-inline-size: 100%;
+  }
+  .bl-toggle__control {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    min-block-size: 44px;
+    min-inline-size: 0;
+    color: var(--bl-ink-1);
+    cursor: pointer;
+  }
+  /* The real checkbox sits invisibly over the track: native clicks, Space, forms and no-JS. */
+  .bl-toggle__input {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 0;
+    inline-size: 40px;
+    block-size: 24px;
+    margin: 0;
+    translate: 0 -50%;
+    opacity: 0;
+    cursor: inherit;
+  }
+  .bl-toggle__track {
+    position: relative;
+    flex: none;
+    inline-size: 40px;
+    block-size: 24px;
+    background: var(--bl-surface);
+    border: 1px solid var(--bl-control-border);
+    border-radius: var(--bl-radius-pill);
+    transition:
+      background-color var(--bl-duration-fast) ease,
+      border-color var(--bl-duration-fast) ease;
+  }
+  .bl-toggle__thumb {
+    position: absolute;
+    inset-block-start: 2px;
+    inset-inline-start: 2px;
+    inline-size: 18px;
+    block-size: 18px;
+    background: var(--bl-raised);
+    border: 1px solid var(--bl-control-border);
+    border-radius: 50%;
+    box-shadow: var(--bl-shadow-thumb);
+    transition: inset-inline-start var(--bl-duration-fast) ease;
+  }
+  .bl-toggle__input:checked + .bl-toggle__track {
+    background: var(--bl-trace);
+    border-color: var(--bl-trace);
+  }
+  .bl-toggle__input:checked + .bl-toggle__track .bl-toggle__thumb {
+    inset-inline-start: calc(100% - 20px);
+    border-color: var(--bl-trace);
+  }
+  /* "On" is readable without colour: thumb position plus an inner mark. */
+  .bl-toggle__input:checked + .bl-toggle__track .bl-toggle__thumb::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    inline-size: 6px;
+    block-size: 6px;
+    background: var(--bl-trace);
+    border-radius: 50%;
+  }
+  .bl-toggle__input:focus-visible + .bl-toggle__track {
+    outline: 2px solid var(--bl-trace);
+    outline-offset: 2px;
+  }
+  .bl-toggle__label {
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+  .bl-toggle__hint {
+    flex-basis: 100%;
+    padding-inline-start: 52px;
+    font-size: var(--bl-text-small);
+    color: var(--bl-ink-2);
+    overflow-wrap: anywhere;
+  }
+  .bl-toggle__input:disabled + .bl-toggle__track {
+    opacity: 0.45;
+  }
+  .bl-toggle__control:has(> .bl-toggle__input:disabled) {
+    color: var(--bl-ink-2);
+    cursor: not-allowed;
+  }
+  @media (hover: hover) {
+    .bl-toggle__control:hover .bl-toggle__input:not(:checked, :disabled) + .bl-toggle__track {
+      border-color: var(--bl-ink-3);
+    }
+    @media (forced-colors: active) {
+      .bl-toggle__control:hover .bl-toggle__input:not(:checked, :disabled) + .bl-toggle__track {
+        border-color: CanvasText;
+      }
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bl-toggle__track,
+    .bl-toggle__thumb {
+      transition: none;
+    }
+  }
+  @media (forced-colors: active) {
+    .bl-toggle__track,
+    .bl-toggle__thumb,
+    .bl-toggle__thumb::after {
+      forced-color-adjust: none;
+    }
+    .bl-toggle__track {
+      background: Canvas;
+      border-color: CanvasText;
+    }
+    .bl-toggle__input:focus-visible + .bl-toggle__track {
+      outline-color: CanvasText;
+    }
+    .bl-toggle__thumb {
+      background: CanvasText;
+      border-color: CanvasText;
+    }
+    .bl-toggle__input:checked + .bl-toggle__track {
+      background: Highlight;
+      border-color: Highlight;
+    }
+    .bl-toggle__input:checked + .bl-toggle__track .bl-toggle__thumb {
+      background: HighlightText;
+      border-color: HighlightText;
+    }
+    .bl-toggle__input:checked + .bl-toggle__track .bl-toggle__thumb::after {
+      background: Highlight;
+    }
+    /* Disabled reads as disabled whether on or off: no Highlight fill, GrayText label. */
+    .bl-toggle__input:disabled + .bl-toggle__track {
+      background: Canvas;
+      border-color: GrayText;
+    }
+    .bl-toggle__input:disabled + .bl-toggle__track .bl-toggle__thumb {
+      background: GrayText;
+      border-color: GrayText;
+    }
+    .bl-toggle__input:disabled + .bl-toggle__track .bl-toggle__thumb::after {
+      background: Canvas;
+    }
+    .bl-toggle__control:has(> .bl-toggle__input:disabled) {
+      color: GrayText;
+    }
+  }
+}

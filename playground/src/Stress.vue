@@ -576,6 +576,25 @@
       </div>
     </section>
 
+    <section v-if="show('toggle-long')" data-case="toggle-long">
+      <h2 class="st-label">toggle-long</h2>
+      <div data-box>
+        <BlToggle
+          :model-value="true"
+          label="Automatically reconnect to Donaudampfschifffahrtsgesellschaftskapitänsmütze networks"
+          hint="https://example.com/a/really/long/unbroken/path/that/must/wrap/inside/the/box"
+        />
+      </div>
+    </section>
+
+    <section v-if="show('toggle-rtl')" data-case="toggle-rtl">
+      <h2 class="st-label">toggle-rtl</h2>
+      <div data-box dir="rtl">
+        <BlToggle :model-value="true" label="تشغيل" />
+        <BlToggle :model-value="false" label="إيقاف" />
+      </div>
+    </section>
+
     <!-- D3: page chrome; each rendered alone via ?case=<id> -->
     <template v-if="chrome">
       <div v-for="n in 12" :key="n" class="st-filler">Filler line {{ n }}</div>
@@ -621,6 +640,7 @@
     BlTabBar,
     BlPagination,
     BlTable,
+    BlToggle,
     BlTabBarItem,
     BlTelemetry,
     BlTelemetryCell

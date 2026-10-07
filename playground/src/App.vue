@@ -273,6 +273,22 @@
         />
       </div>
     </section>
+    <section id="blocks">
+      <BlSectionHead
+        eyebrow="Building blocks"
+        heading="Toggle, media, disclosure, dialog, toast"
+        ruled
+      />
+      <div class="pg-block" data-demo="toggle">
+        <BlToggle v-model="wifi" label="Wi-Fi" hint="Joins known networks automatically" />
+        <BlToggle v-model="pressedOff" label="Disabled setting" disabled />
+      </div>
+      <form class="pg-block" data-demo="toggle-reset" @submit.prevent>
+        <BlToggle v-model="autoJoin" label="Auto-join" />
+        <BlButton type="reset">Reset</BlButton>
+        <span data-demo="toggle-state" aria-hidden="true" class="bl-sr-only">{{ autoJoin }}</span>
+      </form>
+    </section>
   </main>
 
   <BlColophon :items="['© 2026 Example', 'Remote', `Rev ${version}`]" />
@@ -338,6 +354,7 @@
     BlTabBar,
     BlTabBarItem,
     BlTable,
+    BlToggle,
     BlTelemetry,
     BlTelemetryCell,
     riseDelay
@@ -347,6 +364,9 @@
   const version = pkg.version
   const filter = ref<string | null>(null)
   const sizeChoice = ref('M')
+  const wifi = ref(true)
+  const autoJoin = ref(true)
+  const pressedOff = ref(false)
   const muted = ref(false)
   const bold = ref(false)
   const ghostOn = ref(false)

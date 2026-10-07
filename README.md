@@ -125,7 +125,7 @@ dependency pre-bundling. Tailwind is optional: only if the app uses it, add
 - Compact font subsets are listed in `fonts/subset/manifest.json`.
 - `playground/src/App.vue` is the markup reference.
 
-Size budget: `dist/benchlight.min.css` stays at or under 43,008 B (42 KiB) (`wc -c dist/benchlight.min.css`,
+Size budget: `dist/benchlight.min.css` stays at or under 47,104 B (46 KiB) (`wc -c dist/benchlight.min.css`,
 `tests/bundle.test.ts`; it was 28,672 B in v0.3) and the compact font subsets under 23,552 B in total
 (`tests/fonts.test.ts`). The guard is raised in round KiB when legitimate work needs it, and every
 raise gets a CHANGELOG line.
@@ -292,6 +292,38 @@ modules and `pagination` needs `layout` (the bundle CLI warns otherwise).
   there is no `.bl-table__label`). Mark a totals cell with nothing to show `data-empty` so it drops
   out of the stacked card. Set `data-stacked` yourself, or rely on the stack-below-30em fallback.
   `.bl-table--scroll` never stacks.
+
+## BlToggle
+
+An on/off switch on a native checkbox (`role="switch"`). Full prop list is in [API.md](API.md).
+
+```vue
+<BlToggle v-model="wifi" label="Wi-Fi" hint="Joins known networks automatically" />
+```
+
+```html
+<div class="bl-toggle">
+  <label class="bl-toggle__control">
+    <input class="bl-toggle__input" type="checkbox" role="switch" aria-describedby="wifi-hint" />
+    <span class="bl-toggle__track" aria-hidden="true"><span class="bl-toggle__thumb"></span></span>
+    <span class="bl-toggle__label">Wi-Fi</span>
+  </label>
+  <span id="wifi-hint" class="bl-toggle__hint">Joins known networks automatically</span>
+</div>
+```
+
+- Props: `v-model` (boolean), `label`, `hint`, `disabled`, `name`, `value`. With `name`, the form
+  posts `name=value` only while the switch is on.
+- The hint stays out of the accessible name: it sits outside the `label` and is wired up with
+  `aria-describedby`. A consumer `aria-describedby` is merged with the hint id.
+- Controlled only: `:model-value` without an `update:modelValue` listener is just an initial value.
+- A native form reset restores the value the toggle had when it mounted and re-emits it as
+  `update:modelValue`.
+- Not for use inside BlField; the toggle carries its own label and hint.
+- Attrs split: `class` and `style` go on the root `div.bl-toggle`; every other attribute (`id`,
+  `data-*`, `aria-*`) goes on the `input`.
+- The thumb moves with a logical inset, so RTL flips it. "On" is shown by position and an inner mark,
+  not colour alone.
 
 ## CSS hooks
 

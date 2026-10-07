@@ -47,6 +47,7 @@
 - `dist/modules/table.min.css`
 - `dist/modules/telemetry.min.css`
 - `dist/modules/tints.min.css`
+- `dist/modules/toggle.min.css`
 - `dist/modules/tokens.min.css`
 - `dist/modules/type.min.css`
 - `dist/tokens.js`
@@ -87,6 +88,7 @@
 - `BlTable`
 - `BlTelemetry`
 - `BlTelemetryCell`
+- `BlToggle`
 - `FIELD_CONTEXT`
 - `ansiToSegments`
 - `riseDelay`
@@ -518,6 +520,21 @@ Slots: `default`
 Events: none
 Exposed: none
 
+### BlToggle
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `disabled` | `boolean \| undefined` | no |  |
+| `hint` | `string \| undefined` | no |  |
+| `label` | `string` | yes |  |
+| `modelValue` | `boolean` | yes |  |
+| `name` | `string \| undefined` | no |  |
+| `value` | `string \| undefined` | no |  |
+
+Slots: none
+Events: `update:modelValue`
+Exposed: none
+
 ## CSS classes
 - `bl-annotation`
 - `bl-ansi-30`
@@ -676,6 +693,13 @@ Exposed: none
 - `bl-tint-danger`
 - `bl-tint-phosphor`
 - `bl-tint-trace`
+- `bl-toggle`
+- `bl-toggle__control`
+- `bl-toggle__hint`
+- `bl-toggle__input`
+- `bl-toggle__label`
+- `bl-toggle__thumb`
+- `bl-toggle__track`
 
 ## CSS hooks (custom properties a consumer may set)
 - `--bl-chevron-mask`

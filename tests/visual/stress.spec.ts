@@ -515,6 +515,27 @@ const cases: Case[] = [
   { id: 'readout-long', checks: generic() },
   { id: 'button-long', checks: generic() },
   { id: 'meter-long', checks: generic() },
+  { id: 'toggle-long', checks: generic() },
+  {
+    id: 'toggle-rtl',
+    checks: [
+      ...generic(),
+      {
+        name: 'thumb-follows-direction',
+        variants: only('w390'),
+        probe: (page) =>
+          page.evaluate(() => {
+            const [on, off] = [...document.querySelectorAll<HTMLElement>('.bl-toggle__thumb')]
+            const track = on!.parentElement!.getBoundingClientRect()
+            // RTL: checked thumb sits at the left end, unchecked at the right end.
+            const onLeft = on!.getBoundingClientRect().left - track.left
+            const offTrack = off!.parentElement!.getBoundingClientRect()
+            const offRight = offTrack.right - off!.getBoundingClientRect().right
+            return onLeft < 4 && offRight < 4 ? null : `on ${onLeft}px, off ${offRight}px`
+          })
+      }
+    ]
+  },
   {
     id: 'button-icon-toolbar',
     checks: [{ name: 'no-page-overflow', variants: ALL, probe: noPageOverflow }, iconButtonsStay44]
