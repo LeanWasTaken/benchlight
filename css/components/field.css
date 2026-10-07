@@ -35,9 +35,11 @@
       font-size: 1rem;
     }
   }
-  .bl-input:hover,
-  .bl-select:hover {
-    border-color: var(--bl-ink-3);
+  @media (hover: hover) {
+    .bl-input:hover,
+    .bl-select:hover {
+      border-color: var(--bl-ink-3);
+    }
   }
   .bl-input:focus-visible,
   .bl-select:focus-visible {
