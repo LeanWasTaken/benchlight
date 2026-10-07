@@ -63,7 +63,7 @@ export default defineNuxtConfig({
 
 The module adds the fonts and component CSS, the no-flash appearance script, auto-imported `Bl*`
 components and composables (`useAppearance`, `useScrollLifted`, `useFollowScroll`, `useReducedMotion`, `useMarquee`,
-`riseDelay`, `ansiToSegments`). `benchlight: { fonts: false }` skips the bundled fonts. `BlSiteBar`
+`riseDelay`, `ansiToSegments`, `useToast`). `benchlight: { fonts: false }` skips the bundled fonts. `BlSiteBar`
 wraps its nav in a `<nav>` landmark labelled by `navLabel` (default `Primary`). The Tailwind lines are
 optional: skip them if the app does not use Tailwind.
 
@@ -125,7 +125,7 @@ dependency pre-bundling. Tailwind is optional: only if the app uses it, add
 - Compact font subsets are listed in `fonts/subset/manifest.json`.
 - `playground/src/App.vue` is the markup reference.
 
-Size budget: `dist/benchlight.min.css` stays at or under 52,224 B (51 KiB) (`wc -c dist/benchlight.min.css`,
+Size budget: `dist/benchlight.min.css` stays at or under 53,248 B (52 KiB) (`wc -c dist/benchlight.min.css`,
 `tests/bundle.test.ts`; it was 28,672 B in v0.3) and the compact font subsets under 23,552 B in total
 (`tests/fonts.test.ts`). The guard is raised in round KiB when legitimate work needs it, and every
 raise gets a CHANGELOG line.
@@ -447,6 +447,85 @@ bundle CLI warns otherwise).
   ids and add `closedby="none"` for a non-dismissible dialog. Backdrop-click closing, gutter
   compensation, focus-restore hardening and in-dialog toasts are Vue-only.
 
+## BlToast
+
+Short, queued notifications: `useToast()` adds them and one `<BlToaster />` shows them. `toast`
+needs the `btn` module for its buttons and `layout` for the `.bl-sr-only` live regions (the bundle
+CLI warns otherwise). Mount the toaster once, as the last element of the app root:
+
+```vue
+<template>
+  <NuxtPage />
+  <BlToaster />
+</template>
+```
+
+```ts
+const { toast, dismiss, clear } = useToast()
+toast('Saved')
+toast({ message: 'Upload failed', tone: 'danger' })
+const id = toast({ message: 'Item deleted', action: { label: 'Undo', onClick: restore } })
+```
+
+```html
+<section class="bl-toaster" aria-label="Notifications">
+  <ol class="bl-toaster__list">
+    <li class="bl-toast bl-toast--success">
+      <span class="bl-toast__mark" aria-hidden="true"></span>
+      <p class="bl-toast__message" id="m">Saved</p>
+      <button class="bl-btn bl-btn--ghost bl-toast__action">Undo</button>
+      <button
+        class="bl-btn bl-btn--ghost bl-btn--icon bl-toast__dismiss"
+        aria-label="Dismiss"
+        aria-describedby="m"
+      >
+        …
+      </button>
+    </li>
+  </ol>
+  <div class="bl-sr-only" role="status"></div>
+  <div class="bl-sr-only" role="alert"></div>
+</section>
+```
+
+- `toast(input)` takes a string or `{ message, tone, action, duration, id }` and returns the id;
+  `dismiss(id)` is a no-op for unknown ids; `clear()` removes everything.
+- `tone` is `'neutral'` (default, no mark), `'success'` (a circle) or `'danger'` (a diamond plus
+  an inline-start edge), so tones never rely on colour alone.
+- `duration` is in ms: 5000 by default, and `0` (stays until dismissed) when there is an `action`.
+  Give an action toast a duration only if the action is also available elsewhere, and never make
+  a toast the only place important information appears (WCAG 2.2.1). A click on the action runs
+  `onClick`, then dismisses the toast, even if `onClick` throws (the error still surfaces).
+- Re-toasting an existing `id` replaces it in place: a visible toast keeps its slot and its timer
+  restarts; a queued one keeps its queue position.
+- BlToaster props: `max` (default 3 visible; the rest queue first in, first out) and `labels`
+  (`{ region, dismiss, actionHint }`, defaults `'Notifications'`, `'Dismiss'` and
+  `` (label) => `${label} available` ``).
+- Timers pause while a mouse pointer is over the toaster, while focus is inside it and while the
+  tab is hidden, then resume with the time left. Toasts never take focus; when a focused toast
+  goes, focus moves to the next toast's dismiss button, else back to where it came from, else it
+  is blurred. A BlDialog opened from a toast action returns focus there too when it closes, since
+  the action's toast is gone by then.
+- Announcements: each toast is announced when it becomes visible (so speech follows the visual
+  order), danger in the `role="alert"` region and the rest in `role="status"`, with
+  `", Undo available"` appended for an action. Repeats are announced again; an id replace is
+  announced only if the message changed.
+- Toasts inside open dialogs: a modal makes everything outside it inert, so while a BlDialog is
+  open the toaster moves into the topmost one (above its backdrop, reachable and announced) and
+  moves back when it closes. Visible toasts and timers carry across. Below 40em it sits at the
+  top of the screen there, clear of the sheet's footer actions. A toast fired as a dialog closes
+  is announced where the toaster lands next.
+- The store is one per JS realm, shared by every Vue app on the page, so mount one toaster per
+  page; a development warning fires for a second.
+- SSR: `toast()` does nothing on the server and returns `''`. The toaster renders its section and
+  both live regions empty, and the list only after mount, so a toast fired before hydration
+  cannot cause a mismatch.
+- Nuxt UI also auto-imports a `useToast`. In an app that uses both, import Benchlight's
+  explicitly where you need it: `import { useToast } from 'benchlight/vue'`.
+- CSS-only: the classes work on the markup above; timers, queueing and announcements are yours.
+  A toaster outside an open modal dialog is inert, so place it inside the dialog while one is
+  open.
+
 ## CSS hooks
 
 `--bl-scroll-offset-top` and `--bl-scroll-offset-bottom` keep focused elements clear of fixed chrome
@@ -454,6 +533,10 @@ such as the sticky site bar and the mobile tab bar.
 
 `--bl-dialog-width` sets the width of a centred BlDialog (default `32rem`, never wider than the
 viewport less 32px). `--bl-dialog-gutter` is internal: BlDialog sets it on `html` while open.
+
+`--bl-media-size` sets the size of a BlMedia figure (default `64px`).
+
+`--bl-chevron-mask` replaces the chevron shape of both the select and the disclosure.
 
 ## API contract
 

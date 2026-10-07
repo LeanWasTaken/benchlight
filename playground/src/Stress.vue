@@ -629,6 +629,39 @@
       </div>
     </section>
 
+    <section v-if="show('toast-six')" data-case="toast-six">
+      <h2 class="st-label">toast-six</h2>
+    </section>
+
+    <!-- The dialog/toast seam: same-tick close + toast, a sheet's footer, an action that opens a dialog. -->
+    <section v-if="show('dialog-toast')" data-case="dialog-toast">
+      <h2 class="st-label">dialog-toast</h2>
+      <div data-box>
+        <BlButton variant="secondary" @click="sheetOpen = true">Edit item</BlButton>
+        <BlButton
+          variant="secondary"
+          @click="
+            toast({
+              message: 'Update ready',
+              action: { label: 'Details', onClick: () => (detailsOpen = true) }
+            })
+          "
+        >
+          Notify
+        </BlButton>
+      </div>
+      <BlDialog v-model:open="sheetOpen" title="Edit item">
+        <BlButton variant="ghost" @click="toast({ message: 'Copied', duration: 0 })">Copy</BlButton>
+        <template #footer>
+          <BlButton variant="secondary" @click="sheetOpen = false">Cancel</BlButton>
+          <BlButton @click="save">Save</BlButton>
+        </template>
+      </BlDialog>
+      <BlDialog v-model:open="detailsOpen" title="Update details">
+        <p>Version notes.</p>
+      </BlDialog>
+    </section>
+
     <!-- D3: page chrome; each rendered alone via ?case=<id> -->
     <template v-if="chrome">
       <div v-for="n in 12" :key="n" class="st-filler">Filler line {{ n }}</div>
@@ -643,6 +676,7 @@
       {{ t }}
     </BlTabBarItem>
   </BlTabBar>
+  <BlToaster v-if="show('toast-six') || show('dialog-toast')" />
 </template>
 
 <script setup lang="ts">
@@ -680,8 +714,11 @@
     BlDisclosure,
     BlTabBarItem,
     BlTelemetry,
-    BlTelemetryCell
+    BlTelemetryCell,
+    BlToaster,
+    useToast
   } from '../../vue'
+  import { onMounted, ref } from 'vue'
 
   import type { TableColumn } from '../../vue'
 
@@ -801,6 +838,22 @@
   const only = new URLSearchParams(location.search).get('case')
   const chrome = only ? (chromeDefs[only] ?? null) : null
   const show = (id: string) => !chrome && (!only || only === id)
+
+  // Six persistent toasts; the long ones come first so they are among the visible three.
+  const { toast } = useToast()
+  const sheetOpen = ref(false)
+  const detailsOpen = ref(false)
+  function save(): void {
+    sheetOpen.value = false
+    toast('Saved')
+  }
+
+  onMounted(() => {
+    if (!show('toast-six')) return
+    toast({ message: `https://example.com/${'x'.repeat(130)}`, duration: 0 })
+    toast({ message: 'Item deleted', action: { label: 'Undo', onClick: () => {} }, duration: 0 })
+    for (let n = 3; n <= 6; n++) toast({ message: `Toast ${n}`, duration: 0 })
+  })
 </script>
 
 <style>

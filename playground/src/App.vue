@@ -324,6 +324,7 @@
           description="Names show in lists and exports."
         >
           <BlField label="Name"><BlInput v-model="itemName" /></BlField>
+          <BlButton variant="ghost" @click="toast('Copied')">Copy name</BlButton>
           <template #footer>
             <BlButton variant="secondary" @click="dialogOpen = false">Cancel</BlButton>
             <BlButton @click="dialogOpen = false">Save</BlButton>
@@ -336,6 +337,21 @@
             <BlButton variant="danger" @click="lockedOpen = false">Delete</BlButton>
           </template>
         </BlDialog>
+      </div>
+      <div class="pg-block pg-row" data-demo="toast">
+        <BlButton variant="secondary" @click="toast('Saved')">Toast</BlButton>
+        <BlButton variant="secondary" @click="toast({ message: 'Connected', tone: 'success' })">
+          Success
+        </BlButton>
+        <BlButton variant="secondary" @click="toast({ message: 'Upload failed', tone: 'danger' })">
+          Danger
+        </BlButton>
+        <BlButton
+          variant="secondary"
+          @click="toast({ message: 'Item deleted', action: { label: 'Undo', onClick: () => {} } })"
+        >
+          With action
+        </BlButton>
       </div>
     </section>
   </main>
@@ -367,6 +383,7 @@
       Lists
     </BlTabBarItem>
   </BlTabBar>
+  <BlToaster />
 </template>
 
 <script setup lang="ts">
@@ -409,7 +426,9 @@
     BlToggle,
     BlTelemetry,
     BlTelemetryCell,
-    riseDelay
+    BlToaster,
+    riseDelay,
+    useToast
   } from '../../vue'
   import type { TableColumn } from '../../vue'
 
@@ -423,6 +442,7 @@
   const dialogOpen = ref(false)
   const lockedOpen = ref(false)
   const itemName = ref('Item 1')
+  const { toast } = useToast()
   const pressedOff = ref(false)
   const muted = ref(false)
   const bold = ref(false)

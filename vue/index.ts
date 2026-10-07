@@ -35,6 +35,7 @@ export { default as BlToggle } from './components/BlToggle.vue'
 export { default as BlMedia } from './components/BlMedia.vue'
 export { default as BlDisclosure } from './components/BlDisclosure.vue'
 export { default as BlDialog } from './components/BlDialog.vue'
+export { default as BlToaster } from './components/BlToaster.vue'
 
 export {
   APPEARANCE_ATTRIBUTE,
@@ -50,6 +51,7 @@ export { useFollowScroll } from './composables/useFollowScroll'
 export type { FollowScrollOptions } from './composables/useFollowScroll'
 export { riseDelay } from './composables/riseDelay'
 export type { RiseDelayOptions } from './composables/riseDelay'
+export { useToast } from './composables/useToast'
 export { ansiToSegments } from './utils/ansi'
 export type { AnsiSegment } from './utils/ansi'
 export { FIELD_CONTEXT } from './types'

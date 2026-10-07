@@ -14,10 +14,12 @@
 - BlDisclosure: a collapsible section on native `<details>`, with exclusive groups via `name`.
 - BlDialog: a modal on native `<dialog>`, centred from 40em and a bottom sheet below, with close
   reasons, focus restore and a scroll lock.
+- BlToaster and `useToast()`: queued toasts with tones, actions, pause on hover or focus,
+  screen-reader announcements, and in-dialog rendering while a modal is open.
 
 ### Changed
 
-- The full-bundle size guard is raised from 43,008 B (42 KiB) to 52,224 B (51 KiB) for the v0.6
+- The full-bundle size guard is raised from 43,008 B (42 KiB) to 53,248 B (52 KiB) for the v0.6
   components.
 - The full-bundle size guard is raised from 38 KiB to 42 KiB for the button, meter and select
   chevron additions.

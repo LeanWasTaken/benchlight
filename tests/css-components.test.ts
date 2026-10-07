@@ -8,6 +8,21 @@ const read = (name: string) =>
 
 // Selectors each component must define; states are ARIA or native attributes.
 const REQUIRED: Record<string, string[]> = {
+  toast: [
+    '.bl-toaster',
+    '.bl-toaster__list',
+    '.bl-toast',
+    '.bl-toast--success',
+    '.bl-toast--danger',
+    '.bl-toast__mark',
+    '.bl-dialog__toasts > .bl-toaster',
+    '.bl-toast-leave-active',
+    '.bl-toast__message',
+    '.bl-toast__action',
+    '.bl-toast__dismiss',
+    '.bl-toast-enter-from',
+    '.bl-toast-move'
+  ],
   dialog: [
     '.bl-dialog',
     '.bl-dialog[open]',
@@ -777,5 +792,46 @@ describe('dialog', () => {
     expect(ruleBody(css, 'html:has(dialog.bl-dialog[open]:modal)')['padding-inline-end']).toBe(
       'var(--bl-dialog-gutter, 0px)'
     )
+  })
+})
+
+describe('toast', () => {
+  const css = read('toast')
+  it('clears the bottom scroll offset and safe area, above bars and below the skip link', () => {
+    const toaster = ruleBody(css, '.bl-toaster')
+    expect(toaster['inset-block-end']).toContain(
+      'max(var(--bl-scroll-offset-bottom, 0px), env(safe-area-inset-bottom, 0px))'
+    )
+    expect(toaster['z-index']).toBe('45')
+    expect(toaster['pointer-events']).toBe('none')
+    expect(ruleBody(css, '.bl-toast')['pointer-events']).toBe('auto')
+  })
+  it('anchors a toaster inside a bottom sheet to the top, clear of its footer', () => {
+    const sheet = ruleBody(css, '.bl-dialog__toasts > .bl-toaster', ['@media (max-width: 39.99em)'])
+    expect(sheet['inset-block']).toBe('max(16px, env(safe-area-inset-top)) auto')
+  })
+  it('keeps toasts still when a dialog hides the scrollbar', () => {
+    expect(
+      ruleBody(css, '.bl-toaster', ['@media (min-width: 40em)'])['inset-inline-end']
+    ).toContain('+ var(--bl-dialog-gutter, 0px)')
+  })
+  it('takes a leaving toast out of flow so the rest move instead of snapping', () => {
+    expect(ruleBody(css, '.bl-toaster__list').position).toBe('relative')
+    expect(ruleBody(css, '.bl-toast-leave-active').position).toBe('absolute')
+  })
+  it('paints the phosphor mark only for success', () => {
+    expect(ruleBody(css, '.bl-toast__mark').background).not.toContain('phosphor')
+    expect(ruleBody(css, '.bl-toast--success .bl-toast__mark').background).toBe(
+      'var(--bl-phosphor)'
+    )
+    const forced = ['@media (forced-colors: active)']
+    expect(ruleBody(css, '.bl-toast--success .bl-toast__mark', forced).background).toBe(
+      'CanvasText'
+    )
+  })
+  it('drops movement under reduced motion', () => {
+    const reduce = ['@media (prefers-reduced-motion: reduce)']
+    expect(ruleBody(css, '.bl-toast-enter-from', reduce).translate).toBe('none')
+    expect(ruleBody(css, '.bl-toast-leave-to', reduce).translate).toBe('none')
   })
 })

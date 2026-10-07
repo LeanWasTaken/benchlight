@@ -35,7 +35,8 @@ export const MODULES = {
   toggle: 'css/components/toggle.css',
   media: 'css/components/media.css',
   disclosure: 'css/components/disclosure.css',
-  dialog: 'css/components/dialog.css'
+  dialog: 'css/components/dialog.css',
+  toast: 'css/components/toast.css'
 } as const
 
 export type ModuleName = keyof typeof MODULES
@@ -45,5 +46,6 @@ export type ModuleName = keyof typeof MODULES
 export const REQUIRES: Partial<Record<ModuleName, readonly ModuleName[]>> = {
   dialog: ['btn'],
   pagination: ['layout'],
-  table: ['layout', 'pagination']
+  table: ['layout', 'pagination'],
+  toast: ['btn', 'layout']
 }
