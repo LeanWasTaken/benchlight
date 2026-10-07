@@ -9,7 +9,7 @@ classes.
 ## Install
 
 ```json
-"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.5.0"
+"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.6.0"
 ```
 
 The repo is private and the URL uses SSH on purpose: bun turns GitHub https URLs into API tarball
@@ -63,7 +63,7 @@ export default defineNuxtConfig({
 
 The module adds the fonts and component CSS, the no-flash appearance script, auto-imported `Bl*`
 components and composables (`useAppearance`, `useScrollLifted`, `useFollowScroll`, `useReducedMotion`, `useMarquee`,
-`riseDelay`, `ansiToSegments`). `benchlight: { fonts: false }` skips the bundled fonts. `BlSiteBar`
+`riseDelay`, `ansiToSegments`, `useToast`). `benchlight: { fonts: false }` skips the bundled fonts. `BlSiteBar`
 wraps its nav in a `<nav>` landmark labelled by `navLabel` (default `Primary`). The Tailwind lines are
 optional: skip them if the app does not use Tailwind.
 
@@ -125,7 +125,7 @@ dependency pre-bundling. Tailwind is optional: only if the app uses it, add
 - Compact font subsets are listed in `fonts/subset/manifest.json`.
 - `playground/src/App.vue` is the markup reference.
 
-Size budget: `dist/benchlight.min.css` stays at or under 32,768 B (`wc -c dist/benchlight.min.css`,
+Size budget: `dist/benchlight.min.css` stays at or under 53,248 B (52 KiB) (`wc -c dist/benchlight.min.css`,
 `tests/bundle.test.ts`; it was 28,672 B in v0.3) and the compact font subsets under 23,552 B in total
 (`tests/fonts.test.ts`). The guard is raised in round KiB when legitimate work needs it, and every
 raise gets a CHANGELOG line.
@@ -133,6 +133,8 @@ raise gets a CHANGELOG line.
 ## Conventions
 
 - Everything global is prefixed: `.bl-*`, `--bl-*`, `bl-*` keyframes, `Bl*` components.
+- `base` uses `html::after` for the 1px page scrollbar edge; reset it with
+  `html::after { content: none }` if you need the pseudo-element.
 - Library CSS lives in `@layer base` / `@layer components`; utilities and your own CSS win without
   `!important`.
 - States are ARIA or native attributes (`aria-current`, `aria-pressed`, `:checked`, `:disabled`);
@@ -206,7 +208,20 @@ raise gets a CHANGELOG line.
   it with `v-if` may not be announced.
 - **BlSiteBar** `lift` is reactive. **BlPrevNext** renders nothing without neighbours. `LinkTo`
   accepts any object, so typed router locations pass.
-- **BlMeter:** `:value="null"` renders an indeterminate meter.
+- **BlButton:** fill only the `icon` slot for an icon-only button (`bl-btn--icon`, 44px square;
+  `pill` makes it a circle) and name it with `label` (sets `aria-label`; it is for icon-only buttons
+  and replaces visible text as the accessible name, so a dev warning flags it on a button with
+  text). `pressed` makes a toggle button (`aria-pressed`, all variants; ignored on links) with an
+  inset ring as well as a colour change. `variant="ghost"` is transparent until hovered. The dev
+  warnings run after mount and again whenever the props, attributes or slot content change. With raw
+  CSS, add `bl-btn--icon`, `bl-btn--ghost` or `aria-pressed` yourself.
+- **BlMeter:** `:value="null"` renders an indeterminate meter. `valueText` sets `aria-valuetext`
+  ("2.1 of 4 GB"). `showLabel` and `showValue` render the label and value visibly (the value is
+  `valueText` or a percentage, hidden while indeterminate and `aria-hidden`); the bar is then
+  labelled by the visible label. CSS-only: wrap the bar,
+  `<div class="bl-meter-field"><div class="bl-meter-field__head"><span class="bl-meter-field__label">…</span><span class="bl-meter-field__value">…</span></div><div class="bl-meter" role="progressbar" …></div></div>`;
+  the wrapper owns the block margin. `class` and `style` go on the outer element (the wrapper when
+  wrapped, otherwise the bar); every other attribute goes on the progressbar.
 - **BlTelemetry:** `--bl-telemetry-columns` now applies at every width (it used to apply only from
   640px). The default is auto-fit with 12rem cells; with no custom columns, six cells lay out 3x2 when
   there is room.
@@ -220,6 +235,12 @@ raise gets a CHANGELOG line.
   Under reduced motion, overflowing text wraps instead.
 - **BlSegmented:** wraps, with a 16px row gap.
 - **Inputs and selects:** 16px on coarse pointers, so iOS does not zoom on focus.
+- **BlSelect / `.bl-select-wrap`:** BlSelect renders `<span class="bl-select-wrap"><select
+class="bl-select">`; `class` and `style` go on the wrapper (so `$el` is the wrapper: use `$el.querySelector('select')`,
+  and style the control with `.x > .bl-select` or `:deep(.bl-select)`), other attributes and listeners on the select. In
+  CSS-only markup the same wrapper draws a themed chevron (`--bl-chevron-mask`, `--bl-ink-2`) and
+  hides the native arrow for a single-line select; a bare `.bl-select` keeps the native arrow, and
+  `multiple` or `size` selects keep theirs inside the wrapper.
 - **BlProse:** the measure is `min(720px, 68ch)`; images, video and iframes are capped to the column;
   tables scroll horizontally (`display: block`, so add `role="table"` if assistive tech should keep the
   table semantics); display sizes are smaller on phones (`xl` is 40px at 320px wide).
@@ -272,10 +293,250 @@ modules and `pagination` needs `layout` (the bundle CLI warns otherwise).
   out of the stacked card. Set `data-stacked` yourself, or rely on the stack-below-30em fallback.
   `.bl-table--scroll` never stacks.
 
+## BlToggle
+
+An on/off switch on a native checkbox (`role="switch"`). Full prop list is in [API.md](API.md).
+
+```vue
+<BlToggle v-model="wifi" label="Wi-Fi" hint="Joins known networks automatically" />
+```
+
+```html
+<div class="bl-toggle">
+  <label class="bl-toggle__control">
+    <input class="bl-toggle__input" type="checkbox" role="switch" aria-describedby="wifi-hint" />
+    <span class="bl-toggle__track" aria-hidden="true"><span class="bl-toggle__thumb"></span></span>
+    <span class="bl-toggle__label">Wi-Fi</span>
+  </label>
+  <span id="wifi-hint" class="bl-toggle__hint">Joins known networks automatically</span>
+</div>
+```
+
+- Props: `v-model` (boolean), `label`, `hint`, `disabled`, `name`, `value`. With `name`, the form
+  posts `name=value` only while the switch is on.
+- The hint stays out of the accessible name: it sits outside the `label` and is wired up with
+  `aria-describedby`. A consumer `aria-describedby` is merged with the hint id.
+- Controlled only: `:model-value` without an `update:modelValue` listener is just an initial value.
+- A native form reset restores the value the toggle had when it mounted and re-emits it as
+  `update:modelValue`.
+- Not for use inside BlField; the toggle carries its own label and hint.
+- Attrs split: `class` and `style` go on the root `div.bl-toggle`; every other attribute (`id`,
+  `data-*`, `aria-*`) goes on the `input`.
+- The thumb moves with a logical inset, so RTL flips it. "On" is shown by position and an inner mark,
+  not colour alone.
+
+## BlMedia
+
+A figure beside a body, with an optional aside. Layout only: it adds no semantics, so give the
+figure its own `alt`/`aria-label` and choose `as` to fit the surrounding list or article. Full prop
+list is in [API.md](API.md).
+
+```vue
+<BlMedia as="li" align="center">
+  <template #figure><img src="/thumb.png" alt="" /></template>
+  <strong>Project title</strong>
+  <template #aside>v2</template>
+</BlMedia>
+```
+
+```html
+<li class="bl-media bl-media--center">
+  <div class="bl-media__figure"><img src="/thumb.png" alt="" /></div>
+  <div class="bl-media__body"><strong>Project title</strong></div>
+  <div class="bl-media__aside">v2</div>
+</li>
+```
+
+- Slots: `figure`, default (the body) and `aside`. The `figure` and `aside` wrappers are omitted when
+  their slot renders nothing, including `v-if` placeholders and whitespace.
+- Props: `as` (`div`, `li` or `article`; default `div`) and `align` (`start`, the default, or
+  `center`, which adds `.bl-media--center`).
+- `--bl-media-size` sets the figure's `img`, `video` and `svg` size (default 64px).
+- Wrapping rule: the body asks for 12rem beside the figure and wraps below it when it cannot get
+  that, with no measuring. Long unbroken text breaks inside the body.
+
+## BlDisclosure
+
+A collapsible section on native `<details>`. Full prop list is in [API.md](API.md).
+
+```vue
+<BlDisclosure v-model:open="faqA" summary="What does this do?" name="faq">
+  <p>It shows one answer at a time.</p>
+</BlDisclosure>
+```
+
+```html
+<details class="bl-disclosure" name="faq" open>
+  <summary class="bl-disclosure__summary">
+    <span class="bl-disclosure__title">What does this do?</span>
+    <span class="bl-disclosure__chevron" aria-hidden="true"></span>
+  </summary>
+  <div class="bl-disclosure__body"><p>It shows one answer at a time.</p></div>
+</details>
+```
+
+- Props: `summary` (or the `summary` slot for rich content), `open` and `name`; emits `update:open`.
+- `name` groups disclosures so opening one closes the others (Chrome 120+, Safari 17.2+, Firefox
+  130+; older browsers open them independently). The browser-closed sibling also emits
+  `update:open(false)`, so each `v-model` stays in step.
+- `open` without `v-model` is the initial state only.
+- The summary is not a heading; wrap the disclosure if you need one.
+- The chevron reuses `--bl-chevron-mask`.
+
+## BlDialog
+
+A modal on native `<dialog>` and `showModal()`: a centred box from 40em up, a bottom sheet below.
+Full prop list is in [API.md](API.md). `dialog` needs the `btn` module for its close button (the
+bundle CLI warns otherwise).
+
+```vue
+<BlDialog v-model:open="renameOpen" title="Rename item" description="Names show in lists.">
+  <BlField label="Name"><BlInput v-model="name" autofocus /></BlField>
+  <template #footer>
+    <BlButton variant="secondary" @click="renameOpen = false">Cancel</BlButton>
+    <BlButton @click="save">Save</BlButton>
+  </template>
+</BlDialog>
+```
+
+```html
+<dialog class="bl-dialog" aria-labelledby="t" aria-describedby="d">
+  <div class="bl-dialog__panel">
+    <div class="bl-dialog__head">
+      <h2 class="bl-dialog__title" id="t">Rename item</h2>
+      <button class="bl-btn bl-btn--ghost bl-btn--icon bl-dialog__close" aria-label="Close">
+        …
+      </button>
+    </div>
+    <p class="bl-dialog__description" id="d">Names show in lists.</p>
+    <div class="bl-dialog__body">…</div>
+    <div class="bl-dialog__foot">…</div>
+  </div>
+</dialog>
+```
+
+- Props: `open` (`v-model:open`), `title`, `description`, `dismissible` (default `true`) and
+  `labels` (`{ close }`, default `'Close'`). Slots: default (the body, which scrolls) and `footer`.
+- Emits `update:open(false)` and `close({ reason, returnValue })` exactly once per close. `reason`
+  is `'button'` (the ×), `'backdrop'`, `'escape'` (Esc, the back gesture, `requestClose()` or a
+  `request-close` invoker, which all fire `cancel`), `'program'` (the parent set `open` to false;
+  no `update:open` echo) or `'native'` (`<form method="dialog">`, a `close` invoker command).
+  `returnValue` is the string given to `close()`, or `''`.
+- A backdrop click counts only when the press also started on the backdrop, so a drag from inside
+  the panel does not close.
+- `dismissible: false` drops the ×, ignores backdrop clicks and renders `closedby="none"`, which
+  blocks Esc and the Android back gesture in Chrome 134+ and Firefox 141+; `cancel` is also
+  prevented for Safari. Chromium before 134 may still close on a repeated Esc or back gesture
+  (its CloseWatcher anti-abuse rule); the close is then reported as `'escape'` or `'native'`
+  and `v-model` stays in step. In development a warning fires when the footer is empty, since
+  nothing could close the dialog.
+- Focus: the browser focuses the first focusable element, which is the × in a dismissible dialog.
+  Put `autofocus` on the least destructive action or on the first field. On close, focus returns
+  to the opener unless a `@close` handler moved it elsewhere; unmounting an open dialog closes
+  it quietly (no emits) and restores focus too.
+- Scroll lock: `html:has(dialog.bl-dialog[open]:modal)` hides the `html` overflow; the component
+  measures the scrollbar it removes into `--bl-dialog-gutter` so the page does not shift. An app
+  that scrolls `body` instead of `html` is not locked. CSS-only users get no compensation; opt
+  in with `html { scrollbar-gutter: stable }`.
+- Below 40em the dialog is a bottom sheet clear of the safe areas. `dvh` does not shrink for the
+  iOS keyboard, so a field near the bottom of a sheet can sit behind it.
+- Known limitation: setting `open` to false and back to true within one task (before the
+  browser's async `close` event) leaves the dialog closed; the late `close` then emits
+  `update:open(false)`, so state stays consistent and the reopen is dropped.
+- CSS-only: the classes work on any `<dialog>`. Call `showModal()`/`close()` yourself, wire the
+  ids and add `closedby="none"` for a non-dismissible dialog. Backdrop-click closing, gutter
+  compensation, focus-restore hardening and in-dialog toasts are Vue-only.
+
+## BlToast
+
+Short, queued notifications: `useToast()` adds them and one `<BlToaster />` shows them. `toast`
+needs the `btn` module for its buttons and `layout` for the `.bl-sr-only` live regions (the bundle
+CLI warns otherwise). Mount the toaster once, as the last element of the app root:
+
+```vue
+<template>
+  <NuxtPage />
+  <BlToaster />
+</template>
+```
+
+```ts
+const { toast, dismiss, clear } = useToast()
+toast('Saved')
+toast({ message: 'Upload failed', tone: 'danger' })
+const id = toast({ message: 'Item deleted', action: { label: 'Undo', onClick: restore } })
+```
+
+```html
+<section class="bl-toaster" aria-label="Notifications">
+  <ol class="bl-toaster__list">
+    <li class="bl-toast bl-toast--success">
+      <span class="bl-toast__mark" aria-hidden="true"></span>
+      <p class="bl-toast__message" id="m">Saved</p>
+      <button class="bl-btn bl-btn--ghost bl-toast__action">Undo</button>
+      <button
+        class="bl-btn bl-btn--ghost bl-btn--icon bl-toast__dismiss"
+        aria-label="Dismiss"
+        aria-describedby="m"
+      >
+        …
+      </button>
+    </li>
+  </ol>
+  <div class="bl-sr-only" role="status"></div>
+  <div class="bl-sr-only" role="alert"></div>
+</section>
+```
+
+- `toast(input)` takes a string or `{ message, tone, action, duration, id }` and returns the id;
+  `dismiss(id)` is a no-op for unknown ids; `clear()` removes everything.
+- `tone` is `'neutral'` (default, no mark), `'success'` (a circle) or `'danger'` (a diamond plus
+  an inline-start edge), so tones never rely on colour alone.
+- `duration` is in ms: 5000 by default, and `0` (stays until dismissed) when there is an `action`.
+  Give an action toast a duration only if the action is also available elsewhere, and never make
+  a toast the only place important information appears (WCAG 2.2.1). A click on the action runs
+  `onClick`, then dismisses the toast, even if `onClick` throws (the error still surfaces).
+- Re-toasting an existing `id` replaces it in place: a visible toast keeps its slot and its timer
+  restarts; a queued one keeps its queue position.
+- BlToaster props: `max` (default 3 visible; the rest queue first in, first out) and `labels`
+  (`{ region, dismiss, actionHint }`, defaults `'Notifications'`, `'Dismiss'` and
+  `` (label) => `${label} available` ``).
+- Timers pause while a mouse pointer is over the toaster, while focus is inside it and while the
+  tab is hidden, then resume with the time left. Toasts never take focus; when a focused toast
+  goes, focus moves to the next toast's dismiss button, else back to where it came from, else it
+  is blurred. A BlDialog opened from a toast action returns focus there too when it closes, since
+  the action's toast is gone by then.
+- Announcements: each toast is announced when it becomes visible (so speech follows the visual
+  order), danger in the `role="alert"` region and the rest in `role="status"`, with
+  `", Undo available"` appended for an action. Repeats are announced again; an id replace is
+  announced only if the message changed.
+- Toasts inside open dialogs: a modal makes everything outside it inert, so while a BlDialog is
+  open the toaster moves into the topmost one (above its backdrop, reachable and announced) and
+  moves back when it closes. Visible toasts and timers carry across. Below 40em it sits at the
+  top of the screen there, clear of the sheet's footer actions. A toast fired as a dialog closes
+  is announced where the toaster lands next.
+- The store is one per JS realm, shared by every Vue app on the page, so mount one toaster per
+  page; a development warning fires for a second.
+- SSR: `toast()` does nothing on the server and returns `''`. The toaster renders its section and
+  both live regions empty, and the list only after mount, so a toast fired before hydration
+  cannot cause a mismatch.
+- Nuxt UI also auto-imports a `useToast`. In an app that uses both, import Benchlight's
+  explicitly where you need it: `import { useToast } from 'benchlight/vue'`.
+- CSS-only: the classes work on the markup above; timers, queueing and announcements are yours.
+  A toaster outside an open modal dialog is inert, so place it inside the dialog while one is
+  open.
+
 ## CSS hooks
 
 `--bl-scroll-offset-top` and `--bl-scroll-offset-bottom` keep focused elements clear of fixed chrome
 such as the sticky site bar and the mobile tab bar.
+
+`--bl-dialog-width` sets the width of a centred BlDialog (default `32rem`, never wider than the
+viewport less 32px). `--bl-dialog-gutter` is internal: BlDialog sets it on `html` while open.
+
+`--bl-media-size` sets the size of a BlMedia figure (default `64px`).
+
+`--bl-chevron-mask` replaces the chevron shape of both the select and the disclosure.
 
 ## API contract
 

@@ -6,16 +6,21 @@
     :class="{
       'bl-btn--secondary': variant === 'secondary',
       'bl-btn--danger': variant === 'danger',
-      'bl-btn--pill': pill
+      'bl-btn--ghost': variant === 'ghost',
+      'bl-btn--pill': pill,
+      'bl-btn--icon': iconOnly()
     }"
   >
     <span v-if="$slots.icon" class="bl-btn__icon" aria-hidden="true"><slot name="icon" /></span>
-    <slot />
+    <Nodes :n="nodes()" />
   </component>
 </template>
 
 <script setup lang="ts">
-  import { computed } from 'vue'
+  import { computed, onBeforeUpdate, shallowRef, useAttrs, useSlots, watchEffect } from 'vue'
+  import type { VNode } from 'vue'
+  import { hasContent } from '../internal/slots'
+  import { isDev, warn } from '../internal/dev'
   import { linkBindings, resolveTag } from '../internal/link'
   import type { LinkAs, LinkTo } from '../types'
 
@@ -24,13 +29,42 @@
       as?: LinkAs
       to?: LinkTo
       href?: string
-      variant?: 'primary' | 'secondary' | 'danger'
+      variant?: 'primary' | 'secondary' | 'danger' | 'ghost'
+      label?: string
+      pressed?: boolean
       pill?: boolean
       type?: 'button' | 'submit' | 'reset'
       disabled?: boolean
     }>(),
-    { variant: 'primary', type: 'button' }
+    { variant: 'primary', type: 'button', pressed: undefined }
   )
+
+  const slots = useSlots()
+  const attrs = useAttrs()
+
+  // The default slot is evaluated once per render and reused for both the icon-only check
+  // and the rendered content.
+  let cache: VNode[] | undefined
+  const iconOnlyState = shallowRef(false)
+  const hasTextState = shallowRef(false)
+  onBeforeUpdate(() => {
+    cache = undefined
+  })
+  function nodes(): VNode[] {
+    if (!cache) {
+      cache = slots.default?.() ?? []
+      if (isDev) {
+        hasTextState.value = hasContent(cache)
+        iconOnlyState.value = Boolean(slots.icon) && !hasTextState.value
+      }
+    }
+    return cache
+  }
+  // Icon-only: the icon slot is filled and the default slot is empty or whitespace.
+  function iconOnly(): boolean {
+    return Boolean(slots.icon) && !hasContent(nodes())
+  }
+  const Nodes = (p: { n?: VNode[] }) => p.n
 
   function blockClick(event: MouseEvent): void {
     event.preventDefault()
@@ -43,16 +77,54 @@
     props.disabled && linkTag.value !== 'button' ? 'a' : linkTag.value
   )
   const bindings = computed(() => {
+    const name = props.label === undefined ? {} : { 'aria-label': props.label }
     if (tag.value === 'button') {
       return {
         ...linkBindings('button', props.to, props.href),
+        ...name,
         type: props.type,
-        disabled: props.disabled || undefined
+        disabled: props.disabled || undefined,
+        'aria-pressed': props.pressed === undefined ? undefined : String(props.pressed)
       }
     }
     if (props.disabled) {
-      return { 'aria-disabled': 'true', tabindex: '-1', onClickCapture: blockClick }
+      return { ...name, 'aria-disabled': 'true', tabindex: '-1', onClickCapture: blockClick }
     }
-    return linkBindings(tag.value, props.to, props.href)
+    return { ...linkBindings(tag.value, props.to, props.href), ...name }
   })
+
+  if (isDev) {
+    // Per-instance flags keep each hint to one message.
+    const warned = new Set<string>()
+    const once = (key: string, message: string) => {
+      if (warned.has(key)) return
+      warned.add(key)
+      warn(message)
+    }
+    watchEffect(
+      () => {
+        if (props.pressed !== undefined && tag.value !== 'button')
+          once(
+            'pressed',
+            'BlButton: `pressed` is ignored on links; a link cannot be a toggle button.'
+          )
+        if (
+          iconOnlyState.value &&
+          props.label === undefined &&
+          attrs['aria-label'] === undefined &&
+          attrs['aria-labelledby'] === undefined
+        )
+          once(
+            'name',
+            'BlButton: an icon-only button needs a `label`, `aria-label` or `aria-labelledby`.'
+          )
+        if (props.label !== undefined && hasTextState.value)
+          once(
+            'label',
+            'BlButton: `label` replaces the visible text as the accessible name; use it for icon-only buttons.'
+          )
+      },
+      { flush: 'post' }
+    )
+  }
 </script>

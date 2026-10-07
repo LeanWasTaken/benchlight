@@ -13,7 +13,8 @@ const AUTO_IMPORTS = [
   'useMarquee',
   'useFollowScroll',
   'riseDelay',
-  'ansiToSegments'
+  'ansiToSegments',
+  'useToast'
 ] as const
 
 export default defineNuxtModule<ModuleOptions>({

@@ -60,8 +60,14 @@ export function useTableFit(
     if (wasStacked) el.removeAttribute('data-stacked')
     el.setAttribute('data-measuring', '')
     const need = t.getBoundingClientRect().width
+    if (wasStacked) {
+      // Restore the stacked layout while data-measuring still kills transitions, and flush it.
+      // Otherwise the next style change runs from the unstacked measuring layout, and under
+      // reduced motion (0.01ms transitions) its first frame paints the table at that height.
+      el.setAttribute('data-stacked', '')
+      void el.offsetWidth
+    }
     el.removeAttribute('data-measuring')
-    if (wasStacked) el.setAttribute('data-stacked', '')
     const style = getComputedStyle(el)
     const avail =
       el.clientWidth - (parseFloat(style.paddingLeft) || 0) - (parseFloat(style.paddingRight) || 0)

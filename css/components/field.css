@@ -35,9 +35,11 @@
       font-size: 1rem;
     }
   }
-  .bl-input:hover,
-  .bl-select:hover {
-    border-color: var(--bl-ink-3);
+  @media (hover: hover) {
+    .bl-input:hover,
+    .bl-select:hover {
+      border-color: var(--bl-ink-3);
+    }
   }
   .bl-input:focus-visible,
   .bl-select:focus-visible {
@@ -49,6 +51,66 @@
   .bl-select option {
     background: var(--bl-raised);
     color: var(--bl-ink-1);
+  }
+  /* BlSelect wraps the select so a themed chevron can sit on top of it. A bare .bl-select keeps
+     the native arrow; only a single-line select inside the wrapper drops it. The chevron is a
+     stroke mask; set `--bl-chevron-mask: url(...)` anywhere above the wrapper to replace it (the
+     fallback below is the default, so the hook cascades). */
+  .bl-select-wrap {
+    display: block;
+    position: relative;
+    min-width: 0;
+  }
+  .bl-select-wrap > .bl-select {
+    display: block;
+  }
+  .bl-select-wrap > .bl-select:not([multiple], [size]) {
+    appearance: none;
+    padding-inline-end: 40px;
+  }
+  .bl-select-wrap::after {
+    content: '';
+    position: absolute;
+    inset-inline-end: 16px;
+    inset-block-start: 50%;
+    width: 10px;
+    height: 6px;
+    translate: 0 -50%;
+    background: var(--bl-ink-2);
+    -webkit-mask: var(
+        --bl-chevron-mask,
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6' fill='none' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E")
+      )
+      center / contain no-repeat;
+    mask: var(
+        --bl-chevron-mask,
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6' fill='none' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E")
+      )
+      center / contain no-repeat;
+    pointer-events: none;
+    transition: background-color var(--bl-duration-fast) ease;
+  }
+  .bl-select-wrap:has(> .bl-select:is([multiple], [size]))::after {
+    display: none;
+  }
+  @media (hover: hover) {
+    .bl-select-wrap:hover:not(:has(> .bl-select:disabled))::after {
+      background: var(--bl-ink-1);
+    }
+  }
+  .bl-select-wrap:has(> .bl-select:disabled)::after {
+    opacity: 0.45;
+  }
+  @media (forced-colors: active) {
+    .bl-select-wrap::after,
+    .bl-select-wrap:hover::after {
+      forced-color-adjust: none;
+      background: CanvasText;
+    }
+    .bl-select-wrap:has(> .bl-select:disabled)::after {
+      background: GrayText;
+      opacity: 1;
+    }
   }
   .bl-range {
     display: flex;

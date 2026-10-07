@@ -21,6 +21,8 @@
 - `dist/modules/base.min.css`
 - `dist/modules/btn.min.css`
 - `dist/modules/colophon.min.css`
+- `dist/modules/dialog.min.css`
+- `dist/modules/disclosure.min.css`
 - `dist/modules/eq.min.css`
 - `dist/modules/field.min.css`
 - `dist/modules/index-row.min.css`
@@ -29,6 +31,7 @@
 - `dist/modules/link-arrow.min.css`
 - `dist/modules/log.min.css`
 - `dist/modules/marquee.min.css`
+- `dist/modules/media.min.css`
 - `dist/modules/meta.min.css`
 - `dist/modules/meter.min.css`
 - `dist/modules/motion.min.css`
@@ -47,6 +50,8 @@
 - `dist/modules/table.min.css`
 - `dist/modules/telemetry.min.css`
 - `dist/modules/tints.min.css`
+- `dist/modules/toast.min.css`
+- `dist/modules/toggle.min.css`
 - `dist/modules/tokens.min.css`
 - `dist/modules/type.min.css`
 - `dist/tokens.js`
@@ -57,6 +62,8 @@
 - `BlAppearanceSwitch`
 - `BlButton`
 - `BlColophon`
+- `BlDialog`
+- `BlDisclosure`
 - `BlEqBars`
 - `BlField`
 - `BlIndex`
@@ -66,6 +73,7 @@
 - `BlLinkArrow`
 - `BlLog`
 - `BlMarquee`
+- `BlMedia`
 - `BlMeta`
 - `BlMeter`
 - `BlMsg`
@@ -87,6 +95,8 @@
 - `BlTable`
 - `BlTelemetry`
 - `BlTelemetryCell`
+- `BlToaster`
+- `BlToggle`
 - `FIELD_CONTEXT`
 - `ansiToSegments`
 - `riseDelay`
@@ -95,6 +105,7 @@
 - `useMarquee`
 - `useReducedMotion`
 - `useScrollLifted`
+- `useToast`
 
 ## Nuxt auto-imports
 - `ansiToSegments`
@@ -104,6 +115,7 @@
 - `useMarquee`
 - `useReducedMotion`
 - `useScrollLifted`
+- `useToast`
 
 ## Components
 
@@ -124,12 +136,14 @@ Exposed: none
 | `as` | `LinkAs \| undefined` | no |  |
 | `disabled` | `boolean \| undefined` | no |  |
 | `href` | `string \| undefined` | no |  |
+| `label` | `string \| undefined` | no |  |
 | `pill` | `boolean \| undefined` | no |  |
+| `pressed` | `boolean \| undefined` | no | `undefined` |
 | `to` | `LinkTo \| undefined` | no |  |
 | `type` | `"button" \| "submit" \| "reset" \| undefined` | no | `"button"` |
-| `variant` | `"primary" \| "secondary" \| "danger" \| undefined` | no | `"primary"` |
+| `variant` | `"primary" \| "secondary" \| "danger" \| "ghost" \| undefined` | no | `"primary"` |
 
-Slots: `default`, `icon`
+Slots: `icon`
 Events: none
 Exposed: none
 
@@ -141,6 +155,32 @@ Exposed: none
 
 Slots: `actions`, `default`
 Events: none
+Exposed: none
+
+### BlDialog
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `description` | `string \| undefined` | no |  |
+| `dismissible` | `boolean \| undefined` | no | `true` |
+| `labels` | `Partial<DialogLabels> \| undefined` | no |  |
+| `open` | `boolean` | yes |  |
+| `title` | `string` | yes |  |
+
+Slots: `default`, `footer`
+Events: `close`, `update:open`
+Exposed: none
+
+### BlDisclosure
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `name` | `string \| undefined` | no |  |
+| `open` | `boolean \| undefined` | no |  |
+| `summary` | `string \| undefined` | no |  |
+
+Slots: `default`, `summary`
+Events: `update:open`
 Exposed: none
 
 ### BlEqBars
@@ -249,6 +289,17 @@ Slots: `default`
 Events: none
 Exposed: `refresh`
 
+### BlMedia
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `align` | `"start" \| "center" \| undefined` | no |  |
+| `as` | `"div" \| "li" \| "article" \| undefined` | no |  |
+
+Slots: `aside`, `default`, `figure`
+Events: none
+Exposed: none
+
 ### BlMeta
 
 | prop | type | required | default |
@@ -266,7 +317,10 @@ Exposed: none
 | prop | type | required | default |
 | --- | --- | --- | --- |
 | `label` | `string` | yes |  |
+| `showLabel` | `boolean \| undefined` | no |  |
+| `showValue` | `boolean \| undefined` | no |  |
 | `value` | `number \| null` | yes |  |
+| `valueText` | `string \| undefined` | no |  |
 
 Slots: none
 Events: none
@@ -513,6 +567,32 @@ Slots: `default`
 Events: none
 Exposed: none
 
+### BlToaster
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `labels` | `Partial<ToasterLabels> \| undefined` | no |  |
+| `max` | `number \| undefined` | no | `3` |
+
+Slots: none
+Events: none
+Exposed: none
+
+### BlToggle
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `disabled` | `boolean \| undefined` | no |  |
+| `hint` | `string \| undefined` | no |  |
+| `label` | `string` | yes |  |
+| `modelValue` | `boolean` | yes |  |
+| `name` | `string \| undefined` | no |  |
+| `value` | `string \| undefined` | no |  |
+
+Slots: none
+Events: `update:modelValue`
+Exposed: none
+
 ## CSS classes
 - `bl-annotation`
 - `bl-ansi-30`
@@ -533,6 +613,8 @@ Exposed: none
 - `bl-ansi-97`
 - `bl-btn`
 - `bl-btn--danger`
+- `bl-btn--ghost`
+- `bl-btn--icon`
 - `bl-btn--pill`
 - `bl-btn--secondary`
 - `bl-btn__icon`
@@ -540,6 +622,20 @@ Exposed: none
 - `bl-colophon`
 - `bl-colophon__inner`
 - `bl-colophon__items`
+- `bl-dialog`
+- `bl-dialog__body`
+- `bl-dialog__close`
+- `bl-dialog__description`
+- `bl-dialog__foot`
+- `bl-dialog__head`
+- `bl-dialog__panel`
+- `bl-dialog__title`
+- `bl-dialog__toasts`
+- `bl-disclosure`
+- `bl-disclosure__body`
+- `bl-disclosure__chevron`
+- `bl-disclosure__summary`
+- `bl-disclosure__title`
 - `bl-display`
 - `bl-display--lg`
 - `bl-display--md`
@@ -571,10 +667,19 @@ Exposed: none
 - `bl-log`
 - `bl-marquee`
 - `bl-marquee__content`
+- `bl-media`
+- `bl-media--center`
+- `bl-media__aside`
+- `bl-media__body`
+- `bl-media__figure`
 - `bl-meta`
 - `bl-meta--sep`
 - `bl-meta__key`
 - `bl-meter`
+- `bl-meter-field`
+- `bl-meter-field__head`
+- `bl-meter-field__label`
+- `bl-meter-field__value`
 - `bl-meter__fill`
 - `bl-msg`
 - `bl-msg--err`
@@ -617,6 +722,7 @@ Exposed: none
 - `bl-segmented--compact`
 - `bl-segmented__item`
 - `bl-select`
+- `bl-select-wrap`
 - `bl-silkscreen`
 - `bl-site-bar`
 - `bl-site-bar__actions`
@@ -664,10 +770,34 @@ Exposed: none
 - `bl-tint-danger`
 - `bl-tint-phosphor`
 - `bl-tint-trace`
+- `bl-toast`
+- `bl-toast--danger`
+- `bl-toast--success`
+- `bl-toast-enter-active`
+- `bl-toast-enter-from`
+- `bl-toast-leave-active`
+- `bl-toast-leave-to`
+- `bl-toast-move`
+- `bl-toast__action`
+- `bl-toast__dismiss`
+- `bl-toast__mark`
+- `bl-toast__message`
+- `bl-toaster`
+- `bl-toaster__list`
+- `bl-toggle`
+- `bl-toggle__control`
+- `bl-toggle__hint`
+- `bl-toggle__input`
+- `bl-toggle__label`
+- `bl-toggle__thumb`
+- `bl-toggle__track`
 
 ## CSS hooks (custom properties a consumer may set)
+- `--bl-chevron-mask`
 - `--bl-col-min`
+- `--bl-dialog-width`
 - `--bl-log-height`
+- `--bl-media-size`
 - `--bl-meter-value`
 - `--bl-range-value-width`
 - `--bl-rise-delay`
