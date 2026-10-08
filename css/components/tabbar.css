@@ -32,8 +32,10 @@
       color var(--bl-duration-fast) ease,
       background-color var(--bl-duration-fast) ease;
   }
-  .bl-tabbar__item:hover {
-    color: var(--bl-ink-1);
+  @media (hover: hover) {
+    .bl-tabbar__item:hover {
+      color: var(--bl-ink-1);
+    }
   }
   .bl-tabbar__item[aria-current='page'] {
     color: var(--bl-trace);

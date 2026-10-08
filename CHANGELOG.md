@@ -21,6 +21,8 @@
 - `bl-page-*` fade with `ease` instead of `linear`.
 - With reduced motion, `bl-rise` drops its stagger delay (items no longer wait invisible) and the
   BlPrevNext arrow no longer nudges on hover.
+- BlPrevNext, BlTabBar, BlSiteBar, BlLinkArrow, BlColophon, BlSegmented, BlProse and BlSpecPanel hover styles apply only
+  on hover-capable pointers, so a tap no longer leaves them highlighted.
 
 ### Changed
 

@@ -23,8 +23,10 @@
     text-decoration: none;
     transition: background-color var(--bl-duration-fast) ease;
   }
-  .bl-prev-next__link:hover {
-    background: var(--bl-surface);
+  @media (hover: hover) {
+    .bl-prev-next__link:hover {
+      background: var(--bl-surface);
+    }
   }
   .bl-prev-next__link--next {
     text-align: right;
@@ -64,7 +66,9 @@
     color: var(--bl-ink-1);
     transition: color var(--bl-duration-fast) ease;
   }
-  .bl-prev-next__link:hover .bl-prev-next__title {
-    color: var(--bl-trace);
+  @media (hover: hover) {
+    .bl-prev-next__link:hover .bl-prev-next__title {
+      color: var(--bl-trace);
+    }
   }
 }

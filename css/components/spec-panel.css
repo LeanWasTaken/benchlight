@@ -39,7 +39,9 @@
     text-decoration: underline;
     text-underline-offset: 3px;
   }
-  .bl-spec-row__value a:hover {
-    text-decoration-thickness: 2px;
+  @media (hover: hover) {
+    .bl-spec-row__value a:hover {
+      text-decoration-thickness: 2px;
+    }
   }
 }

@@ -50,8 +50,10 @@
     text-transform: uppercase;
     color: var(--bl-ink-3);
   }
-  .bl-segmented__item:hover {
-    color: var(--bl-ink-1);
+  @media (hover: hover) {
+    .bl-segmented__item:hover {
+      color: var(--bl-ink-1);
+    }
   }
   .bl-segmented__item[aria-pressed='true'],
   .bl-segmented__item[aria-current],
