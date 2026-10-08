@@ -403,6 +403,69 @@ test.describe('motion: toast exit', () => {
   })
 })
 
+test.describe('motion: theme flip', () => {
+  test.use({ reducedMotion: 'no-preference' })
+  test('a theme change crossfades the page in one view transition', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'desktop-light', 'one project is enough')
+    await page.goto('/')
+    const result = await page.evaluate(async () => {
+      const doc = document as Document & {
+        startViewTransition?: (update: () => void) => unknown
+      }
+      const original = doc.startViewTransition!.bind(document)
+      let calls = 0
+      doc.startViewTransition = (update) => {
+        calls++
+        return original(update)
+      }
+      const seen = new Set<string>()
+      document.querySelector<HTMLInputElement>('.bl-switch input[value="dark"]')!.click()
+      for (let i = 0; i < 40; i++) {
+        await new Promise(requestAnimationFrame)
+        for (const a of document.documentElement.getAnimations({ subtree: true })) {
+          const effect = a.effect as KeyframeEffect
+          if (effect.pseudoElement?.startsWith('::view-transition'))
+            seen.add(`${effect.pseudoElement} ${effect.getComputedTiming().duration}`)
+        }
+      }
+      return { calls, seen: [...seen] }
+    })
+    expect(result.calls).toBe(1)
+    expect(result.seen).toContain('::view-transition-new(root) 200')
+    expect(result.seen).toContain('::view-transition-old(root) 200')
+    await expect(page.locator('html')).toHaveAttribute('data-bl-appearance', 'dark')
+  })
+
+  test('a flip runs few animations on a page with a 300-row table', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'desktop-light', 'one project is enough')
+    await page.goto('/')
+    await page.evaluate(() => {
+      const cell = (r: number, c: number) =>
+        `<td class="bl-table__num"><span class="bl-annotation">${r * c}</span></td>`
+      const rows = Array.from(
+        { length: 300 },
+        (_, r) => `<tr>${Array.from({ length: 6 }, (_, c) => cell(r, c)).join('')}</tr>`
+      ).join('')
+      const wrap = document.createElement('div')
+      wrap.className = 'bl-table'
+      wrap.innerHTML = `<table class="bl-table__table"><tbody>${rows}</tbody></table>`
+      document.body.append(wrap)
+    })
+    const peak = await page.evaluate(async () => {
+      let max = 0
+      document.querySelector<HTMLInputElement>('.bl-switch input[value="dark"]')!.click()
+      for (let i = 0; i < 45; i++) {
+        await new Promise(requestAnimationFrame)
+        max = Math.max(max, document.getAnimations().length)
+      }
+      return max
+    })
+    // Per-element colour transitions ran thousands at once (6,784 here); the crossfade is a
+    // handful of pseudo-element animations plus the page's own few hundred.
+    expect(peak, 'running animations during the flip').toBeLessThan(1000)
+  })
+})
+
 test.describe('BlTable', () => {
   test('stays steady when an unrelated re-render re-measures it', async ({ page }) => {
     await page.goto('/')

@@ -28,7 +28,9 @@
     border-radius: var(--bl-radius-chip);
     color: var(--bl-ink-2);
     text-decoration: none;
-    transition: color var(--bl-duration-fast) ease;
+    transition:
+      color var(--bl-duration-fast) ease,
+      background-color var(--bl-duration-fast) ease;
   }
   .bl-tabbar__item:hover {
     color: var(--bl-ink-1);
