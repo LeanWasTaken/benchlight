@@ -140,6 +140,13 @@ describe('BlDialog', () => {
     expect(toastHosts.value).toEqual([])
   })
 
+  it('hosts toasts beside the panel, outside its entry transform', () => {
+    const w = open()
+    const host = w.get('.bl-dialog__toasts').element
+    expect(host.parentElement).toBe(dialogEl(w))
+    expect(w.get('.bl-dialog__panel').element.contains(host)).toBe(false)
+  })
+
   it('releases the toast host when it starts closing, not in the async close event', async () => {
     const w = open()
     await w.setProps({ open: true })

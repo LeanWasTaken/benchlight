@@ -30,8 +30,9 @@
       <p v-if="description" :id="descId" class="bl-dialog__description">{{ description }}</p>
       <div class="bl-dialog__body"><slot /></div>
       <Foot :nodes="$slots.footer?.()" />
-      <div ref="toasts" class="bl-dialog__toasts" />
     </div>
+    <!-- Outside the panel: the panel's entry transform would capture the fixed toaster. -->
+    <div ref="toasts" class="bl-dialog__toasts" />
   </dialog>
 </template>
 

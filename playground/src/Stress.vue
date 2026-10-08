@@ -680,6 +680,29 @@
       </BlDialog>
     </section>
 
+    <!-- CSS-only markup with the panel wrapped in a form, the no-JS close path. -->
+    <section v-if="show('dialog-form')" data-case="dialog-form">
+      <h2 class="st-label">dialog-form</h2>
+      <div data-box>
+        <button type="button" class="bl-btn bl-btn--secondary" @click="formDialog?.showModal()">
+          Open form dialog
+        </button>
+      </div>
+      <dialog ref="formDialog" class="bl-dialog" aria-labelledby="st-form-title">
+        <form method="dialog">
+          <div class="bl-dialog__panel">
+            <div class="bl-dialog__head">
+              <h2 id="st-form-title" class="bl-dialog__title">Form dialog</h2>
+            </div>
+            <div class="bl-dialog__body">A panel inside a form.</div>
+            <div class="bl-dialog__foot">
+              <button class="bl-btn" value="ok">OK</button>
+            </div>
+          </div>
+        </form>
+      </dialog>
+    </section>
+
     <!-- D3: page chrome; each rendered alone via ?case=<id> -->
     <template v-if="chrome">
       <div v-for="n in 12" :key="n" class="st-filler">Filler line {{ n }}</div>
@@ -865,6 +888,7 @@
   const { toast } = useToast()
   const sheetOpen = ref(false)
   const detailsOpen = ref(false)
+  const formDialog = ref<HTMLDialogElement>()
   function save(): void {
     sheetOpen.value = false
     toast('Saved')
