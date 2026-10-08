@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.6.2 - 2026-10-09
+
+Overlay polish: toasts stay steady and visible while dialogs open and close, and a dialog closed and
+reopened in the same task opens again. No breaking changes; the dialog's internal markup moved (see
+below), and the documented CSS-only markup keeps working.
 
 ### Fixed
 
