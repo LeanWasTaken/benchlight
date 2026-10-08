@@ -519,7 +519,8 @@ const id = toast({ message: 'Item deleted', action: { label: 'Undo', onClick: re
   open the toaster moves into the topmost one (above its backdrop, reachable and announced) and
   moves back when it closes. Visible toasts and timers carry across. Below 40em it sits at the
   top of the screen there, clear of the sheet's footer actions. A toast fired as a dialog closes
-  is announced where the toaster lands next.
+  is announced where the toaster lands next, and while a closing dialog fades out (Chromium) the
+  toaster stays above it in the top layer, as a manual popover, until the fade ends.
 - The store is one per JS realm, shared by every Vue app on the page, so mount one toaster per
   page; a development warning fires for a second.
 - SSR: `toast()` does nothing on the server and returns `''`. The toaster renders its section and

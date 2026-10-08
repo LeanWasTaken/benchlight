@@ -22,7 +22,12 @@ const spoken = (role: 'status' | 'alert') =>
 beforeEach(() => {
   vi.useFakeTimers()
 })
+const proto = HTMLElement.prototype as unknown as Record<string, unknown>
 afterEach(() => {
+  // happy-dom has no popovers; a stub must not outlive the test that set it, failed or not.
+  delete proto.showPopover
+  delete proto.hidePopover
+  document.querySelectorAll('body > dialog').forEach((d) => d.remove())
   w?.unmount()
   w = undefined
   resetToastStore()
@@ -136,6 +141,62 @@ describe('BlToaster', () => {
     expect(region.closest('dialog')).toBeNull()
     expect(region.textContent).toBe('Saved')
     dialog.remove()
+  })
+
+  it('rides in the top layer while the dialog it left is still fading out', async () => {
+    await mountToaster()
+    const shown: boolean[] = []
+    proto.showPopover = () => shown.push(true)
+    const dialog = document.createElement('dialog')
+    const host = document.createElement('div')
+    dialog.append(host)
+    document.body.append(dialog)
+    dialog.showModal()
+    pushToastHost(host)
+    toast('Copied')
+    await flush()
+    let end!: () => void
+    const exit = {
+      transitionProperty: 'opacity',
+      effect: { getComputedTiming: () => ({ duration: 200 }) },
+      finished: new Promise<void>((r) => (end = r))
+    }
+    dialog.getAnimations = () => [exit as unknown as Animation]
+    dialog.close() // a real browser keeps it painted, backdrop and all, until `exit` ends
+    removeToastHost(host)
+    await flush()
+    const section = document.querySelector<HTMLElement>('.bl-toaster')!
+    expect(section.closest('dialog')).toBeNull()
+    expect(section.getAttribute('popover')).toBe('manual')
+    expect(shown).toEqual([true])
+    end()
+    await flush()
+    expect(section.hasAttribute('popover')).toBe(false) // removing it also hides it
+  })
+
+  it('stays in place when the dialog it left closed at once or in a blink', async () => {
+    await mountToaster()
+    const show = vi.fn()
+    proto.showPopover = show
+    const dialog = document.createElement('dialog')
+    const host = document.createElement('div')
+    dialog.append(host)
+    document.body.append(dialog)
+    dialog.showModal()
+    pushToastHost(host)
+    await flush()
+    // reduced motion: base.css's 0.01ms transition, finished before anyone could see it
+    const blink = {
+      transitionProperty: 'display',
+      effect: { getComputedTiming: () => ({ duration: 0.01 }) },
+      finished: Promise.resolve()
+    }
+    dialog.getAnimations = () => [blink as unknown as Animation]
+    dialog.close()
+    removeToastHost(host)
+    await flush()
+    expect(show).not.toHaveBeenCalled()
+    expect(document.querySelector('.bl-toaster')!.hasAttribute('popover')).toBe(false)
   })
 
   it('stops a deferred announcement watcher when the toaster unmounts', async () => {

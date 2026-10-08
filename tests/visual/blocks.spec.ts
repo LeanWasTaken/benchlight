@@ -485,6 +485,107 @@ test.describe('motion: toasts and dialogs', () => {
       expect(f.o, `opacity per frame ${frames.map((f) => f.o.toFixed(2))}`).toBe(1)
     }
   })
+
+  test('toasts stay on top while a dialog fades out, and speak outside it', async ({
+    page
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== 'desktop-light', 'one project is enough')
+    await page.goto('/stress.html?case=dialog-toast')
+    await page.getByRole('button', { name: 'Edit item' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Edit item' })
+    const panel = dialog.locator('.bl-dialog__panel')
+    await expect(panel).toHaveCSS('opacity', '1')
+    await dialog.getByRole('button', { name: 'Copy' }).click()
+    await expect(page.locator('.bl-toast', { hasText: 'Copied' })).toHaveCSS('opacity', '1')
+    const result = await page.evaluate(async () => {
+      const appends: string[] = []
+      new MutationObserver((records) => {
+        for (const r of records) {
+          const region = r.target as Element
+          if (!region.matches('[role="status"], [role="alert"]')) continue
+          for (const n of r.addedNodes)
+            appends.push(`${n.textContent} ${region.closest('dialog') ? 'inside' : 'outside'}`)
+        }
+      }).observe(document.body, { childList: true, subtree: true })
+      const d = document.querySelector<HTMLDialogElement>('dialog[open]')!
+      const copied = document.querySelector<HTMLElement>('.bl-toast')!
+      const save = [...d.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Save')!
+      save.click()
+      const frames: { closing: boolean; hit: boolean }[] = []
+      for (let i = 0; i < 24; i++) {
+        await new Promise(requestAnimationFrame)
+        const r = copied.getBoundingClientRect()
+        const top = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)
+        frames.push({
+          closing: !d.open && getComputedStyle(d).display !== 'none',
+          hit: top?.closest('.bl-toast') !== null // the entering 'Saved' toast may slide under
+        })
+      }
+      return { frames, appends }
+    })
+    const closing = result.frames.filter((f) => f.closing)
+    expect(closing.length, 'sampled during the exit').toBeGreaterThan(0)
+    expect(
+      closing.filter((f) => !f.hit).length,
+      `hits per exit frame ${closing.map((f) => f.hit)}`
+    ).toBe(0)
+    expect(result.frames.every((f) => f.hit)).toBe(true)
+    expect(result.appends).toEqual(['Saved outside'])
+    const saved = page.locator('.bl-toast', { hasText: 'Saved' })
+    await expect(saved).toBeVisible()
+    await saved.getByRole('button', { name: 'Dismiss' }).click() // its timer must not move 'Copied'
+    await expect(page.locator('.bl-toast')).toHaveCount(1)
+
+    // Hit-testing skips a closing dialog either way, so also compare pixels: freeze the exit
+    // a few frames in and the toast must look exactly as it does once the dialog has gone.
+    await page.getByRole('button', { name: 'Edit item' }).click()
+    await expect(panel).toHaveCSS('opacity', '1')
+    const copied = page.locator('.bl-toast', { hasText: 'Copied' })
+    const clip = (await copied.boundingBox())!
+    const frozen = await page.evaluate(async () => {
+      const d = document.querySelector<HTMLDialogElement>('dialog[open]')!
+      const cancel = [...d.querySelectorAll('button')].find(
+        (b) => b.textContent?.trim() === 'Cancel'
+      )!
+      cancel.click()
+      await new Promise(requestAnimationFrame)
+      // Freeze the exit at a fixed point (80ms of 200ms), whatever the frame rate.
+      document.getAnimations().forEach((a) => {
+        a.pause()
+        a.currentTime = 80
+      })
+      await new Promise(requestAnimationFrame)
+      return Number(getComputedStyle(d.querySelector('.bl-dialog__panel')!).opacity)
+    })
+    expect(frozen, 'frozen mid-exit').toBeGreaterThan(0.2)
+    expect(frozen, 'frozen mid-exit').toBeLessThan(0.95)
+    const during = await page.screenshot({ clip })
+    await page.evaluate(() => document.getAnimations().forEach((a) => a.play()))
+    await expect(page.locator('dialog.bl-dialog').first()).toHaveCSS('display', 'none')
+    await expect(page.locator('.bl-toaster[popover]')).toHaveCount(0)
+    const after = await page.screenshot({ clip })
+    // Mean channel difference: text antialiasing may differ by a level in the top layer, but
+    // the backdrop (70% canvas) dims the toast surface by far more.
+    const diff = await page.evaluate(
+      async ([a, b]) => {
+        const pixels = async (src: string) => {
+          const img = new Image()
+          img.src = `data:image/png;base64,${src}`
+          await img.decode()
+          const c = new OffscreenCanvas(img.width, img.height)
+          const ctx = c.getContext('2d')!
+          ctx.drawImage(img, 0, 0)
+          return ctx.getImageData(0, 0, img.width, img.height).data
+        }
+        const [x, y] = await Promise.all([pixels(a!), pixels(b!)])
+        let sum = 0
+        for (let i = 0; i < x.length; i++) sum += Math.abs(x[i]! - y[i]!)
+        return sum / x.length
+      },
+      [during.toString('base64'), after.toString('base64')]
+    )
+    expect(diff, 'the toast is not dimmed by the closing dialog').toBeLessThan(1)
+  })
 })
 
 test.describe('motion: theme flip', () => {
