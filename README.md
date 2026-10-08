@@ -447,7 +447,9 @@ bundle CLI warns otherwise).
   browser's async `close` event) leaves the dialog closed; the late `close` then emits
   `update:open(false)`, so state stays consistent and the reopen is dropped.
 - CSS-only: the classes work on any `<dialog>`. Call `showModal()`/`close()` yourself, wire the
-  ids and add `closedby="none"` for a non-dismissible dialog. Backdrop-click closing, gutter
+  ids and add `closedby="none"` for a non-dismissible dialog. The panel may be wrapped, e.g. in a
+  `<form method="dialog">` that closes it without script. The panel is only visible inside an open
+  `.bl-dialog` (it fades in with it), so it cannot be shown on its own. Backdrop-click closing, gutter
   compensation, focus-restore hardening and in-dialog toasts are Vue-only.
 
 ## BlToast

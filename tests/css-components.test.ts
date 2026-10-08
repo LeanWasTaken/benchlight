@@ -771,22 +771,55 @@ describe('disclosure', () => {
 
 describe('dialog', () => {
   const css = read('dialog')
+  const OPEN = '.bl-dialog[open] .bl-dialog__panel:not(:where(.bl-dialog:not([open]) *))'
   it('transitions display only where overlay is supported', () => {
-    expect(
-      ruleBody(css, '.bl-dialog', ['@supports (overlay: auto)'])['transition-property']
-    ).toContain('display')
-    expect(ruleBody(css, '.bl-dialog').transition).not.toContain('display')
+    expect(ruleBody(css, '.bl-dialog', ['@supports (overlay: auto)']).transition).toMatch(
+      /display .*allow-discrete.*overlay .*allow-discrete/s
+    )
+    expect(ruleBody(css, '.bl-dialog').transition).toBeUndefined()
   })
-  it('ends the open state on scale: none, not a transform', () => {
-    expect(ruleBody(css, '.bl-dialog[open]').scale).toBe('none')
+  it('fades and moves the panel, never the dialog, so the hosted toaster is untouched', () => {
+    const dialog = ruleBody(css, '.bl-dialog')
+    for (const prop of ['opacity', 'scale', 'translate']) expect(dialog[prop]).toBeUndefined()
+    expect(ruleBody(css, '.bl-dialog[open]').opacity).toBeUndefined()
+    expect(ruleBody(css, '.bl-dialog', ['@supports (overlay: auto)']).transition).not.toMatch(
+      /opacity|scale|translate/
+    )
+    const panel = ruleBody(css, '.bl-dialog__panel')
+    expect(panel.opacity).toBe('0')
+    expect(panel.scale).toBe('0.98')
+    expect(panel.transition).toMatch(/opacity.*scale.*translate/s)
+    expect(ruleBody(css, OPEN, ['@starting-style']).opacity).toBe('0')
+  })
+  it('keeps the backdrop fade, held through the exit where overlay is supported', () => {
+    expect(ruleBody(css, '.bl-dialog::backdrop').transition).toContain('opacity')
+    expect(
+      ruleBody(css, '.bl-dialog::backdrop', ['@supports (overlay: auto)'])['transition-property']
+    ).toBe('opacity, display, overlay')
+  })
+  it('ends the open state on opacity 1 and scale: none, not a transform', () => {
+    expect(ruleBody(css, OPEN).opacity).toBe('1')
+    expect(ruleBody(css, OPEN).scale).toBe('none')
+  })
+  it('opens a panel wrapped in a form, but not one inside a closed nested dialog', () => {
+    // descendant, not child: <dialog><form method="dialog"><div class="bl-dialog__panel">
+    expect(OPEN.startsWith('.bl-dialog[open] .bl-dialog__panel')).toBe(true)
+    const all = parseRules(css).flatMap((r) => r.selectors)
+    expect(all.filter((sel) => sel.includes('> .bl-dialog__panel'))).toEqual([])
+    const open = all.filter((sel) => sel.includes('[open]') && sel.includes('__panel'))
+    expect(open.length).toBeGreaterThanOrEqual(5)
+    for (const sel of open) expect(sel).toBe(OPEN)
   })
   it('slides the bottom sheet in from below 40em', () => {
-    expect(ruleBody(css, '.bl-dialog', ['@media (max-width: 39.99em)']).translate).toBe('0 100%')
+    const sheet = ['@media (max-width: 39.99em)']
+    expect(ruleBody(css, '.bl-dialog__panel', sheet).translate).toBe('0 100%')
+    expect(ruleBody(css, OPEN, sheet).translate).toBe('none')
   })
   it('drops movement under reduced motion', () => {
     const reduce = ['@media (prefers-reduced-motion: reduce)']
-    expect(ruleBody(css, '.bl-dialog', reduce).translate).toBe('none')
-    expect(ruleBody(css, '.bl-dialog[open]', reduce).translate).toBe('none')
+    expect(ruleBody(css, '.bl-dialog__panel', reduce).translate).toBe('none')
+    expect(ruleBody(css, '.bl-dialog__panel', reduce).scale).toBe('none')
+    expect(ruleBody(css, OPEN, reduce).translate).toBe('none')
   })
   it('keeps the gutter padding in step with the scrollbar under reduced motion', () => {
     const reduce = ['@media (prefers-reduced-motion: reduce)']

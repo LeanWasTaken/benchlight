@@ -343,7 +343,7 @@ test.describe('motion', () => {
     await page.goto('/')
     await demo(page, 'dialog').getByRole('button', { name: 'Rename' }).click()
     const dialog = page.locator('.bl-dialog[open]')
-    await expect(dialog).toHaveCSS('opacity', '1')
+    await expect(dialog.locator('.bl-dialog__panel')).toHaveCSS('opacity', '1')
     const open = (await dialog.boundingBox())!
     // close and sample in one evaluate, so the samples are of the exit transition
     const tops = await page.evaluate(async () => {
@@ -400,6 +400,90 @@ test.describe('motion: toast exit', () => {
     // the toast above glides into the freed slot over several frames
     const above = new Set(frames.map((f) => Math.round(f.above * 10)))
     expect(above.size, `above ${[...above]}`).toBeGreaterThan(3)
+  })
+})
+
+test.describe('motion: CSS-only dialog', () => {
+  test.use({ reducedMotion: 'no-preference' })
+
+  test('a CSS-only panel wrapped in a form still opens, as a box and as a sheet', async ({
+    page
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== 'desktop-light', 'one project is enough')
+    await page.goto('/stress.html?case=dialog-form')
+    const open = page.getByRole('button', { name: 'Open form dialog' })
+    const dialog = page.getByRole('dialog', { name: 'Form dialog' })
+    const panel = dialog.locator('form > .bl-dialog__panel')
+    await open.click()
+    await expect(panel).toHaveCSS('opacity', '1')
+    await expect(panel).toHaveCSS('scale', 'none')
+    await dialog.getByRole('button', { name: 'OK' }).click() // <form method="dialog">
+    await expect(dialog).toBeHidden()
+
+    await page.setViewportSize({ width: 390, height: 844 })
+    await open.click()
+    await expect(panel).toHaveCSS('translate', 'none')
+    await expect(panel).toHaveCSS('opacity', '1')
+    const r = (await panel.boundingBox())!
+    expect(r.y, 'the sheet is on screen').toBeLessThan(844 - 100)
+    expect(r.y + r.height).toBeLessThanOrEqual(844.5)
+    await dialog.getByRole('button', { name: 'OK' }).click()
+    await expect(dialog).toBeHidden()
+  })
+})
+
+test.describe('motion: toasts and dialogs', () => {
+  test.use({ reducedMotion: 'no-preference' })
+
+  test('a visible toast stays put while a dialog opens over it', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'desktop-light', 'one project is enough')
+    await page.goto('/stress.html?case=dialog-toast')
+    await page.getByRole('button', { name: 'Notify' }).click()
+    const t = page.locator('.bl-toast', { hasText: 'Update ready' })
+    await expect(t).toHaveCSS('opacity', '1')
+    const frames = await page.evaluate(async () => {
+      const toast = document.querySelector<HTMLElement>('.bl-toast')!
+      // what the eye sees: the toast's opacity times every ancestor's
+      const seen = () => {
+        let o = 1
+        for (let n: Element | null = toast; n; n = n.parentElement)
+          o *= Number(getComputedStyle(n).opacity)
+        return o
+      }
+      const box = () => {
+        const r = toast.getBoundingClientRect()
+        return { x: r.x, y: r.y, w: r.width, h: r.height, o: seen() }
+      }
+      const out = [{ ...box(), inDialog: false, entering: false }]
+      const opener = [...document.querySelectorAll('button')].find((b) =>
+        b.textContent?.includes('Edit item')
+      )!
+      opener.click()
+      await Promise.resolve() // the open watcher calls showModal() in a microtask
+      const dialog = document.querySelector<HTMLDialogElement>('dialog[open]')!
+      for (let i = 0; i < 24; i++) {
+        await new Promise(requestAnimationFrame)
+        out.push({
+          ...box(),
+          inDialog: dialog.contains(toast),
+          entering: dialog.getAnimations({ subtree: true }).length > 0
+        })
+      }
+      return out
+    })
+    expect(
+      frames.filter((f) => f.inDialog && f.entering).length,
+      'sampled inside the dialog during its entry'
+    ).toBeGreaterThan(0)
+    const [first] = frames
+    for (const f of frames) {
+      expect(Math.abs(f.x - first!.x), `x per frame ${frames.map((f) => f.x)}`).toBeLessThan(0.5)
+      expect(Math.abs(f.y - first!.y), `y per frame ${frames.map((f) => f.y)}`).toBeLessThan(0.5)
+      expect(Math.abs(f.w - first!.w), `width per frame ${frames.map((f) => f.w)}`).toBeLessThan(
+        0.5
+      )
+      expect(f.o, `opacity per frame ${frames.map((f) => f.o.toFixed(2))}`).toBe(1)
+    }
   })
 })
 

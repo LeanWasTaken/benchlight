@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- BlDialog: a visible toast no longer slides or blinks when a dialog opens over it. The entry
+  and exit fade and movement (`opacity`, plus `scale`, or `translate` for the bottom sheet)
+  moved from `.bl-dialog` to `.bl-dialog__panel`; the dialog keeps only its `display`/`overlay`
+  exit hold (Chromium) and the backdrop fade. The internal toast host is now a direct child of
+  `<dialog>`, beside the panel, so the toaster is never transformed or faded with it. The panel
+  may sit inside a wrapper such as `<form method="dialog">`.
+
 ## 0.6.1 - 2026-10-08
 
 Motion release: exits that vanished now fade, state changes that snapped now ease, theme changes
