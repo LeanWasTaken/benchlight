@@ -24,8 +24,8 @@ interface TestNuxt {
 
 type Definition = {
   meta: { name: string; configKey: string }
-  defaults: { fonts: boolean }
-  setup: (options: { fonts: boolean }, nuxt: TestNuxt) => void
+  defaults: { fonts: boolean; autoImports: boolean }
+  setup: (options: { fonts: boolean; autoImports?: boolean }, nuxt: TestNuxt) => void
 }
 
 const load = async () => (await import('../../nuxt/module')).default as unknown as Definition
@@ -49,12 +49,12 @@ describe('nuxt module', () => {
     const module = await load()
     expect(module.meta.name).toBe('benchlight')
     expect(module.meta.configKey).toBe('benchlight')
-    expect(module.defaults).toEqual({ fonts: true })
+    expect(module.defaults).toEqual({ fonts: true, autoImports: true })
   })
 
   it('puts fonts then the library css ahead of the app css', async () => {
     const nuxt = makeNuxt()
-    ;(await load()).setup({ fonts: true }, nuxt)
+    ;(await load()).setup({ fonts: true, autoImports: true }, nuxt)
     expect(nuxt.options.css).toEqual([
       '/pkg/nuxt/../css/fonts.css',
       '/pkg/nuxt/../css/index.css',
@@ -64,13 +64,13 @@ describe('nuxt module', () => {
 
   it('omits fonts.css when fonts is off', async () => {
     const nuxt = makeNuxt()
-    ;(await load()).setup({ fonts: false }, nuxt)
+    ;(await load()).setup({ fonts: false, autoImports: true }, nuxt)
     expect(nuxt.options.css).toEqual(['/pkg/nuxt/../css/index.css', '/app/main.css'])
   })
 
   it('prepends the prepaint script to the head scripts', async () => {
     const nuxt = makeNuxt()
-    ;(await load()).setup({ fonts: true }, nuxt)
+    ;(await load()).setup({ fonts: true, autoImports: true }, nuxt)
     expect(nuxt.options.app.head.script).toEqual([
       { innerHTML: PREPAINT, tagPosition: 'head' },
       { src: '/existing.js' }
@@ -78,7 +78,7 @@ describe('nuxt module', () => {
   })
 
   it('adds the components dir without a path prefix', async () => {
-    ;(await load()).setup({ fonts: true }, makeNuxt())
+    ;(await load()).setup({ fonts: true, autoImports: true }, makeNuxt())
     expect(kit.addComponentsDir).toHaveBeenCalledWith({
       path: '/pkg/nuxt/../vue/components',
       pathPrefix: false
@@ -86,7 +86,7 @@ describe('nuxt module', () => {
   })
 
   it('auto-imports the composables and helpers from the vue entry', async () => {
-    ;(await load()).setup({ fonts: true }, makeNuxt())
+    ;(await load()).setup({ fonts: true, autoImports: true }, makeNuxt())
     const imports = kit.addImports.mock.calls[0]![0] as Array<{ name: string; from: string }>
     expect(imports.map((entry) => entry.name)).toEqual([
       'useAppearance',
@@ -101,9 +101,15 @@ describe('nuxt module', () => {
     expect(new Set(imports.map((entry) => entry.from))).toEqual(new Set(['/pkg/nuxt/../vue/index']))
   })
 
+  it('skips the composable auto-imports when autoImports is off, keeping components', async () => {
+    ;(await load()).setup({ fonts: true, autoImports: false }, makeNuxt())
+    expect(kit.addImports).not.toHaveBeenCalled()
+    expect(kit.addComponentsDir).toHaveBeenCalledTimes(1)
+  })
+
   it('transpiles the package and keeps it out of vite pre-bundling', async () => {
     const nuxt = makeNuxt()
-    ;(await load()).setup({ fonts: true }, nuxt)
+    ;(await load()).setup({ fonts: true, autoImports: true }, nuxt)
     expect(nuxt.options.build.transpile).toEqual(['other', 'benchlight'])
     expect(nuxt.options.vite.optimizeDeps).toEqual({
       exclude: ['already', 'benchlight'],
@@ -114,7 +120,7 @@ describe('nuxt module', () => {
   it('creates optimizeDeps when the app has none', async () => {
     const nuxt = makeNuxt()
     nuxt.options.vite = {}
-    ;(await load()).setup({ fonts: true }, nuxt)
+    ;(await load()).setup({ fonts: true, autoImports: true }, nuxt)
     expect(nuxt.options.vite.optimizeDeps).toEqual({ exclude: ['benchlight'] })
   })
 })

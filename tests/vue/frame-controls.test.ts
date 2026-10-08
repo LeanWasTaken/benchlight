@@ -293,6 +293,58 @@ describe('BlSegmented', () => {
     expect(links[0]!.attributes('aria-current')).toBe('page')
     expect(links[1]!.attributes('aria-current')).toBeUndefined()
   })
+
+  it('switches to link mode when an option has href or to, with no as', () => {
+    const wrapper = mount(BlSegmented, {
+      props: {
+        label: 'Language',
+        options: [
+          { value: 'en', label: 'en', href: '/en', current: true },
+          { value: 'lv', label: 'lv', href: '/lv' }
+        ]
+      }
+    })
+    expect(wrapper.element.tagName).toBe('NAV')
+    expect(wrapper.find('button').exists()).toBe(false)
+    expect(wrapper.findAll('a.bl-segmented__item').map((l) => l.attributes('href'))).toEqual([
+      '/en',
+      '/lv'
+    ])
+  })
+
+  it('uses as only to pick the tag when options have to', () => {
+    const Router = defineComponent({
+      props: { to: String },
+      setup:
+        (props, { slots }) =>
+        () =>
+          h('a', { href: props.to, 'data-router': '' }, slots.default?.())
+    })
+    const wrapper = mount(BlSegmented, {
+      props: { as: Router, options: [{ value: 'a', label: 'A', to: '/a' }] }
+    })
+    expect(wrapper.find('a[data-router]').attributes('href')).toBe('/a')
+  })
+
+  it('warns when an option has no to/href in link mode', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    mount(BlSegmented, {
+      props: {
+        options: [
+          { value: 'a', label: 'A', href: '/a' },
+          { value: 'b', label: 'B' }
+        ]
+      }
+    })
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('option has no to/href'))
+    warn.mockRestore()
+  })
+
+  it('stays a button group when neither as nor any option links', () => {
+    const wrapper = mount(BlSegmented, { props: { options, modelValue: null } })
+    expect(wrapper.element.tagName).toBe('DIV')
+    expect(wrapper.findAll('button')).toHaveLength(2)
+  })
 })
 
 describe('BlButton', () => {

@@ -99,6 +99,29 @@ describe('BlToggle', () => {
     w.unmount()
   })
 
+  it('re-emits the mount value after the parent changed the model and the form reset', async () => {
+    const on = ref(true)
+    const Host = defineComponent({
+      setup: () => () =>
+        h('form', [
+          h(BlToggle, {
+            modelValue: on.value,
+            'onUpdate:modelValue': (v: boolean) => (on.value = v),
+            label: 'Wi-Fi'
+          })
+        ])
+    })
+    const w = mount(Host, { attachTo: document.body })
+    on.value = false
+    await w.vm.$nextTick()
+    const input = w.get('input').element as HTMLInputElement
+    expect(input.checked).toBe(false)
+    ;(w.get('form').element as HTMLFormElement).reset()
+    await new Promise((r) => setTimeout(r, 0))
+    expect(on.value).toBe(true)
+    w.unmount()
+  })
+
   it('sets defaultChecked from the initial value so a reset restores it', () => {
     const w = mount(BlToggle, { props: { modelValue: true, label: 'Wi-Fi' } })
     expect((w.get('input').element as HTMLInputElement).defaultChecked).toBe(true)
@@ -107,5 +130,30 @@ describe('BlToggle', () => {
   it('disables the input', () => {
     const w = mount(BlToggle, { props: { modelValue: false, label: 'Wi-Fi', disabled: true } })
     expect(w.get('input').attributes('disabled')).toBeDefined()
+  })
+
+  it('works uncontrolled: no modelValue, it tracks its own state', async () => {
+    const w = mount(BlToggle, { props: { label: 'Wi-Fi' } })
+    const input = w.get('input').element as HTMLInputElement
+    expect(input.checked).toBe(false)
+    await w.get('input').setValue(true)
+    expect(input.checked).toBe(true)
+    expect(w.emitted('update:modelValue')).toEqual([[true]])
+    await w.get('input').setValue(false)
+    expect(input.checked).toBe(false)
+  })
+
+  it('dedupes ids when the consumer repeats the hint id', () => {
+    const w = mount(BlToggle, {
+      props: { modelValue: false, label: 'Wi-Fi', hint: 'Hint' },
+      attrs: { 'aria-describedby': 'err  err extra' }
+    })
+    const hintId = w.get('.bl-toggle__hint').attributes('id')
+    expect(w.get('input').attributes('aria-describedby')).toBe(`${hintId} err extra`)
+    const again = mount(BlToggle, {
+      props: { modelValue: false, label: 'Wi-Fi', hint: 'Hint' },
+      attrs: { 'aria-describedby': `${hintId} err` }
+    })
+    expect(again.get('input').attributes('aria-describedby')).toBe(`${hintId} err`)
   })
 })

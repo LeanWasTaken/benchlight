@@ -6,6 +6,8 @@
         :key="index"
         :label="row.label"
         :value="row.value"
+        :as="row.as"
+        :to="row.to"
         :href="row.href"
         :external="row.external"
       />

@@ -64,9 +64,11 @@ export default defineNuxtConfig({
 The module adds the fonts and component CSS, the no-flash appearance script, auto-imported `Bl*`
 components and composables (`useAppearance`, `useScrollLifted`, `useFollowScroll`,
 `useReducedMotion`, `useMarquee`, `riseDelay`, `ansiToSegments`, `useToast`).
-`benchlight: { fonts: false }` skips the bundled fonts. `BlSiteBar` wraps its nav in a `<nav>`
-landmark labelled by `navLabel` (default `Primary`). The Tailwind lines are optional: skip them if
-the app does not use Tailwind.
+`benchlight: { fonts: false }` skips the bundled fonts, and `benchlight: { autoImports: false }`
+skips the composable and helper auto-imports (components stay auto-imported), so they do not
+collide with another library's. `BlSiteBar` wraps its nav in a `<nav>` landmark labelled by
+`navLabel` (default `Primary`). The Tailwind lines are optional: skip them if the app does not use
+Tailwind.
 
 ```vue
 <script setup lang="ts">
@@ -302,8 +304,9 @@ modules and `pagination` needs `layout` (the bundle CLI warns otherwise).
   string. BlAppearanceSwitch also takes `labels.marks` (`{ auto, light, dark }`, default A / L / D).
 - With async data, BlTable clamps `page` to 1 while there are no rows, so set the page after rows
   arrive (or use `manual` with `totalRows`).
-- **BlPagination** renders nothing for a single page. Standalone: `total`, `pageSize`, `v-model:page`, and
-  `label` or `labels.nav` to name the nav (a dev warning fires when neither is set).
+- **BlPagination** renders nothing for a single page. Standalone: `total`, `pageSize`,
+  `v-model:page`, and `label` or `labels.nav` to name the nav (a dev warning fires when neither is
+  set).
 - **CSS-only use:** wrap a `table` in `div.bl-table` (modifiers `.bl-table--compact`,
   `.bl-table--scroll`). Classes: `.bl-table__num`, `.bl-table__primary`, `.bl-table__label` (a
   `span aria-hidden="true"` in each body cell), `.bl-table__sort`, `.bl-table__sort-strip`,
@@ -324,6 +327,9 @@ An on/off switch on a native checkbox (`role="switch"`). Full prop list is in [A
 <BlToggle v-model="wifi" label="Wi-Fi" hint="Joins known networks automatically" />
 ```
 
+`v-model` is optional: without it the toggle keeps its own state, so a plain form post works
+(`<BlToggle name="wifi" label="Wi-Fi" />`).
+
 ```html
 <div class="bl-toggle">
   <label class="bl-toggle__control">
@@ -339,9 +345,10 @@ An on/off switch on a native checkbox (`role="switch"`). Full prop list is in [A
   posts `name=value` only while the switch is on.
 - The hint stays out of the accessible name: it sits outside the `label` and is wired up with
   `aria-describedby`. A consumer `aria-describedby` is merged with the hint id.
-- Controlled only: `:model-value` without an `update:modelValue` listener is just an initial value.
-- A native form reset restores the value the toggle had when it mounted and re-emits it as
-  `update:modelValue`.
+- Uncontrolled without `v-model`: the toggle keeps its own state; `:model-value` without a
+  listener is just the initial value.
+- A native form reset restores the value the toggle had when it mounted, emitting
+  `update:modelValue` if that changes it.
 - Not for use inside BlField; the toggle carries its own label and hint.
 - Attrs split: `class` and `style` go on the root `div.bl-toggle`; every other attribute (`id`,
   `data-*`, `aria-*`) goes on the `input`.
@@ -548,8 +555,9 @@ const id = toast({ message: 'Item deleted', action: { label: 'Undo', onClick: re
 - SSR: `toast()` does nothing on the server and returns `''`. The toaster renders its section and
   both live regions empty, and the list only after mount, so a toast fired before hydration
   cannot cause a mismatch.
-- Nuxt UI also auto-imports a `useToast`. In an app that uses both, import Benchlight's
-  explicitly where you need it: `import { useToast } from 'benchlight/vue'`.
+- Nuxt UI also auto-imports a `useToast`. In an app that uses both, set
+  `benchlight: { autoImports: false }` and import Benchlight's explicitly where you need it:
+  `import { useToast } from 'benchlight/vue'`.
 - CSS-only: the classes work on the markup above; timers, queueing and announcements are yours.
   A toaster outside an open modal dialog is inert, so place it inside the dialog while one is
   open.

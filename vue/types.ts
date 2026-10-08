@@ -29,10 +29,9 @@ export interface SelectOption<T> {
   label: string
 }
 
-export interface SpecRowData {
+export interface SpecRowData extends LinkProps {
   label: string
   value: string
-  href?: string
   /** open in a new tab; default: true for absolute or protocol-relative URLs */
   external?: boolean
 }
