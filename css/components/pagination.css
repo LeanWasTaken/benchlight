@@ -26,6 +26,11 @@
     font: inherit;
     color: var(--bl-ink-2);
     cursor: pointer;
+    transition:
+      background-color var(--bl-duration-fast) ease,
+      border-color var(--bl-duration-fast) ease,
+      color var(--bl-duration-fast) ease,
+      opacity var(--bl-duration-fast) ease;
   }
   .bl-pagination__page[aria-current='page'] {
     border-color: var(--bl-control-border);

@@ -291,6 +291,29 @@ describe('useMarquee', () => {
     expect(animate).toHaveBeenCalledTimes(2)
   })
 
+  it('glides the text home when the overflow ends, instead of snapping', () => {
+    const { box, animate } = elements(300, 100)
+    const text = document.createElement('div')
+    let width = 300
+    Object.defineProperty(text, 'scrollWidth', { get: () => width })
+    text.animate = animate
+    const { result } = withSetup(() => useMarquee(ref(box), ref(text)))
+    expect(animate).toHaveBeenCalledTimes(2)
+    const computed = vi.spyOn(globalThis, 'getComputedStyle').mockReturnValue({
+      transform: 'translateX(-40px)',
+      getPropertyValue: () => '.12s'
+    } as unknown as CSSStyleDeclaration)
+    width = 80
+    result.refresh()
+    expect(result.overflowing.value).toBe(false)
+    expect(animate).toHaveBeenCalledTimes(3)
+    expect(animate).toHaveBeenLastCalledWith(
+      [{ transform: 'translateX(-40px)' }, { transform: 'none' }],
+      { duration: expect.closeTo(120), easing: 'ease' }
+    )
+    computed.mockRestore()
+  })
+
   it('marks overflow but never animates under reduced motion', () => {
     mockMatchMedia({ [REDUCED_QUERY]: true })
     const { box, text, animate } = elements(300, 100)

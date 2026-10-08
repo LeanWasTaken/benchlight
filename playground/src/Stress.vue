@@ -469,6 +469,24 @@
       </div>
     </section>
 
+    <section v-if="show('eq-settle')" data-case="eq-settle">
+      <h2 class="st-label">eq-settle</h2>
+      <div data-box>
+        <BlEqBars :active="eqActive" />
+        <BlButton variant="secondary" @click="eqActive = !eqActive">Toggle EQ</BlButton>
+      </div>
+    </section>
+
+    <section v-if="show('marquee-glide')" data-case="marquee-glide">
+      <h2 class="st-label">marquee-glide</h2>
+      <div data-box style="inline-size: 12rem">
+        <BlMarquee title="Marquee">
+          <span>{{ marqueeText }}</span>
+        </BlMarquee>
+        <BlButton variant="secondary" @click="marqueeText = 'Short'">Shorten</BlButton>
+      </div>
+    </section>
+
     <!-- Tables -->
     <section v-if="show('table-wide')" data-case="table-wide">
       <h2 class="st-label">table-wide</h2>
@@ -685,12 +703,14 @@
     BlAppearanceSwitch,
     BlButton,
     BlColophon,
+    BlEqBars,
     BlField,
     BlIndex,
     BlIndexRow,
     BlInput,
     BlLinkArrow,
     BlLog,
+    BlMarquee,
     BlMedia,
     BlMeta,
     BlMeter,
@@ -834,6 +854,8 @@
     }
   }
   const chromeCases = Object.keys(chromeDefs)
+  const eqActive = ref(false)
+  const marqueeText = ref('Just a little too long for the box')
 
   const only = new URLSearchParams(location.search).get('case')
   const chrome = only ? (chromeDefs[only] ?? null) : null

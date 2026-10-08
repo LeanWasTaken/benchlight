@@ -717,12 +717,16 @@ describe('toggle', () => {
       at('.bl-toggle__input:checked + .bl-toggle__track')
     )
   })
-  it('moves the thumb with a logical inset so RTL flips it', () => {
-    expect(
-      ruleBody(css, '.bl-toggle__input:checked + .bl-toggle__track .bl-toggle__thumb')[
-        'inset-inline-start'
-      ]
-    ).toBe('calc(100% - 20px)')
+  it('slides the thumb with translate, mirrored for RTL', () => {
+    const thumb = '.bl-toggle__input:checked + .bl-toggle__track .bl-toggle__thumb'
+    expect(ruleBody(css, thumb).translate).toBe('calc(40px - 2px - 18px - 2px - 2px) 0')
+    expect(ruleBody(css, `${thumb}:dir(rtl)`).translate).toBe(
+      'calc((40px - 2px - 18px - 2px - 2px) * -1) 0'
+    )
+    const resting = ruleBody(css, '.bl-toggle__thumb')
+    expect(resting['inset-inline-start']).toBe('2px')
+    expect(resting.transition).toContain('translate')
+    expect(resting.transition).not.toContain('inset-inline-start')
   })
   it('gates hover behind (hover: hover)', () => {
     expect(css.replace(/@media \(hover: hover\)\s*\{[\s\S]*?\n {2}\}/, '')).not.toMatch(/:hover/)
@@ -909,5 +913,109 @@ describe('theme transitions', () => {
       r.selectors.includes('.bl-table[data-measuring] *')
     )
     expect(rule!.declarations['transition-property']).toBe('none !important')
+  })
+})
+
+describe('eased state changes', () => {
+  const file = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8')
+  const props = (list: string | undefined) =>
+    (list ?? '').split(/,(?![^(]*\))/).map((part) => part.trim().split(/\s+/)[0])
+  const inLayer = (css: string, selector: string) =>
+    parseRules(css).find(
+      (r) => r.selectors.join(', ') === selector && r.within.join() === '@layer components'
+    )!.declarations
+
+  it('eases the LED colour and glow', () => {
+    const led = inLayer(read('led'), '.bl-led').transition
+    expect(props(led)).toEqual(expect.arrayContaining(['background-color', 'box-shadow']))
+    expect(led).toContain('var(--bl-duration-fast)')
+  })
+
+  it('eases EQ bar opacity and keeps the loop on the compositor', () => {
+    const css = read('eq')
+    const bar = inLayer(css, '.bl-eq__bar')
+    expect(props(bar.transition)).toEqual(expect.arrayContaining(['opacity', 'height']))
+    expect(bar.transition).not.toMatch(/\b500ms\b/)
+    expect(css).not.toContain('@property')
+    const keyframes = css.slice(css.indexOf('@keyframes bl-eq'), css.indexOf('.bl-eq {'))
+    expect(keyframes).toContain('transform: scaleY')
+    // the loop exists only while active, so an idle EQ has no animation to wait on
+    expect(bar.animation).toBeUndefined()
+    expect(inLayer(css, '.bl-eq--active .bl-eq__bar')['animation-name']).toBe('bl-eq')
+  })
+
+  it('eases BlTable row highlights and the sort icon like the other rows', () => {
+    const css = read('table')
+    const row = inLayer(css, '.bl-table tbody tr[data-action]').transition
+    expect(row).toBe('background-color var(--bl-duration-fast) ease')
+    const sticky = inLayer(css, '.bl-table--scroll tbody tr[data-action] > :first-child')
+    expect(props(sticky.transition)).toContain('background-color')
+    const icon = inLayer(css, '.bl-table__sort-icon').transition
+    expect(props(icon)).toEqual(expect.arrayContaining(['transform', 'opacity']))
+    expect(icon).toContain('var(--bl-duration-fast)')
+    // the measuring pass still wins over every transition above
+    const measuring = parseRules(css).find((r) =>
+      r.selectors.includes('.bl-table[data-measuring] *')
+    )
+    expect(measuring!.declarations['transition-property']).toBe('none !important')
+    // only the icon is exempt: it cannot change what the measuring pass reads
+    const exempt = parseRules(css).find((r) =>
+      r.selectors.includes('.bl-table[data-measuring] .bl-table__sort-icon')
+    )
+    expect(exempt!.declarations['transition-property']).toBe('transform, opacity !important')
+  })
+
+  it('eases pagination buttons', () => {
+    const button = inLayer(read('pagination'), '.bl-pagination button').transition
+    expect(props(button)).toEqual(
+      expect.arrayContaining(['background-color', 'border-color', 'color'])
+    )
+    expect(button).toContain('var(--bl-duration-fast)')
+  })
+
+  it('animates the toggle thumb border, and leaves reduced motion to base.css', () => {
+    const css = read('toggle')
+    expect(props(inLayer(css, '.bl-toggle__thumb').transition)).toContain('border-color')
+    expect(css).not.toContain('prefers-reduced-motion')
+  })
+
+  it('eases pressed and disabled buttons, and the active tab', () => {
+    expect(props(inLayer(read('btn'), '.bl-btn').transition)).toEqual(
+      expect.arrayContaining(['box-shadow', 'opacity'])
+    )
+    expect(props(inLayer(read('tabbar'), '.bl-tabbar__item').transition)).toContain(
+      'background-color'
+    )
+  })
+
+  it('fills the meter with a token duration and an ease, not 100ms linear', () => {
+    const fill = inLayer(read('meter'), '.bl-meter__fill').transition
+    expect(fill).toContain('width var(--bl-duration-fast) var(--bl-ease-out)')
+    expect(fill).not.toContain('linear')
+  })
+
+  it('fades pages with ease, not linear', () => {
+    const css = file('css/motion.css')
+    expect(css).not.toMatch(/bl-duration-page-(leave|enter)\) linear/)
+    expect(css).toContain('var(--bl-duration-page-leave) ease')
+    expect(css).toContain('var(--bl-duration-page-enter) ease')
+  })
+
+  it('does not hold a rise item invisible for its delay under reduced motion', () => {
+    const rules = parseRules(file('css/base.css')).filter(
+      (r) =>
+        r.selectors.includes('.bl-rise') &&
+        r.within.includes('@media (prefers-reduced-motion: reduce)')
+    )
+    expect(rules.map((r) => r.declarations['animation-delay'])).toContain('0ms !important')
+  })
+
+  it('keeps the prev/next arrow nudge to users who allow motion', () => {
+    const nudges = parseRules(read('prev-next')).filter((r) =>
+      r.selectors.some((s) => s.endsWith('__icon') && s.includes(':hover'))
+    )
+    expect(nudges.length).toBe(2)
+    for (const rule of nudges)
+      expect(rule.within.join(' ')).toContain('(prefers-reduced-motion: no-preference)')
   })
 })

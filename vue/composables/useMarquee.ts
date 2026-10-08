@@ -1,4 +1,5 @@
 import { onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue'
+import { cssTime } from '../internal/cssTime'
 import { useReducedMotion } from './useReducedMotion'
 
 export interface MarqueeOptions {
@@ -32,9 +33,12 @@ export function useMarquee(
   }
 
   function refresh(): void {
-    stop()
     const box = container.value
     const text = content.value
+    // Where the text was when the loop stops, so it can glide home instead of snapping.
+    const resting =
+      text && animations.length > 0 && !reduced.value ? getComputedStyle(text).transform : ''
+    stop()
     if (!box || !text) {
       overflowing.value = false
       return
@@ -42,6 +46,11 @@ export function useMarquee(
     measured = `${text.scrollWidth}:${box.clientWidth}`
     const overflow = text.scrollWidth - box.clientWidth
     overflowing.value = overflow > 1
+    if (!overflowing.value && resting && resting !== 'none')
+      text.animate?.([{ transform: resting }, { transform: 'none' }], {
+        duration: cssTime(getComputedStyle(text).getPropertyValue('--bl-duration-fast'), 150),
+        easing: 'ease'
+      })
     if (!overflowing.value || reduced.value) return
     const distance = -(overflow + overshoot)
     const timing: KeyframeAnimationOptions = {

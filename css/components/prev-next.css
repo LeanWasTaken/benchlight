@@ -47,11 +47,14 @@
     width: 1em;
     height: 1em;
   }
-  .bl-prev-next__link--prev:hover .bl-prev-next__icon {
-    transform: translateX(-2px);
-  }
-  .bl-prev-next__link--next:hover .bl-prev-next__icon {
-    transform: translateX(2px);
+  /* A nudge is movement: with reduced motion the arrow stays put. */
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .bl-prev-next__link--prev:hover .bl-prev-next__icon {
+      transform: translateX(-2px);
+    }
+    .bl-prev-next__link--next:hover .bl-prev-next__icon {
+      transform: translateX(2px);
+    }
   }
   .bl-prev-next__title {
     display: block;

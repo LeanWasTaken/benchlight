@@ -14,14 +14,14 @@
     animation-delay: var(--bl-rise-delay, 0ms);
   }
   .bl-page-leave-active {
-    transition: opacity var(--bl-duration-page-leave) linear;
+    transition: opacity var(--bl-duration-page-leave) ease;
     will-change: opacity;
   }
   .bl-page-leave-to {
     opacity: 0;
   }
   .bl-page-enter-active {
-    transition: opacity var(--bl-duration-page-enter) linear;
+    transition: opacity var(--bl-duration-page-enter) ease;
     will-change: opacity;
   }
   .bl-page-enter-from {

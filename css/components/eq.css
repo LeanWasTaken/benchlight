@@ -22,8 +22,9 @@
     opacity: 0.4;
     transform-origin: bottom;
     transition:
-      height 500ms var(--bl-ease-out),
-      background-color 500ms var(--bl-ease-out);
+      height var(--bl-duration-rise) var(--bl-ease-out),
+      background-color var(--bl-duration-rise) var(--bl-ease-out),
+      opacity var(--bl-duration-rise) var(--bl-ease-out);
   }
   .bl-eq__bar:nth-child(1) {
     height: 4px;

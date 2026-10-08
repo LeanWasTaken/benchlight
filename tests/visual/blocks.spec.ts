@@ -466,6 +466,123 @@ test.describe('motion: theme flip', () => {
   })
 })
 
+test.describe('motion: state changes', () => {
+  test.use({ reducedMotion: 'no-preference' })
+  test('an idle EQ leaves nothing to wait on', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'desktop-light', 'one project is enough')
+    await page.goto('/')
+    const result = await page.evaluate(async () => {
+      for (const eq of document.querySelectorAll('.bl-eq--active'))
+        eq.classList.remove('bl-eq--active')
+      const settled = await Promise.race([
+        Promise.allSettled(
+          document
+            .getAnimations()
+            .filter((a) => (a.effect as KeyframeEffect).target?.closest('.bl-eq'))
+            .map((a) => a.finished)
+        ).then(() => true),
+        new Promise((r) => setTimeout(() => r(false), 800))
+      ])
+      return { settled }
+    })
+    expect(result.settled, 'getAnimations().finished resolves with idle bars').toBe(true)
+  })
+
+  test('stopping an EQ glides the bars home over several frames', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'desktop-light', 'one project is enough')
+    await page.goto('/stress.html?case=eq-settle')
+    const toggle = page.getByRole('button', { name: 'Toggle EQ' })
+    await toggle.click()
+    await page.waitForTimeout(1000)
+    const frames = await page.evaluate(async () => {
+      const bar = document.querySelector<HTMLElement>('.bl-eq__bar:nth-child(4)')!
+      document.querySelector<HTMLButtonElement>('button')!.click()
+      const out: string[] = []
+      for (let i = 0; i < 14; i++) {
+        await new Promise(requestAnimationFrame)
+        out.push(getComputedStyle(bar).transform)
+      }
+      return out
+    })
+    expect(new Set(frames).size, `transform per frame ${frames}`).toBeGreaterThan(3)
+    expect(frames.at(-1)).toBe('none')
+  })
+
+  test('the marquee glides home over several frames when its text stops overflowing', async ({
+    page
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== 'desktop-light', 'one project is enough')
+    await page.goto('/stress.html?case=marquee-glide')
+    await page.waitForTimeout(2500)
+    const frames = await page.evaluate(async () => {
+      const box = document.querySelector<HTMLElement>('.bl-marquee')!
+      const text = box.querySelector<HTMLElement>('.bl-marquee__content')!
+      document.querySelector<HTMLButtonElement>('button')!.click()
+      // transforms from the frame the loop has stopped (the overflow mark is gone) onwards
+      const out: string[] = []
+      for (let i = 0; i < 60; i++) {
+        await new Promise(requestAnimationFrame)
+        if (!box.hasAttribute('data-overflowing')) out.push(getComputedStyle(text).transform)
+      }
+      return out
+    })
+    const distinct = new Set(frames.filter((f) => f !== 'none'))
+    expect(distinct.size, `transform per frame after the loop stops ${frames}`).toBeGreaterThan(3)
+    expect(frames.at(-1)).toBe('none')
+  })
+
+  test('an LED fades between off and on instead of switching in one frame', async ({
+    page
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== 'desktop-light', 'one project is enough')
+    await page.goto('/')
+    const frames = await page.evaluate(async () => {
+      const led = document.querySelector<HTMLElement>(
+        '.bl-led:not(.bl-led--on):not(.bl-led--danger)'
+      )!
+      const out: { bg: string; glow: string }[] = []
+      led.classList.add('bl-led--on')
+      for (let i = 0; i < 20; i++) {
+        await new Promise(requestAnimationFrame)
+        const cs = getComputedStyle(led)
+        out.push({ bg: cs.backgroundColor, glow: cs.boxShadow })
+      }
+      return out
+    })
+    expect(new Set(frames.map((f) => f.bg)).size, 'distinct background frames').toBeGreaterThan(3)
+    expect(new Set(frames.map((f) => f.glow)).size, 'distinct glow frames').toBeGreaterThan(3)
+  })
+
+  test('a pagination button eases its hover background', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'desktop-light', 'one project is enough')
+    await page.goto('/')
+    const button = page
+      .locator('.bl-pagination__page:not([aria-current="page"]):not([aria-disabled="true"])')
+      .first()
+    await button.scrollIntoViewIfNeeded()
+    await page.mouse.move(2, 2)
+    await page.waitForTimeout(300)
+    await page.evaluate(() => {
+      const el = document.querySelector<HTMLElement>(
+        '.bl-pagination__page:not([aria-current="page"]):not([aria-disabled="true"])'
+      )!
+      const seen = new Set<string>()
+      ;(window as unknown as { __seen: Set<string> }).__seen = seen
+      const tick = () => {
+        seen.add(getComputedStyle(el).backgroundColor)
+        requestAnimationFrame(tick)
+      }
+      tick()
+    })
+    await button.hover()
+    await page.waitForTimeout(400)
+    const seen = await page.evaluate(() => [
+      ...(window as unknown as { __seen: Set<string> }).__seen
+    ])
+    expect(seen.length, `background frames ${seen.join(' | ')}`).toBeGreaterThan(2)
+  })
+})
+
 test.describe('BlTable', () => {
   test('stays steady when an unrelated re-render re-measures it', async ({ page }) => {
     await page.goto('/')
