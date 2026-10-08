@@ -76,14 +76,14 @@ function expectAll(haystack: string, needles: readonly string[], where: string):
 export const VITE_EXPECTATIONS = {
   html: ['bl-appearance'],
   css: ['--bl-canvas', '.bl-display', '@font-face', 'Bricolage Grotesque', '.bl-btn--secondary'],
-  js: ['bl-led', 'bl-btn', 'bl-switch', 'bl-table', 'bl-pagination']
+  js: ['bl-led', 'bl-btn', 'bl-appearance__track', 'bl-table', 'bl-pagination']
 }
 
 export const NUXT_EXPECTATIONS = {
   page: [
     'data-bl-appearance',
     'bl-site-bar',
-    'bl-switch',
+    'bl-appearance__track',
     'bl-led bl-led--on',
     'bl-spec-row',
     'bl-table',

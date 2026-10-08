@@ -257,7 +257,7 @@ class="bl-select">`; `class` and `style` go on the wrapper (so `$el` is the wrap
 - **BlProse:** the measure is `min(720px, 68ch)`; images, video and iframes are capped to the column;
   tables scroll horizontally (`display: block`, so add `role="table"` if assistive tech should keep the
   table semantics); display sizes are smaller on phones (`xl` is 40px at 320px wide).
-- **BlSectionHead:** bar mode renders `eyebrow` only (no `heading`). The `action` slot works in both
+- **BlSectionHead:** bar mode renders `eyebrow` only (no `heading`). The `actions` slot works in both
   modes.
 
 ## BlTable and BlPagination
@@ -566,7 +566,7 @@ Custom properties a consumer may set. API.md lists them under "CSS hooks".
 | `--bl-log-height`                                     | max height of a BlLog                                                        | `12.5rem`            |
 | `--bl-range-value-width`                              | room reserved for the BlRange value, so the track length stays fixed         | `56px`               |
 | `--bl-table-min-col`                                  | narrowest BlTable column before the table stacks                             | `8rem`               |
-| `--bl-col-min`                                        | narrowest width of one column (BlTable sets it from `TableColumn.width`)     | `--bl-table-min-col` |
+| `--bl-table-col-min`                                  | narrowest width of one column (BlTable sets it from `TableColumn.width`)     | `--bl-table-min-col` |
 
 `--bl-dialog-gutter` is internal: BlDialog sets it on `html` while open.
 
@@ -578,10 +578,10 @@ places. `tokens` always comes first; `base`, `type`, `motion`, `layout` and `tin
 | Component                           | Module         |
 | ----------------------------------- | -------------- |
 | BlSiteBar, BlNavLink                | `site-bar`     |
-| BlTabBar, BlTabBarItem              | `tabbar`       |
+| BlTabBar, BlTabBarItem              | `tab-bar`      |
 | BlColophon                          | `colophon`     |
 | BlSkipLink                          | `skip-link`    |
-| BlAppearanceSwitch                  | `switch`       |
+| BlAppearanceSwitch                  | `appearance`   |
 | BlSegmented                         | `segmented`    |
 | BlButton                            | `btn`          |
 | BlField, BlInput, BlSelect, BlRange | `field`        |

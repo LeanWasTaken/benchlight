@@ -163,11 +163,13 @@ describe('BlTabBar', () => {
           )
       }
     })
-    expect(wrapper.find('nav.bl-tabbar').attributes('aria-label')).toBe('Primary')
-    const item = wrapper.find('a.bl-tabbar__item')
+    expect(wrapper.find('nav.bl-tab-bar').attributes('aria-label')).toBe('Primary')
+    const item = wrapper.find('a.bl-tab-bar__item')
     expect(item.attributes('aria-current')).toBe('page')
-    expect(item.find('.bl-tabbar__icon').attributes('aria-hidden')).toBe('true')
-    expect(item.find('.bl-tabbar__label').text()).toBe('Home')
+    expect(item.find('.bl-tab-bar__icon').attributes('aria-hidden')).toBe('true')
+    expect(item.find('.bl-tab-bar__label').text()).toBe('Home')
+    // The old name is split so a repo-wide grep for it only finds CHANGELOG history.
+    expect(wrapper.html()).not.toContain('bl-tab' + 'bar')
   })
 })
 
@@ -197,8 +199,11 @@ describe('BlAppearanceSwitch', () => {
     const wrapper = mount(BlAppearanceSwitch)
     const radios = wrapper.findAll('input[type="radio"][name^="bl-appearance"]')
     expect(radios.map((r) => r.attributes('aria-label'))).toEqual(['Auto', 'Light', 'Dark'])
-    expect(wrapper.findAll('.bl-switch__option').map((o) => o.text())).toEqual(['A', 'L', 'D'])
+    expect(wrapper.findAll('.bl-appearance__option').map((o) => o.text())).toEqual(['A', 'L', 'D'])
     expect(wrapper.find('legend.bl-sr-only').text()).toBe('Appearance')
+    expect(wrapper.find('fieldset.bl-appearance > .bl-appearance__track').exists()).toBe(true)
+    // The old name is split so a repo-wide grep for it only finds CHANGELOG history.
+    expect(wrapper.html()).not.toContain('bl-sw' + 'itch')
   })
 
   it('applies a choice', async () => {

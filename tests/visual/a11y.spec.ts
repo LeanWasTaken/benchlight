@@ -47,7 +47,7 @@ test('a focused control is not hidden under the mobile tab bar', async ({ page }
   }
   await expect(select).toBeFocused()
   const field = await select.boundingBox()
-  const bar = await page.locator('.bl-tabbar').boundingBox()
+  const bar = await page.locator('.bl-tab-bar').boundingBox()
   expect(field).not.toBeNull()
   expect(bar).not.toBeNull()
   expect(field!.y + field!.height).toBeLessThanOrEqual(bar!.y)
@@ -202,7 +202,7 @@ test('invisible hit areas reach 44px at phone width', async ({ page }) => {
     const selectors = [
       '.bl-link-arrow',
       '.bl-colophon__items a',
-      '.bl-switch__option',
+      '.bl-appearance__option',
       '.bl-segmented__item',
       '.bl-segmented--compact .bl-segmented__item'
     ]

@@ -373,6 +373,6 @@
     }
   }
   function minStyle(column: TableColumn<Row>): Record<string, string> | undefined {
-    return column.width ? { '--bl-col-min': column.width } : undefined
+    return column.width ? { '--bl-table-col-min': column.width } : undefined
   }
 </script>

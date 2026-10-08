@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { spawnSync } from 'node:child_process'
-import { readFileSync, rmSync } from 'node:fs'
+import { existsSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -66,6 +66,21 @@ describe('buildDist', () => {
 
   it('emits one file per module', () => {
     expect(Object.keys(dist.modules)).toEqual(Object.keys(MODULES))
+  })
+
+  it('names the appearance and tab bar modules after their components', () => {
+    expect(MODULES).toMatchObject({
+      appearance: 'css/components/appearance.css',
+      'tab-bar': 'css/components/tab-bar.css'
+    })
+    // The old names are split so a repo-wide grep for them only finds CHANGELOG history.
+    const [oldSwitch, oldTabBar] = ['sw' + 'itch', 'tab' + 'bar']
+    expect(Object.keys(MODULES)).not.toContain(oldSwitch)
+    expect(Object.keys(MODULES)).not.toContain(oldTabBar)
+    expect(existsSync(join(ROOT, 'dist/modules/appearance.min.css'))).toBe(true)
+    expect(existsSync(join(ROOT, 'dist/modules/tab-bar.min.css'))).toBe(true)
+    expect(existsSync(join(ROOT, `dist/modules/${oldSwitch}.min.css`))).toBe(false)
+    expect(existsSync(join(ROOT, `dist/modules/${oldTabBar}.min.css`))).toBe(false)
   })
 
   it('declares the layer order first', () => {

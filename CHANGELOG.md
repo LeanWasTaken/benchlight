@@ -38,6 +38,21 @@
   `id` and `aria-describedby` as plain attributes, which still work and bind after the field
   context. Rename `describedby` in `#default` slot destructuring.
 
+- Names that broke the naming pattern are renamed, with no aliases:
+  - BlSectionHead's slot `action` is now `actions`, and its class `bl-section-head__action` is now
+    `bl-section-head__actions`, matching BlSiteBar and BlColophon. Rename `#action` to `#actions`.
+  - The per-column custom property `--bl-col-min` (BlTable sets it from `TableColumn.width`) is now
+    `--bl-table-col-min`. The table-wide `--bl-table-min-col` is unchanged; both are in the README
+    hooks table.
+  - BlAppearanceSwitch's block `bl-switch` (`__track`, `__option`) is now `bl-appearance`; its
+    module `switch` is now `appearance` (`css/components/appearance.css`,
+    `dist/modules/appearance.min.css`).
+  - BlTabBar and BlTabBarItem's block `bl-tabbar` (`__item`, `__icon`, `__label`) is now
+    `bl-tab-bar`; the module `tabbar` is now `tab-bar` (`css/components/tab-bar.css`,
+    `dist/modules/tab-bar.min.css`).
+
+  Update hand-written markup, CSS overrides and per-module imports to the new names.
+
 ### Added
 
 - BlRange's slider carries the class `bl-range__input`; the `.bl-range input[type='range']` rule is

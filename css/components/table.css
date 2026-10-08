@@ -135,7 +135,7 @@
     white-space: nowrap;
   }
   .bl-table[data-measuring] tbody :is(th, td):not(.bl-table__num) {
-    inline-size: var(--bl-col-min, var(--bl-table-min-col, 8rem));
+    inline-size: var(--bl-table-col-min, var(--bl-table-min-col, 8rem));
     overflow-wrap: anywhere;
   }
   /* Stacked: each row becomes a card of label-value lines. */

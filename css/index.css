@@ -5,10 +5,10 @@
 @import './layout.css';
 @import './tints.css';
 @import './components/site-bar.css';
-@import './components/tabbar.css';
+@import './components/tab-bar.css';
 @import './components/colophon.css';
 @import './components/skip-link.css';
-@import './components/switch.css';
+@import './components/appearance.css';
 @import './components/segmented.css';
 @import './components/btn.css';
 @import './components/field.css';

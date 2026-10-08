@@ -1,5 +1,5 @@
 <template>
-  <nav class="bl-tabbar" :aria-label="label">
+  <nav class="bl-tab-bar" :aria-label="label">
     <slot />
   </nav>
 </template>

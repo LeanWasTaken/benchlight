@@ -126,10 +126,10 @@
   }
   /* Below 40em a tab bar replaces the nav; without one the nav stays reachable. */
   @media (max-width: 39.99em) {
-    html:has(.bl-tabbar) .bl-site-bar__navwrap {
+    html:has(.bl-tab-bar) .bl-site-bar__navwrap {
       display: none;
     }
-    html:has(.bl-tabbar) .bl-site-bar__navwrap + .bl-site-bar__actions {
+    html:has(.bl-tab-bar) .bl-site-bar__navwrap + .bl-site-bar__actions {
       margin-left: auto;
     }
   }

@@ -1,8 +1,8 @@
 <template>
-  <fieldset class="bl-switch" :data-ready="ready ? '' : undefined">
+  <fieldset class="bl-appearance" :data-ready="ready ? '' : undefined">
     <legend class="bl-sr-only">{{ text.legend }}</legend>
-    <div class="bl-switch__track">
-      <label v-for="option in options" :key="option.value" class="bl-switch__option">
+    <div class="bl-appearance__track">
+      <label v-for="option in options" :key="option.value" class="bl-appearance__option">
         <input
           v-model="mode"
           type="radio"

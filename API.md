@@ -18,6 +18,7 @@
 - `dist/appearance.min.js`
 - `dist/benchlight.min.css`
 - `dist/fonts.min.css`
+- `dist/modules/appearance.min.css`
 - `dist/modules/base.min.css`
 - `dist/modules/btn.min.css`
 - `dist/modules/colophon.min.css`
@@ -45,8 +46,7 @@
 - `dist/modules/site-bar.min.css`
 - `dist/modules/skip-link.min.css`
 - `dist/modules/spec-panel.min.css`
-- `dist/modules/switch.min.css`
-- `dist/modules/tabbar.min.css`
+- `dist/modules/tab-bar.min.css`
 - `dist/modules/table.min.css`
 - `dist/modules/telemetry.min.css`
 - `dist/modules/tints.min.css`
@@ -701,7 +701,7 @@ Exposed: none
 | `level` | `1 \| 2 \| 3 \| 4 \| 5 \| 6 \| undefined` | no | `2` |
 | `ruled` | `boolean \| undefined` | no |  |
 
-Slots: `action`
+Slots: `actions`
 Events: none
 Exposed: none
 
@@ -890,6 +890,9 @@ Exposed: none
 - `bl-ansi-95`
 - `bl-ansi-96`
 - `bl-ansi-97`
+- `bl-appearance`
+- `bl-appearance__option`
+- `bl-appearance__track`
 - `bl-btn`
 - `bl-btn--danger`
 - `bl-btn--ghost`
@@ -993,7 +996,7 @@ Exposed: none
 - `bl-section-head`
 - `bl-section-head--bar`
 - `bl-section-head--ruled`
-- `bl-section-head__action`
+- `bl-section-head__actions`
 - `bl-section-head__eyebrow`
 - `bl-section-head__heading`
 - `bl-segmented`
@@ -1015,13 +1018,10 @@ Exposed: none
 - `bl-spec-row__label`
 - `bl-spec-row__value`
 - `bl-sr-only`
-- `bl-switch`
-- `bl-switch__option`
-- `bl-switch__track`
-- `bl-tabbar`
-- `bl-tabbar__icon`
-- `bl-tabbar__item`
-- `bl-tabbar__label`
+- `bl-tab-bar`
+- `bl-tab-bar__icon`
+- `bl-tab-bar__item`
+- `bl-tab-bar__label`
 - `bl-table`
 - `bl-table--compact`
 - `bl-table--scroll`
@@ -1145,7 +1145,6 @@ Exposed: none
 
 ## CSS hooks (custom properties a consumer may set)
 - `--bl-chevron-mask`
-- `--bl-col-min`
 - `--bl-dialog-width`
 - `--bl-log-height`
 - `--bl-media-size`
@@ -1154,6 +1153,7 @@ Exposed: none
 - `--bl-rise-delay`
 - `--bl-scroll-offset-bottom`
 - `--bl-scroll-offset-top`
+- `--bl-table-col-min`
 - `--bl-table-min-col`
 - `--bl-telemetry-columns`
 

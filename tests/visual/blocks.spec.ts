@@ -331,7 +331,7 @@ test.describe('BlToast', () => {
     await page.goto('/')
     await demo(page, 'toast').getByRole('button', { name: 'Toast' }).click()
     const t = (await page.locator('.bl-toast').first().boundingBox())!
-    const bar = await page.locator('.bl-tabbar').boundingBox()
+    const bar = await page.locator('.bl-tab-bar').boundingBox()
     if (bar) expect(t.y + t.height).toBeLessThanOrEqual(bar.y)
   })
 })
@@ -646,7 +646,7 @@ test.describe('motion: theme flip', () => {
         return original(update)
       }
       const seen = new Set<string>()
-      document.querySelector<HTMLInputElement>('.bl-switch input[value="dark"]')!.click()
+      document.querySelector<HTMLInputElement>('.bl-appearance input[value="dark"]')!.click()
       for (let i = 0; i < 40; i++) {
         await new Promise(requestAnimationFrame)
         for (const a of document.documentElement.getAnimations({ subtree: true })) {
@@ -680,7 +680,7 @@ test.describe('motion: theme flip', () => {
     })
     const peak = await page.evaluate(async () => {
       let max = 0
-      document.querySelector<HTMLInputElement>('.bl-switch input[value="dark"]')!.click()
+      document.querySelector<HTMLInputElement>('.bl-appearance input[value="dark"]')!.click()
       for (let i = 0; i < 45; i++) {
         await new Promise(requestAnimationFrame)
         max = Math.max(max, document.getAnimations().length)

@@ -71,7 +71,7 @@
   </div>
 
   <BlSectionHead :level="3" eyebrow="Links" heading="Arrows">
-    <template #action><BlLinkArrow href="#content">All projects</BlLinkArrow></template>
+    <template #actions><BlLinkArrow href="#content">All projects</BlLinkArrow></template>
   </BlSectionHead>
   <div class="pg-row">
     <BlLinkArrow href="#content">All projects</BlLinkArrow>

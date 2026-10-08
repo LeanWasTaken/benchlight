@@ -67,20 +67,20 @@ const REQUIRED: Record<string, string[]> = {
     ".bl-site-bar__link[aria-current]:not([aria-current='false'])",
     '.bl-site-bar__navwrap + .bl-site-bar__actions'
   ],
-  tabbar: [
-    ".bl-tabbar__item[aria-current]:not([aria-current='false'])",
-    'body:has(.bl-tabbar)',
-    'html:has(.bl-tabbar)',
+  'tab-bar': [
+    ".bl-tab-bar__item[aria-current]:not([aria-current='false'])",
+    'body:has(.bl-tab-bar)',
+    'html:has(.bl-tab-bar)',
     '--bl-scroll-offset-bottom: calc(96px + env(safe-area-inset-bottom))'
   ],
   colophon: ['.bl-colophon__inner', '.bl-colophon__items a:hover'],
   'skip-link': ['.bl-skip-link:focus'],
-  switch: [
-    ".bl-switch__track:has(input[value='light']:checked)::before",
-    ".bl-switch__track:has(input[value='dark']:checked)::before",
-    '.bl-switch__track:has(input:focus-visible)',
-    '.bl-switch__option:has(:checked)',
-    '.bl-switch__option::before'
+  appearance: [
+    ".bl-appearance__track:has(input[value='light']:checked)::before",
+    ".bl-appearance__track:has(input[value='dark']:checked)::before",
+    '.bl-appearance__track:has(input:focus-visible)',
+    '.bl-appearance__option:has(:checked)',
+    '.bl-appearance__option::before'
   ],
   segmented: [
     ".bl-segmented__item[aria-pressed='true']",
@@ -120,8 +120,8 @@ const REQUIRED: Record<string, string[]> = {
   'section-head': [
     '.bl-section-head--ruled',
     '.bl-section-head--bar',
-    '.bl-section-head__action',
-    '.bl-section-head:not(.bl-section-head--bar):has(> .bl-section-head__action)'
+    '.bl-section-head__actions',
+    '.bl-section-head:not(.bl-section-head--bar):has(> .bl-section-head__actions)'
   ],
   meta: ['.bl-meta--sep > * + *::before', '.bl-meta__key'],
   'index-row': [
@@ -161,7 +161,7 @@ describe('touch targets', () => {
   it.each([
     ['site-bar', '.bl-site-bar__brand'],
     ['site-bar', '.bl-site-bar__link'],
-    ['switch', '.bl-switch'],
+    ['appearance', '.bl-appearance'],
     ['btn', '.bl-btn'],
     ['field', '.bl-input'],
     ['field', '.bl-select'],
@@ -171,34 +171,34 @@ describe('touch targets', () => {
   })
 
   it('keeps each switch option 44px wide with a hit area reaching 44px tall', () => {
-    const css = read('switch')
-    const option = ruleBody(css, '.bl-switch__option')
+    const css = read('appearance')
+    const option = ruleBody(css, '.bl-appearance__option')
     expect(option.width).toBe('44px')
     expect(option.height).toBe('30px')
-    expect(ruleBody(css, '.bl-switch__option::before').inset).toBe('-7px 0')
+    expect(ruleBody(css, '.bl-appearance__option::before').inset).toBe('-7px 0')
   })
 })
 
 describe('anchored behaviour', () => {
   it('pins the tab bar to the viewport and hides it from 40em up', () => {
-    const css = read('tabbar')
-    expect(ruleBody(css, '.bl-tabbar').position).toBe('fixed')
-    expect(ruleBody(css, '.bl-tabbar', ['@media (min-width: 40em)']).display).toBe('none')
+    const css = read('tab-bar')
+    expect(ruleBody(css, '.bl-tab-bar').position).toBe('fixed')
+    expect(ruleBody(css, '.bl-tab-bar', ['@media (min-width: 40em)']).display).toBe('none')
   })
 
   it('reserves room for the tab bar below 40em only', () => {
-    const css = read('tabbar')
+    const css = read('tab-bar')
     const narrow = ['@media (max-width: 39.99em)']
-    expect(ruleBody(css, 'body:has(.bl-tabbar)', narrow)['padding-bottom']).toBe(
+    expect(ruleBody(css, 'body:has(.bl-tab-bar)', narrow)['padding-bottom']).toBe(
       'calc(80px + env(safe-area-inset-bottom))'
     )
-    expect(ruleBody(css, 'html:has(.bl-tabbar)', narrow)['--bl-scroll-offset-bottom']).toBe(
+    expect(ruleBody(css, 'html:has(.bl-tab-bar)', narrow)['--bl-scroll-offset-bottom']).toBe(
       'calc(96px + env(safe-area-inset-bottom))'
     )
   })
 
   it('keeps the tab bar and the page column clear of device safe areas', () => {
-    const bar = ruleBody(read('tabbar'), '.bl-tabbar')
+    const bar = ruleBody(read('tab-bar'), '.bl-tab-bar')
     expect(bar.bottom).toBe('calc(12px + env(safe-area-inset-bottom))')
     expect(bar.left).toBe('calc(12px + env(safe-area-inset-left))')
     expect(bar.right).toBe('calc(12px + env(safe-area-inset-right))')
@@ -215,12 +215,12 @@ describe('anchored behaviour', () => {
   })
 
   it('shrinks tab bar items and truncates their labels instead of overflowing', () => {
-    const css = read('tabbar')
-    const item = ruleBody(css, '.bl-tabbar__item')
+    const css = read('tab-bar')
+    const item = ruleBody(css, '.bl-tab-bar__item')
     expect(item['min-width']).toBe('0')
     expect(item['min-height']).toBe('44px')
     expect(item.padding).toBe('8px 4px')
-    const label = ruleBody(css, '.bl-tabbar__label')
+    const label = ruleBody(css, '.bl-tab-bar__label')
     expect(label['text-overflow']).toBe('ellipsis')
     expect(label['white-space']).toBe('nowrap')
     expect(label['max-width']).toBe('100%')
@@ -248,7 +248,9 @@ describe('anchored behaviour', () => {
   it('hides the site bar nav below 40em only when a tab bar replaces it', () => {
     const css = read('site-bar')
     const narrow = ['@media (max-width: 39.99em)']
-    expect(ruleBody(css, 'html:has(.bl-tabbar) .bl-site-bar__navwrap', narrow).display).toBe('none')
+    expect(ruleBody(css, 'html:has(.bl-tab-bar) .bl-site-bar__navwrap', narrow).display).toBe(
+      'none'
+    )
     expect(() => ruleBody(css, '.bl-site-bar__navwrap', narrow)).toThrow()
   })
 
@@ -344,12 +346,12 @@ describe('anchored behaviour', () => {
   })
 
   it('slides the switch thumb one 44px option per step', () => {
-    const css = read('switch')
+    const css = read('appearance')
     expect(
-      ruleBody(css, ".bl-switch__track:has(input[value='light']:checked)::before").transform
+      ruleBody(css, ".bl-appearance__track:has(input[value='light']:checked)::before").transform
     ).toBe('translateX(44px)')
     expect(
-      ruleBody(css, ".bl-switch__track:has(input[value='dark']:checked)::before").transform
+      ruleBody(css, ".bl-appearance__track:has(input[value='dark']:checked)::before").transform
     ).toBe('translateX(88px)')
   })
 
@@ -360,7 +362,7 @@ describe('anchored behaviour', () => {
   })
 
   it('draws a trace-coloured focus outline on the switch track', () => {
-    const focus = ruleBody(read('switch'), '.bl-switch__track:has(input:focus-visible)')
+    const focus = ruleBody(read('appearance'), '.bl-appearance__track:has(input:focus-visible)')
     expect(focus.outline).toBe('2px solid var(--bl-trace)')
   })
 })
@@ -586,12 +588,12 @@ describe('container-aware layouts', () => {
   it('gives the section head action room without collapsing the heading', () => {
     const css = read('section-head')
     expect(
-      ruleBody(css, '.bl-section-head:not(.bl-section-head--bar):has(> .bl-section-head__action)')[
+      ruleBody(css, '.bl-section-head:not(.bl-section-head--bar):has(> .bl-section-head__actions)')[
         'grid-template-columns'
       ]
     ).toBe('minmax(0, 1fr) fit-content(40%)')
     expect(ruleBody(css, '.bl-section-head--bar')['flex-wrap']).toBe('wrap')
-    expect(ruleBody(css, '.bl-section-head__action')['flex-shrink']).toBeUndefined()
+    expect(ruleBody(css, '.bl-section-head__actions')['flex-shrink']).toBeUndefined()
   })
 
   it('keeps the link-arrow hit area at least 44px wide', () => {
@@ -936,7 +938,7 @@ describe('theme transitions', () => {
     const cases: [string, string, string[]][] = [
       ['btn', '.bl-btn', ['background-color', 'border-color', 'color', 'box-shadow']],
       ['segmented', '.bl-segmented__item', ['background-color', 'color', 'box-shadow']],
-      ['tabbar', '.bl-tabbar__item', ['color', 'background-color']],
+      ['tab-bar', '.bl-tab-bar__item', ['color', 'background-color']],
       ['toggle', '.bl-toggle__track', ['background-color', 'border-color']],
       ['toggle', '.bl-toggle__thumb', ['border-color']]
     ]
@@ -1028,7 +1030,7 @@ describe('eased state changes', () => {
     expect(props(inLayer(read('btn'), '.bl-btn').transition)).toEqual(
       expect.arrayContaining(['box-shadow', 'opacity'])
     )
-    expect(props(inLayer(read('tabbar'), '.bl-tabbar__item').transition)).toContain(
+    expect(props(inLayer(read('tab-bar'), '.bl-tab-bar__item').transition)).toContain(
       'background-color'
     )
   })
@@ -1074,7 +1076,7 @@ describe('hover-capable pointers only', () => {
     )
   for (const name of [
     'prev-next',
-    'tabbar',
+    'tab-bar',
     'site-bar',
     'link-arrow',
     'colophon',
@@ -1085,4 +1087,24 @@ describe('hover-capable pointers only', () => {
     it(`${name} keeps every :hover rule inside (hover: hover)`, () => {
       expect(ungated(name).map((r) => r.selectors.join(', '))).toEqual([])
     })
+})
+
+describe('renamed blocks and hooks', () => {
+  const all = readdirSync(new URL('../css/components/', import.meta.url))
+    .map((f) => read(f.replace(/\.css$/, '')))
+    .join('\n')
+
+  it('uses the component-named blocks and the plural section head actions', () => {
+    expect(read('appearance')).toContain('.bl-appearance__track')
+    expect(read('tab-bar')).toContain('.bl-tab-bar__item')
+    expect(read('section-head')).toContain('.bl-section-head__actions')
+    expect(read('table')).toContain('var(--bl-table-col-min, var(--bl-table-min-col, 8rem))')
+  })
+
+  it('no longer defines the old names', () => {
+    // The old names are split so a repo-wide grep for them only finds CHANGELOG history.
+    for (const old of ['bl-sw' + 'itch', 'bl-tab' + 'bar', '--bl-' + 'col-min'])
+      expect(all).not.toContain(old)
+    expect(all).not.toMatch(new RegExp('bl-section-head__' + 'action(?!s)'))
+  })
 })
