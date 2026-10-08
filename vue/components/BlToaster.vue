@@ -66,6 +66,7 @@
   import { warn } from '../internal/dev'
   import { toastFocus, toastHosts } from '../internal/toastHosts'
   import { dismissToast, toastState, type ToastRecord } from '../internal/toastStore'
+  import { mergeLabels } from '../internal/labels'
   import type { ToasterLabels } from '../types'
   import BlButton from './BlButton.vue'
 
@@ -73,12 +74,16 @@
   const props = withDefaults(defineProps<{ max?: number; labels?: Partial<ToasterLabels> }>(), {
     max: 3
   })
-  const text = computed<ToasterLabels>(() => ({
-    region: 'Notifications',
-    dismiss: 'Dismiss',
-    actionHint: (label: string) => `${label} available`,
-    ...props.labels
-  }))
+  const text = computed<ToasterLabels>(() =>
+    mergeLabels(
+      {
+        region: 'Notifications',
+        dismiss: 'Dismiss',
+        actionHint: (label: string) => `${label} available`
+      },
+      props.labels
+    )
+  )
   const uid = useId()
   const root = ref<HTMLElement>()
   const status = ref<HTMLElement>()

@@ -136,6 +136,11 @@ interface AppearanceLabels {
     auto: string;
     light: string;
     dark: string;
+    marks?: Partial<{
+        auto: string;
+        light: string;
+        dark: string;
+    }>;
 }
 ```
 
@@ -346,6 +351,9 @@ interface TableLabels {
     total: string;
     empty: string;
     sortStrip: string;
+    sortAscending: string;
+    sortDescending: string;
+    pages: (caption: string) => string;
 }
 ```
 
@@ -632,7 +640,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `label` | `string` | yes |  |
+| `label` | `string \| undefined` | no |  |
 | `labels` | `Partial<PaginationLabels> \| undefined` | no |  |
 | `page` | `number \| undefined` | no | `1` |
 | `pageSize` | `number` | yes |  |

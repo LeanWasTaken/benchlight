@@ -1,5 +1,5 @@
 <template>
-  <nav v-if="pages > 1" class="bl-pagination" :aria-label="label">
+  <nav v-if="pages > 1" class="bl-pagination" :aria-label="navLabel">
     <ul class="bl-pagination__list">
       <li>
         <button
@@ -47,6 +47,8 @@
 
 <script setup lang="ts">
   import { computed, ref, watch } from 'vue'
+  import { warn } from '../internal/dev'
+  import { mergeLabels } from '../internal/labels'
   import { clampPage, pageCount, pageRange } from '../internal/table'
   import type { PaginationLabels } from '../types'
 
@@ -55,7 +57,8 @@
     defineProps<{
       total: number
       pageSize: number
-      label: string
+      /** Accessible name of the nav; falls back to `labels.nav`. */
+      label?: string
       siblings?: number
       labels?: Partial<PaginationLabels>
     }>(),
@@ -63,19 +66,27 @@
   )
   const page = defineModel<number>('page', { default: 1 })
 
-  const text = computed<Omit<PaginationLabels, 'nav'>>(() => {
-    const merged: Omit<PaginationLabels, 'nav'> = {
-      prev: 'Previous',
-      next: 'Next',
-      page: (n) => `Page ${n}`,
-      pageOf: (p, of) => `Page ${p} of ${of}`,
-      range: (from, to, total) => `${from}–${to} of ${total}`
-    }
-    for (const [key, value] of Object.entries(props.labels ?? {})) {
-      if (value !== undefined && key !== 'nav') Object.assign(merged, { [key]: value })
-    }
-    return merged
-  })
+  const text = computed<Omit<PaginationLabels, 'nav'>>(() =>
+    mergeLabels<Omit<PaginationLabels, 'nav'>>(
+      {
+        prev: 'Previous',
+        next: 'Next',
+        page: (n) => `Page ${n}`,
+        pageOf: (p, of) => `Page ${p} of ${of}`,
+        range: (from, to, total) => `${from}–${to} of ${total}`
+      },
+      props.labels
+    )
+  )
+  const navLabel = computed(() => props.label ?? props.labels?.nav)
+  watch(
+    navLabel,
+    (name) => {
+      if (name === undefined)
+        warn('BlPagination: set `label` or `labels.nav` to name the navigation.')
+    },
+    { immediate: true }
+  )
   const pages = computed(() => pageCount(props.total, props.pageSize))
   const current = computed(() => clampPage(page.value, props.total, props.pageSize))
   const items = computed(() => pageRange(current.value, pages.value, props.siblings))
