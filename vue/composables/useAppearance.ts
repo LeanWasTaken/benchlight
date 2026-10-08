@@ -1,5 +1,6 @@
 import {
   effectScope,
+  nextTick,
   onBeforeUnmount,
   onMounted,
   ref,
@@ -33,6 +34,27 @@ function applyAttribute(mode: AppearanceMode): void {
   const root = document.documentElement
   if (mode === 'auto') root.removeAttribute(APPEARANCE_ATTRIBUTE)
   else root.setAttribute(APPEARANCE_ATTRIBUTE, mode)
+}
+
+// A change the user makes crossfades the whole page in one View Transition, instead of every
+// element easing its own colours; without the API, or with reduced motion, it applies at once.
+// `resolved` follows the attribute, not the click: the browser runs the update after it has
+// captured the old page, so resolving earlier would let watchers read the old theme's tokens.
+function applyAnimated(mode: AppearanceMode, resolve: () => void): void {
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (reduced || typeof document.startViewTransition !== 'function') {
+    applyAttribute(mode)
+    resolve()
+  } else {
+    // Skipping ends the transition early; the callback has run by then, so nothing is lost.
+    const transition = document.startViewTransition(async () => {
+      applyAttribute(mode)
+      resolve()
+      // Let watchers' DOM updates land before the new page is captured.
+      await nextTick()
+    })
+    transition.ready.catch(() => {})
+  }
 }
 
 interface SharedAppearance {
@@ -76,13 +98,12 @@ function attach(state: SharedAppearance): void {
     state.scope = effectScope(true)
     state.scope.run(() =>
       watch(state.mode, (value) => {
-        applyAttribute(value)
+        applyAnimated(value, state.resolve)
         try {
           localStorage.setItem(APPEARANCE_STORAGE_KEY, value)
         } catch {
           // storage unavailable: the choice lasts for this page only
         }
-        state.resolve()
       })
     )
   }

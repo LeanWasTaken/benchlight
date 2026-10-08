@@ -862,3 +862,52 @@ describe('toast', () => {
     expect(ruleBody(css, '.bl-toast-leave-to', reduce).translate).toBe('none')
   })
 })
+
+describe('theme transitions', () => {
+  const file = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8')
+  const props = (list: string | undefined) =>
+    (list ?? '').split(/,(?![^(]*\))/).map((part) => part.trim().split(/\s+/)[0])
+
+  it('crossfades a theme change as one View Transition, not per-element transitions', () => {
+    const base = file('css/base.css')
+    expect(base).not.toContain(":where([class^='bl-']")
+    const rules = parseRules(base)
+    const fade = rules.find((r) => r.selectors.includes('::view-transition-old(root)'))
+    expect(fade!.selectors).toContain('::view-transition-new(root)')
+    expect(fade!.declarations['animation-duration']).toBe('var(--bl-duration-base)')
+    const reduce = rules.find(
+      (r) =>
+        r.selectors.includes('::view-transition-new(*)') &&
+        r.within.includes('@media (prefers-reduced-motion: reduce)')
+    )
+    expect(reduce!.declarations['animation-duration']).toBe('0.01ms !important')
+  })
+
+  it('names the colours a component eases where it declares its own transition', () => {
+    const cases: [string, string, string[]][] = [
+      ['btn', '.bl-btn', ['background-color', 'border-color', 'color', 'box-shadow']],
+      ['segmented', '.bl-segmented__item', ['background-color', 'color', 'box-shadow']],
+      ['tabbar', '.bl-tabbar__item', ['color', 'background-color']],
+      ['toggle', '.bl-toggle__track', ['background-color', 'border-color']],
+      ['toggle', '.bl-toggle__thumb', ['border-color']]
+    ]
+    for (const [name, selector, want] of cases) {
+      const rule = parseRules(read(name)).find(
+        (r) =>
+          r.selectors.join(', ') === selector &&
+          r.within.join() === '@layer components' &&
+          r.declarations.transition
+      )
+      expect(rule, `${name} ${selector}`).toBeDefined()
+      for (const prop of want)
+        expect(props(rule!.declarations.transition), `${name} ${selector}`).toContain(prop)
+    }
+  })
+
+  it('keeps BlTable measuring free of transitions', () => {
+    const rule = parseRules(read('table')).find((r) =>
+      r.selectors.includes('.bl-table[data-measuring] *')
+    )
+    expect(rule!.declarations['transition-property']).toBe('none !important')
+  })
+})

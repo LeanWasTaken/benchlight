@@ -49,7 +49,9 @@
     border: 1px solid var(--bl-control-border);
     border-radius: 50%;
     box-shadow: var(--bl-shadow-thumb);
-    transition: inset-inline-start var(--bl-duration-fast) ease;
+    transition:
+      inset-inline-start var(--bl-duration-fast) ease,
+      border-color var(--bl-duration-fast) ease;
   }
   .bl-toggle__input:checked + .bl-toggle__track {
     background: var(--bl-trace);

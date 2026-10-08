@@ -29,7 +29,8 @@
     cursor: pointer;
     transition:
       color var(--bl-duration-fast) ease,
-      background-color var(--bl-duration-fast) ease;
+      background-color var(--bl-duration-fast) ease,
+      box-shadow var(--bl-duration-fast) ease;
   }
   /* Invisible hit area: ~29px item + 8px above and below, meeting at the 16px row-gap midpoint
      so a wrapped row never steals taps from the row above. No horizontal reach (items are 44px wide instead), so it never

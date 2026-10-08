@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createSSRApp, defineComponent, h, nextTick, ref } from 'vue'
+import { createSSRApp, defineComponent, h, nextTick, ref, watch } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 import { riseDelay } from '../../vue/composables/riseDelay'
 import { resetAppearanceState, useAppearance } from '../../vue/composables/useAppearance'
@@ -21,6 +21,76 @@ beforeEach(() => {
 afterEach(() => vi.restoreAllMocks())
 
 describe('useAppearance', () => {
+  describe('view transition', () => {
+    const stub = () => {
+      const start = vi.fn((update: () => void) => {
+        update()
+        return { ready: Promise.resolve() }
+      })
+      ;(document as unknown as { startViewTransition: unknown }).startViewTransition = start
+      return start
+    }
+    afterEach(() => {
+      delete (document as unknown as { startViewTransition?: unknown }).startViewTransition
+    })
+
+    it('applies a change inside one view transition when motion is allowed', async () => {
+      const start = stub()
+      const { result } = withSetup(useAppearance)
+      result.mode.value = 'dark'
+      await nextTick()
+      expect(start).toHaveBeenCalledTimes(1)
+      expect(attribute()).toBe('dark')
+    })
+
+    it('resolves only once the theme is in the DOM, so watchers read the new tokens', async () => {
+      const style = document.createElement('style')
+      style.textContent =
+        ':root { --probe: light } :root[data-bl-appearance="dark"] { --probe: dark }'
+      document.head.append(style)
+      let run: () => Promise<void> = async () => {}
+      ;(document as unknown as { startViewTransition: unknown }).startViewTransition = (
+        update: () => Promise<void>
+      ) => {
+        run = update // the browser runs it later, after capturing the old page
+        return { ready: Promise.resolve() }
+      }
+      const { result } = withSetup(useAppearance)
+      const seen: { attribute: string | null; token: string }[] = []
+      watch(result.resolved, () =>
+        seen.push({
+          attribute: attribute(),
+          token: getComputedStyle(root).getPropertyValue('--probe').trim()
+        })
+      )
+      result.mode.value = 'dark'
+      await nextTick()
+      expect(result.resolved.value).toBe('light')
+      expect(seen).toEqual([])
+      await run()
+      await nextTick()
+      expect(seen).toEqual([{ attribute: 'dark', token: 'dark' }])
+      style.remove()
+    })
+
+    it('applies at once under reduced motion', async () => {
+      mockMatchMedia({ [REDUCED_QUERY]: true })
+      const start = stub()
+      const { result } = withSetup(useAppearance)
+      result.mode.value = 'dark'
+      await nextTick()
+      expect(start).not.toHaveBeenCalled()
+      expect(attribute()).toBe('dark')
+    })
+
+    it('applies at once without the API', async () => {
+      const { result } = withSetup(useAppearance)
+      result.mode.value = 'light'
+      await nextTick()
+      expect(attribute()).toBe('light')
+    })
+  })
+
   it('starts on auto and resolves from the OS', () => {
     mockMatchMedia({ [DARK_QUERY]: true })
     const { result } = withSetup(useAppearance)

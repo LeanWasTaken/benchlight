@@ -50,6 +50,22 @@ describe('js/appearance.js', () => {
     expect(localStorage.getItem('bl-appearance')).toBe('light')
   })
 
+  it('applies a choice inside a view transition when the browser has one', () => {
+    const start = vi.fn((update: () => void) => {
+      update()
+      return { ready: Promise.resolve() }
+    })
+    Object.defineProperty(document, 'startViewTransition', { value: start, configurable: true })
+    try {
+      run()
+      choose('dark')
+      expect(start).toHaveBeenCalledTimes(1)
+      expect(root.getAttribute('data-bl-appearance')).toBe('dark')
+    } finally {
+      delete (document as unknown as { startViewTransition?: unknown }).startViewTransition
+    }
+  })
+
   it('returns to auto by removing the attribute', () => {
     root.setAttribute('data-bl-appearance', 'dark')
     run()

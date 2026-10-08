@@ -7,6 +7,12 @@
 - BlToast: a dismissed toast now fades out where it stands. The move class that Vue puts on the
   leaving toast replaced its opacity and translate transitions, so it vanished at once while
   sliding unseen.
+- Theme changes crossfade instead of snapping. `useAppearance` and `js/appearance.js` apply the
+  new theme inside one View Transition, so the whole page fades over `--bl-duration-base` as a
+  single composited layer, however many elements it holds (a per-element transition rule janked
+  data-heavy pages). Browsers without View Transitions, reduced motion and OS-driven `auto`
+  flips apply the theme at once, as before. BlButton and BlSegmented also ease their pressed and
+  selected rings, and BlTabBar its active tint; BlToggle's thumb border eases with the move.
 
 ## 0.6.0 - 2026-10-08
 
