@@ -19,14 +19,18 @@
     inset: -12px 0;
     content: '';
   }
-  .bl-link-arrow:hover {
-    color: var(--bl-trace);
+  @media (hover: hover) {
+    .bl-link-arrow:hover {
+      color: var(--bl-trace);
+    }
   }
   .bl-link-arrow--quiet {
     color: var(--bl-ink-3);
   }
-  .bl-link-arrow--quiet:hover {
-    color: var(--bl-ink-1);
+  @media (hover: hover) {
+    .bl-link-arrow--quiet:hover {
+      color: var(--bl-ink-1);
+    }
   }
   .bl-link-arrow__icon {
     display: inline-flex;

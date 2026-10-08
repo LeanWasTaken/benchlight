@@ -1019,3 +1019,25 @@ describe('eased state changes', () => {
       expect(rule.within.join(' ')).toContain('(prefers-reduced-motion: no-preference)')
   })
 })
+
+describe('hover-capable pointers only', () => {
+  const ungated = (name: string) =>
+    parseRules(read(name)).filter(
+      (r) =>
+        r.selectors.some((s) => s.includes(':hover')) &&
+        !r.within.some((w) => w.includes('(hover: hover)'))
+    )
+  for (const name of [
+    'prev-next',
+    'tabbar',
+    'site-bar',
+    'link-arrow',
+    'colophon',
+    'segmented',
+    'prose',
+    'spec-panel'
+  ])
+    it(`${name} keeps every :hover rule inside (hover: hover)`, () => {
+      expect(ungated(name).map((r) => r.selectors.join(', '))).toEqual([])
+    })
+})
