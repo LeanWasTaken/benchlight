@@ -1,6 +1,6 @@
 <template>
   <BlSectionHead eyebrow="Featured projects" bar>
-    <template #action><BlLinkArrow href="#content">All projects</BlLinkArrow></template>
+    <template #actions><BlLinkArrow href="#content">All projects</BlLinkArrow></template>
   </BlSectionHead>
   <BlIndex>
     <BlIndexRow

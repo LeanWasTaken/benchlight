@@ -1,5 +1,5 @@
 @layer components {
-  .bl-tabbar {
+  .bl-tab-bar {
     position: fixed;
     right: calc(12px + env(safe-area-inset-right));
     bottom: calc(12px + env(safe-area-inset-bottom));
@@ -15,7 +15,7 @@
     box-shadow: var(--bl-shadow-float);
   }
   /* Up to 5 tabs fit a phone width; more shrink and truncate their labels. */
-  .bl-tabbar__item {
+  .bl-tab-bar__item {
     display: flex;
     flex: 1 1 0;
     min-width: 0;
@@ -33,24 +33,24 @@
       background-color var(--bl-duration-fast) ease;
   }
   @media (hover: hover) {
-    .bl-tabbar__item:hover {
+    .bl-tab-bar__item:hover {
       color: var(--bl-ink-1);
     }
   }
-  .bl-tabbar__item[aria-current]:not([aria-current='false']) {
+  .bl-tab-bar__item[aria-current]:not([aria-current='false']) {
     color: var(--bl-trace);
     background: color-mix(in srgb, var(--bl-trace) 10%, transparent);
   }
-  .bl-tabbar__icon {
+  .bl-tab-bar__icon {
     display: inline-flex;
     width: 16px;
     height: 16px;
   }
-  .bl-tabbar__icon > svg {
+  .bl-tab-bar__icon > svg {
     width: 100%;
     height: 100%;
   }
-  .bl-tabbar__label {
+  .bl-tab-bar__label {
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -61,15 +61,15 @@
     text-transform: uppercase;
   }
   @media (min-width: 40em) {
-    .bl-tabbar {
+    .bl-tab-bar {
       display: none;
     }
   }
   @media (max-width: 39.99em) {
-    body:has(.bl-tabbar) {
+    body:has(.bl-tab-bar) {
       padding-bottom: calc(80px + env(safe-area-inset-bottom));
     }
-    html:has(.bl-tabbar) {
+    html:has(.bl-tab-bar) {
       --bl-scroll-offset-bottom: calc(96px + env(safe-area-inset-bottom));
     }
   }

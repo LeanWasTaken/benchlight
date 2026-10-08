@@ -37,6 +37,14 @@ const make = (props: Record<string, unknown> = {}) =>
   mount(BlTable, { props: { caption: 'Clients', columns, rows, rowKey: 'mac', ...props } })
 
 describe('BlTable', () => {
+  it('sets a column width as --bl-table-col-min on its body cells', () => {
+    const w = make({ columns: [{ key: 'name', label: 'Device', width: '12rem' }, columns[1]] })
+    const style = w.find('tbody tr > *').attributes('style')
+    expect(style).toContain('--bl-table-col-min: 12rem')
+    // The old name is split so a repo-wide grep for it only finds CHANGELOG history.
+    expect(w.html()).not.toContain('--bl-' + 'col-min')
+  })
+
   it('renders table semantics with explicit roles and a caption', () => {
     const w = make()
     expect(w.find('table').attributes('role')).toBe('table')

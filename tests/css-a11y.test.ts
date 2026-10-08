@@ -62,7 +62,7 @@ describe('non-text contrast', () => {
     expect(body(read('css/components/meter.css'), '.bl-meter')).toContain(
       'var(--bl-control-border)'
     )
-    expect(body(read('css/components/switch.css'), '.bl-switch__track::before')).toContain(
+    expect(body(read('css/components/appearance.css'), '.bl-appearance__track::before')).toContain(
       'border: 1px solid var(--bl-control-border);'
     )
     expect(

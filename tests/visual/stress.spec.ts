@@ -65,12 +65,12 @@ async function openVariant(page: Page, id: string, v: Variant): Promise<void> {
   if (process.env.STRESS_BREAK === 'overflow')
     await page.addStyleTag({
       content:
-        '[data-box] > *, .bl-site-bar, .bl-tabbar { width: 2000px !important; min-width: 2000px !important; }'
+        '[data-box] > *, .bl-site-bar, .bl-tab-bar { width: 2000px !important; min-width: 2000px !important; }'
     })
   if (process.env.STRESS_BREAK === 'stack')
     await page.addStyleTag({
       content:
-        '[data-box] *, .bl-site-bar * { position: absolute !important; left: 0 !important; top: 0 !important; } .bl-site-bar, .bl-tabbar { height: 300px !important; } .bl-tabbar__item { margin-left: 2000px !important; }'
+        '[data-box] *, .bl-site-bar * { position: absolute !important; left: 0 !important; top: 0 !important; } .bl-site-bar, .bl-tab-bar { height: 300px !important; } .bl-tab-bar__item { margin-left: 2000px !important; }'
     })
   if (process.env.STRESS_BREAK === 'small')
     await page.addStyleTag({
@@ -79,7 +79,7 @@ async function openVariant(page: Page, id: string, v: Variant): Promise<void> {
   if (process.env.STRESS_BREAK === 'overlap')
     await page.addStyleTag({
       content:
-        '.bl-section-head__eyebrow, .bl-section-head__heading, .bl-section-head__action { position: absolute !important; left: 0 !important; top: 0 !important; width: 100px !important; height: 30px !important; }'
+        '.bl-section-head__eyebrow, .bl-section-head__heading, .bl-section-head__actions { position: absolute !important; left: 0 !important; top: 0 !important; width: 100px !important; height: 30px !important; }'
     })
   await page.evaluate(
     ({ root, narrow }) => {
@@ -375,7 +375,7 @@ const brandCentred: Probe = (page) =>
       return (r.top + r.bottom) / 2
     }
     const svg = document.querySelector('.bl-site-bar__brand svg')
-    const sw = document.querySelector('.bl-switch')
+    const sw = document.querySelector('.bl-appearance')
     if (!svg || !sw) return 'missing logo or switch'
     const range = document.createRange()
     const brand = document.querySelector('.bl-site-bar__brand')!
@@ -762,12 +762,12 @@ const cases: Case[] = [
     ]
   },
   {
-    id: 'section-head-action',
+    id: 'section-head-actions',
     checks: [
       {
         name: 'action-not-collapsed',
         variants: ALL,
-        probe: minWidth('.bl-section-head__action', 60)
+        probe: minWidth('.bl-section-head__actions', 60)
       },
       ...generic(),
       {
@@ -778,23 +778,23 @@ const cases: Case[] = [
       {
         name: 'heading-action-no-overlap',
         variants: ALL,
-        probe: noOverlap('.bl-section-head__heading', '.bl-section-head__action')
+        probe: noOverlap('.bl-section-head__heading', '.bl-section-head__actions')
       }
     ]
   },
   {
-    id: 'section-head-bar-action',
+    id: 'section-head-bar-actions',
     checks: [
       {
         name: 'action-not-collapsed',
         variants: ALL,
-        probe: minWidth('.bl-section-head__action', 60)
+        probe: minWidth('.bl-section-head__actions', 60)
       },
       ...generic(),
       {
         name: 'eyebrow-action-no-overlap',
         variants: ALL,
-        probe: noOverlap('.bl-section-head__eyebrow', '.bl-section-head__action')
+        probe: noOverlap('.bl-section-head__eyebrow', '.bl-section-head__actions')
       }
     ]
   },
@@ -821,7 +821,7 @@ const cases: Case[] = [
       {
         name: 'appearance-switch-visible',
         variants: between(640, 1280),
-        probe: visibleInViewport('.bl-switch')
+        probe: visibleInViewport('.bl-appearance')
       }
     ]
   })),
@@ -829,7 +829,11 @@ const cases: Case[] = [
     id: 'sitebar-brand-30',
     checks: [
       { name: 'no-page-overflow', variants: only('w320'), probe: noPageOverflow },
-      { name: 'switch-visible', variants: only('w320'), probe: visibleInViewport('.bl-switch') }
+      {
+        name: 'appearance-visible',
+        variants: only('w320'),
+        probe: visibleInViewport('.bl-appearance')
+      }
     ]
   },
   {
@@ -855,9 +859,9 @@ const cases: Case[] = [
         probe: brandNotTruncated
       },
       {
-        name: 'switch-visible',
+        name: 'appearance-visible',
         variants: only('w320').concat(only('w640')),
-        probe: visibleInViewport('.bl-switch')
+        probe: visibleInViewport('.bl-appearance')
       },
       {
         name: 'no-page-overflow',
@@ -872,7 +876,7 @@ const cases: Case[] = [
     ]
   },
   ...[6, 7].map<Case>((n) => ({
-    id: `tabbar-${n}`,
+    id: `tab-bar-${n}`,
     checks: [
       {
         name: 'no-page-overflow',
@@ -882,18 +886,18 @@ const cases: Case[] = [
       {
         name: 'tabs-in-viewport',
         variants: only('w320').concat(only('w360')),
-        probe: visibleInViewport('.bl-tabbar__item')
+        probe: visibleInViewport('.bl-tab-bar__item')
       }
     ]
   })),
   {
-    id: 'tabbar-long-4',
+    id: 'tab-bar-long-4',
     checks: [
       { name: 'no-page-overflow', variants: only('w360'), probe: noPageOverflow },
       {
         name: 'tabs-in-viewport',
         variants: only('w360'),
-        probe: visibleInViewport('.bl-tabbar__item')
+        probe: visibleInViewport('.bl-tab-bar__item')
       }
     ]
   },
@@ -1053,7 +1057,7 @@ test.describe('responsive stress', () => {
 })
 
 // at 568x320 the site bar stops being sticky and keyboard focus is never hidden behind chrome.
-for (const id of ['tabbar-6', 'sitebar-nav-no-tabs']) {
+for (const id of ['tab-bar-6', 'sitebar-nav-no-tabs']) {
   test(`short-landscape focus walk (${id})`, async ({ page }) => {
     await page.setViewportSize({ width: 568, height: 320 })
     await page.goto(`/stress.html?case=${id}`)
@@ -1159,7 +1163,7 @@ for (const width of [390, 1280]) {
         const r = document.querySelector(selector)!.getBoundingClientRect()
         return r.top + r.height / 2
       }
-      return { brand: mid('.bl-site-bar__brand'), track: mid('.bl-switch__track') }
+      return { brand: mid('.bl-site-bar__brand'), track: mid('.bl-appearance__track') }
     })
     expect(Math.abs(centres.brand - centres.track)).toBeLessThanOrEqual(2)
   })

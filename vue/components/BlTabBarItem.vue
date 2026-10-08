@@ -2,11 +2,11 @@
   <component
     :is="tag"
     v-bind="linkBindings(tag, to, href)"
-    class="bl-tabbar__item"
+    class="bl-tab-bar__item"
     :aria-current="current ? 'page' : undefined"
   >
-    <span class="bl-tabbar__icon" aria-hidden="true"><slot name="icon" /></span>
-    <span class="bl-tabbar__label"><slot /></span>
+    <span class="bl-tab-bar__icon" aria-hidden="true"><slot name="icon" /></span>
+    <span class="bl-tab-bar__label"><slot /></span>
   </component>
 </template>
 

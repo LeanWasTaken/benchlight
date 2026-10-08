@@ -17,23 +17,34 @@ describe('BlSectionHead', () => {
     expect(wrapper.find('h3.bl-section-head__heading').text()).toBe('What I work with')
   })
 
-  it('bar variant makes the eyebrow the heading and adds an action', () => {
+  it('bar variant makes the eyebrow the heading and adds actions', () => {
     const wrapper = mount(BlSectionHead, {
       props: { eyebrow: 'Featured projects', bar: true },
-      slots: { action: '<a href="/projects">All</a>' }
+      slots: { actions: '<a href="/projects">All</a>' }
     })
     expect(wrapper.classes()).toContain('bl-section-head--bar')
     expect(wrapper.find('h2.bl-section-head__eyebrow').text()).toBe('Featured projects')
-    expect(wrapper.find('.bl-section-head__action a').exists()).toBe(true)
+    expect(wrapper.find('.bl-section-head__actions a').exists()).toBe(true)
   })
 
-  it('renders the action slot outside bar mode too', () => {
+  it('renders the actions slot outside bar mode too', () => {
     const wrapper = mount(BlSectionHead, {
       props: { eyebrow: 'Stack', heading: 'What I work with' },
-      slots: { action: '<a href="/x">All</a>' }
+      slots: { actions: '<a href="/x">All</a>' }
     })
-    expect(wrapper.find('.bl-section-head__action a').exists()).toBe(true)
+    expect(wrapper.find('.bl-section-head__actions a').exists()).toBe(true)
     expect(wrapper.find('h2.bl-section-head__heading').text()).toBe('What I work with')
+  })
+
+  it('renders only the actions slot, not the old action slot', () => {
+    for (const bar of [true, false]) {
+      const wrapper = mount(BlSectionHead, {
+        props: { eyebrow: 'Stack', heading: 'x', bar },
+        slots: { action: '<a href="/x">All</a>' }
+      })
+      expect(wrapper.find('a').exists()).toBe(false)
+      expect(wrapper.find('[class*="__action"]').exists()).toBe(false)
+    }
   })
 
   it('ruled adds the hairline modifier', () => {

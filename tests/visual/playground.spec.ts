@@ -37,16 +37,16 @@ test('the tab bar is pinned to the viewport bottom on mobile and hidden on deskt
   page
 }, testInfo) => {
   await page.goto('/')
-  const tabbar = page.locator('.bl-tabbar')
+  const tabBar = page.locator('.bl-tab-bar')
   if (testInfo.project.name.startsWith('mobile')) {
-    await expect(tabbar).toBeVisible()
-    const box = await tabbar.boundingBox()
+    await expect(tabBar).toBeVisible()
+    const box = await tabBar.boundingBox()
     const height = page.viewportSize()?.height ?? 0
     expect(box).not.toBeNull()
     expect(height - (box!.y + box!.height)).toBeLessThan(16)
     expect(height - (box!.y + box!.height)).toBeGreaterThanOrEqual(-1)
   } else {
-    await expect(tabbar).not.toBeVisible()
+    await expect(tabBar).not.toBeVisible()
   }
 })
 
@@ -71,7 +71,8 @@ test.describe('appearance switch on a reload with a saved choice', () => {
       document.addEventListener(
         'transitionrun',
         (event) => {
-          if ((event.target as Element).closest('.bl-switch__track')) runs.push(event.propertyName)
+          if ((event.target as Element).closest('.bl-appearance__track'))
+            runs.push(event.propertyName)
         },
         true
       )
@@ -81,17 +82,17 @@ test.describe('appearance switch on a reload with a saved choice', () => {
 
     // With the app running, the thumb settles on the same spot and never transitions there.
     await page.goto('/')
-    await expect(page.locator('.bl-switch').first()).toHaveAttribute('data-ready', '')
-    expect((await thumb('.bl-switch__track')).transform).toBe(final)
+    await expect(page.locator('.bl-appearance').first()).toHaveAttribute('data-ready', '')
+    expect((await thumb('.bl-appearance__track')).transform).toBe(final)
     expect(
       await page.evaluate(() => (window as unknown as { __thumbRuns: string[] }).__thumbRuns)
     ).toEqual([])
 
     // Before the component reports ready the thumb follows the root attribute, not the radios.
     await page.evaluate(() => {
-      document.querySelector<HTMLInputElement>('.bl-switch input[value="auto"]')!.checked = true
-      document.querySelector('.bl-switch')!.removeAttribute('data-ready')
+      document.querySelector<HTMLInputElement>('.bl-appearance input[value="auto"]')!.checked = true
+      document.querySelector('.bl-appearance')!.removeAttribute('data-ready')
     })
-    expect((await thumb('.bl-switch__track')).transform).toBe(final)
+    expect((await thumb('.bl-appearance__track')).transform).toBe(final)
   })
 })

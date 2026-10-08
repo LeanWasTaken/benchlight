@@ -392,22 +392,22 @@
       </div>
     </section>
 
-    <section v-if="show('section-head-action')" data-case="section-head-action">
-      <h2 class="st-label">section-head-action</h2>
+    <section v-if="show('section-head-actions')" data-case="section-head-actions">
+      <h2 class="st-label">section-head-actions</h2>
       <div data-box>
         <BlSectionHead eyebrow="Archive" heading="All entries" ruled>
-          <template #action>
+          <template #actions>
             <BlLinkArrow href="#">Browse the complete archive of every note</BlLinkArrow>
           </template>
         </BlSectionHead>
       </div>
     </section>
 
-    <section v-if="show('section-head-bar-action')" data-case="section-head-bar-action">
-      <h2 class="st-label">section-head-bar-action</h2>
+    <section v-if="show('section-head-bar-actions')" data-case="section-head-bar-actions">
+      <h2 class="st-label">section-head-bar-actions</h2>
       <div data-box>
         <BlSectionHead bar eyebrow="Archive of everything">
-          <template #action>
+          <template #actions>
             <BlLinkArrow href="#">Browse the complete archive of every note</BlLinkArrow>
           </template>
         </BlSectionHead>
@@ -875,9 +875,9 @@
     'sitebar-brand-30-nav': { bar: true, brand: 'B'.repeat(30), links: 4, tabs: [] },
     'sitebar-logo': { bar: true, brand, links: 4, tabs: [], logo: true },
     'sitebar-nav-no-tabs': { bar: true, brand, links: 4, tabs: [] },
-    'tabbar-6': { bar: true, brand, links: 4, tabs: tab(6) },
-    'tabbar-7': { bar: true, brand, links: 4, tabs: tab(7) },
-    'tabbar-long-4': {
+    'tab-bar-6': { bar: true, brand, links: 4, tabs: tab(6) },
+    'tab-bar-7': { bar: true, brand, links: 4, tabs: tab(7) },
+    'tab-bar-long-4': {
       bar: true,
       brand,
       links: 4,
