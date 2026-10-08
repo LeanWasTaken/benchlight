@@ -1,8 +1,8 @@
 // @vitest-environment node
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { barrelExports, autoImports, renderApi } from '../scripts/lib/api'
+import { HOOK_ONLY_CLASSES, barrelExports, autoImports, renderApi } from '../scripts/lib/api'
 
 const ROOT = process.cwd()
 
@@ -78,7 +78,7 @@ describe('API.md dynamic slots and slot props', () => {
     expect(table).toContain('`footer` `{ rows: Row[]; }`')
   })
   it('lists the BlField slot props', () => {
-    expect(api()).toMatch(/### BlField\n[\s\S]*?Slot props: `default` `\{ id: string; describedby/)
+    expect(api()).toMatch(/### BlField\n[\s\S]*?Slot props: `default` `\{ id: string; describedBy/)
   })
 })
 
@@ -93,6 +93,17 @@ describe('API.md attributes and hook-only classes', () => {
     const hooks = section('Hook-only classes')
     expect(hooks).toContain('`bl-pagination__prev`')
     expect(hooks).toContain('`bl-pagination__next`')
+  })
+  it('lists the BlRange input hook class', () => {
+    expect(section('Hook-only classes')).toContain('`bl-range__input`')
+  })
+  it('renders every hook-only class from some component', () => {
+    const dir = join(ROOT, 'vue/components')
+    const sources = readdirSync(dir)
+      .filter((f) => f.endsWith('.vue'))
+      .map((f) => readFileSync(join(dir, f), 'utf8'))
+      .join('\n')
+    for (const cls of HOOK_ONLY_CLASSES) expect(sources, cls).toContain(cls)
   })
 })
 

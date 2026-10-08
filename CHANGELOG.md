@@ -31,8 +31,17 @@
   `current` prop on BlNavLink or BlIndexRow wins over a consumer `aria-current`. Move any `target`,
   `rel` or `data-*` hook that targeted the `li`, and any `aria-*` the wrapper carried.
 
+- Field controls settle on one description rule and one spelling. BlField's default slot prop
+  `describedby` is now `describedBy`, matching `FIELD_CONTEXT`. BlInput, BlSelect and BlRange merge
+  a consumer `aria-describedby` with the hint id (hint first, duplicates removed) instead of
+  replacing it, as BlToggle already did. BlRange loses its `id` and `ariaDescribedby` props; pass
+  `id` and `aria-describedby` as plain attributes, which still work and bind after the field
+  context. Rename `describedby` in `#default` slot destructuring.
+
 ### Added
 
+- BlRange's slider carries the class `bl-range__input`; the `.bl-range input[type='range']` rule is
+  kept.
 - Exported types `StatusTone` (shared by BlMsg and `ToastTone`, now an alias), `ButtonVariant`,
   `LedState` and `DialogCloseEvent` (the payload of BlDialog's `close` event).
 - API.md now records exported types (with shapes), every `--bl-*` token, BlTable's dynamic slot

@@ -185,7 +185,7 @@ export function exportedTypes(root: string): { name: string; shape: string }[] {
 }
 
 // Classes that components render but no stylesheet styles; consumers hook them.
-const HOOK_ONLY_CLASSES = ['bl-pagination__next', 'bl-pagination__prev']
+export const HOOK_ONLY_CLASSES = ['bl-pagination__next', 'bl-pagination__prev', 'bl-range__input']
 
 // data-* attributes set (or read as an option) by components, composables and js/, not by consumers.
 export function scriptDataAttributes(root: string): string[] {
