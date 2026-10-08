@@ -6,7 +6,7 @@
         class="bl-toggle__input"
         type="checkbox"
         role="switch"
-        :checked="modelValue"
+        :checked="model"
         :disabled="disabled"
         :name="name"
         :value="value"
@@ -22,16 +22,16 @@
 
 <script setup lang="ts">
   import { onBeforeUnmount, onMounted, ref, useAttrs, useId } from 'vue'
+  import { mergeDescribedBy } from '../internal/describedBy'
 
   const props = defineProps<{
-    modelValue: boolean
     label: string
     hint?: string
     disabled?: boolean
     name?: string
     value?: string
   }>()
-  const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
+  const model = defineModel<boolean>({ default: false })
   defineOptions({ inheritAttrs: false })
   const attrs = useAttrs()
   const hintId = useId()
@@ -44,14 +44,17 @@
     const rest = { ...attrs }
     delete rest.class
     delete rest.style
-    const describedBy = [props.hint ? hintId : undefined, rest['aria-describedby']]
-      .filter(Boolean)
-      .join(' ')
-    return { ...rest, 'aria-describedby': describedBy || undefined }
+    return {
+      ...rest,
+      'aria-describedby': mergeDescribedBy(
+        props.hint ? hintId : undefined,
+        rest['aria-describedby']
+      )
+    }
   }
 
   function onChange(event: Event): void {
-    emit('update:modelValue', (event.target as HTMLInputElement).checked)
+    model.value = (event.target as HTMLInputElement).checked
   }
 
   // A native form reset flips `checked` without an input or change event. The reset event
@@ -65,11 +68,11 @@
     // before the reset algorithm reads `defaultChecked`.
     if (input.value) input.value.defaultChecked = initial
     setTimeout(() => {
-      if (input.value) emit('update:modelValue', input.value.checked)
+      if (input.value) model.value = input.value.checked
     }, 0)
   }
   onMounted(() => {
-    initial = props.modelValue
+    initial = model.value
     if (input.value) input.value.defaultChecked = initial
     form = input.value?.form ?? null
     form?.addEventListener('reset', onReset)

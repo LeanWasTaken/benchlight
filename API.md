@@ -313,10 +313,9 @@ interface SelectOption<T> {
 ### `SpecRowData`
 
 ```ts
-interface SpecRowData {
+interface SpecRowData extends LinkProps {
     label: string;
     value: string;
-    href?: string;
     external?: boolean;
 }
 ```
@@ -532,6 +531,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `label` | `string \| undefined` | no |  |
 | `state` | `"danger" \| "off" \| "on" \| undefined` | no | `"off"` |
 
 Slots: none
@@ -773,9 +773,11 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `as` | `LinkAs \| undefined` | no |  |
 | `external` | `boolean \| null \| undefined` | no | `null` |
 | `href` | `string \| undefined` | no |  |
 | `label` | `string` | yes |  |
+| `to` | `LinkTo \| undefined` | no |  |
 | `value` | `string \| undefined` | no |  |
 
 Slots: `default`
@@ -872,7 +874,7 @@ Exposed: none
 | `disabled` | `boolean \| undefined` | no |  |
 | `hint` | `string \| undefined` | no |  |
 | `label` | `string` | yes |  |
-| `modelValue` | `boolean` | yes |  |
+| `modelValue` | `boolean \| undefined` | no | `false` |
 | `name` | `string \| undefined` | no |  |
 | `value` | `string \| undefined` | no |  |
 

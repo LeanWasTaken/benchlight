@@ -91,6 +91,36 @@ describe('BlTelemetry', () => {
 })
 
 describe('small readouts', () => {
+  it('BlLed is aria-hidden without a label and an img with one', () => {
+    const hidden = mount(BlLed)
+    expect(hidden.attributes('aria-hidden')).toBe('true')
+    expect(hidden.attributes('role')).toBeUndefined()
+    expect(hidden.attributes('aria-label')).toBeUndefined()
+    const named = mount(BlLed, { props: { state: 'danger', label: 'Link down' } })
+    expect(named.attributes('role')).toBe('img')
+    expect(named.attributes('aria-label')).toBe('Link down')
+    expect(named.attributes('aria-hidden')).toBeUndefined()
+  })
+
+  it('BlSpecRow renders a router component from as/to, also from row data', () => {
+    const Router = defineComponent({
+      props: { to: String },
+      setup:
+        (props, { slots }) =>
+        () =>
+          h('a', { href: props.to, 'data-router': '' }, slots.default?.())
+    })
+    const row = mount(BlSpecRow, { props: { label: 'L', value: 'v', as: Router, to: '/x' } })
+    expect(row.find('a[data-router]').attributes('href')).toBe('/x')
+    expect(row.find('a').attributes('target')).toBeUndefined()
+    const toOnly = mount(BlSpecRow, { props: { label: 'L', value: 'v', to: '/y' } })
+    expect(toOnly.find('a').attributes('href')).toBe('/y')
+    const panel = mount(BlSpecPanel, {
+      props: { rows: [{ label: 'L', value: 'v', as: Router, to: '/z' }] }
+    })
+    expect(panel.find('a[data-router]').attributes('href')).toBe('/z')
+  })
+
   it('BlLed maps state to modifiers', () => {
     expect(mount(BlLed).classes()).toEqual(['bl-led'])
     expect(mount(BlLed, { props: { state: 'on' } }).classes()).toContain('bl-led--on')

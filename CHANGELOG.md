@@ -70,8 +70,21 @@
 - README: complete `data-*` list, one CSS hooks table, a component-to-module table and the list of
   supported entry points.
 
+- BlLed takes an optional `label`: with it the LED is `role="img"` with that `aria-label`; without
+  it, it stays `aria-hidden`.
+- BlSpecRow and `SpecRowData` take `as` and `to` per `LinkProps`, so spec links can use a router
+  component.
+- Nuxt module option `autoImports` (default `true`); `false` skips the composable and helper
+  auto-imports (such as `useToast`, which collides with Nuxt UI's) and keeps the components.
+- BlToggle is uncontrolled-capable: `v-model` is optional (`defineModel<boolean>`), so a toggle in
+  a plain form needs no dummy `:model-value`.
+
 ### Fixed
 
+- BlSegmented switches to link mode when any option has `to` or `href`, not only when `as` is set;
+  `as` then only picks the tag. Before, such options rendered buttons that ignored the link.
+- BlToggle merges its hint id with a consumer `aria-describedby` through the shared helper, so ids
+  are deduplicated as in BlInput, BlSelect and BlRange.
 - A `labels` entry set to `undefined` now falls back to the default in BlAppearanceSwitch,
   BlPrevNext, BlDialog and BlToaster, as it already did in BlPagination and BlTable; before, it
   blanked the string. One internal `mergeLabels()` serves all six.
