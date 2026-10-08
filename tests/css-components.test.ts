@@ -819,6 +819,33 @@ describe('toast', () => {
     expect(ruleBody(css, '.bl-toaster__list').position).toBe('relative')
     expect(ruleBody(css, '.bl-toast-leave-active').position).toBe('absolute')
   })
+  it('fades a leaving toast: one transition list covers the move class too', () => {
+    const all = parseRules(css)
+    const rule = all.find(
+      (r) =>
+        r.selectors.includes('.bl-toast-leave-active') &&
+        r.selectors.includes('.bl-toast-move') &&
+        r.within.join('|') === '@layer components'
+    )
+    expect(rule, 'enter, leave and move share one rule').toBeDefined()
+    const list = rule!.declarations.transition ?? ''
+    for (const prop of ['opacity', 'translate', 'transform']) expect(list).toContain(prop)
+    // No later plain rule on the move class may replace that list for the leaver.
+    const movers = all.filter(
+      (r) =>
+        r.selectors.includes('.bl-toast-move') &&
+        r.within.join('|') === '@layer components' &&
+        r !== rule &&
+        'transition' in r.declarations
+    )
+    expect(movers).toEqual([])
+  })
+  it('holds a leaving toast in place against the inline FLIP transform', () => {
+    const rules = parseRules(css).filter(
+      (r) => r.selectors.includes('.bl-toast-leave-active') && 'transform' in r.declarations
+    )
+    expect(rules.map((r) => r.declarations.transform)).toContain('none !important')
+  })
   it('paints the phosphor mark only for success', () => {
     expect(ruleBody(css, '.bl-toast__mark').background).not.toContain('phosphor')
     expect(ruleBody(css, '.bl-toast--success .bl-toast__mark').background).toBe(
