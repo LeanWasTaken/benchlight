@@ -586,6 +586,48 @@ test.describe('motion: toasts and dialogs', () => {
     )
     expect(diff, 'the toast is not dimmed by the closing dialog').toBeLessThan(1)
   })
+
+  test('a close and reopen in the same task ends open, with one emit per session', async ({
+    page
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== 'desktop-light', 'one project is enough')
+    await page.goto('/stress.html?case=dialog-toast')
+    await page.getByRole('button', { name: 'Edit item' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Edit item' })
+    await expect(dialog.locator('.bl-dialog__panel')).toHaveCSS('opacity', '1')
+    const log = page.locator('[data-log]')
+    const frames = await page.evaluate(async () => {
+      const d = document.querySelector<HTMLDialogElement>('dialog[open]')!
+      const closes: boolean[] = []
+      d.addEventListener('close', () => closes.push(d.open))
+      const reopen = [...d.querySelectorAll('button')].find(
+        (b) => b.textContent?.trim() === 'Reopen'
+      )!
+      reopen.click() // false, nextTick, true: all before the browser's close event
+      const out: { open: boolean; locked: string }[] = []
+      for (let i = 0; i < 16; i++) {
+        await new Promise(requestAnimationFrame)
+        out.push({
+          open: d.open,
+          locked: getComputedStyle(document.documentElement).overflowY
+        })
+      }
+      return { out, closes }
+    })
+    expect(frames.closes, 'the late close event arrived while open again').toEqual([true])
+    expect(frames.out.every((f) => f.open && f.locked === 'hidden')).toBe(true)
+    await expect(dialog).toBeVisible()
+    await expect(log).toHaveText('close:program')
+    await page.keyboard.press('Escape')
+    await expect(dialog).toBeHidden()
+    await expect(log).toHaveText('close:program update:false close:escape')
+    await expect(page.locator('html')).toHaveCSS('overflow-y', 'visible')
+    expect(
+      await page.evaluate(() =>
+        document.documentElement.style.getPropertyValue('--bl-dialog-gutter')
+      )
+    ).toBe('')
+  })
 })
 
 test.describe('motion: theme flip', () => {

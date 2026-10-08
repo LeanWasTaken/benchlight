@@ -443,9 +443,9 @@ bundle CLI warns otherwise).
   in with `html { scrollbar-gutter: stable }`.
 - Below 40em the dialog is a bottom sheet clear of the safe areas. `dvh` does not shrink for the
   iOS keyboard, so a field near the bottom of a sheet can sit behind it.
-- Known limitation: setting `open` to false and back to true within one task (before the
-  browser's async `close` event) leaves the dialog closed; the late `close` then emits
-  `update:open(false)`, so state stays consistent and the reopen is dropped.
+- Setting `open` to false and back to true within one task (before the browser's async `close`
+  event) closes and reopens it: the first session reports `close` with reason `'program'` and no
+  `update:open` echo, and the late `close` event is ignored.
 - CSS-only: the classes work on any `<dialog>`. Call `showModal()`/`close()` yourself, wire the
   ids and add `closedby="none"` for a non-dismissible dialog. The panel may be wrapped, e.g. in a
   `<form method="dialog">` that closes it without script. The panel is only visible inside an open

@@ -159,6 +159,43 @@ describe('BlDialog', () => {
     expect(w.emitted('close')).toHaveLength(1)
   })
 
+  it('reopens when open turns false and back to true before the async close event', async () => {
+    const w = open()
+    await w.setProps({ open: true })
+    const d = dialogEl(w)
+    const host = w.get('.bl-dialog__toasts').element
+    // A real browser fires close a task after close(); hold the event back like one.
+    const held: Event[] = []
+    const hold = (e: Event) => {
+      if (e.target !== d || held.includes(e)) return
+      e.stopImmediatePropagation()
+      held.push(e)
+    }
+    window.addEventListener('close', hold, true)
+    await w.setProps({ open: false })
+    expect(d.open).toBe(false)
+    expect(w.emitted('close')).toBeUndefined() // the event is still queued
+    await w.setProps({ open: true })
+    expect(d.open).toBe(true)
+    // the previous session is settled exactly once, without echoing update:open
+    expect(w.emitted('close')).toEqual([[{ reason: 'program', returnValue: '' }]])
+    expect(w.emitted('update:open')).toBeUndefined()
+    expect(toastHosts.value).toEqual([host])
+    // the late close event belongs to the settled session and changes nothing
+    window.removeEventListener('close', hold, true)
+    for (const e of held) d.dispatchEvent(new Event(e.type))
+    expect(d.open).toBe(true)
+    expect(w.emitted('close')).toHaveLength(1)
+    expect(toastHosts.value).toEqual([host])
+    // the new session closes and emits once; the page lock was taken once per session
+    await w.get('.bl-dialog__close').trigger('click')
+    expect(w.emitted('close')).toHaveLength(2)
+    expect((w.emitted('close')![1]![0] as { reason: string }).reason).toBe('button')
+    expect(w.emitted('update:open')).toEqual([[false]])
+    expect(document.documentElement.style.getPropertyValue('--bl-dialog-gutter')).toBe('')
+    expect(toastHosts.value).toEqual([])
+  })
+
   it('returns focus to where it was before the toast when opened from a toast action', async () => {
     const before = document.createElement('button')
     const toaster = document.createElement('section')

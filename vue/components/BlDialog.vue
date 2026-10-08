@@ -81,9 +81,13 @@
 
   function show(): void {
     const dialog = el.value
-    // isOpen, not dialog.open: a real browser's close event is async, and a reopen before it
-    // arrives would double-count the page lock (ruling 10 documents the limitation).
-    if (!dialog || isOpen) return
+    if (!dialog) return
+    if (isOpen) {
+      if (dialog.open) return
+      // Closed earlier in this task, its close event still queued: finish that session now
+      // (onClose ignores the late event once the dialog is open again), then reopen.
+      finish(false)
+    }
     if (!props.dismissible && !hasFooter)
       warn('BlDialog: dismissible is false and the footer is empty, so nothing can close it.')
     opener = document.activeElement instanceof HTMLElement ? document.activeElement : null
@@ -118,14 +122,19 @@
   }
 
   // The only emitter. Fires for every way a dialog closes; happy-dom dispatches it synchronously.
+  // An open dialog here means show() already finished this session and reopened.
   function onClose(): void {
-    if (!isOpen) return
+    if (isOpen && !el.value?.open) finish(true)
+  }
+
+  // Settles a session exactly once. A reopen (sync false) keeps v-model as the parent set it.
+  function finish(sync: boolean): void {
     isOpen = false
     const reason = pendingReason ?? 'native'
     pendingReason = null
     if (toasts.value) removeToastHost(toasts.value)
     unlockPage()
-    if (props.open) emit('update:open', false)
+    if (sync && props.open) emit('update:open', false)
     emit('close', { reason, returnValue: el.value?.returnValue ?? '' })
     restoreFocus()
   }
