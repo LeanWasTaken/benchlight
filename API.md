@@ -145,6 +145,21 @@ interface AppearanceLabels {
 type AppearanceMode = 'auto' | 'light' | 'dark';
 ```
 
+### `ButtonVariant`
+
+```ts
+type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
+```
+
+### `DialogCloseEvent`
+
+```ts
+interface DialogCloseEvent {
+    reason: DialogCloseReason;
+    returnValue: string;
+}
+```
+
 ### `DialogCloseReason`
 
 ```ts
@@ -175,6 +190,12 @@ interface FollowScrollOptions {
     enabled?: MaybeRefOrGetter<boolean>;
     threshold?: number;
 }
+```
+
+### `LedState`
+
+```ts
+type LedState = 'on' | 'off' | 'danger';
 ```
 
 ### `LinkAs`
@@ -295,6 +316,12 @@ interface SpecRowData {
 }
 ```
 
+### `StatusTone`
+
+```ts
+type StatusTone = 'neutral' | 'success' | 'danger';
+```
+
 ### `TableColumn`
 
 ```ts
@@ -355,7 +382,7 @@ interface ToastOptions {
 ### `ToastTone`
 
 ```ts
-type ToastTone = 'neutral' | 'success' | 'danger';
+type ToastTone = StatusTone;
 ```
 
 ### `ToasterLabels`
@@ -582,7 +609,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `tone` | `"info" \| "ok" \| "err" \| undefined` | no | `"info"` |
+| `tone` | `"danger" \| "neutral" \| "success" \| undefined` | no | `"neutral"` |
 
 Slots: `default`
 Events: none
@@ -936,9 +963,8 @@ Exposed: none
 - `bl-meter-field__value`
 - `bl-meter__fill`
 - `bl-msg`
-- `bl-msg--err`
-- `bl-msg--info`
-- `bl-msg--ok`
+- `bl-msg--danger`
+- `bl-msg--success`
 - `bl-msg__text`
 - `bl-page-enter-active`
 - `bl-page-enter-from`

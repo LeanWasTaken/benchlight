@@ -33,7 +33,7 @@ describe('forced colors', () => {
     ['led', ['.bl-led', '.bl-led--on', '.bl-led--danger']],
     ['meter', ['.bl-meter', '.bl-meter__fill']],
     ['eq', ['.bl-eq__bar', '.bl-eq--active .bl-eq__bar']],
-    ['msg', ['.bl-msg--ok::before']],
+    ['msg', ['.bl-msg--success::before', '.bl-msg--danger::before']],
     ['segmented', [".bl-segmented__item[aria-pressed='true']"]],
     ['toggle', ['.bl-toggle__track', '.bl-toggle__input:checked + .bl-toggle__track']],
     ['disclosure', ['.bl-disclosure__chevron']],

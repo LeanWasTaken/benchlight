@@ -22,10 +22,10 @@
 
   <BlSectionHead :level="3" eyebrow="Status" heading="Messages, LEDs, bars" />
   <div class="pg-stack">
-    <BlMsg tone="ok">Saved. Rebooting in 3 s.</BlMsg>
-    <BlMsg tone="err">Upload failed: image too large.</BlMsg>
-    <BlMsg tone="info">Scanning for networks…</BlMsg>
-    <BlMsg>Default tone is info.</BlMsg>
+    <BlMsg tone="success">Saved. Rebooting in 3 s.</BlMsg>
+    <BlMsg tone="danger">Upload failed: image too large.</BlMsg>
+    <BlMsg tone="neutral">Scanning for networks…</BlMsg>
+    <BlMsg>Default tone is neutral.</BlMsg>
   </div>
   <div class="pg-row">
     <BlLed state="on" /><span class="bl-annotation">on</span> <BlLed />

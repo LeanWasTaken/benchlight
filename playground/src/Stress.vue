@@ -418,7 +418,7 @@
     <section v-if="show('msg-link')" data-case="msg-link">
       <h2 class="st-label">msg-link</h2>
       <div data-box>
-        <BlMsg tone="err">
+        <BlMsg tone="danger">
           Upload failed, see <a href="#">the troubleshooting guide</a> or run
           <code>bun run build</code> again.
         </BlMsg>

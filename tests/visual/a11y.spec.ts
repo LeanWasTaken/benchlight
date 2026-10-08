@@ -164,10 +164,10 @@ test.describe('forced colors', () => {
     expect(divider.left || divider.shadow).toBe(true)
   })
 
-  test('the ok message dot stays visible', async ({ page }) => {
+  test('the success message dot stays visible', async ({ page }) => {
     await page.goto('/')
     const dot = await page.evaluate(() => {
-      const style = getComputedStyle(document.querySelector('.bl-msg--ok')!, '::before')
+      const style = getComputedStyle(document.querySelector('.bl-msg--success')!, '::before')
       return {
         fill: style.backgroundColor,
         ground: getComputedStyle(document.body).backgroundColor

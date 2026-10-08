@@ -2,8 +2,18 @@
 
 ## Unreleased
 
+### Breaking
+
+- BlMsg `tone` is now `'neutral' | 'success' | 'danger'`, matching toasts, BlLed and BlButton. The
+  old `info`, `ok` and `err` props still work and map to `neutral`, `success` and `danger` with a
+  one-time dev warning, until v1. The CSS classes have no alias: rename `bl-msg--ok` to
+  `bl-msg--success` and `bl-msg--err` to `bl-msg--danger`. `bl-msg--info` is gone; neutral is the
+  base `.bl-msg` with no modifier.
+
 ### Added
 
+- Exported types `StatusTone` (shared by BlMsg and `ToastTone`, now an alias), `ButtonVariant`,
+  `LedState` and `DialogCloseEvent` (the payload of BlDialog's `close` event).
 - API.md now records exported types (with shapes), every `--bl-*` token, BlTable's dynamic slot
   patterns and all slot props, script-set `data-*` attributes and the hook-only pagination classes.
 - README: complete `data-*` list, one CSS hooks table, a component-to-module table and the list of
