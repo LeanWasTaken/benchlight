@@ -37,7 +37,7 @@
       color: var(--bl-ink-1);
     }
   }
-  .bl-tabbar__item[aria-current='page'] {
+  .bl-tabbar__item[aria-current]:not([aria-current='false']) {
     color: var(--bl-trace);
     background: color-mix(in srgb, var(--bl-trace) 10%, transparent);
   }

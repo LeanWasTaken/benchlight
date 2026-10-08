@@ -7,7 +7,7 @@
       v-for="(project, index) in projects"
       :key="project.refdes"
       href="#content"
-      :selected="index === 0"
+      :current="index === 0"
     >
       <template #meta>
         <BlMeta as="span" :items="project.meta" />

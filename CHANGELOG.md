@@ -10,6 +10,14 @@
   `bl-msg--success` and `bl-msg--err` to `bl-msg--danger`. `bl-msg--info` is gone; neutral is the
   base `.bl-msg` with no modifier.
 
+- BlIndexRow's `selected` prop is now `current?: boolean | 'page' | 'step' | 'location' | 'true'`,
+  the name BlNavLink, BlTabBarItem and BlSegmented already use (`true` renders
+  `aria-current="true"`; there is no `selected` alias). The current-item CSS in the site bar, tab
+  bar, pagination, index row and segmented control now matches
+  `[aria-current]:not([aria-current='false'])` instead of `='page'` or `='true'`, so
+  `aria-current="location"` and `"step"` markup is styled everywhere. Rewrite CSS that targets
+  `.bl-index-row[aria-current='true']` and similar to the new selector.
+
 ### Added
 
 - Exported types `StatusTone` (shared by BlMsg and `ToastTone`, now an alias), `ButtonVariant`,

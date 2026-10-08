@@ -501,8 +501,8 @@ Exposed: none
 | --- | --- | --- | --- |
 | `as` | `LinkAs \| undefined` | no |  |
 | `compact` | `boolean \| undefined` | no |  |
+| `current` | `boolean \| "page" \| "step" \| "location" \| "true" \| undefined` | no |  |
 | `href` | `string \| undefined` | no |  |
-| `selected` | `boolean \| undefined` | no |  |
 | `to` | `LinkTo \| undefined` | no |  |
 
 Slots: `default`, `icon`, `meta`, `title`

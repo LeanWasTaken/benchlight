@@ -138,7 +138,7 @@ raise gets a CHANGELOG line.
 - Library CSS lives in `@layer base` / `@layer components`; utilities and your own CSS win without
   `!important`.
 - States are ARIA or native attributes (`aria-current`, `aria-pressed`, `:checked`, `:disabled`);
-  selected rows use `aria-current="true"`. The `data-*` attributes below are script-set, so
+  the current item uses `aria-current` (`page`, `step`, `location` or `true`; any value but `false` is styled). The `data-*` attributes below are script-set, so
   do not set them yourself (apart from the CSS-only cases in the table notes). `data-lifted`
   (site bar, `js/appearance.js`), `data-overflowing` (BlMarquee), `data-fit`, `data-stacked` and
   `data-measuring` (BlTable), `data-ready` (BlAppearanceSwitch), `data-indeterminate` (BlMeter),

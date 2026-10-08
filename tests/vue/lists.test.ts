@@ -112,13 +112,32 @@ describe('BlIndex and BlIndexRow', () => {
     expect(button.attributes('type')).toBe('button')
   })
 
-  it('marks selection with aria-current and supports compact rows', () => {
+  it('marks the current row with aria-current and supports compact rows', () => {
     const row = mount(BlIndexRow, {
-      props: { as: 'button', selected: true, compact: true },
+      props: { as: 'button', current: true, compact: true },
       slots: { title: 'home-wifi' }
     }).find('.bl-index-row')
     expect(row.attributes('aria-current')).toBe('true')
     expect(row.classes()).toContain('bl-index-row--compact')
+  })
+
+  it.each([
+    ['page', 'page'],
+    ['step', 'step'],
+    ['location', 'location'],
+    ['true', 'true']
+  ] as const)('renders current="%s" as aria-current="%s"', (current, expected) => {
+    const row = mount(BlIndexRow, { props: { current }, slots: { title: 't' } }).find(
+      '.bl-index-row'
+    )
+    expect(row.attributes('aria-current')).toBe(expected)
+  })
+
+  it('renders no aria-current when current is false or unset', () => {
+    const off = mount(BlIndexRow, { props: { current: false }, slots: { title: 't' } })
+    const unset = mount(BlIndexRow, { slots: { title: 't' } })
+    expect(off.find('.bl-index-row').attributes('aria-current')).toBeUndefined()
+    expect(unset.find('.bl-index-row').attributes('aria-current')).toBeUndefined()
   })
 })
 

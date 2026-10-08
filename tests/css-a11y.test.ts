@@ -68,7 +68,7 @@ describe('non-text contrast', () => {
     expect(
       body(
         read('css/components/segmented.css'),
-        ".bl-segmented__item[aria-pressed='true'],\n  .bl-segmented__item[aria-current],\n  .bl-segmented__item:has(:checked)"
+        ".bl-segmented__item[aria-pressed='true'],\n  .bl-segmented__item[aria-current]:not([aria-current='false']),\n  .bl-segmented__item:has(:checked)"
       )
     ).toContain('var(--bl-control-border)')
   })

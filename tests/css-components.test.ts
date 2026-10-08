@@ -64,11 +64,11 @@ const REQUIRED: Record<string, string[]> = {
   'site-bar': [
     '.bl-site-bar[data-lifted]',
     '.bl-site-bar__brand',
-    ".bl-site-bar__link[aria-current='page']",
+    ".bl-site-bar__link[aria-current]:not([aria-current='false'])",
     '.bl-site-bar__navwrap + .bl-site-bar__actions'
   ],
   tabbar: [
-    ".bl-tabbar__item[aria-current='page']",
+    ".bl-tabbar__item[aria-current]:not([aria-current='false'])",
     'body:has(.bl-tabbar)',
     'html:has(.bl-tabbar)',
     '--bl-scroll-offset-bottom: calc(96px + env(safe-area-inset-bottom))'
@@ -84,7 +84,7 @@ const REQUIRED: Record<string, string[]> = {
   ],
   segmented: [
     ".bl-segmented__item[aria-pressed='true']",
-    '.bl-segmented__item[aria-current]',
+    ".bl-segmented__item[aria-current]:not([aria-current='false'])",
     '.bl-segmented__item:has(:checked)',
     '.bl-segmented--compact .bl-segmented__item',
     '.bl-segmented__item::before'
@@ -126,8 +126,8 @@ const REQUIRED: Record<string, string[]> = {
   meta: ['.bl-meta--sep > * + *::before', '.bl-meta__key'],
   'index-row': [
     '.bl-index--grid',
-    ".bl-index-row[aria-current='true']",
-    ".bl-index-row[aria-current='true'] .bl-meta",
+    ".bl-index-row[aria-current]:not([aria-current='false'])",
+    ".bl-index-row[aria-current]:not([aria-current='false']) .bl-meta",
     '.bl-index-row--compact .bl-index-row__title',
     '.bl-index-row:has(> .bl-index-row__icon)'
   ],
@@ -145,7 +145,7 @@ const REQUIRED: Record<string, string[]> = {
     '@media (forced-colors: active)'
   ],
   pagination: [
-    ".bl-pagination__page[aria-current='page']",
+    ".bl-pagination__page[aria-current]:not([aria-current='false'])",
     ".bl-pagination [aria-disabled='true']",
     '.bl-pagination__compact'
   ]
