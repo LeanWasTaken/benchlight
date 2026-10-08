@@ -253,6 +253,53 @@
     }
   }
 
+  // ---- layering: a dialog that closes with an exit transition (Chromium's `overlay`) stays in
+  // the top layer, backdrop and all, until it ends. The toaster has already left it (so it is
+  // announced outside), so it rides in the top layer too, as a manual popover shown after the
+  // dialog closed and so stacked above it, until the dialog's own transitions settle.
+  let layer = 0
+  function raise(dialog: HTMLDialogElement): void {
+    const el = root.value
+    if (!el || typeof el.showPopover !== 'function') return
+    // Reduced motion leaves base.css's 0.01ms transitions: not worth a trip to the top layer.
+    const exits =
+      dialog
+        .getAnimations?.()
+        .filter(
+          (a) =>
+            'transitionProperty' in a && Number(a.effect?.getComputedTiming().duration ?? 0) > 1
+        ) ?? []
+    if (exits.length === 0) return // closed at once: no overlay support, or reduced motion
+    const token = ++layer
+    try {
+      el.popover = 'manual'
+      el.showPopover()
+    } catch {
+      el.removeAttribute('popover')
+      return
+    }
+    void Promise.allSettled(exits.map((a) => a.finished)).then(() => {
+      if (token === layer) lower()
+    })
+  }
+  function lower(): void {
+    layer++
+    const el = root.value
+    if (!el?.hasAttribute('popover')) return
+    if (el.matches(':popover-open')) el.hidePopover()
+    el.removeAttribute('popover')
+  }
+  // After the move: a teleport hides a showing popover (removal), so always lower first.
+  watch(
+    host,
+    (_, prev) => {
+      lower()
+      const dialog = prev?.closest('dialog')
+      if (dialog && !dialog.open) raise(dialog)
+    },
+    { flush: 'post' }
+  )
+
   onMounted(() => {
     if (++toastState.toasters > 1) warn('BlToaster: mount one toaster per page.')
     mounted.value = true
@@ -260,6 +307,7 @@
     watch(visible, sync, { immediate: true, flush: 'post' })
   })
   onBeforeUnmount(() => {
+    lower()
     toastState.toasters--
     toastFocus.returnTarget = null
     scope.stop()

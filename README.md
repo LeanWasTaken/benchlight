@@ -9,7 +9,7 @@ classes.
 ## Install
 
 ```json
-"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.6.1"
+"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.6.2"
 ```
 
 The repo is private and the URL uses SSH on purpose: bun turns GitHub https URLs into API tarball
@@ -443,11 +443,13 @@ bundle CLI warns otherwise).
   in with `html { scrollbar-gutter: stable }`.
 - Below 40em the dialog is a bottom sheet clear of the safe areas. `dvh` does not shrink for the
   iOS keyboard, so a field near the bottom of a sheet can sit behind it.
-- Known limitation: setting `open` to false and back to true within one task (before the
-  browser's async `close` event) leaves the dialog closed; the late `close` then emits
-  `update:open(false)`, so state stays consistent and the reopen is dropped.
+- Setting `open` to false and back to true within one task (before the browser's async `close`
+  event) closes and reopens it: the first session reports `close` with reason `'program'` and no
+  `update:open` echo, and the late `close` event is ignored.
 - CSS-only: the classes work on any `<dialog>`. Call `showModal()`/`close()` yourself, wire the
-  ids and add `closedby="none"` for a non-dismissible dialog. Backdrop-click closing, gutter
+  ids and add `closedby="none"` for a non-dismissible dialog. The panel may be wrapped, e.g. in a
+  `<form method="dialog">` that closes it without script. The panel is only visible inside an open
+  `.bl-dialog` (it fades in with it), so it cannot be shown on its own. Backdrop-click closing, gutter
   compensation, focus-restore hardening and in-dialog toasts are Vue-only.
 
 ## BlToast
@@ -517,7 +519,8 @@ const id = toast({ message: 'Item deleted', action: { label: 'Undo', onClick: re
   open the toaster moves into the topmost one (above its backdrop, reachable and announced) and
   moves back when it closes. Visible toasts and timers carry across. Below 40em it sits at the
   top of the screen there, clear of the sheet's footer actions. A toast fired as a dialog closes
-  is announced where the toaster lands next.
+  is announced where the toaster lands next, and while a closing dialog fades out (Chromium) the
+  toaster stays above it in the top layer, as a manual popover, until the fade ends.
 - The store is one per JS realm, shared by every Vue app on the page, so mount one toaster per
   page; a development warning fires for a second.
 - SSR: `toast()` does nothing on the server and returns `''`. The toaster renders its section and
