@@ -1,6 +1,40 @@
 # Changelog
 
-## Unreleased
+## 0.7.0 - 2026-10-09
+
+The pre-v1 breaking batch: the last set of renames and attribute changes before the v1 API
+freeze. Only BlMsg `tone` keeps old values (a dev warning, and a type error under vue-tsc);
+everything else is a clean break. Use the table below to migrate.
+
+### Migration
+
+<!-- prettier-ignore -->
+| Old | New |
+| --- | --- |
+| `<BlMsg tone="info">` | `tone="neutral"` or omit; warns until v1 (vue-tsc error) |
+| `<BlMsg tone="ok">` | `tone="success"`; warns until v1 (vue-tsc error) |
+| `<BlMsg tone="err">` | `tone="danger"`; warns until v1 (vue-tsc error) |
+| `.bl-msg--ok` | `.bl-msg--success` (no alias) |
+| `.bl-msg--err` | `.bl-msg--danger` (no alias) |
+| `.bl-msg--info` | `.bl-msg` with no modifier |
+| `.bl-msg` with no modifier (quiet note) | now carries the former info tint |
+| BlIndexRow `selected` | `current` (`boolean \| 'page' \| 'step' \| 'location' \| 'true'`) |
+| `.bl-index-row[aria-current='true']` | `[aria-current]:not([aria-current='false'])` |
+| BlNavLink / BlIndexRow attrs and listeners but `class`/`style` on `<li>` | inner link/button |
+| BlToaster `class`, `data-*`, `aria-*` (fell through) | its `<section>` |
+| BlTable `aria-label`, `-labelledby`, `-describedby` etc. on wrapper | the `<table>` |
+| BlField slot prop `describedby` | `describedBy` |
+| BlInput, BlSelect, BlRange `aria-describedby` replaced the hint id | merged, hint first |
+| BlRange props `id`, `ariaDescribedby` | plain attributes `id`, `aria-describedby` |
+| BlSectionHead `#action` | `#actions` |
+| `.bl-section-head__action` | `.bl-section-head__actions` |
+| `--bl-col-min` | `--bl-table-col-min` |
+| `TableLabels` objects typed in full | add `sortAscending`, `sortDescending`, `pages` |
+| BlSegmented options with `to`/`href`, no `as` | links in a `<nav>`; drop `to`/`href` for buttons |
+| `.bl-switch`, `__track`, `__option` | `.bl-appearance`, `__track`, `__option` |
+| module `switch` (`switch.css`, `switch.min.css`) | module `appearance` (`appearance.css`, `appearance.min.css`) |
+| `.bl-tabbar`, `__item`, `__icon`, `__label` | `.bl-tab-bar`, `__item`, `__icon`, `__label` |
+| module `tabbar` (`tabbar.css`, `tabbar.min.css`) | module `tab-bar` (`tab-bar.css`, `tab-bar.min.css`) |
 
 ### Breaking
 
