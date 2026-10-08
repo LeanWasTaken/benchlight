@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- BlToast: a dismissed toast now fades out where it stands. The move class that Vue puts on the
+  leaving toast replaced its opacity and translate transitions, so it vanished at once while
+  sliding unseen.
+
 ## 0.6.0 - 2026-10-08
 
 Building-blocks release: BlToggle, BlMedia, BlDisclosure, BlDialog and BlToast (`useToast`), plus

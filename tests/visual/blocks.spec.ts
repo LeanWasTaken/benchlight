@@ -363,6 +363,46 @@ test.describe('motion', () => {
   })
 })
 
+test.describe('motion: toast exit', () => {
+  test.use({ reducedMotion: 'no-preference' })
+  test('a dismissed toast fades over several frames and stays where it is', async ({
+    page
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== 'desktop-light', 'one project is enough')
+    await page.goto('/')
+    for (const name of ['Toast', 'Success'])
+      await demo(page, 'toast').getByRole('button', { name }).click()
+    const toasts = page.locator('.bl-toast')
+    await expect(toasts).toHaveCount(2)
+    await expect(toasts.nth(1)).toHaveCSS('opacity', '1')
+    const frames = await page.evaluate(async () => {
+      const [first, second] = [...document.querySelectorAll<HTMLElement>('.bl-toast')]
+      const out: { opacity: number; top: number; above: number }[] = []
+      second!.querySelector<HTMLElement>('.bl-toast__dismiss')!.click()
+      for (let i = 0; i < 30 && second!.isConnected; i++) {
+        await new Promise(requestAnimationFrame)
+        if (!second!.isConnected) break
+        out.push({
+          opacity: Number(getComputedStyle(second!).opacity),
+          top: second!.getBoundingClientRect().top,
+          above: first!.getBoundingClientRect().top
+        })
+      }
+      return out
+    })
+    const fading = frames.filter((f) => f.opacity > 0.05 && f.opacity < 0.95)
+    expect(
+      fading.length,
+      `opacity per frame ${frames.map((f) => f.opacity.toFixed(2))}`
+    ).toBeGreaterThan(4)
+    const tops = frames.map((f) => f.top)
+    expect(Math.max(...tops) - Math.min(...tops), `tops ${tops}`).toBeLessThan(12)
+    // the toast above glides into the freed slot over several frames
+    const above = new Set(frames.map((f) => Math.round(f.above * 10)))
+    expect(above.size, `above ${[...above]}`).toBeGreaterThan(3)
+  })
+})
+
 test.describe('BlTable', () => {
   test('stays steady when an unrelated re-render re-measures it', async ({ page }) => {
     await page.goto('/')
