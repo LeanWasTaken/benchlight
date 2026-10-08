@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- API.md now records exported types (with shapes), every `--bl-*` token, BlTable's dynamic slot
+  patterns and all slot props, script-set `data-*` attributes and the hook-only pagination classes.
+- README: complete `data-*` list, one CSS hooks table, a component-to-module table and the list of
+  supported entry points.
+
+### Changed
+
+- BlMedia declares its `as` (`'div'`) and `align` (`'start'`) defaults in `withDefaults`, so API.md
+  shows them. Behaviour is unchanged.
+
 ## 0.6.2 - 2026-10-09
 
 Overlay polish: toasts stay steady and visible while dialogs open and close, and a dialog closed and

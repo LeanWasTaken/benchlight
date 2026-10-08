@@ -117,6 +117,257 @@
 - `useScrollLifted`
 - `useToast`
 
+## Exported types
+
+### `AnsiSegment`
+
+```ts
+interface AnsiSegment {
+    text: string;
+    className?: string;
+}
+```
+
+### `AppearanceLabels`
+
+```ts
+interface AppearanceLabels {
+    legend: string;
+    auto: string;
+    light: string;
+    dark: string;
+}
+```
+
+### `AppearanceMode`
+
+```ts
+type AppearanceMode = 'auto' | 'light' | 'dark';
+```
+
+### `DialogCloseReason`
+
+```ts
+type DialogCloseReason = 'button' | 'backdrop' | 'escape' | 'program' | 'native';
+```
+
+### `DialogLabels`
+
+```ts
+interface DialogLabels {
+    close: string;
+}
+```
+
+### `FieldContext`
+
+```ts
+interface FieldContext {
+    id: Readonly<Ref<string>>;
+    describedBy: Readonly<Ref<string | undefined>>;
+}
+```
+
+### `FollowScrollOptions`
+
+```ts
+interface FollowScrollOptions {
+    enabled?: MaybeRefOrGetter<boolean>;
+    threshold?: number;
+}
+```
+
+### `LinkAs`
+
+```ts
+type LinkAs = string | Component;
+```
+
+### `LinkProps`
+
+```ts
+interface LinkProps {
+    as?: LinkAs;
+    to?: LinkTo;
+    href?: string;
+}
+```
+
+### `LinkTo`
+
+```ts
+type LinkTo = string | object;
+```
+
+### `MarqueeOptions`
+
+```ts
+interface MarqueeOptions {
+    speed?: number;
+    pause?: number;
+    overshoot?: number;
+}
+```
+
+### `MetaItem`
+
+```ts
+type MetaItem = string | {
+    text: string;
+    class?: string;
+};
+```
+
+### `PaginationLabels`
+
+```ts
+interface PaginationLabels {
+    nav: string;
+    prev: string;
+    next: string;
+    page: (n: number) => string;
+    pageOf: (page: number, pages: number) => string;
+    range: (from: number, to: number, total: number) => string;
+}
+```
+
+### `PrevNextItem`
+
+```ts
+interface PrevNextItem extends Pick<LinkProps, 'to' | 'href'> {
+    title: string;
+}
+```
+
+### `PrevNextLabels`
+
+```ts
+interface PrevNextLabels {
+    nav: string;
+    prev: string;
+    next: string;
+}
+```
+
+### `ResolvedAppearance`
+
+```ts
+type ResolvedAppearance = 'light' | 'dark';
+```
+
+### `RiseDelayOptions`
+
+```ts
+interface RiseDelayOptions {
+    base?: number;
+    step?: number;
+    cap?: number;
+}
+```
+
+### `SegmentedOption`
+
+```ts
+interface SegmentedOption<T> extends Pick<LinkProps, 'to' | 'href'> {
+    value: T;
+    label: string;
+    current?: boolean;
+}
+```
+
+### `SelectOption`
+
+```ts
+interface SelectOption<T> {
+    value: T;
+    label: string;
+}
+```
+
+### `SpecRowData`
+
+```ts
+interface SpecRowData {
+    label: string;
+    value: string;
+    href?: string;
+    external?: boolean;
+}
+```
+
+### `TableColumn`
+
+```ts
+interface TableColumn<Row = Record<string, unknown>> {
+    key: string;
+    label: string;
+    align?: 'start' | 'end' | 'center';
+    numeric?: boolean;
+    sortable?: boolean;
+    sortBy?: (row: Row) => string | number | null | undefined;
+    format?: (value: unknown, row?: Row) => string;
+    width?: string;
+    primary?: boolean;
+    total?: 'sum' | 'avg' | 'count' | ((rows: Row[]) => string | number);
+}
+```
+
+### `TableLabels`
+
+```ts
+interface TableLabels {
+    total: string;
+    empty: string;
+    sortStrip: string;
+}
+```
+
+### `TableSort`
+
+```ts
+interface TableSort {
+    key: string;
+    dir: 'asc' | 'desc';
+}
+```
+
+### `ToastAction`
+
+```ts
+interface ToastAction {
+    label: string;
+    onClick: () => void;
+}
+```
+
+### `ToastOptions`
+
+```ts
+interface ToastOptions {
+    message: string;
+    tone?: ToastTone;
+    action?: ToastAction;
+    duration?: number;
+    id?: string;
+}
+```
+
+### `ToastTone`
+
+```ts
+type ToastTone = 'neutral' | 'success' | 'danger';
+```
+
+### `ToasterLabels`
+
+```ts
+interface ToasterLabels {
+    region: string;
+    dismiss: string;
+    actionHint: (label: string) => string;
+}
+```
+
 ## Components
 
 ### BlAppearanceSwitch
@@ -202,6 +453,7 @@ Exposed: none
 | `label` | `string` | yes |  |
 
 Slots: `default`
+Slot props: `default` `{ id: string; describedby: string | undefined; }`
 Events: none
 Exposed: none
 
@@ -293,8 +545,8 @@ Exposed: `refresh`
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `align` | `"start" \| "center" \| undefined` | no |  |
-| `as` | `"div" \| "li" \| "article" \| undefined` | no |  |
+| `align` | `"start" \| "center" \| undefined` | no | `"start"` |
+| `as` | `"div" \| "li" \| "article" \| undefined` | no | `"div"` |
 
 Slots: `aside`, `default`, `figure`
 Events: none
@@ -544,6 +796,8 @@ Exposed: none
 | `totals` | `Record<string, string \| number> \| undefined` | no |  |
 
 Slots: `caption`, `empty`, `footer`
+Dynamic slots: `cell-<key>`, `head-<key>`
+Slot props: `footer` `{ rows: Row[]; }`, `cell-<key>` `{ row: Row; value: unknown; column: TableColumn<Row> }`, `head-<key>` `{ column: TableColumn<Row> }`
 Events: `update:page`, `update:sort`
 Exposed: none
 
@@ -791,6 +1045,78 @@ Exposed: none
 - `bl-toggle__label`
 - `bl-toggle__thumb`
 - `bl-toggle__track`
+
+## Hook-only classes
+- `bl-pagination__next`
+- `bl-pagination__prev`
+
+## Script-set data attributes
+- `data-action`
+- `data-bl-appearance`
+- `data-bl-lift`
+- `data-dir`
+- `data-empty`
+- `data-fit`
+- `data-indeterminate`
+- `data-label`
+- `data-lifted`
+- `data-measuring`
+- `data-overflowing`
+- `data-ready`
+- `data-stacked`
+
+## Tokens
+- `--bl-canvas`
+- `--bl-control-border`
+- `--bl-copper`
+- `--bl-danger`
+- `--bl-duration-base`
+- `--bl-duration-fast`
+- `--bl-duration-page-enter`
+- `--bl-duration-page-leave`
+- `--bl-duration-rise`
+- `--bl-duration-rise-step`
+- `--bl-ease-out`
+- `--bl-font-display`
+- `--bl-font-mono`
+- `--bl-font-sans`
+- `--bl-ink-1`
+- `--bl-ink-2`
+- `--bl-ink-3`
+- `--bl-layout-column`
+- `--bl-layout-gutter`
+- `--bl-layout-gutter-narrow`
+- `--bl-layout-prose`
+- `--bl-leading-body`
+- `--bl-leading-display`
+- `--bl-leading-display-md`
+- `--bl-leading-heading`
+- `--bl-leading-lede`
+- `--bl-phosphor`
+- `--bl-radius-card`
+- `--bl-radius-chip`
+- `--bl-radius-pill`
+- `--bl-raised`
+- `--bl-separator`
+- `--bl-shadow-float`
+- `--bl-shadow-glow`
+- `--bl-shadow-thumb`
+- `--bl-shadow-well`
+- `--bl-surface`
+- `--bl-text-annotation`
+- `--bl-text-body`
+- `--bl-text-display-lg`
+- `--bl-text-display-md`
+- `--bl-text-display-xl`
+- `--bl-text-heading`
+- `--bl-text-micro`
+- `--bl-text-small`
+- `--bl-trace`
+- `--bl-tracking-annotation`
+- `--bl-tracking-display`
+- `--bl-tracking-heading`
+- `--bl-tracking-nav`
+- `--bl-tracking-silkscreen`
 
 ## CSS hooks (custom properties a consumer may set)
 - `--bl-chevron-mask`

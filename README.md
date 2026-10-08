@@ -138,8 +138,12 @@ raise gets a CHANGELOG line.
 - Library CSS lives in `@layer base` / `@layer components`; utilities and your own CSS win without
   `!important`.
 - States are ARIA or native attributes (`aria-current`, `aria-pressed`, `:checked`, `:disabled`);
-  selected rows use `aria-current="true"`. Only `data-lifted`, `data-overflowing`, `data-fit`,
-  `data-stacked` and `data-measuring` are script-set.
+  selected rows use `aria-current="true"`. The `data-*` attributes below are script-set, so
+  do not set them yourself (apart from the CSS-only cases in the table notes). `data-lifted`
+  (site bar, `js/appearance.js`), `data-overflowing` (BlMarquee), `data-fit`, `data-stacked` and
+  `data-measuring` (BlTable), `data-ready` (BlAppearanceSwitch), `data-indeterminate` (BlMeter),
+  `data-action`, `data-dir`, `data-label` and `data-empty` (BlTable), `data-bl-appearance` (on
+  `<html>`) and `data-bl-lift` (you set it; `js/appearance.js` reads it).
 - Appearance: `data-bl-appearance="light|dark"` on `<html>` (absent = auto), stored as
   `localStorage['bl-appearance']`.
   A user's theme change crossfades the whole page with a View Transition (`--bl-duration-base`)
@@ -268,7 +272,7 @@ modules and `pagination` needs `layout` (the bundle CLI warns otherwise).
   The primary column (the first unless one sets `primary`) is the row header. `v-model:sort` and
   `v-model:page` are optional; set `rowKey` when sorting, paging or using row actions.
 - **Slots:** `caption`, `empty`, `footer` and the dynamic `cell-<key>` (`{ row, value, column }`) and
-  `head-<key>` (`{ column }`) per column key. The dynamic ones are not listed in API.md.
+  `head-<key>` (`{ column }`) per column key. API.md lists them under BlTable.
 - **`manual` mode** is for server-side sorting and paging: rows are shown as given, nothing is sorted
   or sliced. Pass `totalRows` (a dev warning fires if `pageSize` is set without it) and `totals`.
 - **Row actions:** `rowLink(row)` (an `a`, RouterLink or similar, as with `LinkProps`) or
@@ -534,19 +538,79 @@ const id = toast({ message: 'Item deleted', action: { label: 'Undo', onClick: re
 
 ## CSS hooks
 
-`--bl-scroll-offset-top` and `--bl-scroll-offset-bottom` keep focused elements clear of fixed chrome
-such as the sticky site bar and the mobile tab bar.
+Custom properties a consumer may set. API.md lists them under "CSS hooks".
 
-`--bl-dialog-width` sets the width of a centred BlDialog (default `32rem`, never wider than the
-viewport less 32px). `--bl-dialog-gutter` is internal: BlDialog sets it on `html` while open.
+| Hook                                                  | Sets                                                                         | Default              |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------- | -------------------- |
+| `--bl-scroll-offset-top`, `--bl-scroll-offset-bottom` | clearance for focused elements under fixed chrome (site bar, mobile tab bar) | token-derived        |
+| `--bl-dialog-width`                                   | width of a centred BlDialog, never wider than the viewport less 32px         | `32rem`              |
+| `--bl-media-size`                                     | size of a BlMedia figure                                                     | `64px`               |
+| `--bl-chevron-mask`                                   | chevron shape of both the select and the disclosure                          | built-in chevron     |
+| `--bl-meter-value`                                    | fill fraction of a BlMeter bar (0 to 1; BlMeter sets it)                     | `0`                  |
+| `--bl-rise-delay`                                     | page-enter animation delay of one element (`riseDelay()` sets it)            | `0ms`                |
+| `--bl-telemetry-columns`                              | column count of a BlTelemetry grid                                           | auto-fit             |
+| `--bl-log-height`                                     | max height of a BlLog                                                        | `12.5rem`            |
+| `--bl-range-value-width`                              | room reserved for the BlRange value, so the track length stays fixed         | `56px`               |
+| `--bl-table-min-col`                                  | narrowest BlTable column before the table stacks                             | `8rem`               |
+| `--bl-col-min`                                        | narrowest width of one column (BlTable sets it from `TableColumn.width`)     | `--bl-table-min-col` |
 
-`--bl-media-size` sets the size of a BlMedia figure (default `64px`).
+`--bl-dialog-gutter` is internal: BlDialog sets it on `html` while open.
 
-`--bl-chevron-mask` replaces the chevron shape of both the select and the disclosure.
+## Component to module
+
+`dist/modules/<module>.min.css` takes the module name, which differs from the component name in
+places. `tokens` always comes first; `base`, `type`, `motion`, `layout` and `tints` are shared.
+
+| Component                           | Module         |
+| ----------------------------------- | -------------- |
+| BlSiteBar, BlNavLink                | `site-bar`     |
+| BlTabBar, BlTabBarItem              | `tabbar`       |
+| BlColophon                          | `colophon`     |
+| BlSkipLink                          | `skip-link`    |
+| BlAppearanceSwitch                  | `switch`       |
+| BlSegmented                         | `segmented`    |
+| BlButton                            | `btn`          |
+| BlField, BlInput, BlSelect, BlRange | `field`        |
+| BlLinkArrow                         | `link-arrow`   |
+| BlSpecPanel, BlSpecRow              | `spec-panel`   |
+| BlTelemetry, BlTelemetryCell        | `telemetry`    |
+| BlLed                               | `led`          |
+| BlEqBars                            | `eq`           |
+| BlMarquee                           | `marquee`      |
+| BlReadout                           | `readout`      |
+| BlMeter                             | `meter`        |
+| BlMsg                               | `msg`          |
+| BlLog                               | `log`          |
+| BlSectionHead                       | `section-head` |
+| BlMeta                              | `meta`         |
+| BlIndex, BlIndexRow                 | `index-row`    |
+| BlPrevNext                          | `prev-next`    |
+| BlProse                             | `prose`        |
+| BlTable                             | `table`        |
+| BlPagination                        | `pagination`   |
+| BlToggle                            | `toggle`       |
+| BlMedia                             | `media`        |
+| BlDisclosure                        | `disclosure`   |
+| BlDialog                            | `dialog`       |
+| BlToaster                           | `toast`        |
+
+## Supported entry points
+
+`package.json` exports the wildcards `./css/*`, `./js/*`, `./fonts/*` and `./dist/*`, which make every
+file path resolvable. Only these are the supported public surface; everything else (for example
+`js/prepaint-script.d.mts`) is internal and may move in a minor release:
+
+- `benchlight/vue`, `benchlight/nuxt`, `benchlight/vite`, `benchlight/tokens`
+- `benchlight/tailwind/theme.css`
+- `benchlight/css/index.css` and `benchlight/css/components/*.css`
+- `benchlight/dist/benchlight.min.css`, `benchlight/dist/fonts.min.css` and `benchlight/dist/modules/*`
+- `benchlight/js/appearance.js`, `benchlight/js/prepaint.js` and `benchlight/js/prepaint-script.mjs`
 
 ## API contract
 
-`API.md` is generated by `bun run build`. Review a diff in it as the breaking-change checklist before
+`API.md` is generated by `bun run build`. It lists package exports, `dist/` files, runtime exports,
+exported types with their shapes, components (props, slots with their props, events), CSS classes,
+tokens, script-set `data-*` attributes, hook-only classes and CSS hooks. Review a diff in it as the breaking-change checklist before
 tagging.
 
 ## Tokens in JS
