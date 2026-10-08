@@ -115,7 +115,7 @@ const REQUIRED: Record<string, string[]> = {
     '.bl-meter-field__value',
     '@media (prefers-reduced-motion: reduce)'
   ],
-  msg: ['.bl-msg--ok::before', '.bl-msg--err', '.bl-msg--info'],
+  msg: ['.bl-msg--success::before', '.bl-msg--danger'],
   log: ['.bl-ansi-31', '.bl-ansi-97', 'var(--bl-log-height, 12.5rem)'],
   'section-head': [
     '.bl-section-head--ruled',
@@ -366,10 +366,22 @@ describe('anchored behaviour', () => {
 })
 
 describe('text on tints (spec §4.1)', () => {
-  it('bl-msg--ok uses ink-1 text and carries phosphor in the LED mark', () => {
+  it('bl-msg--success uses ink-1 text and carries phosphor in the LED mark', () => {
     const css = read('msg')
-    expect(css).toMatch(/\.bl-msg--ok\s*\{[^}]*color:\s*var\(--bl-ink-1\)/)
-    expect(css).toMatch(/\.bl-msg--ok::before\s*\{[^}]*background:\s*var\(--bl-phosphor\)/)
+    expect(css).toMatch(/\.bl-msg--success\s*\{[^}]*color:\s*var\(--bl-ink-1\)/)
+    expect(css).toMatch(/\.bl-msg--success::before\s*\{[^}]*background:\s*var\(--bl-phosphor\)/)
+  })
+
+  it('bl-msg--danger carries a diamond mark in the danger colour', () => {
+    const css = read('msg')
+    const mark = /\.bl-msg--danger::before\s*\{([^}]*)\}/.exec(css)?.[1] ?? ''
+    expect(mark).toMatch(/background:\s*var\(--bl-danger\)/)
+    expect(mark).toMatch(/rotate:\s*45deg/)
+    expect(mark).toMatch(/content:\s*''/)
+  })
+
+  it('the old bl-msg--ok/--err/--info classes are gone', () => {
+    expect(read('msg')).not.toMatch(/\.bl-msg--(ok|err|info)\b/)
   })
 })
 

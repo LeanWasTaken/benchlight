@@ -103,7 +103,20 @@ export interface DialogLabels {
 
 export type DialogCloseReason = 'button' | 'backdrop' | 'escape' | 'program' | 'native'
 
-export type ToastTone = 'neutral' | 'success' | 'danger'
+/** Status vocabulary shared by BlMsg and toasts. Neutral is the unmarked base. */
+export type StatusTone = 'neutral' | 'success' | 'danger'
+
+export type ToastTone = StatusTone
+
+export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost'
+
+export type LedState = 'on' | 'off' | 'danger'
+
+/** Payload of BlDialog's `close` event. */
+export interface DialogCloseEvent {
+  reason: DialogCloseReason
+  returnValue: string
+}
 
 export interface ToastAction {
   label: string

@@ -4,3 +4,12 @@ export const isDev = Boolean((import.meta as { env?: { DEV?: boolean } }).env?.D
 export function warn(message: string): void {
   if (isDev) console.warn(`[benchlight] ${message}`)
 }
+
+const warned = new Set<string>()
+
+// Like warn, but each distinct message fires once per page load.
+export function warnOnce(message: string): void {
+  if (!isDev || warned.has(message)) return
+  warned.add(message)
+  warn(message)
+}

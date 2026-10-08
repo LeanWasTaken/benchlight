@@ -127,11 +127,33 @@ describe('small readouts', () => {
     expect(wrapper.find('.bl-readout__unit').text()).toBe('Mbps')
   })
 
-  it('BlMsg sets tone and an alert role for errors', () => {
-    expect(mount(BlMsg, { props: { tone: 'ok' } }).attributes('role')).toBe('status')
-    const err = mount(BlMsg, { props: { tone: 'err' } })
-    expect(err.classes()).toContain('bl-msg--err')
-    expect(err.attributes('role')).toBe('alert')
+  it('BlMsg renders the status tones and an alert role for danger', () => {
+    const neutral = mount(BlMsg)
+    expect(neutral.classes()).toEqual(['bl-msg'])
+    expect(neutral.attributes('role')).toBe('status')
+    const success = mount(BlMsg, { props: { tone: 'success' } })
+    expect(success.classes()).toContain('bl-msg--success')
+    expect(success.attributes('role')).toBe('status')
+    const danger = mount(BlMsg, { props: { tone: 'danger' } })
+    expect(danger.classes()).toContain('bl-msg--danger')
+    expect(danger.attributes('role')).toBe('alert')
+  })
+
+  it('BlMsg maps the old info/ok/err tones with one dev warning each', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const map = { info: 'neutral', ok: 'success', err: 'danger' } as const
+    for (const [old, now] of Object.entries(map)) {
+      const wrapper = mount(BlMsg, { props: { tone: old as never } })
+      expect(wrapper.classes().join(' ')).not.toContain(`bl-msg--${old}`)
+      if (now !== 'neutral') expect(wrapper.classes()).toContain(`bl-msg--${now}`)
+      expect(wrapper.attributes('role')).toBe(now === 'danger' ? 'alert' : 'status')
+      mount(BlMsg, { props: { tone: old as never } })
+    }
+    const messages = warn.mock.calls.map((call) => String(call[0]))
+    expect(messages).toHaveLength(3)
+    expect(messages.join('\n')).toMatch(/"info".*"neutral"/)
+    expect(messages.join('\n')).toMatch(/"ok".*"success"/)
+    expect(messages.join('\n')).toMatch(/"err".*"danger"/)
   })
 
   it('BlMsg wraps the slot in one text box so runs and links share a column', () => {
