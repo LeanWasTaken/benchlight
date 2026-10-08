@@ -62,10 +62,11 @@ export default defineNuxtConfig({
 ```
 
 The module adds the fonts and component CSS, the no-flash appearance script, auto-imported `Bl*`
-components and composables (`useAppearance`, `useScrollLifted`, `useFollowScroll`, `useReducedMotion`, `useMarquee`,
-`riseDelay`, `ansiToSegments`, `useToast`). `benchlight: { fonts: false }` skips the bundled fonts. `BlSiteBar`
-wraps its nav in a `<nav>` landmark labelled by `navLabel` (default `Primary`). The Tailwind lines are
-optional: skip them if the app does not use Tailwind.
+components and composables (`useAppearance`, `useScrollLifted`, `useFollowScroll`,
+`useReducedMotion`, `useMarquee`, `riseDelay`, `ansiToSegments`, `useToast`).
+`benchlight: { fonts: false }` skips the bundled fonts. `BlSiteBar` wraps its nav in a `<nav>`
+landmark labelled by `navLabel` (default `Primary`). The Tailwind lines are optional: skip them if
+the app does not use Tailwind.
 
 ```vue
 <script setup lang="ts">
@@ -138,12 +139,13 @@ raise gets a CHANGELOG line.
 - Library CSS lives in `@layer base` / `@layer components`; utilities and your own CSS win without
   `!important`.
 - States are ARIA or native attributes (`aria-current`, `aria-pressed`, `:checked`, `:disabled`);
-  the current item uses `aria-current` (`page`, `step`, `location` or `true`; any value but `false` is styled). The `data-*` attributes below are script-set, so
-  do not set them yourself (apart from the CSS-only cases in the table notes). `data-lifted`
-  (site bar, `js/appearance.js`), `data-overflowing` (BlMarquee), `data-fit`, `data-stacked` and
-  `data-measuring` (BlTable), `data-ready` (BlAppearanceSwitch), `data-indeterminate` (BlMeter),
-  `data-action`, `data-dir`, `data-label` and `data-empty` (BlTable), `data-bl-appearance` (on
-  `<html>`) and `data-bl-lift` (you set it; `js/appearance.js` reads it).
+  the current item uses `aria-current` (`page`, `step`, `location` or `true`; any value but `false`
+  is styled). The `data-*` attributes below are script-set, so do not set them yourself (apart from
+  the CSS-only cases in the table notes). `data-lifted` (site bar, `js/appearance.js`),
+  `data-overflowing` (BlMarquee), `data-fit`, `data-stacked` and `data-measuring` (BlTable),
+  `data-ready` (BlAppearanceSwitch), `data-indeterminate` (BlMeter), `data-action`, `data-dir`,
+  `data-label` and `data-empty` (BlTable), `data-bl-appearance` (on `<html>`) and `data-bl-lift`
+  (you set it; `js/appearance.js` reads it).
 - Appearance: `data-bl-appearance="light|dark"` on `<html>` (absent = auto), stored as
   `localStorage['bl-appearance']`.
   A user's theme change crossfades the whole page with a View Transition (`--bl-duration-base`)
@@ -181,6 +183,9 @@ raise gets a CHANGELOG line.
 - Long unbroken content (URLs, hashes, compound words) wraps instead of widening the page.
 - The stress suite is the contract: `/stress.html` renders every component with hostile content and
   `tests/visual/stress.spec.ts` checks it (see Development).
+- **Link attrs.** `BlNavLink` and `BlIndexRow` render an `li` around the link: `class` and `style`
+  go on the `li`; `target`, `rel`, `aria-label`, `data-*` and listeners such as `@click` go on the
+  inner link or button. A set `current` prop wins over a consumer `aria-current`.
 - **Gutter.** `BlIndexRow` and `BlPrevNext` links bleed 12px either side for the hover background, so
   the host needs at least 12px of side padding. `.bl-col` provides 16-24px.
 - **Site bar.** The nav scrolls horizontally on one line when it does not fit. A brand under about
@@ -271,6 +276,12 @@ modules and `pagination` needs `layout` (the bundle CLI warns otherwise).
 - **Columns** are `{ key, label, align?, numeric?, sortable?, sortBy?, format?, width?, primary?, total? }`.
   The primary column (the first unless one sets `primary`) is the row header. `v-model:sort` and
   `v-model:page` are optional; set `rowKey` when sorting, paging or using row actions.
+- **Attrs:** the naming, description and structure attributes (`aria-label`, `aria-labelledby`,
+  `aria-describedby`, `aria-description`, `aria-details`, `aria-roledescription`, `aria-rowcount`,
+  `aria-colcount`) go on the `<table>`, so a note on units or a totals row can describe it. Every
+  other attribute stays on the wrapper `div.bl-table`: `class`, `style`, `id`, `data-*`, listeners
+  and the state attributes `aria-hidden`, `aria-busy` and `aria-live` (which must cover the sort
+  strip and pagination too).
 - **Slots:** `caption`, `empty`, `footer` and the dynamic `cell-<key>` (`{ row, value, column }`) and
   `head-<key>` (`{ column }`) per column key. API.md lists them under BlTable.
 - **`manual` mode** is for server-side sorting and paging: rows are shown as given, nothing is sorted
@@ -507,6 +518,8 @@ const id = toast({ message: 'Item deleted', action: { label: 'Undo', onClick: re
   `onClick`, then dismisses the toast, even if `onClick` throws (the error still surfaces).
 - Re-toasting an existing `id` replaces it in place: a visible toast keeps its slot and its timer
   restarts; a queued one keeps its queue position.
+- BlToaster takes `class`, `data-*` and `aria-*` on its `<section class="bl-toaster">` (inside the
+  teleport); an `aria-label` there replaces the `labels.region` text.
 - BlToaster props: `max` (default 3 visible; the rest queue first in, first out) and `labels`
   (`{ region, dismiss, actionHint }`, defaults `'Notifications'`, `'Dismiss'` and
   `` (label) => `${label} available` ``).
