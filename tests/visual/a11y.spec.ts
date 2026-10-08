@@ -476,3 +476,20 @@ test.describe('forced colors: v0.6 blocks', () => {
     expect(axe.violations.map((v) => v.id)).toEqual([])
   })
 })
+
+test('aria-current="location" markup is styled like the current page', async ({ page }) => {
+  await page.goto('/')
+  const colours = await page.evaluate(() => {
+    const host = document.body.appendChild(document.createElement('div'))
+    host.innerHTML =
+      '<a class="bl-site-bar__link" href="#" aria-current="location">here</a>' +
+      '<a class="bl-site-bar__link" href="#" aria-current="false">off</a>' +
+      '<a class="bl-site-bar__link" href="#">plain</a>'
+    const colour = (el: Element) => getComputedStyle(el).color
+    const [here, off, plain] = [...host.children].map(colour)
+    host.remove()
+    return { here, off, plain }
+  })
+  expect(colours.here).not.toBe(colours.plain)
+  expect(colours.off).toBe(colours.plain)
+})

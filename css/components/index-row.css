@@ -37,13 +37,13 @@
       color: var(--bl-trace);
     }
   }
-  .bl-index-row[aria-current='true'] {
+  .bl-index-row[aria-current]:not([aria-current='false']) {
     background: color-mix(in srgb, var(--bl-trace) 10%, transparent);
   }
-  .bl-index-row[aria-current='true'] .bl-index-row__title {
+  .bl-index-row[aria-current]:not([aria-current='false']) .bl-index-row__title {
     color: var(--bl-trace);
   }
-  .bl-index-row[aria-current='true'] .bl-meta {
+  .bl-index-row[aria-current]:not([aria-current='false']) .bl-meta {
     color: var(--bl-ink-2);
   }
   .bl-index-row__meta,

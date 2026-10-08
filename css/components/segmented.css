@@ -56,7 +56,7 @@
     }
   }
   .bl-segmented__item[aria-pressed='true'],
-  .bl-segmented__item[aria-current],
+  .bl-segmented__item[aria-current]:not([aria-current='false']),
   .bl-segmented__item:has(:checked) {
     background: var(--bl-raised);
     color: var(--bl-ink-1);
@@ -75,7 +75,7 @@
   }
   @media (forced-colors: active) {
     .bl-segmented__item[aria-pressed='true'],
-    .bl-segmented__item[aria-current],
+    .bl-segmented__item[aria-current]:not([aria-current='false']),
     .bl-segmented__item:has(:checked) {
       forced-color-adjust: none;
       background: Highlight;

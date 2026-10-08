@@ -5,7 +5,7 @@
       v-bind="bindings"
       class="bl-index-row"
       :class="{ 'bl-index-row--compact': compact }"
-      :aria-current="selected ? 'true' : undefined"
+      :aria-current="ariaCurrent"
     >
       <span v-if="$slots.icon" class="bl-index-row__icon" aria-hidden="true">
         <slot name="icon" />
@@ -26,10 +26,11 @@
     as?: LinkAs
     to?: LinkTo
     href?: string
-    selected?: boolean
+    current?: boolean | 'page' | 'step' | 'location' | 'true'
     compact?: boolean
   }>()
 
+  const ariaCurrent = computed(() => (props.current === true ? 'true' : props.current || undefined))
   const tag = computed(() => resolveTag(props.as, props.to, props.href, 'div'))
   const bindings = computed(() => {
     if (tag.value === 'div') return linkBindings('div', props.to, props.href)

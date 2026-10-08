@@ -101,7 +101,7 @@
       color: var(--bl-ink-1);
     }
   }
-  .bl-site-bar__link[aria-current='page'] {
+  .bl-site-bar__link[aria-current]:not([aria-current='false']) {
     color: var(--bl-trace);
   }
   .bl-site-bar__actions {
