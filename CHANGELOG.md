@@ -18,6 +18,19 @@
   `aria-current="location"` and `"step"` markup is styled everywhere. Rewrite CSS that targets
   `.bl-index-row[aria-current='true']` and similar to the new selector.
 
+- Attributes now land on the element they describe. BlNavLink and BlIndexRow set
+  `inheritAttrs: false`: `class` and `style` stay on the `<li>`; every other attribute and listener
+  (`target`, `rel`, `aria-label`, `data-*`, `@click`) moves to the inner link or button, where it
+  used to land on the `<li>`. BlToaster sets `inheritAttrs: false` and binds `class`, `data-*` and
+  `aria-*` to its `<section>` (inside the teleport), which also removes the Vue extraneous-attrs
+  warning; an `aria-label` there overrides the `labels.region` default. BlTable sends the naming,
+  description and structure attributes (`aria-label`, `aria-labelledby`, `aria-describedby`,
+  `aria-description`, `aria-details`, `aria-roledescription`, `aria-rowcount`, `aria-colcount`) to
+  the `<table>` instead of the wrapper `div.bl-table`; `class`, `style`, `id`, `data-*`, listeners
+  and state attributes such as `aria-hidden`, `aria-busy` and `aria-live` stay on the wrapper. A set
+  `current` prop on BlNavLink or BlIndexRow wins over a consumer `aria-current`. Move any `target`,
+  `rel` or `data-*` hook that targeted the `li`, and any `aria-*` the wrapper carried.
+
 ### Added
 
 - Exported types `StatusTone` (shared by BlMsg and `ToastTone`, now an alias), `ButtonVariant`,

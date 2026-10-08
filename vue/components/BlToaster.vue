@@ -4,6 +4,7 @@
       ref="root"
       class="bl-toaster"
       :aria-label="text.region"
+      v-bind="$attrs"
       @pointerenter="onPointer($event, true)"
       @pointerleave="onPointer($event, false)"
       @focusin="onFocusIn"
@@ -68,6 +69,7 @@
   import type { ToasterLabels } from '../types'
   import BlButton from './BlButton.vue'
 
+  defineOptions({ inheritAttrs: false })
   const props = withDefaults(defineProps<{ max?: number; labels?: Partial<ToasterLabels> }>(), {
     max: 3
   })

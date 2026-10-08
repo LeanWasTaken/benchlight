@@ -1,6 +1,7 @@
 <template>
   <div
     ref="root"
+    v-bind="wrapperAttrs()"
     class="bl-table"
     :class="{ 'bl-table--compact': compact, 'bl-table--scroll': scroll }"
     :data-fit="fit.fitted.value ? '' : undefined"
@@ -32,7 +33,7 @@
       :role="scroll && fit.overflowing.value ? 'region' : undefined"
       :aria-labelledby="scroll && fit.overflowing.value ? captionId : undefined"
     >
-      <table ref="table" role="table" class="bl-table__table">
+      <table ref="table" role="table" class="bl-table__table" v-bind="tableAttrs()">
         <caption :id="captionId" :class="{ 'bl-sr-only': captionHidden }">
           <slot name="caption">{{ caption }}</slot>
         </caption>
@@ -184,7 +185,7 @@
 </template>
 
 <script setup lang="ts" generic="Row extends Record<string, unknown>">
-  import { computed, ref, useId, useSlots, watch } from 'vue'
+  import { computed, ref, useAttrs, useId, useSlots, watch } from 'vue'
   import BlPagination from './BlPagination.vue'
   import { useTableFit } from '../internal/useTableFit'
   import { warn } from '../internal/dev'
@@ -223,6 +224,29 @@
   }>()
   const sort = defineModel<{ key: string; dir: 'asc' | 'desc' } | null>('sort', { default: null })
   const page = defineModel<number>('page', { default: 1 })
+
+  defineOptions({ inheritAttrs: false })
+  const attrs = useAttrs()
+  // Naming, description and structure attributes describe the <table>, so they land there;
+  // everything else (aria-hidden, aria-busy, aria-live, listeners, class, style, id, data-*) stays
+  // on the wrapper, which also holds the sort strip and pagination. Functions evaluated in render,
+  // so they re-run on any attr change.
+  const TABLE_ATTRS = new Set([
+    'aria-label',
+    'aria-labelledby',
+    'aria-describedby',
+    'aria-description',
+    'aria-details',
+    'aria-roledescription',
+    'aria-rowcount',
+    'aria-colcount'
+  ])
+  function tableAttrs(): Record<string, unknown> {
+    return Object.fromEntries(Object.entries(attrs).filter(([key]) => TABLE_ATTRS.has(key)))
+  }
+  function wrapperAttrs(): Record<string, unknown> {
+    return Object.fromEntries(Object.entries(attrs).filter(([key]) => !TABLE_ATTRS.has(key)))
+  }
 
   const root = ref<HTMLElement | null>(null)
   const table = ref<HTMLElement | null>(null)
