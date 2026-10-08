@@ -10,6 +10,10 @@
   exit hold (Chromium) and the backdrop fade. The internal toast host is now a direct child of
   `<dialog>`, beside the panel, so the toaster is never transformed or faded with it. The panel
   may sit inside a wrapper such as `<form method="dialog">`.
+- BlToast: toasts no longer dip under a closing dialog's backdrop for its ~200ms fade. The
+  toaster still leaves the dialog as it starts closing (so a toast fired with the close is
+  announced outside it), and while that dialog's exit transition runs it is shown as a
+  `popover="manual"` above it in the top layer, then returns to normal stacking.
 
 ## 0.6.1 - 2026-10-08
 

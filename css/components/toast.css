@@ -10,6 +10,19 @@
     margin-inline: auto;
     pointer-events: none;
   }
+  /* While a dialog fades out above it, BlToaster rides in the top layer as a manual popover.
+     Undo the UA popover box; zero specificity, so the toaster's own rules still win. */
+  :where(.bl-toaster[popover]) {
+    inset-block-start: auto;
+    inline-size: auto;
+    block-size: auto;
+    margin-block: 0;
+    padding: 0;
+    overflow: visible;
+    color: inherit;
+    background: none;
+    border: 0;
+  }
   @media (min-width: 40em) {
     .bl-toaster {
       inset-inline-start: auto;
