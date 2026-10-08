@@ -87,5 +87,9 @@
     ::view-transition-new(*) {
       animation-duration: 0.01ms !important;
     }
+    /* A staggered item must not wait out its delay either. */
+    .bl-rise {
+      animation-delay: 0ms !important;
+    }
   }
 }

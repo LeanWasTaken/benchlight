@@ -40,7 +40,7 @@
     width: calc(var(--bl-meter-value, 0) * 100%);
     height: 100%;
     background: var(--bl-trace);
-    transition: width 100ms linear;
+    transition: width var(--bl-duration-fast) var(--bl-ease-out);
   }
   .bl-meter[data-indeterminate] .bl-meter__fill {
     width: 30%;

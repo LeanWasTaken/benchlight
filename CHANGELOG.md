@@ -7,12 +7,25 @@
 - BlToast: a dismissed toast now fades out where it stands. The move class that Vue puts on the
   leaving toast replaced its opacity and translate transitions, so it vanished at once while
   sliding unseen.
-- Theme changes crossfade instead of snapping. `useAppearance` and `js/appearance.js` apply the
-  new theme inside one View Transition, so the whole page fades over `--bl-duration-base` as a
-  single composited layer, however many elements it holds (a per-element transition rule janked
-  data-heavy pages). Browsers without View Transitions, reduced motion and OS-driven `auto`
-  flips apply the theme at once, as before. BlButton and BlSegmented also ease their pressed and
-  selected rings, and BlTabBar its active tint; BlToggle's thumb border eases with the move.
+- BlLed eases its colour and glow between off, on and danger over `--bl-duration-fast`.
+- BlEqBars: opacity eases with the height and colour, and stopping glides the bars to rest (a
+  short composited animation from where the loop was) instead of snapping them back.
+- BlTable: row hover and focus highlight and the sort icon's rotation and fade ease at
+  `--bl-duration-fast`, like BlIndexRow and BlPrevNext; the icon is exempt from the measuring
+  pass's `transition-property: none`, since it cannot change a measurement.
+- BlPagination buttons ease their hover and current state, and BlButton its disabled opacity.
+- BlToggle: the thumb slides with `translate` (mirrored for RTL with `:dir(rtl)`) instead of
+  animating `inset-inline-start`.
+- BlMeter: the fill eases over `--bl-duration-fast` with `--bl-ease-out` instead of 100ms linear.
+- BlMarquee glides the text back to rest when it stops overflowing instead of snapping.
+- `bl-page-*` fade with `ease` instead of `linear`.
+- With reduced motion, `bl-rise` drops its stagger delay (items no longer wait invisible) and the
+  BlPrevNext arrow no longer nudges on hover.
+
+### Changed
+
+- The full-bundle size guard is raised from 53,248 B (52 KiB) to 56,320 B (55 KiB) for the motion
+  fixes.
 
 ## 0.6.0 - 2026-10-08
 

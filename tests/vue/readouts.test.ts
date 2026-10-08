@@ -103,6 +103,24 @@ describe('small readouts', () => {
     expect(wrapper.classes()).toContain('bl-eq--active')
   })
 
+  it('BlEqBars glides each bar home from where the loop was when it stops', async () => {
+    const animate = vi.fn()
+    const wrapper = mount(BlEqBars, { props: { active: true }, attachTo: document.body })
+    for (const bar of wrapper.findAll('.bl-eq__bar')) (bar.element as HTMLElement).animate = animate
+    const computed = vi.spyOn(globalThis, 'getComputedStyle').mockReturnValue({
+      transform: 'matrix(1, 0, 0, 0.6, 0, 0)',
+      getPropertyValue: () => '.15s'
+    } as unknown as CSSStyleDeclaration)
+    await wrapper.setProps({ active: false })
+    expect(animate).toHaveBeenCalledTimes(4)
+    expect(animate).toHaveBeenCalledWith(
+      [{ transform: 'matrix(1, 0, 0, 0.6, 0, 0)' }, { transform: 'none' }],
+      { duration: expect.closeTo(150), easing: 'ease' }
+    )
+    computed.mockRestore()
+    wrapper.unmount()
+  })
+
   it('BlReadout renders value and unit', () => {
     const wrapper = mount(BlReadout, { props: { value: 94.2, unit: 'Mbps' } })
     expect(wrapper.find('.bl-readout__value').text()).toBe('94.2')
