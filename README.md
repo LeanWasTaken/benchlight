@@ -294,12 +294,16 @@ modules and `pagination` needs `layout` (the bundle CLI warns otherwise).
 - **Totals:** a column `total` of `'sum'`, `'avg'`, `'count'` or a function over all rows (not just the
   page). `format(value)` formats the result. The footer renders the cells; the `footer` slot replaces
   them.
-- **i18n:** `labels` (`total`, `empty`, `sortStrip`) and `paginationLabels` (`nav`, `prev`, `next`,
-  `page`, `pageOf`, `range`); `locale` sets the sort collation.
+- **i18n:** `labels` (`total`, `empty`, `sortStrip`, `sortAscending`, `sortDescending`, and
+  `pages: (caption) => string` for the pagination's name) and `paginationLabels` (`nav`, `prev`,
+  `next`, `page`, `pageOf`, `range`); `locale` sets the sort collation. Every `labels` prop in the
+  library (BlAppearanceSwitch, BlPrevNext, BlDialog, BlToaster, BlPagination, BlTable) treats an
+  `undefined` value as "use the default", so an i18n lookup that finds nothing never blanks a
+  string. BlAppearanceSwitch also takes `labels.marks` (`{ auto, light, dark }`, default A / L / D).
 - With async data, BlTable clamps `page` to 1 while there are no rows, so set the page after rows
   arrive (or use `manual` with `totalRows`).
-- **BlPagination** renders nothing for a single page. Standalone: `total`, `pageSize`, `label`,
-  `v-model:page`.
+- **BlPagination** renders nothing for a single page. Standalone: `total`, `pageSize`, `v-model:page`, and
+  `label` or `labels.nav` to name the nav (a dev warning fires when neither is set).
 - **CSS-only use:** wrap a `table` in `div.bl-table` (modifiers `.bl-table--compact`,
   `.bl-table--scroll`). Classes: `.bl-table__num`, `.bl-table__primary`, `.bl-table__label` (a
   `span aria-hidden="true"` in each body cell), `.bl-table__sort`, `.bl-table__sort-strip`,

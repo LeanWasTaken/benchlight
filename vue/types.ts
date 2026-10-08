@@ -48,6 +48,8 @@ export interface AppearanceLabels {
   auto: string
   light: string
   dark: string
+  /** The short visible mark beside each option; defaults to A / L / D. */
+  marks?: Partial<{ auto: string; light: string; dark: string }>
 }
 
 export interface PrevNextLabels {
@@ -86,6 +88,10 @@ export interface TableLabels {
   total: string
   empty: string
   sortStrip: string
+  sortAscending: string
+  sortDescending: string
+  /** Accessible name of the table's pagination when `paginationLabels.nav` is not set. */
+  pages: (caption: string) => string
 }
 
 export interface PaginationLabels {

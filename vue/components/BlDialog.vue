@@ -42,6 +42,7 @@
   import { lockPage, unlockPage } from '../internal/pageLock'
   import { hasContent } from '../internal/slots'
   import { pushToastHost, removeToastHost, toastFocus } from '../internal/toastHosts'
+  import { mergeLabels } from '../internal/labels'
   import type { DialogCloseEvent, DialogCloseReason, DialogLabels } from '../types'
   import BlButton from './BlButton.vue'
 
@@ -71,7 +72,7 @@
   }
   const titleId = useId()
   const descId = useId()
-  const text = computed<DialogLabels>(() => ({ close: 'Close', ...props.labels }))
+  const text = computed<DialogLabels>(() => mergeLabels({ close: 'Close' }, props.labels))
 
   let isOpen = false
   let pendingReason: DialogCloseReason | null = null

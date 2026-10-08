@@ -19,7 +19,7 @@
       >
         {{ column.label
         }}<span v-if="sort?.key === column.key" class="bl-sr-only"
-          >, {{ sort.dir === 'asc' ? 'ascending' : 'descending' }}</span
+          >, {{ sort.dir === 'asc' ? text.sortAscending : text.sortDescending }}</span
         >
         <svg class="bl-table__sort-icon" viewBox="0 0 12 12" aria-hidden="true">
           <path d="M3 7.5 6 4.5l3 3" fill="none" stroke="currentColor" stroke-width="1.5" />
@@ -178,7 +178,7 @@
       v-model:page="currentPage"
       :total="totalCount"
       :page-size="pageSize"
-      :label="paginationLabels?.nav ?? `${caption}, pages`"
+      :label="paginationLabels?.nav ?? text.pages(caption)"
       :labels="paginationLabels"
     />
   </div>
@@ -198,6 +198,7 @@
     pageSlice,
     sortRows
   } from '../internal/table'
+  import { mergeLabels } from '../internal/labels'
   import type { LinkAs, LinkTo, PaginationLabels, TableColumn, TableLabels } from '../types'
 
   /**
@@ -253,13 +254,19 @@
   const scroller = ref<HTMLElement | null>(null)
   const captionId = useId()
 
-  const text = computed<TableLabels>(() => {
-    const merged: TableLabels = { total: 'Total', empty: 'No data', sortStrip: 'Sort by' }
-    for (const [key, value] of Object.entries(props.labels ?? {})) {
-      if (value !== undefined) merged[key as keyof TableLabels] = value
-    }
-    return merged
-  })
+  const text = computed<TableLabels>(() =>
+    mergeLabels<TableLabels>(
+      {
+        total: 'Total',
+        empty: 'No data',
+        sortStrip: 'Sort by',
+        sortAscending: 'ascending',
+        sortDescending: 'descending',
+        pages: (title) => `${title}, pages`
+      },
+      props.labels
+    )
+  )
   const primaryKey = computed(() => (props.columns.find((c) => c.primary) ?? props.columns[0])?.key)
   const sortable = computed(() => props.columns.filter((c) => c.sortable))
   const sortedRows = computed<Row[]>(() =>

@@ -58,6 +58,7 @@
 <script setup lang="ts">
   import { computed } from 'vue'
   import { linkBindings } from '../internal/link'
+  import { mergeLabels } from '../internal/labels'
   import type { LinkAs, PrevNextItem, PrevNextLabels } from '../types'
 
   const props = withDefaults(
@@ -69,10 +70,7 @@
     }>(),
     { as: 'a' }
   )
-  const text = computed<PrevNextLabels>(() => ({
-    nav: 'Pagination',
-    prev: 'Previous',
-    next: 'Next',
-    ...props.labels
-  }))
+  const text = computed<PrevNextLabels>(() =>
+    mergeLabels({ nav: 'Pagination', prev: 'Previous', next: 'Next' }, props.labels)
+  )
 </script>

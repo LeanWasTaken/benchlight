@@ -55,6 +55,12 @@
 
 ### Added
 
+- Every built-in string is overridable. `AppearanceLabels.marks` (`{ auto, light, dark }`) sets the
+  visible A / L / D marks of BlAppearanceSwitch. `TableLabels` gains `sortAscending` and
+  `sortDescending` (the sort-strip state read by screen readers) and `pages: (caption) => string`
+  (the default pagination name, still overridden by `paginationLabels.nav`).
+- BlPagination's `label` is optional and falls back to `labels.nav`; a dev warning fires when
+  neither is set.
 - BlRange's slider carries the class `bl-range__input`; the `.bl-range input[type='range']` rule is
   kept.
 - Exported types `StatusTone` (shared by BlMsg and `ToastTone`, now an alias), `ButtonVariant`,
@@ -63,6 +69,12 @@
   patterns and all slot props, script-set `data-*` attributes and the hook-only pagination classes.
 - README: complete `data-*` list, one CSS hooks table, a component-to-module table and the list of
   supported entry points.
+
+### Fixed
+
+- A `labels` entry set to `undefined` now falls back to the default in BlAppearanceSwitch,
+  BlPrevNext, BlDialog and BlToaster, as it already did in BlPagination and BlTable; before, it
+  blanked the string. One internal `mergeLabels()` serves all six.
 
 ### Changed
 
