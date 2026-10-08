@@ -14,6 +14,11 @@
   toaster still leaves the dialog as it starts closing (so a toast fired with the close is
   announced outside it), and while that dialog's exit transition runs it is shown as a
   `popover="manual"` above it in the top layer, then returns to normal stacking.
+- BlDialog: setting `open` to false and back to true within one task now reopens the dialog.
+  Before, the reopen was dropped because the browser's `close` event had not arrived yet, and
+  the late event then emitted `update:open(false)`. The reopen now settles the closing session
+  once (`close` with `'program'`, toast host, page lock, focus) and ignores its late event; the
+  "known limitation" note is gone from the README.
 
 ## 0.6.1 - 2026-10-08
 

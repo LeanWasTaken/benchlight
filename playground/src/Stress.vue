@@ -668,13 +668,21 @@
           Notify
         </BlButton>
       </div>
-      <BlDialog v-model:open="sheetOpen" title="Edit item">
+      <BlDialog
+        v-model:open="sheetOpen"
+        title="Edit item"
+        @update:open="sheetLog.push(`update:${$event}`)"
+        @close="sheetLog.push(`close:${$event.reason}`)"
+      >
         <BlButton variant="ghost" @click="toast({ message: 'Copied', duration: 0 })">Copy</BlButton>
+        <BlButton variant="ghost" @click="reopen">Reopen</BlButton>
         <template #footer>
           <BlButton variant="secondary" @click="sheetOpen = false">Cancel</BlButton>
           <BlButton @click="save">Save</BlButton>
         </template>
       </BlDialog>
+      <!-- Emits of the Edit item dialog, for the same-task close and reopen test. -->
+      <p hidden data-log>{{ sheetLog.join(' ') }}</p>
       <BlDialog v-model:open="detailsOpen" title="Update details">
         <p>Version notes.</p>
       </BlDialog>
@@ -761,7 +769,7 @@
     BlToaster,
     useToast
   } from '../../vue'
-  import { onMounted, ref } from 'vue'
+  import { nextTick, onMounted, ref } from 'vue'
 
   import type { TableColumn } from '../../vue'
 
@@ -892,6 +900,13 @@
   function save(): void {
     sheetOpen.value = false
     toast('Saved')
+  }
+  const sheetLog = ref<string[]>([])
+  // Close and reopen in one task, before the browser's async close event.
+  async function reopen(): Promise<void> {
+    sheetOpen.value = false
+    await nextTick()
+    sheetOpen.value = true
   }
 
   onMounted(() => {
