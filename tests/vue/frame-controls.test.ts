@@ -588,7 +588,7 @@ describe('form controls', () => {
     expect(select.attributes('style')).toBeUndefined()
   })
 
-  it('BlSelect wires to a BlField, and an own id or aria-describedby wins', async () => {
+  it('BlSelect wires to a BlField, and an own id wins and aria-describedby merges', async () => {
     const own = ref<Record<string, unknown>>({})
     const Host = defineComponent({
       setup: () => () =>
@@ -603,7 +603,7 @@ describe('form controls', () => {
     own.value = { id: 'mine', 'aria-describedby': 'other' }
     await nextTick()
     expect(wrapper.find('select').attributes('id')).toBe('mine')
-    expect(wrapper.find('select').attributes('aria-describedby')).toBe('other')
+    expect(wrapper.find('select').attributes('aria-describedby')).toBe(`${id}-hint other`)
   })
 
   it('BlRange shows the formatted value and exposes it to screen readers', () => {
@@ -645,7 +645,7 @@ describe('form controls', () => {
     const wrapper = mount(BlRange, { attrs: { class: 'mine', style: 'width: 10px' } })
     expect(wrapper.classes()).toEqual(expect.arrayContaining(['bl-range', 'mine']))
     expect(wrapper.attributes('style')).toContain('width: 10px')
-    expect(wrapper.find('input').attributes('class')).toBeUndefined()
+    expect(wrapper.find('input').attributes('class')).toBe('bl-range__input')
     expect(wrapper.find('input').attributes('style')).toBeUndefined()
   })
 
@@ -676,14 +676,37 @@ describe('form controls', () => {
     expect(wrapper.find('input').attributes('aria-describedby')).toBeUndefined()
   })
 
-  it('explicit id and aria-describedby on the control win over the field', () => {
+  it('explicit id wins and aria-describedby merges with the hint id', () => {
     const wrapper = mount(BlField, {
       props: { label: 'SSID', hint: 'Network name' },
       slots: { default: () => h(BlInput, { id: 'own', 'aria-describedby': 'mine' }) }
     })
     const input = wrapper.find('input')
     expect(input.attributes('id')).toBe('own')
-    expect(input.attributes('aria-describedby')).toBe('mine')
+    expect(input.attributes('aria-describedby')).toBe(
+      `${wrapper.find('label').attributes('for')}-hint mine`
+    )
+  })
+
+  it('BlInput merges consumer ids after the hint id without duplicates', () => {
+    const wrapper = mount(BlField, {
+      props: { label: 'SSID', hint: 'h', id: 'f' },
+      slots: { default: () => h(BlInput, { 'aria-describedby': 'err f-hint note' }) }
+    })
+    expect(wrapper.find('input').attributes('aria-describedby')).toBe('f-hint err note')
+  })
+
+  it('BlSelect and BlInput keep a consumer aria-describedby outside a field', () => {
+    const sel = mount(BlSelect, {
+      props: { options: [{ value: 'a', label: 'A' }] },
+      attrs: { 'aria-describedby': 'x' }
+    })
+    expect(sel.find('select').attributes('aria-describedby')).toBe('x')
+    expect(
+      mount(BlInput, { attrs: { 'aria-describedby': 'x' } })
+        .find('input')
+        .attributes('aria-describedby')
+    ).toBe('x')
   })
 
   it('BlField wires BlSelect and BlRange too', () => {
@@ -703,12 +726,12 @@ describe('form controls', () => {
     expect(range.find('input[type="range"]').attributes('aria-describedby')).toBe(`${rangeId}-hint`)
   })
 
-  it('exposes id and describedby as slot props for third-party controls', () => {
+  it('exposes id and describedBy as slot props for third-party controls', () => {
     const wrapper = mount(BlField, {
       props: { label: 'L', hint: 'H', id: 'f' },
       slots: {
-        default: (p: { id: string; describedby?: string }) =>
-          h('textarea', { id: p.id, 'aria-describedby': p.describedby })
+        default: (p: { id: string; describedBy?: string }) =>
+          h('textarea', { id: p.id, 'aria-describedby': p.describedBy })
       }
     })
     expect(wrapper.find('textarea').attributes()).toMatchObject({
@@ -721,13 +744,25 @@ describe('form controls', () => {
     expect(mount(BlInput).find('input').attributes('id')).toBeUndefined()
   })
 
-  it('BlRange id prop and explicit attrs win over the field', () => {
+  it('BlRange id attr wins and aria-describedby merges with the hint id', () => {
     const wrapper = mount(BlField, {
-      props: { label: 'Volume', hint: 'h' },
-      slots: { default: () => h(BlRange, { id: 'own', 'aria-describedby': 'mine' }) }
+      props: { label: 'Volume', hint: 'h', id: 'f' },
+      slots: { default: () => h(BlRange, { id: 'own', 'aria-describedby': 'mine f-hint' }) }
     })
     const input = wrapper.find('input[type="range"]')
     expect(input.attributes('id')).toBe('own')
-    expect(input.attributes('aria-describedby')).toBe('mine')
+    expect(input.attributes('aria-describedby')).toBe('f-hint mine')
+  })
+
+  it('BlRange has no id or ariaDescribedby props and its input carries bl-range__input', () => {
+    const props = Object.keys((BlRange as { props?: Record<string, unknown> }).props ?? {})
+    expect(props).not.toContain('id')
+    expect(props).not.toContain('ariaDescribedby')
+    const wrapper = mount(BlRange, { attrs: { id: 'r', 'aria-describedby': 'd' } })
+    const input = wrapper.find('input')
+    expect(input.classes()).toContain('bl-range__input')
+    expect(input.attributes('id')).toBe('r')
+    expect(input.attributes('aria-describedby')).toBe('d')
+    expect(wrapper.attributes('id')).toBeUndefined()
   })
 })

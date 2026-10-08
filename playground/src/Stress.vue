@@ -84,8 +84,8 @@
       <h2 class="st-label">field-hint-url</h2>
       <div data-box>
         <BlField label="Endpoint" :hint="`See ${url}`">
-          <template #default="{ id, describedby }">
-            <BlInput :id="id" :aria-describedby="describedby" model-value="" />
+          <template #default="{ id, describedBy }">
+            <BlInput :id="id" :aria-describedby="describedBy" model-value="" />
           </template>
         </BlField>
       </div>

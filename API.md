@@ -480,7 +480,7 @@ Exposed: none
 | `label` | `string` | yes |  |
 
 Slots: `default`
-Slot props: `default` `{ id: string; describedby: string | undefined; }`
+Slot props: `default` `{ id: string; describedBy: string | undefined; }`
 Events: none
 Exposed: none
 
@@ -670,9 +670,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `ariaDescribedby` | `string \| undefined` | no |  |
 | `format` | `((value: number) => string) \| undefined` | no |  |
-| `id` | `string \| undefined` | no |  |
 | `max` | `number \| undefined` | no | `100` |
 | `min` | `number \| undefined` | no | `0` |
 | `modelValue` | `number \| undefined` | no | `0` |
@@ -1075,6 +1073,7 @@ Exposed: none
 ## Hook-only classes
 - `bl-pagination__next`
 - `bl-pagination__prev`
+- `bl-range__input`
 
 ## Script-set data attributes
 - `data-action`

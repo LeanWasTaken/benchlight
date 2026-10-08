@@ -1,7 +1,7 @@
 <template>
   <div class="bl-field">
     <label class="bl-field__label" :for="fieldId">{{ label }}</label>
-    <slot :id="fieldId" :describedby="describedBy" />
+    <slot :id="fieldId" :described-by="describedBy" />
     <p v-if="hint" :id="hintId" class="bl-field__hint">{{ hint }}</p>
   </div>
 </template>

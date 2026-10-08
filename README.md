@@ -205,12 +205,13 @@ raise gets a CHANGELOG line.
   `useScrollLifted(threshold)` takes a number, `false`, a ref or a getter. Both it and
   `useReducedMotion()` return a ref that is `false` on the server and until mounted.
 - **Fields:** BlField passes its `id` and hint id to BlInput, BlSelect and BlRange automatically.
-  Your own `id` or `aria-describedby` on the control wins. BlRange forwards fallthrough attrs
-  (`aria-label`, `disabled`, `name`, listeners) to the slider; `class` and `style` stay on the
-  wrapper. Its explicit `ariaDescribedby` and `id` props win over the field context. To override the
-  id, set `id` on BlField instead of on the control, so the `<label for>` still matches. For other controls, use the slot props
-  `{ id, describedby }` (lowercase, a slot prop) or `inject(FIELD_CONTEXT)` from `benchlight/vue`,
-  which holds `{ id, describedBy }` as refs (camelCase).
+  Your own `id` on the control wins. Your own `aria-describedby` is merged: the hint id comes
+  first, then yours, without duplicates. BlRange forwards fallthrough attrs (`id`, `aria-label`,
+  `disabled`, `name`, listeners) to the slider, which carries the class `bl-range__input`; `class`
+  and `style` stay on the wrapper. To override the id, set `id` on BlField instead of on the
+  control, so the `<label for>` still matches. For other controls, use the slot props
+  `{ id, describedBy }` or `inject(FIELD_CONTEXT)` from `benchlight/vue`, which holds
+  `{ id, describedBy }` as refs.
 - **Links:** `LinkProps` precedence: `as` a component (e.g. RouterLink) receives `to` if set,
   otherwise `href`; `as` `'a'` (the default when `to` or `href` is set) receives `href`, else a
   string `to`; `as` any other tag receives neither. Misuse logs a `[benchlight]` warning in
