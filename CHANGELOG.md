@@ -1,9 +1,16 @@
 # Changelog
 
-## Unreleased
+## 0.6.1 - 2026-10-08
+
+Motion release: exits that vanished now fade, state changes that snapped now ease, theme changes
+crossfade, and hover styles no longer stick after a tap. No breaking changes.
 
 ### Fixed
 
+- Theme changes from the appearance switch crossfade the whole page with a View Transition over
+  `--bl-duration-base` where supported and motion is allowed; before, the page background faded
+  while most surfaces snapped. Unsupported browsers and `auto` changes from the OS switch
+  instantly, as before.
 - BlToast: a dismissed toast now fades out where it stands. The move class that Vue puts on the
   leaving toast replaced its opacity and translate transitions, so it vanished at once while
   sliding unseen.
