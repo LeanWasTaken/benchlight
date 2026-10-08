@@ -37,7 +37,8 @@
     border-radius: var(--bl-radius-pill);
     transition:
       background-color var(--bl-duration-fast) ease,
-      border-color var(--bl-duration-fast) ease;
+      border-color var(--bl-duration-fast) ease,
+      opacity var(--bl-duration-fast) ease;
   }
   .bl-toggle__thumb {
     position: absolute;
@@ -49,15 +50,21 @@
     border: 1px solid var(--bl-control-border);
     border-radius: 50%;
     box-shadow: var(--bl-shadow-thumb);
-    transition: inset-inline-start var(--bl-duration-fast) ease;
+    transition:
+      translate var(--bl-duration-fast) ease,
+      border-color var(--bl-duration-fast) ease;
   }
   .bl-toggle__input:checked + .bl-toggle__track {
     background: var(--bl-trace);
     border-color: var(--bl-trace);
   }
   .bl-toggle__input:checked + .bl-toggle__track .bl-toggle__thumb {
-    inset-inline-start: calc(100% - 20px);
+    /* Travel: track width, less both borders, the 18px thumb and a 2px inset on each side. */
+    translate: calc(40px - 2px - 18px - 2px - 2px) 0;
     border-color: var(--bl-trace);
+  }
+  .bl-toggle__input:checked + .bl-toggle__track .bl-toggle__thumb:dir(rtl) {
+    translate: calc((40px - 2px - 18px - 2px - 2px) * -1) 0;
   }
   /* "On" is readable without colour: thumb position plus an inner mark. */
   .bl-toggle__input:checked + .bl-toggle__track .bl-toggle__thumb::after {
@@ -100,12 +107,6 @@
       .bl-toggle__control:hover .bl-toggle__input:not(:checked, :disabled) + .bl-toggle__track {
         border-color: CanvasText;
       }
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .bl-toggle__track,
-    .bl-toggle__thumb {
-      transition: none;
     }
   }
   @media (forced-colors: active) {

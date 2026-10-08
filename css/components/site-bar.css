@@ -96,8 +96,10 @@
     color: var(--bl-ink-2);
     transition: color var(--bl-duration-fast) ease;
   }
-  .bl-site-bar__link:hover {
-    color: var(--bl-ink-1);
+  @media (hover: hover) {
+    .bl-site-bar__link:hover {
+      color: var(--bl-ink-1);
+    }
   }
   .bl-site-bar__link[aria-current='page'] {
     color: var(--bl-trace);

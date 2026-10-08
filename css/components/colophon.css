@@ -32,7 +32,9 @@
     inset: -12px -8px;
     content: '';
   }
-  .bl-colophon__items a:hover {
-    color: var(--bl-ink-1);
+  @media (hover: hover) {
+    .bl-colophon__items a:hover {
+      color: var(--bl-ink-1);
+    }
   }
 }

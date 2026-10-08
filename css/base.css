@@ -67,6 +67,12 @@
   [tabindex='-1']:focus-visible {
     outline: none;
   }
+  /* The appearance switch swaps themes inside a View Transition (see useAppearance): one
+     composited crossfade of the whole page, however many elements it holds. */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: var(--bl-duration-base);
+  }
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -75,6 +81,15 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
+    }
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+      animation-duration: 0.01ms !important;
+    }
+    /* A staggered item must not wait out its delay either. */
+    .bl-rise {
+      animation-delay: 0ms !important;
     }
   }
 }

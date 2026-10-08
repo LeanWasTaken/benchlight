@@ -89,6 +89,9 @@
     block-size: 0.75em;
     flex: none;
     opacity: 0.35;
+    transition:
+      transform var(--bl-duration-fast) ease,
+      opacity var(--bl-duration-fast) ease;
   }
   [aria-sort] > .bl-table__sort .bl-table__sort-icon,
   .bl-table__sort[data-dir] .bl-table__sort-icon {
@@ -119,6 +122,11 @@
   .bl-table[data-measuring],
   .bl-table[data-measuring] * {
     transition-property: none !important;
+  }
+  /* Sorting re-renders the rows and measures in the same task. The icon changes only transform
+     and opacity, which cannot move the layout being measured, so its ease may run through. */
+  .bl-table[data-measuring] .bl-table__sort-icon {
+    transition-property: transform, opacity !important;
   }
   .bl-table[data-measuring] .bl-table__table {
     inline-size: min-content;
@@ -228,6 +236,14 @@
   }
   .bl-table tbody tr[data-action] {
     cursor: pointer;
+    transition: background-color var(--bl-duration-fast) ease;
+  }
+  .bl-table--scroll tbody tr[data-action] > :first-child {
+    transition:
+      background-color var(--bl-duration-fast) ease,
+      border-color var(--bl-duration-base) ease,
+      color var(--bl-duration-base) ease,
+      box-shadow var(--bl-duration-base) ease;
   }
   @media (hover: hover) {
     .bl-table__action:hover {

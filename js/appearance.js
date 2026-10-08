@@ -9,8 +9,17 @@
   function wireSwitch(input) {
     input.checked = input.value === currentMode()
     input.addEventListener('change', function () {
-      if (input.value === 'auto') root.removeAttribute(ATTRIBUTE)
-      else root.setAttribute(ATTRIBUTE, input.value)
+      function apply() {
+        if (input.value === 'auto') root.removeAttribute(ATTRIBUTE)
+        else root.setAttribute(ATTRIBUTE, input.value)
+      }
+      // One crossfade of the whole page, unless motion is reduced or the API is missing.
+      if (
+        typeof document.startViewTransition === 'function' &&
+        !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      )
+        document.startViewTransition(apply).ready.catch(function () {})
+      else apply()
       try {
         localStorage.setItem('bl-appearance', input.value)
       } catch {

@@ -9,7 +9,7 @@ classes.
 ## Install
 
 ```json
-"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.6.0"
+"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.6.1"
 ```
 
 The repo is private and the URL uses SSH on purpose: bun turns GitHub https URLs into API tarball
@@ -125,7 +125,7 @@ dependency pre-bundling. Tailwind is optional: only if the app uses it, add
 - Compact font subsets are listed in `fonts/subset/manifest.json`.
 - `playground/src/App.vue` is the markup reference.
 
-Size budget: `dist/benchlight.min.css` stays at or under 53,248 B (52 KiB) (`wc -c dist/benchlight.min.css`,
+Size budget: `dist/benchlight.min.css` stays at or under 56,320 B (55 KiB) (`wc -c dist/benchlight.min.css`,
 `tests/bundle.test.ts`; it was 28,672 B in v0.3) and the compact font subsets under 23,552 B in total
 (`tests/fonts.test.ts`). The guard is raised in round KiB when legitimate work needs it, and every
 raise gets a CHANGELOG line.
@@ -142,6 +142,9 @@ raise gets a CHANGELOG line.
   `data-stacked` and `data-measuring` are script-set.
 - Appearance: `data-bl-appearance="light|dark"` on `<html>` (absent = auto), stored as
   `localStorage['bl-appearance']`.
+  A user's theme change crossfades the whole page with a View Transition (`--bl-duration-base`)
+  where the browser supports it and motion is allowed; otherwise it switches instantly. Changes
+  that follow the OS in `auto` mode switch instantly.
 - Text on a tint is `ink-1`, `trace` or `danger`; copper and phosphor are marks only there.
 - Borders of controls (inputs, secondary buttons, switch thumb, selected segment, meter edge) use
   `--bl-control-border`, which keeps at least 3:1 against canvas, surface and raised. Hit areas are

@@ -85,20 +85,25 @@
     position: absolute;
     inset-inline: 0;
   }
+  /* One list for all three states: TransitionGroup also puts the move class on a leaving toast,
+     and a separate `transition` on it would replace the fade. TransitionGroup moves with an
+     inline transform and skips the move unless the element transitions it. */
   .bl-toast-enter-active,
-  .bl-toast-leave-active {
+  .bl-toast-leave-active,
+  .bl-toast-move {
     transition:
       opacity var(--bl-duration-base) ease,
-      translate var(--bl-duration-base) var(--bl-ease-out);
+      translate var(--bl-duration-base) var(--bl-ease-out),
+      transform var(--bl-duration-base) var(--bl-ease-out);
   }
   .bl-toast-enter-from,
   .bl-toast-leave-to {
     opacity: 0;
     translate: 0 8px;
   }
-  /* TransitionGroup moves with an inline transform, and skips the move unless it transitions. */
-  .bl-toast-move {
-    transition: transform var(--bl-duration-base) var(--bl-ease-out);
+  /* The FLIP transform also lands on the leaver; it fades where it stands. */
+  .bl-toast-leave-active {
+    transform: none !important;
   }
   @media (prefers-reduced-motion: reduce) {
     .bl-toast-enter-from,

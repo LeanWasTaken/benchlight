@@ -23,7 +23,9 @@
     transition:
       background-color var(--bl-duration-fast) ease,
       border-color var(--bl-duration-fast) ease,
-      color var(--bl-duration-fast) ease;
+      color var(--bl-duration-fast) ease,
+      box-shadow var(--bl-duration-fast) ease,
+      opacity var(--bl-duration-fast) ease;
   }
   .bl-btn--secondary {
     background: var(--bl-surface);
