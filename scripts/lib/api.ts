@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { basename, join, relative, sep } from 'node:path'
+import ts from 'typescript'
 import { createChecker } from 'vue-component-meta'
 import { classNames, customPropertyDeclarations, propertyNames, stripNoise } from './css-scan'
 
@@ -64,6 +65,29 @@ function scrub(root: string, text: string): string {
   return text.split(root).join('<root>').split(posix(root)).join('<root>').replace(/\s+/g, ' ')
 }
 
+// vue-component-meta cannot see slots named by a template literal, so they are declared here.
+// dynamicSlots() fails the build if the component no longer renders the pattern.
+const DYNAMIC_SLOTS: Record<string, { pattern: string; props: string }[]> = {
+  BlTable: [
+    {
+      pattern: 'cell-<key>',
+      props: '{ row: Row; value: unknown; column: TableColumn<Row> }'
+    },
+    { pattern: 'head-<key>', props: '{ column: TableColumn<Row> }' }
+  ]
+}
+
+function dynamicSlots(root: string, name: string, file: string) {
+  const declared = DYNAMIC_SLOTS[name] ?? []
+  const source = readFileSync(file, 'utf8')
+  for (const { pattern } of declared) {
+    if (!source.includes(`\`${pattern.replace('<key>', '${')}`)) {
+      throw new Error(`${name}: dynamic slot ${pattern} is not rendered; update DYNAMIC_SLOTS`)
+    }
+  }
+  return declared
+}
+
 function componentSection(root: string): string {
   const checker = createChecker(join(root, 'tsconfig.json'), {
     schema: false,
@@ -85,6 +109,11 @@ function componentSection(root: string): string {
             } |`
         )
       const slots = sorted(meta.slots.map((s) => s.name))
+      const slotProps = meta.slots
+        .filter((s) => !['{}', 'any'].includes(s.type))
+        .sort((a, b) => byCodeUnit(a.name, b.name))
+        .map((s) => `\`${s.name}\` \`${scrub(root, s.type)}\``)
+      const dynamic = dynamicSlots(root, name, file)
       const events = sorted(meta.events.map((e) => e.name))
       const propNames = new Set(meta.props.map((p) => p.name))
       const exposed = sorted(
@@ -102,11 +131,73 @@ function componentSection(root: string): string {
           : 'No props.',
         '',
         `Slots: ${inline(slots)}`,
+        ...(dynamic.length ? [`Dynamic slots: ${inline(dynamic.map((d) => d.pattern))}`] : []),
+        ...(slotProps.length || dynamic.length
+          ? [
+              `Slot props: ${[
+                ...slotProps,
+                ...dynamic.map((d) => `\`${d.pattern}\` \`${d.props}\``)
+              ].join(', ')}`
+            ]
+          : []),
         `Events: ${inline(events)}`,
         `Exposed: ${inline(exposed)}`
       ].join('\n')
     })
     .join('\n\n')
+}
+
+// Types exported from vue/index.ts (`export type { .. } from` and `export type * from`), with shapes.
+export function exportedTypes(root: string): { name: string; shape: string }[] {
+  const dir = join(root, 'vue')
+  const source = readFileSync(join(dir, 'index.ts'), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\/\/.*$/gm, '')
+  const wanted = new Map<string, Set<string> | null>() // file -> names, null = all
+  for (const m of source.matchAll(/^export\s+type\s+\*\s+from\s+'([^']+)'/gm)) {
+    wanted.set(join(dir, `${m[1]}.ts`), null)
+  }
+  for (const m of source.matchAll(/^export\s+type\s*\{([^}]*)\}\s*from\s+'([^']+)'/gm)) {
+    const names = m[1]!
+      .split(',')
+      .map((n) => n.trim().split(/\s+as\s+/)[0]!)
+      .filter(Boolean)
+    const file = join(dir, `${m[2]}.ts`)
+    const prev = wanted.get(file)
+    if (prev !== null) wanted.set(file, new Set([...(prev ?? []), ...names]))
+  }
+  const printer = ts.createPrinter({ removeComments: true, newLine: ts.NewLineKind.LineFeed })
+  const found = new Map<string, string>()
+  for (const [file, names] of wanted) {
+    const sf = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true)
+    for (const node of sf.statements) {
+      if (!ts.isInterfaceDeclaration(node) && !ts.isTypeAliasDeclaration(node)) continue
+      if (!node.modifiers?.some((mod) => mod.kind === ts.SyntaxKind.ExportKeyword)) continue
+      const name = node.name.text
+      if (names && !names.has(name)) continue
+      found.set(
+        name,
+        printer.printNode(ts.EmitHint.Unspecified, node, sf).replace(/^export\s+/, '')
+      )
+    }
+  }
+  return [...found.keys()].sort(byCodeUnit).map((name) => ({ name, shape: found.get(name)! }))
+}
+
+// Classes that components render but no stylesheet styles; consumers hook them.
+const HOOK_ONLY_CLASSES = ['bl-pagination__next', 'bl-pagination__prev']
+
+// data-* attributes set (or read as an option) by components, composables and js/, not by consumers.
+export function scriptDataAttributes(root: string): string[] {
+  const found: string[] = []
+  for (const dir of ['vue', 'js']) {
+    for (const file of readdirSync(join(root, dir), { recursive: true }).map(String)) {
+      if (!/\.(vue|ts|js|mjs)$/.test(file) || file.endsWith('.d.mts')) continue
+      const source = readFileSync(join(root, dir, file), 'utf8')
+      for (const m of source.matchAll(/\bdata-[a-z][a-z-]*/g)) found.push(m[0])
+    }
+  }
+  return sorted(found.filter((a) => !a.endsWith('-')))
 }
 
 // Custom properties the components set themselves; read in CSS, but not for consumers.
@@ -150,12 +241,27 @@ export function renderApi(root: string): string {
     '## Nuxt auto-imports',
     list(sorted(autoImports(root))),
     '',
+    '## Exported types',
+    '',
+    exportedTypes(root)
+      .map((t) => `### \`${t.name}\`\n\n\`\`\`ts\n${t.shape}\n\`\`\``)
+      .join('\n\n'),
+    '',
     '## Components',
     '',
     componentSection(root),
     '',
     '## CSS classes',
     list(sorted(classNames(allCss).filter((c) => c.startsWith('bl-')))),
+    '',
+    '## Hook-only classes',
+    list(HOOK_ONLY_CLASSES),
+    '',
+    '## Script-set data attributes',
+    list(scriptDataAttributes(root)),
+    '',
+    '## Tokens',
+    list(sorted([...tokenDecls].filter((t) => t.startsWith('--bl-')))),
     '',
     '## CSS hooks (custom properties a consumer may set)',
     list(hooks),

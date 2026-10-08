@@ -1,5 +1,5 @@
 <template>
-  <component :is="as ?? 'div'" class="bl-media" :class="{ 'bl-media--center': align === 'center' }">
+  <component :is="as" class="bl-media" :class="{ 'bl-media--center': align === 'center' }">
     <Part part="figure" :nodes="$slots.figure?.()" />
     <div class="bl-media__body"><slot /></div>
     <Part part="aside" :nodes="$slots.aside?.()" />
@@ -10,7 +10,10 @@
   import { h, type VNode } from 'vue'
   import { hasContent } from '../internal/slots'
 
-  defineProps<{ as?: 'div' | 'li' | 'article'; align?: 'start' | 'center' }>()
+  withDefaults(defineProps<{ as?: 'div' | 'li' | 'article'; align?: 'start' | 'center' }>(), {
+    as: 'div',
+    align: 'start'
+  })
   defineSlots<{ default?: () => VNode[]; figure?: () => VNode[]; aside?: () => VNode[] }>()
 
   // Each optional slot is evaluated once per render; its wrapper is dropped when it is empty.
