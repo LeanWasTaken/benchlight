@@ -1,7 +1,7 @@
 @layer components {
   /* The track's own 6px margin centres it in the 44px footprint: a fieldset's min-height does
      not centre its content, which left the track 6px above the bar's text line. */
-  .bl-switch {
+  .bl-appearance {
     display: flex;
     align-items: center;
     min-height: 44px;
@@ -9,7 +9,7 @@
     padding: 0;
     border: 0;
   }
-  .bl-switch__track {
+  .bl-appearance__track {
     position: relative;
     display: flex;
     margin-block: 6px;
@@ -18,7 +18,7 @@
     border-radius: 8px;
     box-shadow: var(--bl-shadow-well);
   }
-  .bl-switch__track::before {
+  .bl-appearance__track::before {
     position: absolute;
     top: 2px;
     left: 2px;
@@ -32,36 +32,36 @@
     transition: transform var(--bl-duration-fast) ease;
     content: '';
   }
-  .bl-switch__track:has(input[value='light']:checked)::before {
+  .bl-appearance__track:has(input[value='light']:checked)::before {
     transform: translateX(44px);
   }
-  .bl-switch__track:has(input[value='dark']:checked)::before {
+  .bl-appearance__track:has(input[value='dark']:checked)::before {
     transform: translateX(88px);
   }
   /* Before the component mounts the radios may not match the saved choice yet (server markup is
      "auto"), so the thumb and active label follow the root attribute until it is ready. */
-  :root[data-bl-appearance='light'] .bl-switch:not([data-ready]) .bl-switch__track::before {
+  :root[data-bl-appearance='light'] .bl-appearance:not([data-ready]) .bl-appearance__track::before {
     transform: translateX(44px);
   }
-  :root[data-bl-appearance='dark'] .bl-switch:not([data-ready]) .bl-switch__track::before {
+  :root[data-bl-appearance='dark'] .bl-appearance:not([data-ready]) .bl-appearance__track::before {
     transform: translateX(88px);
   }
-  :root[data-bl-appearance] .bl-switch:not([data-ready]) .bl-switch__option {
+  :root[data-bl-appearance] .bl-appearance:not([data-ready]) .bl-appearance__option {
     color: var(--bl-ink-3);
   }
   :root[data-bl-appearance='light']
-    .bl-switch:not([data-ready])
-    .bl-switch__option:has(input[value='light']),
+    .bl-appearance:not([data-ready])
+    .bl-appearance__option:has(input[value='light']),
   :root[data-bl-appearance='dark']
-    .bl-switch:not([data-ready])
-    .bl-switch__option:has(input[value='dark']) {
+    .bl-appearance:not([data-ready])
+    .bl-appearance__option:has(input[value='dark']) {
     color: var(--bl-ink-1);
   }
-  .bl-switch__track:has(input:focus-visible) {
+  .bl-appearance__track:has(input:focus-visible) {
     outline: 2px solid var(--bl-trace);
     outline-offset: 2px;
   }
-  .bl-switch__option {
+  .bl-appearance__option {
     position: relative;
     z-index: 1;
     display: grid;
@@ -77,15 +77,15 @@
     transition: color var(--bl-duration-fast) ease;
   }
   /* Invisible hit area: 30px option + 7px above and below = 44px. */
-  .bl-switch__option::before {
+  .bl-appearance__option::before {
     position: absolute;
     inset: -7px 0;
     content: '';
   }
-  .bl-switch__option:has(:checked) {
+  .bl-appearance__option:has(:checked) {
     color: var(--bl-ink-1);
   }
-  .bl-switch__option input {
+  .bl-appearance__option input {
     position: absolute;
     opacity: 0;
     pointer-events: none;

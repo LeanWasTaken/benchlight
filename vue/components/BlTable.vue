@@ -1,6 +1,7 @@
 <template>
   <div
     ref="root"
+    v-bind="wrapperAttrs()"
     class="bl-table"
     :class="{ 'bl-table--compact': compact, 'bl-table--scroll': scroll }"
     :data-fit="fit.fitted.value ? '' : undefined"
@@ -18,7 +19,7 @@
       >
         {{ column.label
         }}<span v-if="sort?.key === column.key" class="bl-sr-only"
-          >, {{ sort.dir === 'asc' ? 'ascending' : 'descending' }}</span
+          >, {{ sort.dir === 'asc' ? text.sortAscending : text.sortDescending }}</span
         >
         <svg class="bl-table__sort-icon" viewBox="0 0 12 12" aria-hidden="true">
           <path d="M3 7.5 6 4.5l3 3" fill="none" stroke="currentColor" stroke-width="1.5" />
@@ -32,7 +33,7 @@
       :role="scroll && fit.overflowing.value ? 'region' : undefined"
       :aria-labelledby="scroll && fit.overflowing.value ? captionId : undefined"
     >
-      <table ref="table" role="table" class="bl-table__table">
+      <table ref="table" role="table" class="bl-table__table" v-bind="tableAttrs()">
         <caption :id="captionId" :class="{ 'bl-sr-only': captionHidden }">
           <slot name="caption">{{ caption }}</slot>
         </caption>
@@ -177,14 +178,14 @@
       v-model:page="currentPage"
       :total="totalCount"
       :page-size="pageSize"
-      :label="paginationLabels?.nav ?? `${caption}, pages`"
+      :label="paginationLabels?.nav ?? text.pages(caption)"
       :labels="paginationLabels"
     />
   </div>
 </template>
 
 <script setup lang="ts" generic="Row extends Record<string, unknown>">
-  import { computed, ref, useId, useSlots, watch } from 'vue'
+  import { computed, ref, useAttrs, useId, useSlots, watch } from 'vue'
   import BlPagination from './BlPagination.vue'
   import { useTableFit } from '../internal/useTableFit'
   import { warn } from '../internal/dev'
@@ -197,6 +198,7 @@
     pageSlice,
     sortRows
   } from '../internal/table'
+  import { mergeLabels } from '../internal/labels'
   import type { LinkAs, LinkTo, PaginationLabels, TableColumn, TableLabels } from '../types'
 
   /**
@@ -224,18 +226,47 @@
   const sort = defineModel<{ key: string; dir: 'asc' | 'desc' } | null>('sort', { default: null })
   const page = defineModel<number>('page', { default: 1 })
 
+  defineOptions({ inheritAttrs: false })
+  const attrs = useAttrs()
+  // Naming, description and structure attributes describe the <table>, so they land there;
+  // everything else (aria-hidden, aria-busy, aria-live, listeners, class, style, id, data-*) stays
+  // on the wrapper, which also holds the sort strip and pagination. Functions evaluated in render,
+  // so they re-run on any attr change.
+  const TABLE_ATTRS = new Set([
+    'aria-label',
+    'aria-labelledby',
+    'aria-describedby',
+    'aria-description',
+    'aria-details',
+    'aria-roledescription',
+    'aria-rowcount',
+    'aria-colcount'
+  ])
+  function tableAttrs(): Record<string, unknown> {
+    return Object.fromEntries(Object.entries(attrs).filter(([key]) => TABLE_ATTRS.has(key)))
+  }
+  function wrapperAttrs(): Record<string, unknown> {
+    return Object.fromEntries(Object.entries(attrs).filter(([key]) => !TABLE_ATTRS.has(key)))
+  }
+
   const root = ref<HTMLElement | null>(null)
   const table = ref<HTMLElement | null>(null)
   const scroller = ref<HTMLElement | null>(null)
   const captionId = useId()
 
-  const text = computed<TableLabels>(() => {
-    const merged: TableLabels = { total: 'Total', empty: 'No data', sortStrip: 'Sort by' }
-    for (const [key, value] of Object.entries(props.labels ?? {})) {
-      if (value !== undefined) merged[key as keyof TableLabels] = value
-    }
-    return merged
-  })
+  const text = computed<TableLabels>(() =>
+    mergeLabels<TableLabels>(
+      {
+        total: 'Total',
+        empty: 'No data',
+        sortStrip: 'Sort by',
+        sortAscending: 'ascending',
+        sortDescending: 'descending',
+        pages: (title) => `${title}, pages`
+      },
+      props.labels
+    )
+  )
   const primaryKey = computed(() => (props.columns.find((c) => c.primary) ?? props.columns[0])?.key)
   const sortable = computed(() => props.columns.filter((c) => c.sortable))
   const sortedRows = computed<Row[]>(() =>
@@ -349,6 +380,6 @@
     }
   }
   function minStyle(column: TableColumn<Row>): Record<string, string> | undefined {
-    return column.width ? { '--bl-col-min': column.width } : undefined
+    return column.width ? { '--bl-table-col-min': column.width } : undefined
   }
 </script>

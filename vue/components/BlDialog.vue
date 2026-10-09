@@ -42,7 +42,8 @@
   import { lockPage, unlockPage } from '../internal/pageLock'
   import { hasContent } from '../internal/slots'
   import { pushToastHost, removeToastHost, toastFocus } from '../internal/toastHosts'
-  import type { DialogCloseReason, DialogLabels } from '../types'
+  import { mergeLabels } from '../internal/labels'
+  import type { DialogCloseEvent, DialogCloseReason, DialogLabels } from '../types'
   import BlButton from './BlButton.vue'
 
   const props = withDefaults(
@@ -58,7 +59,7 @@
   defineSlots<{ default?: () => VNode[]; footer?: () => VNode[] }>()
   const emit = defineEmits<{
     'update:open': [open: boolean]
-    close: [payload: { reason: DialogCloseReason; returnValue: string }]
+    close: [payload: DialogCloseEvent]
   }>()
   const el = ref<HTMLDialogElement>()
   const toasts = ref<HTMLElement>()
@@ -71,7 +72,7 @@
   }
   const titleId = useId()
   const descId = useId()
-  const text = computed<DialogLabels>(() => ({ close: 'Close', ...props.labels }))
+  const text = computed<DialogLabels>(() => mergeLabels({ close: 'Close' }, props.labels))
 
   let isOpen = false
   let pendingReason: DialogCloseReason | null = null

@@ -118,6 +118,7 @@
     align-items: center;
     gap: 0 12px;
   }
+  /* The input also carries .bl-range__input as a stable hook; this descendant rule styles it. */
   .bl-range input[type='range'] {
     flex: 1;
     min-width: 96px;

@@ -18,6 +18,7 @@
 - `dist/appearance.min.js`
 - `dist/benchlight.min.css`
 - `dist/fonts.min.css`
+- `dist/modules/appearance.min.css`
 - `dist/modules/base.min.css`
 - `dist/modules/btn.min.css`
 - `dist/modules/colophon.min.css`
@@ -45,8 +46,7 @@
 - `dist/modules/site-bar.min.css`
 - `dist/modules/skip-link.min.css`
 - `dist/modules/spec-panel.min.css`
-- `dist/modules/switch.min.css`
-- `dist/modules/tabbar.min.css`
+- `dist/modules/tab-bar.min.css`
 - `dist/modules/table.min.css`
 - `dist/modules/telemetry.min.css`
 - `dist/modules/tints.min.css`
@@ -116,6 +116,291 @@
 - `useReducedMotion`
 - `useScrollLifted`
 - `useToast`
+
+## Exported types
+
+### `AnsiSegment`
+
+```ts
+interface AnsiSegment {
+    text: string;
+    className?: string;
+}
+```
+
+### `AppearanceLabels`
+
+```ts
+interface AppearanceLabels {
+    legend: string;
+    auto: string;
+    light: string;
+    dark: string;
+    marks?: Partial<{
+        auto: string;
+        light: string;
+        dark: string;
+    }>;
+}
+```
+
+### `AppearanceMode`
+
+```ts
+type AppearanceMode = 'auto' | 'light' | 'dark';
+```
+
+### `ButtonVariant`
+
+```ts
+type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
+```
+
+### `DialogCloseEvent`
+
+```ts
+interface DialogCloseEvent {
+    reason: DialogCloseReason;
+    returnValue: string;
+}
+```
+
+### `DialogCloseReason`
+
+```ts
+type DialogCloseReason = 'button' | 'backdrop' | 'escape' | 'program' | 'native';
+```
+
+### `DialogLabels`
+
+```ts
+interface DialogLabels {
+    close: string;
+}
+```
+
+### `FieldContext`
+
+```ts
+interface FieldContext {
+    id: Readonly<Ref<string>>;
+    describedBy: Readonly<Ref<string | undefined>>;
+}
+```
+
+### `FollowScrollOptions`
+
+```ts
+interface FollowScrollOptions {
+    enabled?: MaybeRefOrGetter<boolean>;
+    threshold?: number;
+}
+```
+
+### `LedState`
+
+```ts
+type LedState = 'on' | 'off' | 'danger';
+```
+
+### `LinkAs`
+
+```ts
+type LinkAs = string | Component;
+```
+
+### `LinkProps`
+
+```ts
+interface LinkProps {
+    as?: LinkAs;
+    to?: LinkTo;
+    href?: string;
+}
+```
+
+### `LinkTo`
+
+```ts
+type LinkTo = string | object;
+```
+
+### `MarqueeOptions`
+
+```ts
+interface MarqueeOptions {
+    speed?: number;
+    pause?: number;
+    overshoot?: number;
+}
+```
+
+### `MetaItem`
+
+```ts
+type MetaItem = string | {
+    text: string;
+    class?: string;
+};
+```
+
+### `PaginationLabels`
+
+```ts
+interface PaginationLabels {
+    nav: string;
+    prev: string;
+    next: string;
+    page: (n: number) => string;
+    pageOf: (page: number, pages: number) => string;
+    range: (from: number, to: number, total: number) => string;
+}
+```
+
+### `PrevNextItem`
+
+```ts
+interface PrevNextItem extends Pick<LinkProps, 'to' | 'href'> {
+    title: string;
+}
+```
+
+### `PrevNextLabels`
+
+```ts
+interface PrevNextLabels {
+    nav: string;
+    prev: string;
+    next: string;
+}
+```
+
+### `ResolvedAppearance`
+
+```ts
+type ResolvedAppearance = 'light' | 'dark';
+```
+
+### `RiseDelayOptions`
+
+```ts
+interface RiseDelayOptions {
+    base?: number;
+    step?: number;
+    cap?: number;
+}
+```
+
+### `SegmentedOption`
+
+```ts
+interface SegmentedOption<T> extends Pick<LinkProps, 'to' | 'href'> {
+    value: T;
+    label: string;
+    current?: boolean;
+}
+```
+
+### `SelectOption`
+
+```ts
+interface SelectOption<T> {
+    value: T;
+    label: string;
+}
+```
+
+### `SpecRowData`
+
+```ts
+interface SpecRowData extends LinkProps {
+    label: string;
+    value: string;
+    external?: boolean;
+}
+```
+
+### `StatusTone`
+
+```ts
+type StatusTone = 'neutral' | 'success' | 'danger';
+```
+
+### `TableColumn`
+
+```ts
+interface TableColumn<Row = Record<string, unknown>> {
+    key: string;
+    label: string;
+    align?: 'start' | 'end' | 'center';
+    numeric?: boolean;
+    sortable?: boolean;
+    sortBy?: (row: Row) => string | number | null | undefined;
+    format?: (value: unknown, row?: Row) => string;
+    width?: string;
+    primary?: boolean;
+    total?: 'sum' | 'avg' | 'count' | ((rows: Row[]) => string | number);
+}
+```
+
+### `TableLabels`
+
+```ts
+interface TableLabels {
+    total: string;
+    empty: string;
+    sortStrip: string;
+    sortAscending: string;
+    sortDescending: string;
+    pages: (caption: string) => string;
+}
+```
+
+### `TableSort`
+
+```ts
+interface TableSort {
+    key: string;
+    dir: 'asc' | 'desc';
+}
+```
+
+### `ToastAction`
+
+```ts
+interface ToastAction {
+    label: string;
+    onClick: () => void;
+}
+```
+
+### `ToastOptions`
+
+```ts
+interface ToastOptions {
+    message: string;
+    tone?: ToastTone;
+    action?: ToastAction;
+    duration?: number;
+    id?: string;
+}
+```
+
+### `ToastTone`
+
+```ts
+type ToastTone = StatusTone;
+```
+
+### `ToasterLabels`
+
+```ts
+interface ToasterLabels {
+    region: string;
+    dismiss: string;
+    actionHint: (label: string) => string;
+}
+```
 
 ## Components
 
@@ -202,6 +487,7 @@ Exposed: none
 | `label` | `string` | yes |  |
 
 Slots: `default`
+Slot props: `default` `{ id: string; describedBy: string | undefined; }`
 Events: none
 Exposed: none
 
@@ -222,8 +508,8 @@ Exposed: none
 | --- | --- | --- | --- |
 | `as` | `LinkAs \| undefined` | no |  |
 | `compact` | `boolean \| undefined` | no |  |
+| `current` | `boolean \| "page" \| "step" \| "location" \| "true" \| undefined` | no |  |
 | `href` | `string \| undefined` | no |  |
-| `selected` | `boolean \| undefined` | no |  |
 | `to` | `LinkTo \| undefined` | no |  |
 
 Slots: `default`, `icon`, `meta`, `title`
@@ -245,6 +531,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `label` | `string \| undefined` | no |  |
 | `state` | `"danger" \| "off" \| "on" \| undefined` | no | `"off"` |
 
 Slots: none
@@ -293,8 +580,8 @@ Exposed: `refresh`
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `align` | `"start" \| "center" \| undefined` | no |  |
-| `as` | `"div" \| "li" \| "article" \| undefined` | no |  |
+| `align` | `"start" \| "center" \| undefined` | no | `"start"` |
+| `as` | `"div" \| "li" \| "article" \| undefined` | no | `"div"` |
 
 Slots: `aside`, `default`, `figure`
 Events: none
@@ -330,7 +617,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `tone` | `"info" \| "ok" \| "err" \| undefined` | no | `"info"` |
+| `tone` | `"danger" \| "neutral" \| "success" \| undefined` | no | `"neutral"` |
 
 Slots: `default`
 Events: none
@@ -353,7 +640,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `label` | `string` | yes |  |
+| `label` | `string \| undefined` | no |  |
 | `labels` | `Partial<PaginationLabels> \| undefined` | no |  |
 | `page` | `number \| undefined` | no | `1` |
 | `pageSize` | `number` | yes |  |
@@ -391,9 +678,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `ariaDescribedby` | `string \| undefined` | no |  |
 | `format` | `((value: number) => string) \| undefined` | no |  |
-| `id` | `string \| undefined` | no |  |
 | `max` | `number \| undefined` | no | `100` |
 | `min` | `number \| undefined` | no | `0` |
 | `modelValue` | `number \| undefined` | no | `0` |
@@ -424,7 +709,7 @@ Exposed: none
 | `level` | `1 \| 2 \| 3 \| 4 \| 5 \| 6 \| undefined` | no | `2` |
 | `ruled` | `boolean \| undefined` | no |  |
 
-Slots: `action`
+Slots: `actions`
 Events: none
 Exposed: none
 
@@ -488,9 +773,11 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `as` | `LinkAs \| undefined` | no |  |
 | `external` | `boolean \| null \| undefined` | no | `null` |
 | `href` | `string \| undefined` | no |  |
 | `label` | `string` | yes |  |
+| `to` | `LinkTo \| undefined` | no |  |
 | `value` | `string \| undefined` | no |  |
 
 Slots: `default`
@@ -544,6 +831,8 @@ Exposed: none
 | `totals` | `Record<string, string \| number> \| undefined` | no |  |
 
 Slots: `caption`, `empty`, `footer`
+Dynamic slots: `cell-<key>`, `head-<key>`
+Slot props: `footer` `{ rows: Row[]; }`, `cell-<key>` `{ row: Row; value: unknown; column: TableColumn<Row> }`, `head-<key>` `{ column: TableColumn<Row> }`
 Events: `update:page`, `update:sort`
 Exposed: none
 
@@ -585,7 +874,7 @@ Exposed: none
 | `disabled` | `boolean \| undefined` | no |  |
 | `hint` | `string \| undefined` | no |  |
 | `label` | `string` | yes |  |
-| `modelValue` | `boolean` | yes |  |
+| `modelValue` | `boolean \| undefined` | no | `false` |
 | `name` | `string \| undefined` | no |  |
 | `value` | `string \| undefined` | no |  |
 
@@ -611,6 +900,9 @@ Exposed: none
 - `bl-ansi-95`
 - `bl-ansi-96`
 - `bl-ansi-97`
+- `bl-appearance`
+- `bl-appearance__option`
+- `bl-appearance__track`
 - `bl-btn`
 - `bl-btn--danger`
 - `bl-btn--ghost`
@@ -682,9 +974,8 @@ Exposed: none
 - `bl-meter-field__value`
 - `bl-meter__fill`
 - `bl-msg`
-- `bl-msg--err`
-- `bl-msg--info`
-- `bl-msg--ok`
+- `bl-msg--danger`
+- `bl-msg--success`
 - `bl-msg__text`
 - `bl-page-enter-active`
 - `bl-page-enter-from`
@@ -715,7 +1006,7 @@ Exposed: none
 - `bl-section-head`
 - `bl-section-head--bar`
 - `bl-section-head--ruled`
-- `bl-section-head__action`
+- `bl-section-head__actions`
 - `bl-section-head__eyebrow`
 - `bl-section-head__heading`
 - `bl-segmented`
@@ -737,13 +1028,10 @@ Exposed: none
 - `bl-spec-row__label`
 - `bl-spec-row__value`
 - `bl-sr-only`
-- `bl-switch`
-- `bl-switch__option`
-- `bl-switch__track`
-- `bl-tabbar`
-- `bl-tabbar__icon`
-- `bl-tabbar__item`
-- `bl-tabbar__label`
+- `bl-tab-bar`
+- `bl-tab-bar__icon`
+- `bl-tab-bar__item`
+- `bl-tab-bar__label`
 - `bl-table`
 - `bl-table--compact`
 - `bl-table--scroll`
@@ -792,9 +1080,81 @@ Exposed: none
 - `bl-toggle__thumb`
 - `bl-toggle__track`
 
+## Hook-only classes
+- `bl-pagination__next`
+- `bl-pagination__prev`
+- `bl-range__input`
+
+## Script-set data attributes
+- `data-action`
+- `data-bl-appearance`
+- `data-bl-lift`
+- `data-dir`
+- `data-empty`
+- `data-fit`
+- `data-indeterminate`
+- `data-label`
+- `data-lifted`
+- `data-measuring`
+- `data-overflowing`
+- `data-ready`
+- `data-stacked`
+
+## Tokens
+- `--bl-canvas`
+- `--bl-control-border`
+- `--bl-copper`
+- `--bl-danger`
+- `--bl-duration-base`
+- `--bl-duration-fast`
+- `--bl-duration-page-enter`
+- `--bl-duration-page-leave`
+- `--bl-duration-rise`
+- `--bl-duration-rise-step`
+- `--bl-ease-out`
+- `--bl-font-display`
+- `--bl-font-mono`
+- `--bl-font-sans`
+- `--bl-ink-1`
+- `--bl-ink-2`
+- `--bl-ink-3`
+- `--bl-layout-column`
+- `--bl-layout-gutter`
+- `--bl-layout-gutter-narrow`
+- `--bl-layout-prose`
+- `--bl-leading-body`
+- `--bl-leading-display`
+- `--bl-leading-display-md`
+- `--bl-leading-heading`
+- `--bl-leading-lede`
+- `--bl-phosphor`
+- `--bl-radius-card`
+- `--bl-radius-chip`
+- `--bl-radius-pill`
+- `--bl-raised`
+- `--bl-separator`
+- `--bl-shadow-float`
+- `--bl-shadow-glow`
+- `--bl-shadow-thumb`
+- `--bl-shadow-well`
+- `--bl-surface`
+- `--bl-text-annotation`
+- `--bl-text-body`
+- `--bl-text-display-lg`
+- `--bl-text-display-md`
+- `--bl-text-display-xl`
+- `--bl-text-heading`
+- `--bl-text-micro`
+- `--bl-text-small`
+- `--bl-trace`
+- `--bl-tracking-annotation`
+- `--bl-tracking-display`
+- `--bl-tracking-heading`
+- `--bl-tracking-nav`
+- `--bl-tracking-silkscreen`
+
 ## CSS hooks (custom properties a consumer may set)
 - `--bl-chevron-mask`
-- `--bl-col-min`
 - `--bl-dialog-width`
 - `--bl-log-height`
 - `--bl-media-size`
@@ -803,6 +1163,7 @@ Exposed: none
 - `--bl-rise-delay`
 - `--bl-scroll-offset-bottom`
 - `--bl-scroll-offset-top`
+- `--bl-table-col-min`
 - `--bl-table-min-col`
 - `--bl-telemetry-columns`
 

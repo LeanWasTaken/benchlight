@@ -29,10 +29,9 @@ export interface SelectOption<T> {
   label: string
 }
 
-export interface SpecRowData {
+export interface SpecRowData extends LinkProps {
   label: string
   value: string
-  href?: string
   /** open in a new tab; default: true for absolute or protocol-relative URLs */
   external?: boolean
 }
@@ -48,6 +47,8 @@ export interface AppearanceLabels {
   auto: string
   light: string
   dark: string
+  /** The short visible mark beside each option; defaults to A / L / D. */
+  marks?: Partial<{ auto: string; light: string; dark: string }>
 }
 
 export interface PrevNextLabels {
@@ -86,6 +87,10 @@ export interface TableLabels {
   total: string
   empty: string
   sortStrip: string
+  sortAscending: string
+  sortDescending: string
+  /** Accessible name of the table's pagination when `paginationLabels.nav` is not set. */
+  pages: (caption: string) => string
 }
 
 export interface PaginationLabels {
@@ -103,7 +108,20 @@ export interface DialogLabels {
 
 export type DialogCloseReason = 'button' | 'backdrop' | 'escape' | 'program' | 'native'
 
-export type ToastTone = 'neutral' | 'success' | 'danger'
+/** Status vocabulary shared by BlMsg and toasts. Neutral is the unmarked base. */
+export type StatusTone = 'neutral' | 'success' | 'danger'
+
+export type ToastTone = StatusTone
+
+export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost'
+
+export type LedState = 'on' | 'off' | 'danger'
+
+/** Payload of BlDialog's `close` event. */
+export interface DialogCloseEvent {
+  reason: DialogCloseReason
+  returnValue: string
+}
 
 export interface ToastAction {
   label: string

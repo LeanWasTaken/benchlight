@@ -33,18 +33,18 @@
   .bl-section-head--bar .bl-section-head__eyebrow {
     margin: 0;
   }
-  .bl-section-head__action {
+  .bl-section-head__actions {
     min-width: 0;
     max-width: 100%;
     margin-left: auto;
   }
-  .bl-section-head:not(.bl-section-head--bar):has(> .bl-section-head__action) {
+  .bl-section-head:not(.bl-section-head--bar):has(> .bl-section-head__actions) {
     display: grid;
     grid-template-columns: minmax(0, 1fr) fit-content(40%);
     align-items: baseline;
     column-gap: 16px;
   }
-  .bl-section-head:not(.bl-section-head--bar):has(> .bl-section-head__action)
+  .bl-section-head:not(.bl-section-head--bar):has(> .bl-section-head__actions)
     > .bl-section-head__eyebrow {
     grid-column: 1 / -1;
   }

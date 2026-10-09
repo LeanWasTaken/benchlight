@@ -4,6 +4,11 @@ import { PREPAINT } from '../js/prepaint-script.mjs'
 export interface ModuleOptions {
   /** add css/fonts.css (self-hosted Geist, Geist Mono, Bricolage Grotesque) */
   fonts: boolean
+  /**
+   * auto-import the composables and helpers (`useToast`, `useAppearance`, ...);
+   * components stay auto-imported
+   */
+  autoImports: boolean
 }
 
 const AUTO_IMPORTS = [
@@ -19,7 +24,7 @@ const AUTO_IMPORTS = [
 
 export default defineNuxtModule<ModuleOptions>({
   meta: { name: 'benchlight', configKey: 'benchlight', compatibility: { nuxt: '>=4.0.0' } },
-  defaults: { fonts: true },
+  defaults: { fonts: true, autoImports: true },
   setup(options, nuxt) {
     const { resolve } = createResolver(import.meta.url)
 
@@ -33,7 +38,9 @@ export default defineNuxtModule<ModuleOptions>({
     ]
 
     addComponentsDir({ path: resolve('../vue/components'), pathPrefix: false })
-    addImports(AUTO_IMPORTS.map((name) => ({ name, from: resolve('../vue/index') })))
+    if (options.autoImports) {
+      addImports(AUTO_IMPORTS.map((name) => ({ name, from: resolve('../vue/index') })))
+    }
 
     nuxt.options.build.transpile.push('benchlight')
     nuxt.options.vite.optimizeDeps = {

@@ -9,7 +9,7 @@ classes.
 ## Install
 
 ```json
-"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.6.2"
+"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.7.0"
 ```
 
 The repo is private and the URL uses SSH on purpose: bun turns GitHub https URLs into API tarball
@@ -62,10 +62,13 @@ export default defineNuxtConfig({
 ```
 
 The module adds the fonts and component CSS, the no-flash appearance script, auto-imported `Bl*`
-components and composables (`useAppearance`, `useScrollLifted`, `useFollowScroll`, `useReducedMotion`, `useMarquee`,
-`riseDelay`, `ansiToSegments`, `useToast`). `benchlight: { fonts: false }` skips the bundled fonts. `BlSiteBar`
-wraps its nav in a `<nav>` landmark labelled by `navLabel` (default `Primary`). The Tailwind lines are
-optional: skip them if the app does not use Tailwind.
+components and composables (`useAppearance`, `useScrollLifted`, `useFollowScroll`,
+`useReducedMotion`, `useMarquee`, `riseDelay`, `ansiToSegments`, `useToast`).
+`benchlight: { fonts: false }` skips the bundled fonts, and `benchlight: { autoImports: false }`
+skips the composable and helper auto-imports (components stay auto-imported), so they do not
+collide with another library's. `BlSiteBar` wraps its nav in a `<nav>` landmark labelled by
+`navLabel` (default `Primary`). The Tailwind lines are optional: skip them if the app does not use
+Tailwind.
 
 ```vue
 <script setup lang="ts">
@@ -138,8 +141,13 @@ raise gets a CHANGELOG line.
 - Library CSS lives in `@layer base` / `@layer components`; utilities and your own CSS win without
   `!important`.
 - States are ARIA or native attributes (`aria-current`, `aria-pressed`, `:checked`, `:disabled`);
-  selected rows use `aria-current="true"`. Only `data-lifted`, `data-overflowing`, `data-fit`,
-  `data-stacked` and `data-measuring` are script-set.
+  the current item uses `aria-current` (`page`, `step`, `location` or `true`; any value but `false`
+  is styled). The `data-*` attributes below are script-set, so do not set them yourself (apart from
+  the CSS-only cases in the table notes). `data-lifted` (site bar, `js/appearance.js`),
+  `data-overflowing` (BlMarquee), `data-fit`, `data-stacked` and `data-measuring` (BlTable),
+  `data-ready` (BlAppearanceSwitch), `data-indeterminate` (BlMeter), `data-action`, `data-dir`,
+  `data-label` and `data-empty` (BlTable), `data-bl-appearance` (on `<html>`) and `data-bl-lift`
+  (you set it; `js/appearance.js` reads it).
 - Appearance: `data-bl-appearance="light|dark"` on `<html>` (absent = auto), stored as
   `localStorage['bl-appearance']`.
   A user's theme change crossfades the whole page with a View Transition (`--bl-duration-base`)
@@ -177,6 +185,9 @@ raise gets a CHANGELOG line.
 - Long unbroken content (URLs, hashes, compound words) wraps instead of widening the page.
 - The stress suite is the contract: `/stress.html` renders every component with hostile content and
   `tests/visual/stress.spec.ts` checks it (see Development).
+- **Link attrs.** `BlNavLink` and `BlIndexRow` render an `li` around the link: `class` and `style`
+  go on the `li`; `target`, `rel`, `aria-label`, `data-*` and listeners such as `@click` go on the
+  inner link or button. A set `current` prop wins over a consumer `aria-current`.
 - **Gutter.** `BlIndexRow` and `BlPrevNext` links bleed 12px either side for the hover background, so
   the host needs at least 12px of side padding. `.bl-col` provides 16-24px.
 - **Site bar.** The nav scrolls horizontally on one line when it does not fit. A brand under about
@@ -196,12 +207,13 @@ raise gets a CHANGELOG line.
   `useScrollLifted(threshold)` takes a number, `false`, a ref or a getter. Both it and
   `useReducedMotion()` return a ref that is `false` on the server and until mounted.
 - **Fields:** BlField passes its `id` and hint id to BlInput, BlSelect and BlRange automatically.
-  Your own `id` or `aria-describedby` on the control wins. BlRange forwards fallthrough attrs
-  (`aria-label`, `disabled`, `name`, listeners) to the slider; `class` and `style` stay on the
-  wrapper. Its explicit `ariaDescribedby` and `id` props win over the field context. To override the
-  id, set `id` on BlField instead of on the control, so the `<label for>` still matches. For other controls, use the slot props
-  `{ id, describedby }` (lowercase, a slot prop) or `inject(FIELD_CONTEXT)` from `benchlight/vue`,
-  which holds `{ id, describedBy }` as refs (camelCase).
+  Your own `id` on the control wins. Your own `aria-describedby` is merged: the hint id comes
+  first, then yours, without duplicates. BlRange forwards fallthrough attrs (`id`, `aria-label`,
+  `disabled`, `name`, listeners) to the slider, which carries the class `bl-range__input`; `class`
+  and `style` stay on the wrapper. To override the id, set `id` on BlField instead of on the
+  control, so the `<label for>` still matches. For other controls, use the slot props
+  `{ id, describedBy }` or `inject(FIELD_CONTEXT)` from `benchlight/vue`, which holds
+  `{ id, describedBy }` as refs.
 - **Links:** `LinkProps` precedence: `as` a component (e.g. RouterLink) receives `to` if set,
   otherwise `href`; `as` `'a'` (the default when `to` or `href` is set) receives `href`, else a
   string `to`; `as` any other tag receives neither. Misuse logs a `[benchlight]` warning in
@@ -247,7 +259,7 @@ class="bl-select">`; `class` and `style` go on the wrapper (so `$el` is the wrap
 - **BlProse:** the measure is `min(720px, 68ch)`; images, video and iframes are capped to the column;
   tables scroll horizontally (`display: block`, so add `role="table"` if assistive tech should keep the
   table semantics); display sizes are smaller on phones (`xl` is 40px at 320px wide).
-- **BlSectionHead:** bar mode renders `eyebrow` only (no `heading`). The `action` slot works in both
+- **BlSectionHead:** bar mode renders `eyebrow` only (no `heading`). The `actions` slot works in both
   modes.
 
 ## BlTable and BlPagination
@@ -267,8 +279,14 @@ modules and `pagination` needs `layout` (the bundle CLI warns otherwise).
 - **Columns** are `{ key, label, align?, numeric?, sortable?, sortBy?, format?, width?, primary?, total? }`.
   The primary column (the first unless one sets `primary`) is the row header. `v-model:sort` and
   `v-model:page` are optional; set `rowKey` when sorting, paging or using row actions.
+- **Attrs:** the naming, description and structure attributes (`aria-label`, `aria-labelledby`,
+  `aria-describedby`, `aria-description`, `aria-details`, `aria-roledescription`, `aria-rowcount`,
+  `aria-colcount`) go on the `<table>`, so a note on units or a totals row can describe it. Every
+  other attribute stays on the wrapper `div.bl-table`: `class`, `style`, `id`, `data-*`, listeners
+  and the state attributes `aria-hidden`, `aria-busy` and `aria-live` (which must cover the sort
+  strip and pagination too).
 - **Slots:** `caption`, `empty`, `footer` and the dynamic `cell-<key>` (`{ row, value, column }`) and
-  `head-<key>` (`{ column }`) per column key. The dynamic ones are not listed in API.md.
+  `head-<key>` (`{ column }`) per column key. API.md lists them under BlTable.
 - **`manual` mode** is for server-side sorting and paging: rows are shown as given, nothing is sorted
   or sliced. Pass `totalRows` (a dev warning fires if `pageSize` is set without it) and `totals`.
 - **Row actions:** `rowLink(row)` (an `a`, RouterLink or similar, as with `LinkProps`) or
@@ -278,12 +296,17 @@ modules and `pagination` needs `layout` (the bundle CLI warns otherwise).
 - **Totals:** a column `total` of `'sum'`, `'avg'`, `'count'` or a function over all rows (not just the
   page). `format(value)` formats the result. The footer renders the cells; the `footer` slot replaces
   them.
-- **i18n:** `labels` (`total`, `empty`, `sortStrip`) and `paginationLabels` (`nav`, `prev`, `next`,
-  `page`, `pageOf`, `range`); `locale` sets the sort collation.
+- **i18n:** `labels` (`total`, `empty`, `sortStrip`, `sortAscending`, `sortDescending`, and
+  `pages: (caption) => string` for the pagination's name) and `paginationLabels` (`nav`, `prev`,
+  `next`, `page`, `pageOf`, `range`); `locale` sets the sort collation. Every `labels` prop in the
+  library (BlAppearanceSwitch, BlPrevNext, BlDialog, BlToaster, BlPagination, BlTable) treats an
+  `undefined` value as "use the default", so an i18n lookup that finds nothing never blanks a
+  string. BlAppearanceSwitch also takes `labels.marks` (`{ auto, light, dark }`, default A / L / D).
 - With async data, BlTable clamps `page` to 1 while there are no rows, so set the page after rows
   arrive (or use `manual` with `totalRows`).
-- **BlPagination** renders nothing for a single page. Standalone: `total`, `pageSize`, `label`,
-  `v-model:page`.
+- **BlPagination** renders nothing for a single page. Standalone: `total`, `pageSize`,
+  `v-model:page`, and `label` or `labels.nav` to name the nav (a dev warning fires when neither is
+  set).
 - **CSS-only use:** wrap a `table` in `div.bl-table` (modifiers `.bl-table--compact`,
   `.bl-table--scroll`). Classes: `.bl-table__num`, `.bl-table__primary`, `.bl-table__label` (a
   `span aria-hidden="true"` in each body cell), `.bl-table__sort`, `.bl-table__sort-strip`,
@@ -304,6 +327,9 @@ An on/off switch on a native checkbox (`role="switch"`). Full prop list is in [A
 <BlToggle v-model="wifi" label="Wi-Fi" hint="Joins known networks automatically" />
 ```
 
+`v-model` is optional: without it the toggle keeps its own state, so a plain form post works
+(`<BlToggle name="wifi" label="Wi-Fi" />`).
+
 ```html
 <div class="bl-toggle">
   <label class="bl-toggle__control">
@@ -319,9 +345,10 @@ An on/off switch on a native checkbox (`role="switch"`). Full prop list is in [A
   posts `name=value` only while the switch is on.
 - The hint stays out of the accessible name: it sits outside the `label` and is wired up with
   `aria-describedby`. A consumer `aria-describedby` is merged with the hint id.
-- Controlled only: `:model-value` without an `update:modelValue` listener is just an initial value.
-- A native form reset restores the value the toggle had when it mounted and re-emits it as
-  `update:modelValue`.
+- Uncontrolled without `v-model`: the toggle keeps its own state; `:model-value` without a
+  listener is just the initial value.
+- A native form reset restores the value the toggle had when it mounted, emitting
+  `update:modelValue` if that changes it.
 - Not for use inside BlField; the toggle carries its own label and hint.
 - Attrs split: `class` and `style` go on the root `div.bl-toggle`; every other attribute (`id`,
   `data-*`, `aria-*`) goes on the `input`.
@@ -503,6 +530,8 @@ const id = toast({ message: 'Item deleted', action: { label: 'Undo', onClick: re
   `onClick`, then dismisses the toast, even if `onClick` throws (the error still surfaces).
 - Re-toasting an existing `id` replaces it in place: a visible toast keeps its slot and its timer
   restarts; a queued one keeps its queue position.
+- BlToaster takes `class`, `data-*` and `aria-*` on its `<section class="bl-toaster">` (inside the
+  teleport); an `aria-label` there replaces the `labels.region` text.
 - BlToaster props: `max` (default 3 visible; the rest queue first in, first out) and `labels`
   (`{ region, dismiss, actionHint }`, defaults `'Notifications'`, `'Dismiss'` and
   `` (label) => `${label} available` ``).
@@ -526,27 +555,88 @@ const id = toast({ message: 'Item deleted', action: { label: 'Undo', onClick: re
 - SSR: `toast()` does nothing on the server and returns `''`. The toaster renders its section and
   both live regions empty, and the list only after mount, so a toast fired before hydration
   cannot cause a mismatch.
-- Nuxt UI also auto-imports a `useToast`. In an app that uses both, import Benchlight's
-  explicitly where you need it: `import { useToast } from 'benchlight/vue'`.
+- Nuxt UI also auto-imports a `useToast`. In an app that uses both, set
+  `benchlight: { autoImports: false }` and import Benchlight's explicitly where you need it:
+  `import { useToast } from 'benchlight/vue'`.
 - CSS-only: the classes work on the markup above; timers, queueing and announcements are yours.
   A toaster outside an open modal dialog is inert, so place it inside the dialog while one is
   open.
 
 ## CSS hooks
 
-`--bl-scroll-offset-top` and `--bl-scroll-offset-bottom` keep focused elements clear of fixed chrome
-such as the sticky site bar and the mobile tab bar.
+Custom properties a consumer may set. API.md lists them under "CSS hooks".
 
-`--bl-dialog-width` sets the width of a centred BlDialog (default `32rem`, never wider than the
-viewport less 32px). `--bl-dialog-gutter` is internal: BlDialog sets it on `html` while open.
+| Hook                                                  | Sets                                                                         | Default              |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------- | -------------------- |
+| `--bl-scroll-offset-top`, `--bl-scroll-offset-bottom` | clearance for focused elements under fixed chrome (site bar, mobile tab bar) | token-derived        |
+| `--bl-dialog-width`                                   | width of a centred BlDialog, never wider than the viewport less 32px         | `32rem`              |
+| `--bl-media-size`                                     | size of a BlMedia figure                                                     | `64px`               |
+| `--bl-chevron-mask`                                   | chevron shape of both the select and the disclosure                          | built-in chevron     |
+| `--bl-meter-value`                                    | fill fraction of a BlMeter bar (0 to 1; BlMeter sets it)                     | `0`                  |
+| `--bl-rise-delay`                                     | page-enter animation delay of one element (`riseDelay()` sets it)            | `0ms`                |
+| `--bl-telemetry-columns`                              | column count of a BlTelemetry grid                                           | auto-fit             |
+| `--bl-log-height`                                     | max height of a BlLog                                                        | `12.5rem`            |
+| `--bl-range-value-width`                              | room reserved for the BlRange value, so the track length stays fixed         | `56px`               |
+| `--bl-table-min-col`                                  | narrowest BlTable column before the table stacks                             | `8rem`               |
+| `--bl-table-col-min`                                  | narrowest width of one column (BlTable sets it from `TableColumn.width`)     | `--bl-table-min-col` |
 
-`--bl-media-size` sets the size of a BlMedia figure (default `64px`).
+`--bl-dialog-gutter` is internal: BlDialog sets it on `html` while open.
 
-`--bl-chevron-mask` replaces the chevron shape of both the select and the disclosure.
+## Component to module
+
+`dist/modules/<module>.min.css` takes the module name, which differs from the component name in
+places. `tokens` always comes first; `base`, `type`, `motion`, `layout` and `tints` are shared.
+
+| Component                           | Module         |
+| ----------------------------------- | -------------- |
+| BlSiteBar, BlNavLink                | `site-bar`     |
+| BlTabBar, BlTabBarItem              | `tab-bar`      |
+| BlColophon                          | `colophon`     |
+| BlSkipLink                          | `skip-link`    |
+| BlAppearanceSwitch                  | `appearance`   |
+| BlSegmented                         | `segmented`    |
+| BlButton                            | `btn`          |
+| BlField, BlInput, BlSelect, BlRange | `field`        |
+| BlLinkArrow                         | `link-arrow`   |
+| BlSpecPanel, BlSpecRow              | `spec-panel`   |
+| BlTelemetry, BlTelemetryCell        | `telemetry`    |
+| BlLed                               | `led`          |
+| BlEqBars                            | `eq`           |
+| BlMarquee                           | `marquee`      |
+| BlReadout                           | `readout`      |
+| BlMeter                             | `meter`        |
+| BlMsg                               | `msg`          |
+| BlLog                               | `log`          |
+| BlSectionHead                       | `section-head` |
+| BlMeta                              | `meta`         |
+| BlIndex, BlIndexRow                 | `index-row`    |
+| BlPrevNext                          | `prev-next`    |
+| BlProse                             | `prose`        |
+| BlTable                             | `table`        |
+| BlPagination                        | `pagination`   |
+| BlToggle                            | `toggle`       |
+| BlMedia                             | `media`        |
+| BlDisclosure                        | `disclosure`   |
+| BlDialog                            | `dialog`       |
+| BlToaster                           | `toast`        |
+
+## Supported entry points
+
+`package.json` exports the wildcards `./css/*`, `./js/*`, `./fonts/*` and `./dist/*`, which make every
+file path resolvable. Only these are the supported public surface; everything else (for example
+`js/prepaint-script.d.mts`) is internal and may move in a minor release:
+
+- `benchlight/vue`, `benchlight/nuxt`, `benchlight/vite`, `benchlight/tokens`
+- `benchlight/tailwind/theme.css`
+- `benchlight/css/index.css` and `benchlight/css/components/*.css`
+- `benchlight/dist/benchlight.min.css`, `benchlight/dist/fonts.min.css` and `benchlight/dist/modules/*`
+- `benchlight/js/appearance.js`, `benchlight/js/prepaint.js` and `benchlight/js/prepaint-script.mjs`
 
 ## API contract
 
-`API.md` is generated by `bun run build`. Review a diff in it as the breaking-change checklist before
+`API.md` is generated by `bun run build`. It lists package exports, `dist/` files, runtime exports,
+exported types with their shapes, components (props, slots with their props, events), CSS classes,
+tokens, script-set `data-*` attributes, hook-only classes and CSS hooks. Review a diff in it as the breaking-change checklist before
 tagging.
 
 ## Tokens in JS

@@ -1,8 +1,8 @@
 <template>
-  <fieldset class="bl-switch" :data-ready="ready ? '' : undefined">
+  <fieldset class="bl-appearance" :data-ready="ready ? '' : undefined">
     <legend class="bl-sr-only">{{ text.legend }}</legend>
-    <div class="bl-switch__track">
-      <label v-for="option in options" :key="option.value" class="bl-switch__option">
+    <div class="bl-appearance__track">
+      <label v-for="option in options" :key="option.value" class="bl-appearance__option">
         <input
           v-model="mode"
           type="radio"
@@ -19,6 +19,7 @@
 <script setup lang="ts">
   import { computed, onMounted, ref, useId } from 'vue'
   import { useAppearance, type AppearanceMode } from '../composables/useAppearance'
+  import { mergeLabels } from '../internal/labels'
   import type { AppearanceLabels } from '../types'
 
   const props = defineProps<{ labels?: Partial<AppearanceLabels> }>()
@@ -31,16 +32,15 @@
   })
   const groupName = `bl-appearance-${useId()}`
 
-  const text = computed<AppearanceLabels>(() => ({
-    legend: 'Appearance',
-    auto: 'Auto',
-    light: 'Light',
-    dark: 'Dark',
-    ...props.labels
-  }))
+  const text = computed<AppearanceLabels>(() =>
+    mergeLabels({ legend: 'Appearance', auto: 'Auto', light: 'Light', dark: 'Dark' }, props.labels)
+  )
+  const marks = computed(() =>
+    mergeLabels({ auto: 'A', light: 'L', dark: 'D' }, props.labels?.marks)
+  )
 
   const MODES: AppearanceMode[] = ['auto', 'light', 'dark']
   const options = computed(() =>
-    MODES.map((value) => ({ value, label: text.value[value], mark: value[0]!.toUpperCase() }))
+    MODES.map((value) => ({ value, label: text.value[value], mark: marks.value[value] }))
   )
 </script>
