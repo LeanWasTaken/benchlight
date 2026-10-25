@@ -647,6 +647,52 @@
       </div>
     </section>
 
+    <section v-if="show('checkbox-long')" data-case="checkbox-long">
+      <h2 class="st-label">checkbox-long</h2>
+      <div data-box>
+        <BlCheckbox
+          :model-value="true"
+          :label="`Include ${german} in every export`"
+          :hint="url"
+          :error="`Unknown key ${hash}`"
+        />
+        <BlCheckbox :model-value="false" :indeterminate="true" label="Partly selected" />
+      </div>
+    </section>
+
+    <section v-if="show('radio-long')" data-case="radio-long">
+      <h2 class="st-label">radio-long</h2>
+      <div data-box>
+        <BlRadioGroup
+          model-value="a"
+          :legend="`${german} ${german}`"
+          :hint="url"
+          :error="`Unknown value ${hash}`"
+        >
+          <BlRadio :label="`${german} first option`" value="a" :hint="url" />
+          <BlRadio label="Second" value="b" />
+        </BlRadioGroup>
+        <BlRadioGroup model-value="x" :legend="german" class="bl-fieldset--inline">
+          <BlRadio
+            v-for="n in 6"
+            :key="n"
+            :label="`Option ${german.slice(0, n * 6)}`"
+            :value="`x${n}`"
+          />
+        </BlRadioGroup>
+      </div>
+    </section>
+
+    <section v-if="show('textarea-error')" data-case="textarea-error">
+      <h2 class="st-label">textarea-error</h2>
+      <div data-box>
+        <BlField :label="german" :hint="url" :error="`Unknown token ${hash}`">
+          <BlTextarea :model-value="hash" />
+        </BlField>
+        <BlToggle :model-value="false" label="Accept" :error="`Rejected by ${url}`" />
+      </div>
+    </section>
+
     <section v-if="show('toast-six')" data-case="toast-six">
       <h2 class="st-label">toast-six</h2>
     </section>
@@ -733,6 +779,7 @@
   import {
     BlAppearanceSwitch,
     BlButton,
+    BlCheckbox,
     BlColophon,
     BlEqBars,
     BlField,
@@ -749,6 +796,8 @@
     BlNavLink,
     BlPrevNext,
     BlProse,
+    BlRadio,
+    BlRadioGroup,
     BlRange,
     BlReadout,
     BlSectionHead,
@@ -760,6 +809,7 @@
     BlTabBar,
     BlPagination,
     BlTable,
+    BlTextarea,
     BlToggle,
     BlDialog,
     BlDisclosure,

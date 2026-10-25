@@ -58,6 +58,142 @@ test.describe('BlToggle', () => {
   })
 })
 
+test.describe('BlCheckbox', () => {
+  test('Space ticks the box', async ({ page }) => {
+    await page.goto('/')
+    const input = demo(page, 'checkbox').getByRole('checkbox', { name: 'Send metrics' })
+    await expect(input).not.toBeChecked()
+    await input.focus()
+    await page.keyboard.press('Space')
+    await expect(input).toBeChecked()
+  })
+
+  test('a click clears the dash and ticks the box', async ({ page }) => {
+    await page.goto('/')
+    const input = demo(page, 'checkbox').getByRole('checkbox', { name: 'All channels' })
+    await expect(input).toHaveJSProperty('indeterminate', true)
+    const mark = () =>
+      input.evaluate((el) => {
+        const style = getComputedStyle(el.nextElementSibling!, '::after')
+        return `${style.width} ${style.height}`
+      })
+    expect(await mark(), 'dash').toBe('12px 2px')
+    // Click the drawn box, as a user does; the hidden input sits under it.
+    await input.locator('xpath=following-sibling::span[1]').click()
+    await expect(input).toHaveJSProperty('indeterminate', false)
+    await expect(input).toBeChecked()
+    // Chromium can report the pseudo-element's old box for a few frames after the change.
+    await expect.poll(mark, { message: 'tick' }).toBe('6px 11px')
+  })
+
+  test('a native Reset restores the initial state and the v-model follows', async ({ page }) => {
+    await page.goto('/')
+    const form = demo(page, 'checkbox-reset')
+    const input = form.getByRole('checkbox', { name: 'Keep logs' })
+    const state = demo(page, 'checkbox-state')
+    await expect(input).toBeChecked()
+    await input.focus()
+    await page.keyboard.press('Space')
+    await expect(state).toHaveText('false')
+    await form.getByRole('button', { name: 'Reset' }).click()
+    await expect(input).toBeChecked()
+    await expect(state).toHaveText('true')
+  })
+
+  test.describe('forced colors', () => {
+    test.use({ forcedColors: 'active' })
+    test('checked, indeterminate and unchecked boxes stay distinguishable', async ({ page }) => {
+      await page.goto('/')
+      const box = (name: string) =>
+        demo(page, 'checkbox')
+          .locator('.bl-checkbox', { hasText: name })
+          .locator('.bl-checkbox__box')
+          .evaluate((el) => {
+            const after = getComputedStyle(el, '::after')
+            return `${getComputedStyle(el).backgroundColor} ${after.display}`
+          })
+      const [mixed, on, off] = [
+        await box('All channels'),
+        await box('Nightly backups'),
+        await box('Send metrics')
+      ]
+      expect(on).not.toBe(off)
+      expect(mixed).not.toBe(off)
+    })
+    test('a disabled box reads as disabled, ticked or not', async ({ page }) => {
+      await page.goto('/')
+      const label = (name: string) =>
+        demo(page, 'checkbox')
+          .locator('.bl-checkbox', { hasText: name })
+          .locator('.bl-checkbox__label')
+          .evaluate((el) => getComputedStyle(el).color)
+      expect(await label('Required by policy')).not.toBe(await label('Send metrics'))
+      const [fill, ground] = await demo(page, 'checkbox')
+        .locator('.bl-checkbox', { hasText: 'Required by policy' })
+        .locator('.bl-checkbox__box')
+        .evaluate((el) => [
+          getComputedStyle(el).backgroundColor,
+          getComputedStyle(document.body).backgroundColor
+        ])
+      expect(fill, 'no Highlight fill on a disabled, checked box').toBe(ground)
+    })
+  })
+})
+
+test.describe('BlRadioGroup', () => {
+  test('arrow keys move and select; Tab leaves the group', async ({ page }) => {
+    await page.goto('/')
+    const group = demo(page, 'radio').getByRole('radiogroup', { name: 'Band' })
+    const radio = (name: string) => group.getByRole('radio', { name })
+    const state = demo(page, 'radio-state')
+    await expect(radio('5 GHz')).toBeChecked()
+    await radio('5 GHz').focus()
+    await page.keyboard.press('ArrowDown')
+    await expect(radio('6 GHz')).toBeFocused()
+    await expect(radio('6 GHz')).toBeChecked()
+    await expect(state).toHaveText('6')
+    // The last option wraps to the first, natively.
+    await page.keyboard.press('ArrowDown')
+    await expect(radio('2.4 GHz')).toBeFocused()
+    await expect(radio('2.4 GHz')).toBeChecked()
+    await page.keyboard.press('ArrowUp')
+    await expect(radio('6 GHz')).toBeChecked()
+    await expect(state).toHaveText('6')
+    // One tab stop per group: Tab lands on the next group's checked radio, Shift+Tab comes back
+    // to this group's checked radio, not its first.
+    await page.keyboard.press('Tab')
+    const next = demo(page, 'radio').getByRole('radiogroup', { name: 'Channel width' })
+    await expect(next.getByRole('radio', { name: '40 MHz' })).toBeFocused()
+    await page.keyboard.press('Shift+Tab')
+    await expect(radio('6 GHz')).toBeFocused()
+  })
+
+  test('arrow keys skip a disabled option', async ({ page }) => {
+    await page.goto('/')
+    const group = demo(page, 'radio').getByRole('radiogroup', { name: 'Channel width' })
+    await group.getByRole('radio', { name: '40 MHz' }).focus()
+    await page.keyboard.press('ArrowRight')
+    await expect(group.getByRole('radio', { name: '20 MHz' })).toBeChecked()
+  })
+
+  test.describe('forced colors', () => {
+    test.use({ forcedColors: 'active' })
+    test('checked and unchecked dots stay distinguishable; disabled has no Highlight', async ({
+      page
+    }) => {
+      await page.goto('/')
+      const dot = (name: string) =>
+        demo(page, 'radio')
+          .locator('.bl-radio', { hasText: name })
+          .locator('.bl-radio__dot')
+          .evaluate((el) => getComputedStyle(el).backgroundColor)
+      expect(await dot('5 GHz')).not.toBe(await dot('6 GHz'))
+      const ground = await page.evaluate(() => getComputedStyle(document.body).backgroundColor)
+      expect(await dot('Automatic'), 'no Highlight fill on a disabled, checked dot').toBe(ground)
+    })
+  })
+})
+
 test.describe('BlDisclosure', () => {
   test('opening one in a named group closes its sibling', async ({ page }) => {
     await page.goto('/')

@@ -33,17 +33,90 @@
     <BlToggle v-model="notify" label="Notify" name="notify" value="yes" />
     <BlToggle :model-value="true" label="Locked on" disabled />
   </div>
+
+  <BlSectionHead :level="3" eyebrow="Textarea" heading="Multi-line text" />
+  <div class="pg-stack" data-demo="textarea">
+    <BlField label="Notes" hint="Resizes vertically.">
+      <BlTextarea v-model="notes" />
+    </BlField>
+    <BlField label="Archived notes"><BlTextarea model-value="Read only now." disabled /></BlField>
+  </div>
+
+  <BlSectionHead :level="3" eyebrow="Checkbox" heading="Ticks and dashes" />
+  <div class="pg-stack" data-demo="checkbox">
+    <BlCheckbox v-model="allChannels" v-model:indeterminate="someChannels" label="All channels" />
+    <BlCheckbox v-model="backups" label="Nightly backups" hint="Runs at 03:00 local time" />
+    <BlCheckbox v-model="metrics" label="Send metrics" />
+    <BlCheckbox :model-value="true" label="Required by policy" disabled />
+    <BlCheckbox :model-value="false" label="Not available" disabled />
+  </div>
+  <form class="pg-row" data-demo="checkbox-reset" @submit.prevent>
+    <BlCheckbox v-model="keepLogs" label="Keep logs" />
+    <BlButton type="reset">Reset</BlButton>
+    <span data-demo="checkbox-state" aria-hidden="true" class="bl-sr-only">{{ keepLogs }}</span>
+  </form>
+
+  <BlSectionHead :level="3" eyebrow="Radio" heading="One of several" />
+  <div data-demo="radio">
+    <BlRadioGroup v-model="band" legend="Band" hint="Arrow keys move between options.">
+      <BlRadio label="2.4 GHz" value="2.4" hint="Longer range" />
+      <BlRadio label="5 GHz" value="5" />
+      <BlRadio label="6 GHz" value="6" />
+    </BlRadioGroup>
+    <span data-demo="radio-state" aria-hidden="true" class="bl-sr-only">{{ band }}</span>
+    <BlRadioGroup v-model="channelWidth" legend="Channel width" class="bl-fieldset--inline">
+      <BlRadio label="20 MHz" value="20" />
+      <BlRadio label="40 MHz" value="40" />
+      <BlRadio label="80 MHz" value="80" disabled />
+    </BlRadioGroup>
+    <BlRadioGroup model-value="auto" legend="Region (locked)" disabled>
+      <BlRadio label="Automatic" value="auto" />
+      <BlRadio label="Fixed" value="fixed" />
+    </BlRadioGroup>
+  </div>
+
+  <BlSectionHead :level="3" eyebrow="Validation" heading="Invalid fields" />
+  <div class="pg-stack" data-demo="invalid">
+    <BlField label="Contact email" hint="We never share it." error="Enter an email address.">
+      <BlInput v-model="badEmail" type="email" />
+    </BlField>
+    <BlField label="Network" error="Pick a network.">
+      <BlSelect v-model="badNetwork" :options="networks" />
+    </BlField>
+    <BlField label="Gain" error="Gain is above the safe limit.">
+      <BlRange v-model="gain" :min="0" :max="24" />
+    </BlField>
+    <BlField label="Message" error="Write at least 20 characters.">
+      <BlTextarea v-model="message" :rows="3" />
+    </BlField>
+    <BlToggle v-model="terms" label="Accept the terms" error="Accept the terms to continue." />
+    <BlCheckbox v-model="confirm" label="I have a backup" error="Confirm that a backup exists." />
+    <BlRadioGroup v-model="plan" legend="Plan" error="Choose a plan.">
+      <BlRadio label="Basic" value="basic" />
+      <BlRadio label="Pro" value="pro" />
+    </BlRadioGroup>
+    <fieldset class="bl-fieldset bl-fieldset--invalid" aria-describedby="pg-cg-error">
+      <legend class="bl-fieldset__legend">Notify me about</legend>
+      <p id="pg-cg-error" class="bl-fieldset__error">Choose at least one topic.</p>
+      <BlCheckbox v-model="topicUpdates" label="Updates" />
+      <BlCheckbox v-model="topicOutages" label="Outages" />
+    </fieldset>
+  </div>
 </template>
 
 <script setup lang="ts">
   import { ref } from 'vue'
   import {
     BlButton,
+    BlCheckbox,
     BlField,
     BlInput,
+    BlRadio,
+    BlRadioGroup,
     BlRange,
     BlSectionHead,
     BlSelect,
+    BlTextarea,
     BlToggle
   } from '../../../vue'
   import DemoFieldInput from './DemoFieldInput.vue'
@@ -62,4 +135,23 @@
   ]
   const volume = ref(-12)
   const brightness = ref(40)
+
+  const notes = ref('First line.\nSecond line.')
+  const allChannels = ref(false)
+  const someChannels = ref(true)
+  const backups = ref(true)
+  const metrics = ref(false)
+  const keepLogs = ref(true)
+  const band = ref('5')
+  const channelWidth = ref('40')
+
+  const badEmail = ref('not-an-email')
+  const badNetwork = ref('guest')
+  const gain = ref(22)
+  const message = ref('Too short')
+  const terms = ref(false)
+  const confirm = ref(false)
+  const plan = ref('')
+  const topicUpdates = ref(false)
+  const topicOutages = ref(false)
 </script>

@@ -557,6 +557,9 @@ const cases: Case[] = [
       }
     ]
   },
+  { id: 'checkbox-long', checks: generic() },
+  { id: 'radio-long', checks: generic() },
+  { id: 'textarea-error', checks: generic() },
   {
     id: 'toast-six',
     checks: [

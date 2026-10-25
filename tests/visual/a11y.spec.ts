@@ -40,7 +40,8 @@ test('the skip-link target takes focus without a ring', async ({ page }) => {
 test('a focused control is not hidden under the mobile tab bar', async ({ page }, testInfo) => {
   test.skip(!testInfo.project.name.startsWith('mobile'), 'tab bar is mobile-only')
   await page.goto('/')
-  const select = page.locator('select.bl-select')
+  // The first select on the page; the validation demo adds a second one further down.
+  const select = page.locator('select.bl-select').first()
   for (let i = 0; i < 80; i++) {
     await page.keyboard.press('Tab')
     if (await select.evaluate((el) => el === document.activeElement)) break
@@ -204,7 +205,9 @@ test('invisible hit areas reach 44px at phone width', async ({ page }) => {
       '.bl-colophon__items a',
       '.bl-appearance__option',
       '.bl-segmented__item',
-      '.bl-segmented--compact .bl-segmented__item'
+      '.bl-segmented--compact .bl-segmented__item',
+      '.bl-checkbox__control',
+      '.bl-radio__control'
     ]
     return selectors.flatMap((selector) =>
       [...document.querySelectorAll(selector)].map((el, index) => {
@@ -492,4 +495,120 @@ test('aria-current="location" markup is styled like the current page', async ({ 
   })
   expect(colours.here).not.toBe(colours.plain)
   expect(colours.off).toBe(colours.plain)
+})
+
+test.describe('form controls', () => {
+  const axe = (page: Page, selector: string) =>
+    new AxeBuilder({ page })
+      .include(selector)
+      .analyze()
+      .then((r) => r.violations.map((v) => `${v.id}: ${v.nodes.length}`))
+
+  test('every control state is present and has no axe violations', async ({ page }) => {
+    await page.goto('/')
+    await page.evaluate(() => document.fonts.ready)
+    const count = (selector: string) => page.locator(selector).count()
+    // default, checked, indeterminate and disabled per control; invalid is in its own demo.
+    expect(await count('[data-demo="checkbox"] .bl-checkbox__input:not(:checked)')).toBeGreaterThan(
+      0
+    )
+    expect(await count('[data-demo="checkbox"] .bl-checkbox__input:checked')).toBeGreaterThan(0)
+    expect(await count('[data-demo="checkbox"] .bl-checkbox__input:indeterminate')).toBe(1)
+    expect(await count('[data-demo="checkbox"] .bl-checkbox__input:disabled')).toBe(2)
+    expect(await count('[data-demo="radio"] .bl-radio__input:checked')).toBe(3)
+    expect(await count('[data-demo="radio"] .bl-radio__input:disabled')).toBeGreaterThan(0)
+    expect(await count('[data-demo="textarea"] textarea:disabled')).toBe(1)
+    expect(await count('[data-demo="invalid"] [aria-invalid="true"]')).toBe(7)
+    for (const name of ['textarea', 'checkbox', 'checkbox-reset', 'radio', 'invalid', 'toggle'])
+      expect(await axe(page, `[data-demo="${name}"]`), name).toEqual([])
+  })
+
+  test('the states a user reaches have no axe violations', async ({ page }) => {
+    await page.goto('/')
+    const demo = page.locator('[data-demo="checkbox"]')
+    // A user clicks the drawn box or the label text, not the hidden input under them. Clear the
+    // indeterminate box, untick a checked one, then pick other radios.
+    await demo.getByText('All channels', { exact: true }).click()
+    await demo.getByText('Nightly backups', { exact: true }).click()
+    await page.locator('[data-demo="radio"]').getByText('6 GHz', { exact: true }).click()
+    await page.locator('[data-demo="invalid"]').getByText('Pro', { exact: true }).click()
+    await expect(demo.getByRole('checkbox', { name: 'All channels' })).toBeChecked()
+    await expect(demo.getByRole('checkbox', { name: 'Nightly backups' })).not.toBeChecked()
+    await expect(page.getByRole('radio', { name: '6 GHz' })).toBeChecked()
+    await expect(page.getByRole('radio', { name: 'Pro', exact: true })).toBeChecked()
+    for (const name of ['checkbox', 'radio', 'invalid'])
+      expect(await axe(page, `[data-demo="${name}"]`), name).toEqual([])
+  })
+
+  test('the error text is not a live region', async ({ page }) => {
+    await page.goto('/')
+    const live = await page
+      .locator('.bl-field__error, .bl-toggle__error, .bl-checkbox__error, .bl-fieldset__error')
+      .evaluateAll(
+        (els) =>
+          els.filter((el) => el.closest('[aria-live], [role="alert"], [role="status"]')).length
+      )
+    expect(live).toBe(0)
+  })
+
+  test.describe('forced colors', () => {
+    test.use({ forcedColors: 'active' })
+
+    test('every error mark and the invalid group bar stay visible', async ({ page }) => {
+      await page.goto('/')
+      const marks = await page.evaluate(() => {
+        const ground = getComputedStyle(document.body).backgroundColor
+        return [
+          '.bl-field__error',
+          '.bl-toggle__error',
+          '.bl-checkbox__error',
+          '.bl-fieldset__error'
+        ].map((selector) => {
+          const fill = getComputedStyle(
+            document.querySelector(selector)!,
+            '::before'
+          ).backgroundColor
+          return `${selector}: ${fill !== ground && fill !== 'rgba(0, 0, 0, 0)'}`
+        })
+      })
+      expect(marks).toEqual([
+        '.bl-field__error: true',
+        '.bl-toggle__error: true',
+        '.bl-checkbox__error: true',
+        '.bl-fieldset__error: true'
+      ])
+      const bar = await page
+        .locator('[data-demo="invalid"] .bl-fieldset--invalid')
+        .first()
+        .evaluate((el) => {
+          const style = getComputedStyle(el)
+          return (
+            parseFloat(style.borderInlineStartWidth) > 0 && style.borderInlineStartStyle !== 'none'
+          )
+        })
+      expect(bar).toBe(true)
+    })
+
+    test('an invalid control border is thicker than a valid one', async ({ page }) => {
+      await page.goto('/')
+      const width = (selector: string) =>
+        page
+          .locator(selector)
+          .first()
+          .evaluate((el) => {
+            const style = getComputedStyle(el)
+            // A border, or an inset ring that doubles it.
+            return parseFloat(style.borderTopWidth) + (style.boxShadow === 'none' ? 0 : 1)
+          })
+      expect(await width('[data-demo="invalid"] .bl-input')).toBeGreaterThan(
+        await width('.bl-input:not([aria-invalid])')
+      )
+      expect(await width('[data-demo="invalid"] .bl-textarea')).toBeGreaterThan(
+        await width('[data-demo="textarea"] .bl-textarea')
+      )
+      expect(await width('[data-demo="invalid"] .bl-checkbox__box')).toBeGreaterThan(
+        await width('[data-demo="checkbox"] .bl-checkbox__box')
+      )
+    })
+  })
 })
