@@ -100,6 +100,14 @@ const REQUIRED: Record<string, string[]> = {
     'pointer-events: none'
   ],
   field: ['.bl-input:focus-visible', '.bl-select', ".bl-range input[type='range']"],
+  fieldset: [
+    '.bl-fieldset',
+    '.bl-fieldset__legend',
+    '.bl-fieldset__hint',
+    '.bl-fieldset__error',
+    '.bl-fieldset--invalid',
+    '.bl-fieldset--inline'
+  ],
   'link-arrow': ['.bl-link-arrow::before', '.bl-link-arrow--quiet'],
   'spec-panel': ['.bl-spec-row + .bl-spec-row', '.bl-spec-row__value a'],
   telemetry: ['.bl-ruler', '--bl-telemetry-columns', '.bl-telemetry__cell'],
@@ -306,6 +314,23 @@ describe('anchored behaviour', () => {
       expect(invalid['border-width']).toBe('2px')
       expect(invalid['border-color']).toBe('var(--bl-danger)')
     }
+  })
+
+  it('styles the fieldset error line like the field error and marks an invalid group', () => {
+    const css = read('fieldset')
+    expect(css).toContain('@layer components')
+    expect(ruleBody(css, '.bl-fieldset')['min-width']).toBe('0')
+    expect(ruleBody(css, '.bl-fieldset')['border']).toBe('0')
+    const error = ruleBody(css, '.bl-fieldset__error')
+    expect(error['color']).toBe('var(--bl-danger)')
+    expect(error['display']).toBe('flex')
+    const mark = ruleBody(css, '.bl-fieldset__error::before')
+    expect(mark['content']).toContain('!')
+    expect(mark['border-radius']).toBe('50%')
+    expect(ruleBody(css, '.bl-fieldset--invalid')['border-inline-start']).toContain(
+      'var(--bl-danger)'
+    )
+    expect(ruleBody(css, '.bl-fieldset--inline')['flex-direction']).toBe('row')
   })
 
   it('makes the icon button a 44px square, a circle with pill', () => {

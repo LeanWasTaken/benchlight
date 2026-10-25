@@ -1,0 +1,77 @@
+@layer components {
+  .bl-fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    margin: 0 0 20px;
+    padding: 0;
+    border: 0;
+  }
+  /* A legend is not a flex item in every engine, so it takes block flow and a margin of its own. */
+  .bl-fieldset__legend {
+    padding: 0;
+    margin-bottom: 8px;
+    overflow-wrap: anywhere;
+    font-size: var(--bl-text-small);
+    color: var(--bl-ink-1);
+  }
+  .bl-fieldset__hint {
+    margin: 0;
+    overflow-wrap: anywhere;
+    font-size: var(--bl-text-small);
+    color: var(--bl-ink-2);
+  }
+  /* Same "!" disc as .bl-field__error, so the state does not rest on colour. */
+  .bl-fieldset__error {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0;
+    overflow-wrap: anywhere;
+    font-size: var(--bl-text-small);
+    color: var(--bl-danger);
+  }
+  .bl-fieldset__error::before {
+    content: '!' / '';
+    flex-shrink: 0;
+    box-sizing: border-box;
+    width: 16px;
+    height: 16px;
+    margin-top: 0.1em;
+    background: var(--bl-danger);
+    border-radius: 50%;
+    color: var(--bl-raised);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+  }
+  /* A bar down the group's leading edge is a second cue beside the error line. */
+  .bl-fieldset--invalid {
+    padding-inline-start: 10px;
+    border-inline-start: 2px solid var(--bl-danger);
+  }
+  .bl-fieldset--inline {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 20px;
+  }
+  /* The legend, hint and error each take a full row so only the options sit side by side. */
+  .bl-fieldset--inline > .bl-fieldset__legend,
+  .bl-fieldset--inline > .bl-fieldset__hint,
+  .bl-fieldset--inline > .bl-fieldset__error {
+    flex: 0 0 100%;
+  }
+  @media (forced-colors: active) {
+    .bl-fieldset__error::before {
+      forced-color-adjust: none;
+      background: CanvasText;
+      color: Canvas;
+    }
+    .bl-fieldset--invalid {
+      border-inline-start-color: CanvasText;
+    }
+  }
+}

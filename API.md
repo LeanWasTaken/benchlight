@@ -39,6 +39,7 @@
 - `dist/modules/disclosure.min.css`
 - `dist/modules/eq.min.css`
 - `dist/modules/field.min.css`
+- `dist/modules/fieldset.min.css`
 - `dist/modules/index-row.min.css`
 - `dist/modules/layout.min.css`
 - `dist/modules/led.min.css`
@@ -973,6 +974,12 @@ Exposed: none
 - `bl-field__error`
 - `bl-field__hint`
 - `bl-field__label`
+- `bl-fieldset`
+- `bl-fieldset--inline`
+- `bl-fieldset--invalid`
+- `bl-fieldset__error`
+- `bl-fieldset__hint`
+- `bl-fieldset__legend`
 - `bl-index`
 - `bl-index--grid`
 - `bl-index--ruled-top`

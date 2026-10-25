@@ -15,6 +15,7 @@ export const MODULES = {
   segmented: 'css/components/segmented.css',
   btn: 'css/components/btn.css',
   field: 'css/components/field.css',
+  fieldset: 'css/components/fieldset.css',
   'link-arrow': 'css/components/link-arrow.css',
   'spec-panel': 'css/components/spec-panel.css',
   telemetry: 'css/components/telemetry.css',
