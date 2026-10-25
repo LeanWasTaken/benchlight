@@ -11,6 +11,15 @@
   scripts. Not exported any more: `dist/tokens.js` (use `benchlight/tokens`),
   `js/prepaint-script.d.mts` as a subpath, `fonts/full/*` and `fonts/OFL-*.txt`. They still ship
   in the package. There is no root entry; import a subpath.
+- Type-checks under stricter consumer settings: the shipped source passes with
+  `exactOptionalPropertyTypes` and `noPropertyAccessFromIndexSignature`, both now on in the repo.
+  Compiled runtime prop declarations are unchanged.
+- New `LabelOverrides<T>` type; `labels` props take `Partial<LabelOverrides<…Labels>>` (was
+  `Partial<…Labels>`), so an `undefined` label value, which falls back to the default, also
+  type-checks under `exactOptionalPropertyTypes`. BlTable `rowLink` may return `undefined` link
+  fields under that flag too.
+- `benchlight/tokens` types come from a generated `dist/tokens.d.ts` instead of
+  `tokens/index.ts`, so they resolve under `moduleResolution: "NodeNext"` too.
 
 ## 0.7.0 - 2026-10-09
 

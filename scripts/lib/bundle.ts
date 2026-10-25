@@ -61,7 +61,7 @@ export function buildModules(
   let bundle = minifyCss(sources.map(([, css]) => css).join('\n'), 'bundle.css')
   if (names.includes('tokens')) {
     bundle = withLayerOrder(bundle)
-    modules.tokens = withLayerOrder(modules.tokens!)
+    modules['tokens'] = withLayerOrder(modules['tokens']!)
   }
   return { bundle, modules }
 }

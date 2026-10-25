@@ -22,7 +22,7 @@ import { mockMatchMedia } from '../helpers/vue'
 const RouterLinkLike = defineComponent({
   props: { to: { type: [String, Object], required: true } },
   setup(props, { slots }) {
-    return () => h('a', { href: String(props.to), 'data-router': '' }, slots.default?.())
+    return () => h('a', { href: String(props.to), 'data-router': '' }, slots['default']?.())
   }
 })
 
@@ -318,7 +318,7 @@ describe('BlSegmented', () => {
       setup:
         (props, { slots }) =>
         () =>
-          h('a', { href: props.to, 'data-router': '' }, slots.default?.())
+          h('a', { href: props.to, 'data-router': '' }, slots['default']?.())
     })
     const wrapper = mount(BlSegmented, {
       props: { as: Router, options: [{ value: 'a', label: 'A', to: '/a' }] }
@@ -787,7 +787,7 @@ describe('form controls', () => {
     const wrapper = mount(BlField, {
       props: { label: 'L', hint: 'H', id: 'f' },
       slots: {
-        default: (p: { id: string; describedBy?: string }) =>
+        default: (p: { id: string; describedBy: string | undefined }) =>
           h('textarea', { id: p.id, 'aria-describedby': p.describedBy })
       }
     })

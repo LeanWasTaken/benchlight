@@ -156,7 +156,7 @@ describe('BlPagination label', () => {
 describe('BlAppearanceSwitch marks', () => {
   it('shows A / L / D by default and honours labels.marks', () => {
     const marks = (labels?: object) =>
-      mount(BlAppearanceSwitch, { props: { labels } })
+      mount(BlAppearanceSwitch, { props: labels ? { labels } : {} })
         .findAll('label')
         .map((l) => l.text())
     expect(marks()).toEqual(['A', 'L', 'D'])

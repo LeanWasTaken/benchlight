@@ -85,7 +85,7 @@ describe('buildDist', () => {
 
   it('declares the layer order first', () => {
     expect(dist.bundle.startsWith(LAYERS)).toBe(true)
-    expect(dist.modules.tokens!.startsWith(LAYERS)).toBe(true)
+    expect(dist.modules['tokens']!.startsWith(LAYERS)).toBe(true)
   })
 
   it('keeps every token as a variable, so it is interchangeable with the source CSS', () => {

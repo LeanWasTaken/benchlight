@@ -73,11 +73,11 @@ describe('foundation CSS', () => {
 
   it('draws a doubled-specificity trace focus ring on keyboard focus', () => {
     const ring = ruleBody(read('css/base.css'), ':focus-visible:focus-visible')
-    expect(ring.outline).toBe('2px solid var(--bl-trace)')
+    expect(ring['outline']).toBe('2px solid var(--bl-trace)')
     expect(ring['outline-offset']).toBe('2px')
   })
 
   it('draws no ring on programmatic focus targets', () => {
-    expect(ruleBody(read('css/base.css'), "[tabindex='-1']:focus-visible").outline).toBe('none')
+    expect(ruleBody(read('css/base.css'), "[tabindex='-1']:focus-visible")['outline']).toBe('none')
   })
 })

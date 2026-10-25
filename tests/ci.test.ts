@@ -65,7 +65,7 @@ describe('CI hardening', () => {
         /setup-bun@[0-9a-f]{40} # v2\n\s+with:\n\s+bun-version-file: package\.json/
       )
     }
-    expect(jobs.browser).toContain("require('./package.json').packageManager.split('@')[1]")
+    expect(jobs['browser']).toContain("require('./package.json').packageManager.split('@')[1]")
   })
 
   it('scopes the deploy key to the git-install step and removes it afterwards', () => {
@@ -93,6 +93,6 @@ describe('CI hardening', () => {
     const script = (JSON.parse(read('package.json')) as { scripts: Record<string, string> })
       .scripts['lint:workflows']!
     expect(script).toMatch(/docker run --rm .*rhysd\/actionlint:\d+\.\d+\.\d+/)
-    expect(jobs.check).toContain('run: bun run lint:workflows')
+    expect(jobs['check']).toContain('run: bun run lint:workflows')
   })
 })

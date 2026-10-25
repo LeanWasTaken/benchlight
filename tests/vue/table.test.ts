@@ -214,7 +214,7 @@ describe('BlTable row actions', () => {
         columns,
         rows,
         rowKey: 'mac',
-        rowLink: (r: Record<string, unknown>) => ({ href: `/c/${String(r.mac)}` })
+        rowLink: (r: Record<string, unknown>) => ({ href: `/c/${String(r['mac'])}` })
       },
       attachTo: document.body
     })
@@ -242,7 +242,7 @@ describe('BlTable row actions', () => {
           rows,
           rowKey: 'mac',
           scroll: true,
-          rowLink: (r: Record<string, unknown>) => ({ href: `/c/${String(r.mac)}` })
+          rowLink: (r: Record<string, unknown>) => ({ href: `/c/${String(r['mac'])}` })
         },
         attachTo: document.body
       })
@@ -268,7 +268,7 @@ describe('BlTable row actions', () => {
         columns,
         rows,
         rowKey: 'mac',
-        onRowActivate: (r: Record<string, unknown>) => seen.push(String(r.mac))
+        onRowActivate: (r: Record<string, unknown>) => seen.push(String(r['mac']))
       },
       slots: { 'cell-ip': () => h('button', { class: 'own' }, 'copy') },
       attachTo: document.body
@@ -289,7 +289,7 @@ describe('BlTable row actions', () => {
         columns,
         rows,
         rowKey: 'mac',
-        onRowActivate: (r: Record<string, unknown>) => seen.push(String(r.mac))
+        onRowActivate: (r: Record<string, unknown>) => seen.push(String(r['mac']))
       },
       attachTo: document.body
     })

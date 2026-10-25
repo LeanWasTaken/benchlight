@@ -29,7 +29,7 @@
       </div>
       <p v-if="description" :id="descId" class="bl-dialog__description">{{ description }}</p>
       <div class="bl-dialog__body"><slot /></div>
-      <Foot :nodes="$slots.footer?.()" />
+      <Foot :nodes="$slots['footer']?.()" />
     </div>
     <!-- Outside the panel: the panel's entry transform would capture the fixed toaster. -->
     <div ref="toasts" class="bl-dialog__toasts" />
@@ -43,7 +43,7 @@
   import { hasContent } from '../internal/slots'
   import { pushToastHost, removeToastHost, toastFocus } from '../internal/toastHosts'
   import { mergeLabels } from '../internal/labels'
-  import type { DialogCloseEvent, DialogCloseReason, DialogLabels } from '../types'
+  import type { DialogCloseEvent, DialogCloseReason, DialogLabels, LabelOverrides } from '../types'
   import BlButton from './BlButton.vue'
 
   const props = withDefaults(
@@ -52,7 +52,7 @@
       title: string
       description?: string
       dismissible?: boolean
-      labels?: Partial<DialogLabels>
+      labels?: Partial<LabelOverrides<DialogLabels>>
     }>(),
     { dismissible: true }
   )
@@ -66,7 +66,7 @@
   // The footer slot is evaluated once per render; an empty or v-if-ed footer is dropped, and
   // the result is remembered for the "no way out" warning (slots are not called outside render).
   let hasFooter = false
-  const Foot = (p: { nodes?: VNode[] }) => {
+  const Foot = (p: { nodes?: VNode[] | undefined }) => {
     hasFooter = hasContent(p.nodes)
     return hasFooter ? h('div', { class: 'bl-dialog__foot' }, p.nodes) : null
   }

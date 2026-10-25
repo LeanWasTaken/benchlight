@@ -48,7 +48,7 @@ describe('sortRows', () => {
     expect(down.slice(0, 3).map((r) => r.v)).toEqual(['10', '3.5', 2])
   })
   it('uses sortBy and ignores an unknown sort key', () => {
-    const out = sortRows(rows, [col('name', { sortBy: (r) => -(r.n as number) })], {
+    const out = sortRows(rows, [col('name', { sortBy: (r) => -(r['n'] as number) })], {
       key: 'name',
       dir: 'asc'
     })
@@ -144,6 +144,6 @@ describe('totals and formatting', () => {
   it('formats cells', () => {
     expect(formatCell({ a: null }, col('a'))).toBe('')
     expect(formatCell({ a: 3 }, col('a'))).toBe('3')
-    expect(formatCell({ a: 3 }, col('a', { format: (v, r) => `${v}/${r?.a}` }))).toBe('3/3')
+    expect(formatCell({ a: 3 }, col('a', { format: (v, r) => `${v}/${r?.['a']}` }))).toBe('3/3')
   })
 })

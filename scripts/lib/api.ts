@@ -105,7 +105,8 @@ function componentSection(root: string): string {
         .map(
           (p) =>
             `| \`${p.name}\` | \`${cell(p.type)}\` | ${p.required ? 'yes' : 'no'} | ${
-              p.default === undefined ? '' : `\`${cell(p.default)}\``
+              // ` as never` is a type-only cast (BlButton `pressed`), not part of the value.
+              p.default === undefined ? '' : `\`${cell(p.default.replace(/ as never$/, ''))}\``
             } |`
         )
       const slots = sorted(meta.slots.map((s) => s.name))

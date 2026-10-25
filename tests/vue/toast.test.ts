@@ -25,8 +25,8 @@ beforeEach(() => {
 const proto = HTMLElement.prototype as unknown as Record<string, unknown>
 afterEach(() => {
   // happy-dom has no popovers; a stub must not outlive the test that set it, failed or not.
-  delete proto.showPopover
-  delete proto.hidePopover
+  delete proto['showPopover']
+  delete proto['hidePopover']
   document.querySelectorAll('body > dialog').forEach((d) => d.remove())
   w?.unmount()
   w = undefined
@@ -146,7 +146,7 @@ describe('BlToaster', () => {
   it('rides in the top layer while the dialog it left is still fading out', async () => {
     await mountToaster()
     const shown: boolean[] = []
-    proto.showPopover = () => shown.push(true)
+    proto['showPopover'] = () => shown.push(true)
     const dialog = document.createElement('dialog')
     const host = document.createElement('div')
     dialog.append(host)
@@ -177,7 +177,7 @@ describe('BlToaster', () => {
   it('stays in place when the dialog it left closed at once or in a blink', async () => {
     await mountToaster()
     const show = vi.fn()
-    proto.showPopover = show
+    proto['showPopover'] = show
     const dialog = document.createElement('dialog')
     const host = document.createElement('div')
     dialog.append(host)

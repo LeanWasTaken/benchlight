@@ -649,7 +649,7 @@ tokens.color.dark.canvas // '#101214', e.g. for OG images that cannot read CSS v
 ```
 
 `benchlight/tokens` resolves at runtime to `dist/tokens.js`, because Nuxt's server bundler cannot compile
-TypeScript from `node_modules`. Types still come from `tokens/index.ts`.
+TypeScript from `node_modules`. Types come from the generated `dist/tokens.d.ts`.
 
 ## Development
 

@@ -20,9 +20,9 @@
   import { computed, onMounted, ref, useId } from 'vue'
   import { useAppearance, type AppearanceMode } from '../composables/useAppearance'
   import { mergeLabels } from '../internal/labels'
-  import type { AppearanceLabels } from '../types'
+  import type { AppearanceLabels, LabelOverrides } from '../types'
 
-  const props = defineProps<{ labels?: Partial<AppearanceLabels> }>()
+  const props = defineProps<{ labels?: Partial<LabelOverrides<AppearanceLabels>> }>()
   const { mode } = useAppearance()
   // Until mounted the switch draws from the root attribute and does not animate, so a saved
   // choice never visibly slides in after hydration (the server always renders "auto").

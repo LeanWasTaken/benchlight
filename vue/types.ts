@@ -42,13 +42,20 @@ export interface PrevNextItem extends Pick<LinkProps, 'to' | 'href'> {
   title: string
 }
 
+/**
+ * A partial label set for a `labels` prop. An `undefined` value falls back to the default, also
+ * under `exactOptionalPropertyTypes`. Props spell it `Partial<LabelOverrides<…>>`: Vue compiles
+ * a `Partial<>` prop to a runtime `Object` check, and an unresolved alias to none.
+ */
+export type LabelOverrides<T> = { [K in keyof T]?: T[K] | undefined }
+
 export interface AppearanceLabels {
   legend: string
   auto: string
   light: string
   dark: string
   /** The short visible mark beside each option; defaults to A / L / D. */
-  marks?: Partial<{ auto: string; light: string; dark: string }>
+  marks?: LabelOverrides<{ auto: string; light: string; dark: string }>
 }
 
 export interface PrevNextLabels {

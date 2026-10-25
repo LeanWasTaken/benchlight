@@ -32,7 +32,7 @@
   ],
   "exports": {
     "./tokens": {
-      "types": "./tokens/index.ts",
+      "types": "./dist/tokens.d.ts",
       "default": "./dist/tokens.js"
     },
     "./vue": "./vue/index.ts",

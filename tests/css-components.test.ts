@@ -173,17 +173,17 @@ describe('touch targets', () => {
   it('keeps each switch option 44px wide with a hit area reaching 44px tall', () => {
     const css = read('appearance')
     const option = ruleBody(css, '.bl-appearance__option')
-    expect(option.width).toBe('44px')
-    expect(option.height).toBe('30px')
-    expect(ruleBody(css, '.bl-appearance__option::before').inset).toBe('-7px 0')
+    expect(option['width']).toBe('44px')
+    expect(option['height']).toBe('30px')
+    expect(ruleBody(css, '.bl-appearance__option::before')['inset']).toBe('-7px 0')
   })
 })
 
 describe('anchored behaviour', () => {
   it('pins the tab bar to the viewport and hides it from 40em up', () => {
     const css = read('tab-bar')
-    expect(ruleBody(css, '.bl-tab-bar').position).toBe('fixed')
-    expect(ruleBody(css, '.bl-tab-bar', ['@media (min-width: 40em)']).display).toBe('none')
+    expect(ruleBody(css, '.bl-tab-bar')['position']).toBe('fixed')
+    expect(ruleBody(css, '.bl-tab-bar', ['@media (min-width: 40em)'])['display']).toBe('none')
   })
 
   it('reserves room for the tab bar below 40em only', () => {
@@ -199,9 +199,9 @@ describe('anchored behaviour', () => {
 
   it('keeps the tab bar and the page column clear of device safe areas', () => {
     const bar = ruleBody(read('tab-bar'), '.bl-tab-bar')
-    expect(bar.bottom).toBe('calc(12px + env(safe-area-inset-bottom))')
-    expect(bar.left).toBe('calc(12px + env(safe-area-inset-left))')
-    expect(bar.right).toBe('calc(12px + env(safe-area-inset-right))')
+    expect(bar['bottom']).toBe('calc(12px + env(safe-area-inset-bottom))')
+    expect(bar['left']).toBe('calc(12px + env(safe-area-inset-left))')
+    expect(bar['right']).toBe('calc(12px + env(safe-area-inset-right))')
     const layout = readFileSync(new URL('../css/layout.css', import.meta.url), 'utf8')
     for (const within of [[], ['@media (max-width: 30em)']]) {
       const gutter = ruleBody(layout, '.bl-col', within)['padding-inline']
@@ -219,7 +219,7 @@ describe('anchored behaviour', () => {
     const item = ruleBody(css, '.bl-tab-bar__item')
     expect(item['min-width']).toBe('0')
     expect(item['min-height']).toBe('44px')
-    expect(item.padding).toBe('8px 4px')
+    expect(item['padding']).toBe('8px 4px')
     const label = ruleBody(css, '.bl-tab-bar__label')
     expect(label['text-overflow']).toBe('ellipsis')
     expect(label['white-space']).toBe('nowrap')
@@ -236,8 +236,8 @@ describe('anchored behaviour', () => {
     expect(wrap['mask-image']!.replace(/\s+/g, '')).toContain(
       'linear-gradient(toright,transparent,#00012px'
     )
-    expect(wrap.padding).toBe('4px 12px')
-    expect(wrap.display).toBe('block')
+    expect(wrap['padding']).toBe('4px 12px')
+    expect(wrap['display']).toBe('block')
     expect(ruleBody(css, '.bl-site-bar__brand')['text-overflow']).toBe('ellipsis')
     expect(ruleBody(css, '.bl-site-bar__brand')['min-width']).toBe('min(max-content, 7rem)')
     expect(ruleBody(css, '.bl-site-bar__brand > svg')['vertical-align']).toBe('middle')
@@ -248,7 +248,7 @@ describe('anchored behaviour', () => {
   it('hides the site bar nav below 40em only when a tab bar replaces it', () => {
     const css = read('site-bar')
     const narrow = ['@media (max-width: 39.99em)']
-    expect(ruleBody(css, 'html:has(.bl-tab-bar) .bl-site-bar__navwrap', narrow).display).toBe(
+    expect(ruleBody(css, 'html:has(.bl-tab-bar) .bl-site-bar__navwrap', narrow)['display']).toBe(
       'none'
     )
     expect(() => ruleBody(css, '.bl-site-bar__navwrap', narrow)).toThrow()
@@ -257,15 +257,15 @@ describe('anchored behaviour', () => {
   it('lets the site bar scroll away on short screens and zeroes the top scroll offset', () => {
     const css = read('site-bar')
     const short = ['@media (max-height: 30em)']
-    expect(ruleBody(css, '.bl-site-bar', short).position).toBe('static')
+    expect(ruleBody(css, '.bl-site-bar', short)['position']).toBe('static')
     expect(ruleBody(css, 'html', short)['--bl-scroll-offset-top']).toBe('0px')
   })
 
   it('dims a disabled button and blocks pointer events on aria-disabled', () => {
     const css = read('btn')
     const disabled = ruleBody(css, '.bl-btn:disabled')
-    expect(disabled.opacity).toBe('0.45')
-    expect(disabled.cursor).toBe('not-allowed')
+    expect(disabled['opacity']).toBe('0.45')
+    expect(disabled['cursor']).toBe('not-allowed')
     expect(ruleBody(css, ".bl-btn[aria-disabled='true']")['pointer-events']).toBe('none')
   })
 
@@ -278,7 +278,7 @@ describe('anchored behaviour', () => {
       '.bl-btn--danger:hover',
       '.bl-btn--ghost:hover'
     ]) {
-      expect(ruleBody(css, selector, gate).background).toBeDefined()
+      expect(ruleBody(css, selector, gate)['background']).toBeDefined()
       expect(() => ruleBody(css, selector)).toThrow()
     }
   })
@@ -296,9 +296,9 @@ describe('anchored behaviour', () => {
     const css = read('btn')
     const icon = ruleBody(css, '.bl-btn--icon')
     expect(icon['inline-size']).toBe('44px')
-    expect(icon.padding).toBe('0')
-    expect(ruleBody(css, '.bl-btn--pill.bl-btn--icon').padding).toBe('0')
-    expect(ruleBody(css, '.bl-btn--icon .bl-btn__icon').width).toBe('18px')
+    expect(icon['padding']).toBe('0')
+    expect(ruleBody(css, '.bl-btn--pill.bl-btn--icon')['padding']).toBe('0')
+    expect(ruleBody(css, '.bl-btn--icon .bl-btn__icon')['width']).toBe('18px')
   })
 
   it('marks pressed with an inset ring on every variant, not hue alone', () => {
@@ -306,7 +306,7 @@ describe('anchored behaviour', () => {
     expect(ruleBody(css, ".bl-btn[aria-pressed='true']")['box-shadow']).toBe(
       'inset 0 0 0 2px var(--bl-canvas)'
     )
-    expect(ruleBody(css, ".bl-btn--danger[aria-pressed='true']").background).toBe(
+    expect(ruleBody(css, ".bl-btn--danger[aria-pressed='true']")['background']).toBe(
       'var(--bl-danger)'
     )
     const tinted = ruleBody(css, ".bl-btn--ghost[aria-pressed='true']")
@@ -322,7 +322,7 @@ describe('anchored behaviour', () => {
       ".bl-btn--secondary[aria-pressed='true']:hover",
       ".bl-btn--ghost[aria-pressed='true']:hover"
     ]) {
-      expect(ruleBody(css, selector, gate).background).toBeDefined()
+      expect(ruleBody(css, selector, gate)['background']).toBeDefined()
       expect(() => ruleBody(css, selector)).toThrow()
     }
   })
@@ -331,16 +331,16 @@ describe('anchored behaviour', () => {
     const rule = ruleBody(read('btn'), ".bl-btn[aria-pressed='true']", [
       '@media (forced-colors: active)'
     ])
-    expect(rule.background).toBe('Highlight')
-    expect(rule.color).toBe('HighlightText')
+    expect(rule['background']).toBe('Highlight')
+    expect(rule['color']).toBe('HighlightText')
     expect(rule['forced-color-adjust']).toBe('none')
     expect(rule['box-shadow']).toBe('inset 0 0 0 2px HighlightText')
   })
 
   it('lets the meter field own the block margin and wrap its head', () => {
     const css = read('meter')
-    expect(ruleBody(css, '.bl-meter-field').margin).toBe('16px 0')
-    expect(ruleBody(css, '.bl-meter-field > .bl-meter').margin).toBe('0')
+    expect(ruleBody(css, '.bl-meter-field')['margin']).toBe('16px 0')
+    expect(ruleBody(css, '.bl-meter-field > .bl-meter')['margin']).toBe('0')
     expect(ruleBody(css, '.bl-meter-field__head')['flex-wrap']).toBe('wrap')
     expect(ruleBody(css, '.bl-meter-field__value')['font-variant-numeric']).toBe('tabular-nums')
   })
@@ -348,22 +348,22 @@ describe('anchored behaviour', () => {
   it('slides the switch thumb one 44px option per step', () => {
     const css = read('appearance')
     expect(
-      ruleBody(css, ".bl-appearance__track:has(input[value='light']:checked)::before").transform
+      ruleBody(css, ".bl-appearance__track:has(input[value='light']:checked)::before")['transform']
     ).toBe('translateX(44px)')
     expect(
-      ruleBody(css, ".bl-appearance__track:has(input[value='dark']:checked)::before").transform
+      ruleBody(css, ".bl-appearance__track:has(input[value='dark']:checked)::before")['transform']
     ).toBe('translateX(88px)')
   })
 
   it('lights an on LED in phosphor with a glow', () => {
     const on = ruleBody(read('led'), '.bl-led--on')
-    expect(on.background).toBe('var(--bl-phosphor)')
+    expect(on['background']).toBe('var(--bl-phosphor)')
     expect(on['box-shadow']).toBe('var(--bl-shadow-glow) var(--bl-phosphor)')
   })
 
   it('draws a trace-coloured focus outline on the switch track', () => {
     const focus = ruleBody(read('appearance'), '.bl-appearance__track:has(input:focus-visible)')
-    expect(focus.outline).toBe('2px solid var(--bl-trace)')
+    expect(focus['outline']).toBe('2px solid var(--bl-trace)')
   })
 })
 
@@ -452,7 +452,7 @@ describe('intrinsic wrapping (long tokens never widen the page)', () => {
       '100%'
     )
     const table = ruleBody(css, '.bl-prose table')
-    expect(table.display).toBe('block')
+    expect(table['display']).toBe('block')
     expect(table['overflow-x']).toBe('auto')
     expect(ruleBody(css, '.bl-prose hr')['border-top']).toContain('var(--bl-separator)')
     expect(ruleBody(css, '.bl-prose :not(pre) > code')['overflow-wrap']).toBe('anywhere')
@@ -475,8 +475,10 @@ describe('intrinsic wrapping (long tokens never widen the page)', () => {
     expect(segmented['column-gap']).toBe('4px')
     expect(segmented['border-radius']).toBe('17px')
     expect(ruleBody(seg, '.bl-segmented__item')['min-width']).toBe('44px')
-    expect(ruleBody(seg, '.bl-segmented__item::before').inset).toBe('-8px 0')
-    expect(ruleBody(seg, '.bl-segmented--compact .bl-segmented__item::before').inset).toBe('-9px 0')
+    expect(ruleBody(seg, '.bl-segmented__item::before')['inset']).toBe('-8px 0')
+    expect(ruleBody(seg, '.bl-segmented--compact .bl-segmented__item::before')['inset']).toBe(
+      '-9px 0'
+    )
     const log = ruleBody(read('log'), '.bl-log')
     expect(log['font-size']).toBe('0.75rem')
     expect(log['overflow-wrap']).toBe('anywhere')
@@ -606,15 +608,15 @@ describe('select chevron', () => {
 
   it('drops the native arrow only for a single-line select inside the wrapper', () => {
     const rule = ruleBody(css, '.bl-select-wrap > .bl-select:not([multiple], [size])')
-    expect(rule.appearance).toBe('none')
+    expect(rule['appearance']).toBe('none')
     expect(rule['padding-inline-end']).toBe('40px')
     expect(ruleBody(css, '.bl-select')['appearance']).toBeUndefined()
   })
 
   it('lays the wrapper out like the full-width select', () => {
     const wrap = ruleBody(css, '.bl-select-wrap')
-    expect(wrap.display).toBe('block')
-    expect(wrap.position).toBe('relative')
+    expect(wrap['display']).toBe('block')
+    expect(wrap['position']).toBe('relative')
     expect(wrap['min-width']).toBe('0')
     expect(wrap['--bl-chevron-mask']).toBeUndefined()
   })
@@ -626,7 +628,7 @@ describe('select chevron', () => {
         /^var\(\s*--bl-chevron-mask,\s*url\("data:image\/svg\+xml,.*"\)\s*\) center \/ contain no-repeat$/
       )
     }
-    expect(chevron.background).toBe('var(--bl-ink-2)')
+    expect(chevron['background']).toBe('var(--bl-ink-2)')
     expect(chevron['inset-inline-end']).toBe('16px')
     expect(chevron['pointer-events']).toBe('none')
     expect(chevron).not.toHaveProperty('right')
@@ -635,21 +637,21 @@ describe('select chevron', () => {
   it('brightens on hover only where hover exists, and dims when disabled', () => {
     const sel = '.bl-select-wrap:hover:not(:has(> .bl-select:disabled))::after'
     const hover = ruleBody(css, sel, ['@media (hover: hover)'])
-    expect(hover.background).toBe('var(--bl-ink-1)')
+    expect(hover['background']).toBe('var(--bl-ink-1)')
     expect(() => ruleBody(css, sel)).toThrow()
     const off = ruleBody(css, '.bl-select-wrap:has(> .bl-select:disabled)::after')
-    expect(off.opacity).toBe('0.45')
+    expect(off['opacity']).toBe('0.45')
   })
 
   it('keeps the chevron visible in forced colors', () => {
     const forced = ruleBody(css, '.bl-select-wrap::after', ['@media (forced-colors: active)'])
     expect(forced['forced-color-adjust']).toBe('none')
-    expect(forced.background).toBe('CanvasText')
+    expect(forced['background']).toBe('CanvasText')
     const off = ruleBody(css, '.bl-select-wrap:has(> .bl-select:disabled)::after', [
       '@media (forced-colors: active)'
     ])
-    expect(off.background).toBe('GrayText')
-    expect(off.opacity).toBe('1')
+    expect(off['background']).toBe('GrayText')
+    expect(off['opacity']).toBe('1')
   })
 })
 
@@ -686,7 +688,7 @@ describe('themed scrollbars', () => {
     expect(edge['inline-size']).toBe('max(0px, min(1px, 100vw - 100%))')
     expect(edge['pointer-events']).toBe('none')
     const base = readFileSync(new URL('../css/base.css', import.meta.url), 'utf8')
-    expect(ruleBody(base, 'html:dir(rtl)::after', supports).display).toBe('none')
+    expect(ruleBody(base, 'html:dir(rtl)::after', supports)['display']).toBe('none')
   })
 
   it('themes every scrolling rule in the library, except the hidden-scrollbar nav', () => {
@@ -718,11 +720,11 @@ describe('toggle', () => {
   })
   it('reads as disabled in forced colors whether on or off', () => {
     const forced = ['@media (forced-colors: active)']
-    expect(ruleBody(css, '.bl-toggle__input:disabled + .bl-toggle__track', forced).background).toBe(
-      'Canvas'
-    )
     expect(
-      ruleBody(css, '.bl-toggle__control:has(> .bl-toggle__input:disabled)', forced).color
+      ruleBody(css, '.bl-toggle__input:disabled + .bl-toggle__track', forced)['background']
+    ).toBe('Canvas')
+    expect(
+      ruleBody(css, '.bl-toggle__control:has(> .bl-toggle__input:disabled)', forced)['color']
     ).toBe('GrayText')
     // Declared after the :checked rules of equal specificity, so disabled wins when both match.
     const rules = parseRules(css).filter((r) => r.within.includes(forced[0]!))
@@ -733,14 +735,14 @@ describe('toggle', () => {
   })
   it('slides the thumb with translate, mirrored for RTL', () => {
     const thumb = '.bl-toggle__input:checked + .bl-toggle__track .bl-toggle__thumb'
-    expect(ruleBody(css, thumb).translate).toBe('calc(40px - 2px - 18px - 2px - 2px) 0')
-    expect(ruleBody(css, `${thumb}:dir(rtl)`).translate).toBe(
+    expect(ruleBody(css, thumb)['translate']).toBe('calc(40px - 2px - 18px - 2px - 2px) 0')
+    expect(ruleBody(css, `${thumb}:dir(rtl)`)['translate']).toBe(
       'calc((40px - 2px - 18px - 2px - 2px) * -1) 0'
     )
     const resting = ruleBody(css, '.bl-toggle__thumb')
     expect(resting['inset-inline-start']).toBe('2px')
-    expect(resting.transition).toContain('translate')
-    expect(resting.transition).not.toContain('inset-inline-start')
+    expect(resting['transition']).toContain('translate')
+    expect(resting['transition']).not.toContain('inset-inline-start')
   })
   it('gates hover behind (hover: hover)', () => {
     expect(css.replace(/@media \(hover: hover\)\s*\{[\s\S]*?\n {2}\}/, '')).not.toMatch(/:hover/)
@@ -787,33 +789,33 @@ describe('dialog', () => {
   const css = read('dialog')
   const OPEN = '.bl-dialog[open] .bl-dialog__panel:not(:where(.bl-dialog:not([open]) *))'
   it('transitions display only where overlay is supported', () => {
-    expect(ruleBody(css, '.bl-dialog', ['@supports (overlay: auto)']).transition).toMatch(
+    expect(ruleBody(css, '.bl-dialog', ['@supports (overlay: auto)'])['transition']).toMatch(
       /display .*allow-discrete.*overlay .*allow-discrete/s
     )
-    expect(ruleBody(css, '.bl-dialog').transition).toBeUndefined()
+    expect(ruleBody(css, '.bl-dialog')['transition']).toBeUndefined()
   })
   it('fades and moves the panel, never the dialog, so the hosted toaster is untouched', () => {
     const dialog = ruleBody(css, '.bl-dialog')
     for (const prop of ['opacity', 'scale', 'translate']) expect(dialog[prop]).toBeUndefined()
-    expect(ruleBody(css, '.bl-dialog[open]').opacity).toBeUndefined()
-    expect(ruleBody(css, '.bl-dialog', ['@supports (overlay: auto)']).transition).not.toMatch(
+    expect(ruleBody(css, '.bl-dialog[open]')['opacity']).toBeUndefined()
+    expect(ruleBody(css, '.bl-dialog', ['@supports (overlay: auto)'])['transition']).not.toMatch(
       /opacity|scale|translate/
     )
     const panel = ruleBody(css, '.bl-dialog__panel')
-    expect(panel.opacity).toBe('0')
-    expect(panel.scale).toBe('0.98')
-    expect(panel.transition).toMatch(/opacity.*scale.*translate/s)
-    expect(ruleBody(css, OPEN, ['@starting-style']).opacity).toBe('0')
+    expect(panel['opacity']).toBe('0')
+    expect(panel['scale']).toBe('0.98')
+    expect(panel['transition']).toMatch(/opacity.*scale.*translate/s)
+    expect(ruleBody(css, OPEN, ['@starting-style'])['opacity']).toBe('0')
   })
   it('keeps the backdrop fade, held through the exit where overlay is supported', () => {
-    expect(ruleBody(css, '.bl-dialog::backdrop').transition).toContain('opacity')
+    expect(ruleBody(css, '.bl-dialog::backdrop')['transition']).toContain('opacity')
     expect(
       ruleBody(css, '.bl-dialog::backdrop', ['@supports (overlay: auto)'])['transition-property']
     ).toBe('opacity, display, overlay')
   })
   it('ends the open state on opacity 1 and scale: none, not a transform', () => {
-    expect(ruleBody(css, OPEN).opacity).toBe('1')
-    expect(ruleBody(css, OPEN).scale).toBe('none')
+    expect(ruleBody(css, OPEN)['opacity']).toBe('1')
+    expect(ruleBody(css, OPEN)['scale']).toBe('none')
   })
   it('opens a panel wrapped in a form, but not one inside a closed nested dialog', () => {
     // descendant, not child: <dialog><form method="dialog"><div class="bl-dialog__panel">
@@ -826,14 +828,14 @@ describe('dialog', () => {
   })
   it('slides the bottom sheet in from below 40em', () => {
     const sheet = ['@media (max-width: 39.99em)']
-    expect(ruleBody(css, '.bl-dialog__panel', sheet).translate).toBe('0 100%')
-    expect(ruleBody(css, OPEN, sheet).translate).toBe('none')
+    expect(ruleBody(css, '.bl-dialog__panel', sheet)['translate']).toBe('0 100%')
+    expect(ruleBody(css, OPEN, sheet)['translate']).toBe('none')
   })
   it('drops movement under reduced motion', () => {
     const reduce = ['@media (prefers-reduced-motion: reduce)']
-    expect(ruleBody(css, '.bl-dialog__panel', reduce).translate).toBe('none')
-    expect(ruleBody(css, '.bl-dialog__panel', reduce).scale).toBe('none')
-    expect(ruleBody(css, OPEN, reduce).translate).toBe('none')
+    expect(ruleBody(css, '.bl-dialog__panel', reduce)['translate']).toBe('none')
+    expect(ruleBody(css, '.bl-dialog__panel', reduce)['scale']).toBe('none')
+    expect(ruleBody(css, OPEN, reduce)['translate']).toBe('none')
   })
   it('keeps the gutter padding in step with the scrollbar under reduced motion', () => {
     const reduce = ['@media (prefers-reduced-motion: reduce)']
@@ -867,8 +869,8 @@ describe('toast', () => {
     ).toContain('+ var(--bl-dialog-gutter, 0px)')
   })
   it('takes a leaving toast out of flow so the rest move instead of snapping', () => {
-    expect(ruleBody(css, '.bl-toaster__list').position).toBe('relative')
-    expect(ruleBody(css, '.bl-toast-leave-active').position).toBe('absolute')
+    expect(ruleBody(css, '.bl-toaster__list')['position']).toBe('relative')
+    expect(ruleBody(css, '.bl-toast-leave-active')['position']).toBe('absolute')
   })
   it('fades a leaving toast: one transition list covers the move class too', () => {
     const all = parseRules(css)
@@ -879,7 +881,7 @@ describe('toast', () => {
         r.within.join('|') === '@layer components'
     )
     expect(rule, 'enter, leave and move share one rule').toBeDefined()
-    const list = rule!.declarations.transition ?? ''
+    const list = rule!.declarations['transition'] ?? ''
     for (const prop of ['opacity', 'translate', 'transform']) expect(list).toContain(prop)
     // No later plain rule on the move class may replace that list for the leaver.
     const movers = all.filter(
@@ -895,22 +897,22 @@ describe('toast', () => {
     const rules = parseRules(css).filter(
       (r) => r.selectors.includes('.bl-toast-leave-active') && 'transform' in r.declarations
     )
-    expect(rules.map((r) => r.declarations.transform)).toContain('none !important')
+    expect(rules.map((r) => r.declarations['transform'])).toContain('none !important')
   })
   it('paints the phosphor mark only for success', () => {
-    expect(ruleBody(css, '.bl-toast__mark').background).not.toContain('phosphor')
-    expect(ruleBody(css, '.bl-toast--success .bl-toast__mark').background).toBe(
+    expect(ruleBody(css, '.bl-toast__mark')['background']).not.toContain('phosphor')
+    expect(ruleBody(css, '.bl-toast--success .bl-toast__mark')['background']).toBe(
       'var(--bl-phosphor)'
     )
     const forced = ['@media (forced-colors: active)']
-    expect(ruleBody(css, '.bl-toast--success .bl-toast__mark', forced).background).toBe(
+    expect(ruleBody(css, '.bl-toast--success .bl-toast__mark', forced)['background']).toBe(
       'CanvasText'
     )
   })
   it('drops movement under reduced motion', () => {
     const reduce = ['@media (prefers-reduced-motion: reduce)']
-    expect(ruleBody(css, '.bl-toast-enter-from', reduce).translate).toBe('none')
-    expect(ruleBody(css, '.bl-toast-leave-to', reduce).translate).toBe('none')
+    expect(ruleBody(css, '.bl-toast-enter-from', reduce)['translate']).toBe('none')
+    expect(ruleBody(css, '.bl-toast-leave-to', reduce)['translate']).toBe('none')
   })
 })
 
@@ -947,11 +949,11 @@ describe('theme transitions', () => {
         (r) =>
           r.selectors.join(', ') === selector &&
           r.within.join() === '@layer components' &&
-          r.declarations.transition
+          r.declarations['transition']
       )
       expect(rule, `${name} ${selector}`).toBeDefined()
       for (const prop of want)
-        expect(props(rule!.declarations.transition), `${name} ${selector}`).toContain(prop)
+        expect(props(rule!.declarations['transition']), `${name} ${selector}`).toContain(prop)
     }
   })
 
@@ -973,7 +975,7 @@ describe('eased state changes', () => {
     )!.declarations
 
   it('eases the LED colour and glow', () => {
-    const led = inLayer(read('led'), '.bl-led').transition
+    const led = inLayer(read('led'), '.bl-led')['transition']
     expect(props(led)).toEqual(expect.arrayContaining(['background-color', 'box-shadow']))
     expect(led).toContain('var(--bl-duration-fast)')
   })
@@ -981,23 +983,23 @@ describe('eased state changes', () => {
   it('eases EQ bar opacity and keeps the loop on the compositor', () => {
     const css = read('eq')
     const bar = inLayer(css, '.bl-eq__bar')
-    expect(props(bar.transition)).toEqual(expect.arrayContaining(['opacity', 'height']))
-    expect(bar.transition).not.toMatch(/\b500ms\b/)
+    expect(props(bar['transition'])).toEqual(expect.arrayContaining(['opacity', 'height']))
+    expect(bar['transition']).not.toMatch(/\b500ms\b/)
     expect(css).not.toContain('@property')
     const keyframes = css.slice(css.indexOf('@keyframes bl-eq'), css.indexOf('.bl-eq {'))
     expect(keyframes).toContain('transform: scaleY')
     // the loop exists only while active, so an idle EQ has no animation to wait on
-    expect(bar.animation).toBeUndefined()
+    expect(bar['animation']).toBeUndefined()
     expect(inLayer(css, '.bl-eq--active .bl-eq__bar')['animation-name']).toBe('bl-eq')
   })
 
   it('eases BlTable row highlights and the sort icon like the other rows', () => {
     const css = read('table')
-    const row = inLayer(css, '.bl-table tbody tr[data-action]').transition
+    const row = inLayer(css, '.bl-table tbody tr[data-action]')['transition']
     expect(row).toBe('background-color var(--bl-duration-fast) ease')
     const sticky = inLayer(css, '.bl-table--scroll tbody tr[data-action] > :first-child')
-    expect(props(sticky.transition)).toContain('background-color')
-    const icon = inLayer(css, '.bl-table__sort-icon').transition
+    expect(props(sticky['transition'])).toContain('background-color')
+    const icon = inLayer(css, '.bl-table__sort-icon')['transition']
     expect(props(icon)).toEqual(expect.arrayContaining(['transform', 'opacity']))
     expect(icon).toContain('var(--bl-duration-fast)')
     // the measuring pass still wins over every transition above
@@ -1013,7 +1015,7 @@ describe('eased state changes', () => {
   })
 
   it('eases pagination buttons', () => {
-    const button = inLayer(read('pagination'), '.bl-pagination button').transition
+    const button = inLayer(read('pagination'), '.bl-pagination button')['transition']
     expect(props(button)).toEqual(
       expect.arrayContaining(['background-color', 'border-color', 'color'])
     )
@@ -1022,21 +1024,21 @@ describe('eased state changes', () => {
 
   it('animates the toggle thumb border, and leaves reduced motion to base.css', () => {
     const css = read('toggle')
-    expect(props(inLayer(css, '.bl-toggle__thumb').transition)).toContain('border-color')
+    expect(props(inLayer(css, '.bl-toggle__thumb')['transition'])).toContain('border-color')
     expect(css).not.toContain('prefers-reduced-motion')
   })
 
   it('eases pressed and disabled buttons, and the active tab', () => {
-    expect(props(inLayer(read('btn'), '.bl-btn').transition)).toEqual(
+    expect(props(inLayer(read('btn'), '.bl-btn')['transition'])).toEqual(
       expect.arrayContaining(['box-shadow', 'opacity'])
     )
-    expect(props(inLayer(read('tab-bar'), '.bl-tab-bar__item').transition)).toContain(
+    expect(props(inLayer(read('tab-bar'), '.bl-tab-bar__item')['transition'])).toContain(
       'background-color'
     )
   })
 
   it('fills the meter with a token duration and an ease, not 100ms linear', () => {
-    const fill = inLayer(read('meter'), '.bl-meter__fill').transition
+    const fill = inLayer(read('meter'), '.bl-meter__fill')['transition']
     expect(fill).toContain('width var(--bl-duration-fast) var(--bl-ease-out)')
     expect(fill).not.toContain('linear')
   })

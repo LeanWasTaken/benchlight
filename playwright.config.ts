@@ -9,7 +9,7 @@ export default defineConfig({
   testDir: 'tests/visual',
   // Font rasterisation differs per OS, so each platform keeps its own baselines.
   snapshotPathTemplate: '{testDir}/__screenshots__/{arg}-{projectName}-{platform}{ext}',
-  forbidOnly: !!process.env.CI,
+  forbidOnly: !!process.env['CI'],
   use: { baseURL: 'http://localhost:4173', reducedMotion: 'reduce' },
   webServer: {
     command: 'bunx vite build playground && bunx vite preview playground --port 4173 --strictPort',

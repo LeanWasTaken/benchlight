@@ -1,4 +1,8 @@
+// @vitest-environment node
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
+import { tokensDeclaration } from '../scripts/lib/tokens-dts'
 import { colorNames, tokens } from '../tokens/tokens'
 
 describe('tokens', () => {
@@ -63,9 +67,19 @@ describe('tokens', () => {
   })
 
   it('ships a compiled dist/tokens.js identical to the source', async () => {
-    // @ts-expect-error -- generated JS, typed via tokens/index.ts
     const compiled = await import('../dist/tokens.js')
     expect(compiled.tokens).toEqual(tokens)
     expect(compiled.colorNames).toEqual(colorNames)
+  })
+
+  it('ships a fresh dist/tokens.d.ts declaring what tokens/index.ts exports', () => {
+    const dts = readFileSync(new URL('../dist/tokens.d.ts', import.meta.url), 'utf8')
+    expect(dts).toBe(tokensDeclaration(fileURLToPath(new URL('..', import.meta.url))))
+    const index = readFileSync(new URL('../tokens/index.ts', import.meta.url), 'utf8')
+    const reexported = [...index.matchAll(/\{([^}]*)\} from '\.\/tokens'/g)].flatMap((m) =>
+      m[1]!.split(',').map((name) => name.trim())
+    )
+    const declared = [...dts.matchAll(/^export (?:declare const|type) (\w+)/gm)].map((m) => m[1])
+    expect(declared.sort()).toEqual(reexported.sort())
   })
 })

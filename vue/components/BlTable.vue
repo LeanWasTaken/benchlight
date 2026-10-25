@@ -179,7 +179,7 @@
       :total="totalCount"
       :page-size="pageSize"
       :label="paginationLabels?.nav ?? text.pages(caption)"
-      :labels="paginationLabels"
+      :labels="paginationLabels!"
     />
   </div>
 </template>
@@ -199,7 +199,14 @@
     sortRows
   } from '../internal/table'
   import { mergeLabels } from '../internal/labels'
-  import type { LinkAs, LinkTo, PaginationLabels, TableColumn, TableLabels } from '../types'
+  import type {
+    LabelOverrides,
+    LinkAs,
+    LinkTo,
+    PaginationLabels,
+    TableColumn,
+    TableLabels
+  } from '../types'
 
   /**
    * Responsive table: stacks when its natural width does not fit (measured, not a breakpoint).
@@ -217,11 +224,15 @@
     manual?: boolean
     totalRows?: number
     totals?: Record<string, string | number>
-    rowLink?: (row: Row) => { as?: LinkAs; to?: LinkTo; href?: string }
+    rowLink?: (row: Row) => {
+      as?: LinkAs | undefined
+      to?: LinkTo | undefined
+      href?: string | undefined
+    }
     onRowActivate?: (row: Row) => void
     locale?: string
-    labels?: Partial<TableLabels>
-    paginationLabels?: Partial<PaginationLabels>
+    labels?: Partial<LabelOverrides<TableLabels>>
+    paginationLabels?: Partial<LabelOverrides<PaginationLabels>>
   }>()
   const sort = defineModel<{ key: string; dir: 'asc' | 'desc' } | null>('sort', { default: null })
   const page = defineModel<number>('page', { default: 1 })
@@ -344,7 +355,7 @@
   )
   const hasFooter = computed(
     () =>
-      !!slots.footer ||
+      !!slots['footer'] ||
       (props.manual
         ? !!props.totals && Object.keys(props.totals).length > 0
         : props.columns.some((c) => c.total))

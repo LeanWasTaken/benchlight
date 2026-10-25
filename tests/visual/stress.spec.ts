@@ -62,21 +62,21 @@ async function openVariant(page: Page, id: string, v: Variant): Promise<void> {
   await page.goto(`/stress.html?case=${id}`)
   await page.evaluate(() => document.fonts.ready)
   // Bite-proof hook: STRESS_BREAK deliberately breaks layout so passing checks can be shown to fail.
-  if (process.env.STRESS_BREAK === 'overflow')
+  if (process.env['STRESS_BREAK'] === 'overflow')
     await page.addStyleTag({
       content:
         '[data-box] > *, .bl-site-bar, .bl-tab-bar { width: 2000px !important; min-width: 2000px !important; }'
     })
-  if (process.env.STRESS_BREAK === 'stack')
+  if (process.env['STRESS_BREAK'] === 'stack')
     await page.addStyleTag({
       content:
         '[data-box] *, .bl-site-bar * { position: absolute !important; left: 0 !important; top: 0 !important; } .bl-site-bar, .bl-tab-bar { height: 300px !important; } .bl-tab-bar__item { margin-left: 2000px !important; }'
     })
-  if (process.env.STRESS_BREAK === 'small')
+  if (process.env['STRESS_BREAK'] === 'small')
     await page.addStyleTag({
       content: '.bl-site-bar__link { min-height: 20px !important; padding: 0 !important; }'
     })
-  if (process.env.STRESS_BREAK === 'overlap')
+  if (process.env['STRESS_BREAK'] === 'overlap')
     await page.addStyleTag({
       content:
         '.bl-section-head__eyebrow, .bl-section-head__heading, .bl-section-head__actions { position: absolute !important; left: 0 !important; top: 0 !important; width: 100px !important; height: 30px !important; }'

@@ -108,7 +108,7 @@ describe('small readouts', () => {
       setup:
         (props, { slots }) =>
         () =>
-          h('a', { href: props.to, 'data-router': '' }, slots.default?.())
+          h('a', { href: props.to, 'data-router': '' }, slots['default']?.())
     })
     const row = mount(BlSpecRow, { props: { label: 'L', value: 'v', as: Router, to: '/x' } })
     expect(row.find('a[data-router]').attributes('href')).toBe('/x')

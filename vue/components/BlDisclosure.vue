@@ -27,7 +27,7 @@
   }
 
   onMounted(() => {
-    if (!props.summary && !slots.summary)
+    if (!props.summary && !slots['summary'])
       warn('BlDisclosure: pass a summary prop or a summary slot.')
   })
 </script>

@@ -21,7 +21,7 @@ describe('ruleBody', () => {
     expect(ruleBody(sheet, '.a')).toEqual({ color: 'blue', background: 'url("a;b.png")' })
   })
   it('matches one entry of a selector list, including attribute selectors', () => {
-    expect(ruleBody(sheet, ".b:has(input[value='x'])").color).toBe('red')
+    expect(ruleBody(sheet, ".b:has(input[value='x'])")['color']).toBe('red')
   })
   it('scopes to @media and ignores other contexts', () => {
     expect(ruleBody(sheet, '.a', ['@media (min-width: 640px)'])).toEqual({ display: 'none' })

@@ -209,7 +209,7 @@ describe('useAppearance', () => {
 
 describe('useScrollLifted', () => {
   afterEach(() => {
-    delete (window as unknown as Record<string, unknown>).scrollY
+    delete (window as unknown as Record<string, unknown>)['scrollY']
   })
 
   const scrollTo = (y: number) => {

@@ -148,7 +148,7 @@ interface AppearanceLabels {
     auto: string;
     light: string;
     dark: string;
-    marks?: Partial<{
+    marks?: LabelOverrides<{
         auto: string;
         light: string;
         dark: string;
@@ -207,6 +207,14 @@ interface FollowScrollOptions {
     enabled?: MaybeRefOrGetter<boolean>;
     threshold?: number;
 }
+```
+
+### `LabelOverrides`
+
+```ts
+type LabelOverrides<T> = {
+    [K in keyof T]?: T[K] | undefined;
+};
 ```
 
 ### `LedState`
@@ -420,7 +428,7 @@ interface ToasterLabels {
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `labels` | `Partial<AppearanceLabels> \| undefined` | no |  |
+| `labels` | `Partial<LabelOverrides<AppearanceLabels>> \| undefined` | no |  |
 
 Slots: none
 Events: none
@@ -460,7 +468,7 @@ Exposed: none
 | --- | --- | --- | --- |
 | `description` | `string \| undefined` | no |  |
 | `dismissible` | `boolean \| undefined` | no | `true` |
-| `labels` | `Partial<DialogLabels> \| undefined` | no |  |
+| `labels` | `Partial<LabelOverrides<DialogLabels>> \| undefined` | no |  |
 | `open` | `boolean` | yes |  |
 | `title` | `string` | yes |  |
 
@@ -653,7 +661,7 @@ Exposed: none
 | prop | type | required | default |
 | --- | --- | --- | --- |
 | `label` | `string \| undefined` | no |  |
-| `labels` | `Partial<PaginationLabels> \| undefined` | no |  |
+| `labels` | `Partial<LabelOverrides<PaginationLabels>> \| undefined` | no |  |
 | `page` | `number \| undefined` | no | `1` |
 | `pageSize` | `number` | yes |  |
 | `siblings` | `number \| undefined` | no | `1` |
@@ -668,7 +676,7 @@ Exposed: none
 | prop | type | required | default |
 | --- | --- | --- | --- |
 | `as` | `LinkAs \| undefined` | no | `"a"` |
-| `labels` | `Partial<PrevNextLabels> \| undefined` | no |  |
+| `labels` | `Partial<LabelOverrides<PrevNextLabels>> \| undefined` | no |  |
 | `next` | `PrevNextItem \| null \| undefined` | no |  |
 | `prev` | `PrevNextItem \| null \| undefined` | no |  |
 
@@ -827,13 +835,13 @@ Exposed: none
 | `captionHidden` | `boolean \| undefined` | no |  |
 | `columns` | `TableColumn<Row>[]` | yes |  |
 | `compact` | `boolean \| undefined` | no |  |
-| `labels` | `Partial<TableLabels> \| undefined` | no |  |
+| `labels` | `Partial<LabelOverrides<TableLabels>> \| undefined` | no |  |
 | `locale` | `string \| undefined` | no |  |
 | `manual` | `boolean \| undefined` | no |  |
 | `onRowActivate` | `((row: Row) => void) \| undefined` | no |  |
 | `page` | `number \| undefined` | no | `1` |
 | `pageSize` | `number \| undefined` | no |  |
-| `paginationLabels` | `Partial<PaginationLabels> \| undefined` | no |  |
+| `paginationLabels` | `Partial<LabelOverrides<PaginationLabels>> \| undefined` | no |  |
 | `rowKey` | `string \| ((row: Row) => string \| number) \| undefined` | no |  |
 | `rowLink` | `((row: Row) => { as?: LinkAs \| undefined; to?: LinkTo \| undefined; href?: string \| undefined; }) \| undefined` | no |  |
 | `rows` | `Row[]` | yes |  |
@@ -872,7 +880,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `labels` | `Partial<ToasterLabels> \| undefined` | no |  |
+| `labels` | `Partial<LabelOverrides<ToasterLabels>> \| undefined` | no |  |
 | `max` | `number \| undefined` | no | `3` |
 
 Slots: none
