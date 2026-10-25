@@ -65,6 +65,16 @@ describe('forced colors', () => {
         ".bl-checkbox__input[aria-invalid='true']:not(:disabled) + .bl-checkbox__box"
       ]
     ],
+    [
+      'radio',
+      [
+        '.bl-radio__dot',
+        '.bl-radio__dot::after',
+        '.bl-radio__input:checked + .bl-radio__dot',
+        '.bl-radio__input:focus-visible + .bl-radio__dot',
+        '.bl-radio__input:disabled + .bl-radio__dot'
+      ]
+    ],
     ['disclosure', ['.bl-disclosure__chevron']],
     ['toast', ['.bl-toast', '.bl-toast__mark', '.bl-toast--danger .bl-toast__mark']]
   ]

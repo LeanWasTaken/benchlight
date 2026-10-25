@@ -55,6 +55,7 @@
 - `dist/modules/pagination.min.css`
 - `dist/modules/prev-next.min.css`
 - `dist/modules/prose.min.css`
+- `dist/modules/radio.min.css`
 - `dist/modules/readout.min.css`
 - `dist/modules/section-head.min.css`
 - `dist/modules/segmented.min.css`
@@ -96,6 +97,8 @@
 - `BlPagination`
 - `BlPrevNext`
 - `BlProse`
+- `BlRadio`
+- `BlRadioGroup`
 - `BlRange`
 - `BlReadout`
 - `BlSectionHead`
@@ -717,6 +720,35 @@ Slots: `default`
 Events: none
 Exposed: none
 
+### BlRadio
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `disabled` | `boolean \| undefined` | no |  |
+| `hint` | `string \| undefined` | no |  |
+| `label` | `string` | yes |  |
+| `value` | `string \| number` | yes |  |
+
+Slots: none
+Events: none
+Exposed: none
+
+### BlRadioGroup
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `disabled` | `boolean \| undefined` | no |  |
+| `error` | `string \| undefined` | no |  |
+| `hint` | `string \| undefined` | no |  |
+| `legend` | `string` | yes |  |
+| `modelValue` | `string \| number \| undefined` | no |  |
+| `name` | `string \| undefined` | no |  |
+| `required` | `boolean \| undefined` | no |  |
+
+Slots: `default`
+Events: `update:modelValue`
+Exposed: none
+
 ### BlRange
 
 | prop | type | required | default |
@@ -1065,6 +1097,12 @@ Exposed: none
 - `bl-prev-next__link--prev`
 - `bl-prev-next__title`
 - `bl-prose`
+- `bl-radio`
+- `bl-radio__control`
+- `bl-radio__dot`
+- `bl-radio__hint`
+- `bl-radio__input`
+- `bl-radio__label`
 - `bl-range`
 - `bl-range__value`
 - `bl-readout`

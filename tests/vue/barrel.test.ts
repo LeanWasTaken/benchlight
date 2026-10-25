@@ -22,6 +22,8 @@ const COMPONENTS = [
   'BlNavLink',
   'BlPrevNext',
   'BlProse',
+  'BlRadio',
+  'BlRadioGroup',
   'BlRange',
   'BlReadout',
   'BlSectionHead',

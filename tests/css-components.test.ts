@@ -72,6 +72,17 @@ const REQUIRED: Record<string, string[]> = {
     '.bl-checkbox__input:checked + .bl-checkbox__box',
     '.bl-checkbox__input:indeterminate + .bl-checkbox__box'
   ],
+  radio: [
+    '.bl-radio',
+    '.bl-radio__control',
+    '.bl-radio__input',
+    '.bl-radio__dot',
+    '.bl-radio__label',
+    '.bl-radio__hint',
+    '.bl-radio__input:checked + .bl-radio__dot',
+    '.bl-radio__input:focus-visible + .bl-radio__dot',
+    '.bl-radio__input:disabled + .bl-radio__dot'
+  ],
   'site-bar': [
     '.bl-site-bar[data-lifted]',
     '.bl-site-bar__brand',
@@ -835,6 +846,39 @@ describe('checkbox', () => {
     const at = (sel: string) => rules.findIndex((r) => r.selectors.includes(sel))
     expect(at('.bl-checkbox__input:disabled + .bl-checkbox__box')).toBeGreaterThan(
       at('.bl-checkbox__input:checked + .bl-checkbox__box')
+    )
+  })
+  it('gates hover behind (hover: hover)', () => {
+    expect(css.replace(/@media \(hover: hover\)\s*\{[\s\S]*?\n {2}\}/, '')).not.toMatch(/:hover/)
+  })
+})
+
+describe('radio', () => {
+  const css = read('radio')
+  const forced = ['@media (forced-colors: active)']
+  it('is a 44px row with a 22px round dot', () => {
+    expect(ruleBody(css, '.bl-radio__control')['min-block-size']).toBe('44px')
+    expect(ruleBody(css, '.bl-radio__dot')['inline-size']).toBe('22px')
+    expect(ruleBody(css, '.bl-radio__dot')['border-radius']).toBe('50%')
+  })
+  it('draws a centre disc when checked, never colour alone', () => {
+    expect(ruleBody(css, '.bl-radio__dot::after')['display']).toBe('none')
+    expect(ruleBody(css, '.bl-radio__dot::after')['border-radius']).toBe('50%')
+    expect(ruleBody(css, '.bl-radio__input:checked + .bl-radio__dot::after')['display']).toBe(
+      'block'
+    )
+  })
+  it('leaves invalid to the fieldset', () => {
+    expect(css).not.toContain('aria-invalid')
+  })
+  it('reads as disabled in forced colors whether checked or not', () => {
+    expect(ruleBody(css, '.bl-radio__input:disabled + .bl-radio__dot', forced)['background']).toBe(
+      'Canvas'
+    )
+    const rules = parseRules(css).filter((r) => r.within.includes(forced[0]!))
+    const at = (sel: string) => rules.findIndex((r) => r.selectors.includes(sel))
+    expect(at('.bl-radio__input:disabled + .bl-radio__dot')).toBeGreaterThan(
+      at('.bl-radio__input:checked + .bl-radio__dot')
     )
   })
   it('gates hover behind (hover: hover)', () => {
