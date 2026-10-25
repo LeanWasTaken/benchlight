@@ -4,6 +4,7 @@ import * as benchlight from '../../vue'
 const COMPONENTS = [
   'BlAppearanceSwitch',
   'BlButton',
+  'BlCheckbox',
   'BlColophon',
   'BlEqBars',
   'BlField',

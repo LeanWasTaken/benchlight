@@ -34,6 +34,7 @@
 - `dist/modules/appearance.min.css`
 - `dist/modules/base.min.css`
 - `dist/modules/btn.min.css`
+- `dist/modules/checkbox.min.css`
 - `dist/modules/colophon.min.css`
 - `dist/modules/dialog.min.css`
 - `dist/modules/disclosure.min.css`
@@ -74,6 +75,7 @@
 - `APPEARANCE_STORAGE_KEY`
 - `BlAppearanceSwitch`
 - `BlButton`
+- `BlCheckbox`
 - `BlColophon`
 - `BlDialog`
 - `BlDisclosure`
@@ -453,6 +455,23 @@ Exposed: none
 
 Slots: `icon`
 Events: none
+Exposed: none
+
+### BlCheckbox
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `disabled` | `boolean \| undefined` | no |  |
+| `error` | `string \| undefined` | no |  |
+| `hint` | `string \| undefined` | no |  |
+| `indeterminate` | `boolean \| undefined` | no | `false` |
+| `label` | `string` | yes |  |
+| `modelValue` | `boolean \| undefined` | no | `false` |
+| `name` | `string \| undefined` | no |  |
+| `value` | `string \| undefined` | no |  |
+
+Slots: none
+Events: `update:indeterminate`, `update:modelValue`
 Exposed: none
 
 ### BlColophon
@@ -946,6 +965,13 @@ Exposed: none
 - `bl-btn--pill`
 - `bl-btn--secondary`
 - `bl-btn__icon`
+- `bl-checkbox`
+- `bl-checkbox__box`
+- `bl-checkbox__control`
+- `bl-checkbox__error`
+- `bl-checkbox__hint`
+- `bl-checkbox__input`
+- `bl-checkbox__label`
 - `bl-col`
 - `bl-colophon`
 - `bl-colophon__inner`

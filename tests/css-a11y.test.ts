@@ -54,6 +54,17 @@ describe('forced colors', () => {
         ".bl-toggle__input[aria-invalid='true']:not(:disabled) + .bl-toggle__track"
       ]
     ],
+    [
+      'checkbox',
+      [
+        '.bl-checkbox__box',
+        '.bl-checkbox__box::after',
+        '.bl-checkbox__input:checked + .bl-checkbox__box',
+        '.bl-checkbox__input:indeterminate + .bl-checkbox__box',
+        '.bl-checkbox__error::before',
+        ".bl-checkbox__input[aria-invalid='true']:not(:disabled) + .bl-checkbox__box"
+      ]
+    ],
     ['disclosure', ['.bl-disclosure__chevron']],
     ['toast', ['.bl-toast', '.bl-toast__mark', '.bl-toast--danger .bl-toast__mark']]
   ]

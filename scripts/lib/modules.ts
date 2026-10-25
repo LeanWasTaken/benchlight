@@ -34,6 +34,7 @@ export const MODULES = {
   table: 'css/components/table.css',
   pagination: 'css/components/pagination.css',
   toggle: 'css/components/toggle.css',
+  checkbox: 'css/components/checkbox.css',
   media: 'css/components/media.css',
   disclosure: 'css/components/disclosure.css',
   dialog: 'css/components/dialog.css',

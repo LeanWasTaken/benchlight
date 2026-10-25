@@ -61,6 +61,17 @@ const REQUIRED: Record<string, string[]> = {
     '.bl-toggle__hint',
     '.bl-toggle__input:checked + .bl-toggle__track'
   ],
+  checkbox: [
+    '.bl-checkbox',
+    '.bl-checkbox__control',
+    '.bl-checkbox__input',
+    '.bl-checkbox__box',
+    '.bl-checkbox__label',
+    '.bl-checkbox__hint',
+    '.bl-checkbox__error',
+    '.bl-checkbox__input:checked + .bl-checkbox__box',
+    '.bl-checkbox__input:indeterminate + .bl-checkbox__box'
+  ],
   'site-bar': [
     '.bl-site-bar[data-lifted]',
     '.bl-site-bar__brand',
@@ -785,6 +796,46 @@ describe('toggle', () => {
     expect(resting['inset-inline-start']).toBe('2px')
     expect(resting['transition']).toContain('translate')
     expect(resting['transition']).not.toContain('inset-inline-start')
+  })
+  it('gates hover behind (hover: hover)', () => {
+    expect(css.replace(/@media \(hover: hover\)\s*\{[\s\S]*?\n {2}\}/, '')).not.toMatch(/:hover/)
+  })
+})
+
+describe('checkbox', () => {
+  const css = read('checkbox')
+  const forced = ['@media (forced-colors: active)']
+  it('is a 44px row with a 22px box', () => {
+    expect(ruleBody(css, '.bl-checkbox__control')['min-block-size']).toBe('44px')
+    expect(ruleBody(css, '.bl-checkbox__box')['inline-size']).toBe('22px')
+  })
+  it('draws a tick for checked and a dash for indeterminate, never colour alone', () => {
+    const tick = ruleBody(css, '.bl-checkbox__input:checked + .bl-checkbox__box::after')
+    expect(tick['rotate']).toBe('45deg')
+    expect(tick['border-block-end']).toContain('2px')
+    const dash = ruleBody(css, '.bl-checkbox__input:indeterminate + .bl-checkbox__box::after')
+    expect(dash['block-size']).toBe('2px')
+    const rules = parseRules(css).filter((r) => r.within.join() === '@layer components')
+    const at = (sel: string) => rules.findIndex((r) => r.selectors.includes(sel))
+    expect(at('.bl-checkbox__input:indeterminate + .bl-checkbox__box::after')).toBeGreaterThan(
+      at('.bl-checkbox__input:checked + .bl-checkbox__box::after')
+    )
+  })
+  it('keeps the invalid ring off a disabled checkbox, in both modes', () => {
+    const sel = ".bl-checkbox__input[aria-invalid='true']:not(:disabled) + .bl-checkbox__box"
+    expect(ruleBody(css, sel)['box-shadow']).toContain('var(--bl-danger)')
+    expect(ruleBody(css, sel, forced)['box-shadow']).toContain('CanvasText')
+    expect(css).not.toMatch(/aria-invalid='true'\](?!:not\(:disabled\))/)
+  })
+  it('reads as disabled in forced colors whether marked or not', () => {
+    expect(
+      ruleBody(css, '.bl-checkbox__input:disabled + .bl-checkbox__box', forced)['background']
+    ).toBe('Canvas')
+    const rules = parseRules(css).filter((r) => r.within.includes(forced[0]!))
+    const at = (sel: string) => rules.findIndex((r) => r.selectors.includes(sel))
+    expect(at('.bl-checkbox__input:disabled + .bl-checkbox__box')).toBeGreaterThan(
+      at('.bl-checkbox__input:checked + .bl-checkbox__box')
+    )
   })
   it('gates hover behind (hover: hover)', () => {
     expect(css.replace(/@media \(hover: hover\)\s*\{[\s\S]*?\n {2}\}/, '')).not.toMatch(/:hover/)
