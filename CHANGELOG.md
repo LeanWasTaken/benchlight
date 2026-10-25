@@ -1,20 +1,54 @@
 # Changelog
 
-## Unreleased
+## 0.8.0 - 2026-10-26
+
+Form controls and one validation convention, settled before the v1 API freeze, plus the npm-ready
+package (MIT, explicit exports). Benchlight renders an invalid state it is given; it never decides
+what is valid. Three changes break: the BlInput `type` narrowing (type-level only), the required
+`invalid` member of `FieldContext` (type-level only) and the subpaths that are no longer
+exported. Use the table below to migrate.
+
+### Migration
+
+<!-- prettier-ignore -->
+| Before | After |
+| --- | --- |
+| `<BlInput type="number">`, `type="date"` and other non-text types | use a native `<input>` or a dedicated component; `number` is left out because the model is a string. Type-level only: any string still works at runtime |
+| `provide(FIELD_CONTEXT, { id, describedBy })` | add `invalid: computed(() => false)`. Type-level only: at runtime the built-ins read `field?.invalid?.value === true`, so an older provider still works |
+| `benchlight/dist/tokens.js` | `benchlight/tokens` |
+| `benchlight/fonts/full/*`, `benchlight/fonts/OFL-*.txt`, `benchlight/js/prepaint-script.d.mts` | not exported any more (still in the package); use `benchlight/fonts/subset/*` and `benchlight/js/prepaint-script.mjs` |
+
+### Added
+
+- New components: BlTextarea (BlInput's multi-line sibling: no wrapper, every attr on the
+  `<textarea>`, `rows` defaults to 4, vertical resize only, wired by BlField), BlCheckbox
+  (`v-model` plus `v-model:indeterminate`; tick, dash and empty shapes), and BlRadioGroup with
+  BlRadio (a `fieldset role="radiogroup"` with a `legend` that owns the model and the `name`;
+  native arrow-key and Tab behaviour; `required`; `bl-fieldset--inline`).
+- New CSS modules `checkbox`, `radio` and `fieldset` (`.bl-fieldset`, `__legend`, `__hint`,
+  `__error`, `--invalid`, `--inline`), each with a `dist/modules/*.min.css`. `radio` needs
+  `fieldset`; `fieldset` alone covers a CSS-only checkbox group (README recipe).
+- Validation convention: an `error` string marks a control invalid and renders an error line
+  with a leading "!" mark after the hint; the control gets `aria-invalid="true"` and the error id
+  after the hint id in `aria-describedby`, and its border thickens, so the state never rests on
+  colour. BlField carries it for BlInput, BlTextarea, BlSelect and BlRange; the self-labelled
+  BlToggle, BlCheckbox and BlRadioGroup take their own `error` prop (`.bl-toggle__error`,
+  `.bl-checkbox__error`, `.bl-fieldset__error`). A consumer `aria-invalid` wins. Errors are not
+  live regions; add `role="alert"` where you want one announced.
+- BlCheckbox and BlRadioGroup restore their mount-time value on a native form reset, as BlToggle
+  does.
+
+### Changed
 
 - BlField takes an `error` prop. When set (a non-empty string) the field is invalid: it adds
-  `.bl-field--invalid` and a `p.bl-field__error` after the hint, and BlInput, BlSelect and BlRange
-  set `aria-invalid="true"` and add the error id to `aria-describedby` (a consumer `aria-invalid`
+  `.bl-field--invalid` and a `p.bl-field__error` after the hint, and BlInput, BlTextarea, BlSelect
+  and BlRange set `aria-invalid="true"` and add the error id to `aria-describedby` (a consumer `aria-invalid`
   wins). The error is not a live region. The slot props gain `invalid`.
-- `FieldContext` gains `invalid`, and `describedBy` is now the hint id then the error id. A
-  provider written before this still works: built-ins read `invalid` defensively.
+- `FieldContext` gains a required `invalid`, and `describedBy` is now the hint id then the error
+  id. A provider written before this still works at runtime, because built-ins read `invalid`
+  defensively; under TypeScript it must add `invalid` (see Migration).
 - BlInput `type` is narrowed to `'text' | 'email' | 'password' | 'search' | 'tel' | 'url'`.
-  Type-level only; any string still works at runtime.
-
-  | Before                                                   | After                                                                                               |
-  | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-  | `<BlInput type="number">`, `type="date"` and other types | use a native `<input>` or a dedicated component; `number` is left out because the model is a string |
-
+  Type-level only; any string still works at runtime (see Migration).
 - The size cap on `dist/benchlight.min.css` is removed; the font subset cap stays.
 - `package.json` is no longer `private`, and the README installs from npm (`npm install benchlight`).
 - CI runs `publint` and `@arethetypeswrong/cli` (`bun run lint:package`) against the packed tarball.

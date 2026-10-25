@@ -1190,8 +1190,10 @@ Exposed: none
 - `bl-toggle__track`
 
 ## Hook-only classes
+- `bl-field--invalid`
 - `bl-pagination__next`
 - `bl-pagination__prev`
+- `bl-radio-group`
 - `bl-range__input`
 
 ## Script-set data attributes

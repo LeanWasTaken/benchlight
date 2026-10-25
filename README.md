@@ -182,8 +182,8 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
   `useScrollLifted(threshold)` takes a number, `false`, a ref or a getter. Both it and
   `useReducedMotion()` return a ref that is `false` on the server and until mounted.
 - **Fields:** BlField passes its `id` and hint id to BlInput, BlTextarea, BlSelect and BlRange
-  automatically. Your own `id` on the control wins. Your own `aria-describedby` is merged: the hint id comes
-  first, then yours, without duplicates. BlRange forwards fallthrough attrs (`id`, `aria-label`,
+  automatically. Your own `id` on the control wins. Your own `aria-describedby` is merged: the
+  hint id comes first, then the error id, then yours, without duplicates. BlRange forwards fallthrough attrs (`id`, `aria-label`,
   `disabled`, `name`, listeners) to the slider, which carries the class `bl-range__input`; `class`
   and `style` stay on the wrapper. To override the id, set `id` on BlField instead of on the
   control, so the `<label for>` still matches. For other controls, use the slot props
