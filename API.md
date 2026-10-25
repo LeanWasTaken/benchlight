@@ -197,6 +197,7 @@ interface DialogLabels {
 interface FieldContext {
     id: Readonly<Ref<string>>;
     describedBy: Readonly<Ref<string | undefined>>;
+    invalid: Readonly<Ref<boolean>>;
 }
 ```
 
@@ -502,12 +503,13 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `error` | `string \| undefined` | no |  |
 | `hint` | `string \| undefined` | no |  |
 | `id` | `string \| undefined` | no |  |
 | `label` | `string` | yes |  |
 
 Slots: `default`
-Slot props: `default` `{ id: string; describedBy: string | undefined; }`
+Slot props: `default` `{ id: string; describedBy: string | undefined; invalid: boolean; }`
 Events: none
 Exposed: none
 
@@ -541,7 +543,7 @@ Exposed: none
 | prop | type | required | default |
 | --- | --- | --- | --- |
 | `modelValue` | `string \| undefined` | no | `""` |
-| `type` | `string \| undefined` | no | `"text"` |
+| `type` | `"search" \| "text" \| "email" \| "password" \| "tel" \| "url" \| undefined` | no | `"text"` |
 
 Slots: none
 Events: `update:modelValue`
@@ -956,6 +958,7 @@ Exposed: none
 - `bl-eq--active`
 - `bl-eq__bar`
 - `bl-field`
+- `bl-field__error`
 - `bl-field__hint`
 - `bl-field__label`
 - `bl-index`

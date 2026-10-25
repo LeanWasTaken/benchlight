@@ -35,6 +35,14 @@ describe('forced colors', () => {
     ['eq', ['.bl-eq__bar', '.bl-eq--active .bl-eq__bar']],
     ['msg', ['.bl-msg--success::before', '.bl-msg--danger::before']],
     ['segmented', [".bl-segmented__item[aria-pressed='true']"]],
+    [
+      'field',
+      [
+        '.bl-field__error::before',
+        ".bl-input[aria-invalid='true']:not(:disabled)",
+        ".bl-select[aria-invalid='true']:not(:disabled)"
+      ]
+    ],
     ['toggle', ['.bl-toggle__track', '.bl-toggle__input:checked + .bl-toggle__track']],
     ['disclosure', ['.bl-disclosure__chevron']],
     ['toast', ['.bl-toast', '.bl-toast__mark', '.bl-toast--danger .bl-toast__mark']]

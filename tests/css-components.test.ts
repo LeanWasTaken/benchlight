@@ -292,6 +292,21 @@ describe('anchored behaviour', () => {
     }
   })
 
+  it('styles the field error line and invalid controls without relying on colour', () => {
+    const css = read('field')
+    const error = ruleBody(css, '.bl-field__error')
+    expect(error['color']).toBe('var(--bl-danger)')
+    expect(error['display']).toBe('flex')
+    const mark = ruleBody(css, '.bl-field__error::before')
+    expect(mark['content']).toContain('!')
+    expect(mark['border-radius']).toBe('50%')
+    for (const control of ['.bl-input', '.bl-select']) {
+      const invalid = ruleBody(css, `${control}[aria-invalid='true']:not(:disabled)`)
+      expect(invalid['border-width']).toBe('2px')
+      expect(invalid['border-color']).toBe('var(--bl-danger)')
+    }
+  })
+
   it('makes the icon button a 44px square, a circle with pill', () => {
     const css = read('btn')
     const icon = ruleBody(css, '.bl-btn--icon')

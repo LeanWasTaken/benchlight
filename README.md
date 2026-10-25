@@ -187,8 +187,22 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
   `disabled`, `name`, listeners) to the slider, which carries the class `bl-range__input`; `class`
   and `style` stay on the wrapper. To override the id, set `id` on BlField instead of on the
   control, so the `<label for>` still matches. For other controls, use the slot props
-  `{ id, describedBy }` or `inject(FIELD_CONTEXT)` from `benchlight/vue`, which holds
-  `{ id, describedBy }` as refs.
+  `{ id, describedBy, invalid }` or `inject(FIELD_CONTEXT)` from `benchlight/vue`, which holds
+  `{ id, describedBy, invalid }` as refs. `describedBy` is the hint id then the error id,
+  space-joined. Read `invalid` as `field?.invalid?.value === true`, so a control also works under
+  a provider that predates it.
+- **Field errors:** set `error` on BlField to mark it invalid; marking it invalid is your job,
+  Benchlight only renders it. An empty string is not an error. BlField adds
+  `.bl-field--invalid` and a `p.bl-field__error` (id `<id>-error`) after the hint; BlInput,
+  BlSelect and BlRange get `aria-invalid="true"` and the error id in `aria-describedby`. Your own
+  `aria-invalid` on the control wins. The error is not a live region, so it is not announced as
+  you type; add `role="alert"` yourself where you want an announcement. The error line starts
+  with a "!" mark and the control border thickens, so the state does not rest on colour. In plain
+  HTML, `[aria-invalid='true']` on `.bl-input` or `.bl-select` gets the same styling. Native
+  `required` passes through to the control; there is no built-in required marker.
+- **BlInput:** renders a bare `<input>` with no wrapper, so `class`, `style` and every attribute
+  land on the input. `type` is `'text' | 'email' | 'password' | 'search' | 'tel' | 'url'`
+  (default `'text'`); `number` is left out because the model is a string.
 - **Links:** `LinkProps` precedence: `as` a component (e.g. RouterLink) receives `to` if set,
   otherwise `href`; `as` `'a'` (the default when `to` or `href` is set) receives `href`, else a
   string `to`; `as` any other tag receives neither. Misuse logs a `[benchlight]` warning in

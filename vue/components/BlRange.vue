@@ -43,6 +43,7 @@
     )
     return {
       id: field?.id.value,
+      'aria-invalid': field?.invalid?.value === true ? 'true' : undefined,
       ...rest,
       'aria-describedby': mergeDescribedBy(field?.describedBy.value, attrs['aria-describedby'])
     }

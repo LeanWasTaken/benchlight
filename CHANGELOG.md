@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- BlField takes an `error` prop. When set (a non-empty string) the field is invalid: it adds
+  `.bl-field--invalid` and a `p.bl-field__error` after the hint, and BlInput, BlSelect and BlRange
+  set `aria-invalid="true"` and add the error id to `aria-describedby` (a consumer `aria-invalid`
+  wins). The error is not a live region. The slot props gain `invalid`.
+- `FieldContext` gains `invalid`, and `describedBy` is now the hint id then the error id. A
+  provider written before this still works: built-ins read `invalid` defensively.
+- BlInput `type` is narrowed to `'text' | 'email' | 'password' | 'search' | 'tel' | 'url'`.
+  Type-level only; any string still works at runtime.
+
+  | Before                                                   | After                                                                                               |
+  | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+  | `<BlInput type="number">`, `type="date"` and other types | use a native `<input>` or a dedicated component; `number` is left out because the model is a string |
+
 - The size cap on `dist/benchlight.min.css` is removed; the font subset cap stays.
 - `package.json` is no longer `private`, and the README installs from npm (`npm install benchlight`).
 - CI runs `publint` and `@arethetypeswrong/cli` (`bun run lint:package`) against the packed tarball.

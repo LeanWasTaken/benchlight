@@ -67,6 +67,7 @@ export interface PrevNextLabels {
 export interface FieldContext {
   id: Readonly<Ref<string>>
   describedBy: Readonly<Ref<string | undefined>>
+  invalid: Readonly<Ref<boolean>>
 }
 
 // Provided by BlField; form controls (Benchlight's or your own) inject it for id and hint wiring.
