@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- The size cap on `dist/benchlight.min.css` is removed; the font subset cap stays.
 - `package.json` is no longer `private`, and the README installs from npm (`npm install benchlight`).
 - CI runs `publint` and `@arethetypeswrong/cli` (`bun run lint:package`) against the packed tarball.
 - License is now MIT, with a `LICENSE` file; `package.json` gains `author`, `repository`,

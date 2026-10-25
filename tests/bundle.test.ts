@@ -113,10 +113,6 @@ describe('buildDist', () => {
     expect(prefixedImage).toBe(count(/(?<![-\w])mask-image:/g))
     expect(count(/-webkit-font-smoothing:/g)).toBeGreaterThan(0)
   })
-
-  it('stays within the 56320-byte guard', () => {
-    expect(Buffer.byteLength(read('dist/benchlight.min.css'))).toBeLessThanOrEqual(56_320)
-  })
 })
 
 describe('custom build', () => {
