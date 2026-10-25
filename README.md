@@ -181,8 +181,8 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
   reader is at the bottom. An enabled follower starts at the bottom on mount.
   `useScrollLifted(threshold)` takes a number, `false`, a ref or a getter. Both it and
   `useReducedMotion()` return a ref that is `false` on the server and until mounted.
-- **Fields:** BlField passes its `id` and hint id to BlInput, BlSelect and BlRange automatically.
-  Your own `id` on the control wins. Your own `aria-describedby` is merged: the hint id comes
+- **Fields:** BlField passes its `id` and hint id to BlInput, BlTextarea, BlSelect and BlRange
+  automatically. Your own `id` on the control wins. Your own `aria-describedby` is merged: the hint id comes
   first, then yours, without duplicates. BlRange forwards fallthrough attrs (`id`, `aria-label`,
   `disabled`, `name`, listeners) to the slider, which carries the class `bl-range__input`; `class`
   and `style` stay on the wrapper. To override the id, set `id` on BlField instead of on the
@@ -194,15 +194,20 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
 - **Field errors:** set `error` on BlField to mark it invalid; marking it invalid is your job,
   Benchlight only renders it. An empty string is not an error. BlField adds
   `.bl-field--invalid` and a `p.bl-field__error` (id `<id>-error`) after the hint; BlInput,
-  BlSelect and BlRange get `aria-invalid="true"` and the error id in `aria-describedby`. Your own
-  `aria-invalid` on the control wins. The error is not a live region, so it is not announced as
-  you type; add `role="alert"` yourself where you want an announcement. The error line starts
+  BlTextarea, BlSelect and BlRange get `aria-invalid="true"` and the error id in
+  `aria-describedby`. Your own `aria-invalid` on the control wins. The error is not a live region,
+  so it is not announced as you type; add `role="alert"` yourself where you want an announcement. The error line starts
   with a "!" mark and the control border thickens, so the state does not rest on colour. In plain
-  HTML, `[aria-invalid='true']` on `.bl-input` or `.bl-select` gets the same styling. Native
-  `required` passes through to the control; there is no built-in required marker.
+  HTML, `[aria-invalid='true']` on `.bl-input`, `.bl-textarea` or `.bl-select` gets the same
+  styling. Native `required` passes through to the control; there is no built-in required marker.
+  BlToggle, BlCheckbox and BlRadioGroup carry their own label, so they take their own `error`
+  prop with the same output (`.bl-toggle__error`, `.bl-checkbox__error`, `.bl-fieldset__error`).
 - **BlInput:** renders a bare `<input>` with no wrapper, so `class`, `style` and every attribute
   land on the input. `type` is `'text' | 'email' | 'password' | 'search' | 'tel' | 'url'`
   (default `'text'`); `number` is left out because the model is a string.
+- **BlTextarea:** the multi-line sibling of BlInput, with the same contract: no wrapper, every
+  attribute (including `class` and `style`) on the `<textarea>`, a string `v-model`, and the
+  field wiring above. `rows` defaults to 4; it resizes vertically only and does not autosize.
 - **Links:** `LinkProps` precedence: `as` a component (e.g. RouterLink) receives `to` if set,
   otherwise `href`; `as` `'a'` (the default when `to` or `href` is set) receives `href`, else a
   string `to`; `as` any other tag receives neither. Misuse logs a `[benchlight]` warning in
@@ -330,8 +335,11 @@ An on/off switch on a native checkbox (`role="switch"`). Full prop list is in [A
 </div>
 ```
 
-- Props: `v-model` (boolean), `label`, `hint`, `disabled`, `name`, `value`. With `name`, the form
-  posts `name=value` only while the switch is on.
+- Props: `v-model` (boolean), `label`, `hint`, `error`, `disabled`, `name`, `value`. With `name`,
+  the form posts `name=value` only while the switch is on.
+- `error` marks the switch invalid: `aria-invalid="true"` on the input, a
+  `span.bl-toggle__error` after the hint, and its id after the hint id in `aria-describedby`.
+  In plain HTML, `aria-invalid="true"` on `.bl-toggle__input` draws the invalid track.
 - The hint stays out of the accessible name: it sits outside the `label` and is wired up with
   `aria-describedby`. A consumer `aria-describedby` is merged with the hint id.
 - Uncontrolled without `v-model`: the toggle keeps its own state; `:model-value` without a
@@ -343,6 +351,100 @@ An on/off switch on a native checkbox (`role="switch"`). Full prop list is in [A
   `data-*`, `aria-*`) goes on the `input`.
 - The thumb moves with a logical inset, so RTL flips it. "On" is shown by position and an inner mark,
   not colour alone.
+
+## BlCheckbox
+
+A checkbox drawn over a native `<input type="checkbox">`, shaped like BlToggle. Full prop list is
+in [API.md](API.md).
+
+```vue
+<BlCheckbox v-model="backups" label="Nightly backups" hint="Runs at 03:00 local time" />
+<BlCheckbox v-model="all" v-model:indeterminate="some" label="All channels" />
+```
+
+```html
+<div class="bl-checkbox">
+  <label class="bl-checkbox__control">
+    <input class="bl-checkbox__input" type="checkbox" aria-describedby="backups-hint" />
+    <span class="bl-checkbox__box" aria-hidden="true"></span>
+    <span class="bl-checkbox__label">Nightly backups</span>
+  </label>
+  <span id="backups-hint" class="bl-checkbox__hint">Runs at 03:00 local time</span>
+</div>
+```
+
+- Props: `v-model` (boolean), `v-model:indeterminate` (boolean), `label`, `hint`, `error`,
+  `disabled`, `name`, `value`. The box shows a tick when checked, a dash when indeterminate and
+  nothing when unchecked, so the state never rests on colour.
+- `indeterminate`: bind `v-model:indeterminate` and handle `update:indeterminate`. A click clears
+  the dash natively and the checkbox emits `update:indeterminate` with `false`; setting it back to
+  `true` restores the dash. If the parent ignores that update, setting `true` again is a no-op
+  until the value changes.
+- `indeterminate` is a DOM property, not an attribute. Server-rendered HTML shows no dash until the
+  component mounts, and in CSS-only use you set it from script
+  (`input.indeterminate = true`); the box draws the dash from `:indeterminate`.
+- `error`, the hint, attrs and form reset work as on BlToggle: `class` and `style` go on the root,
+  every other attribute on the input, the hint and error stay out of the accessible name, and a
+  native form reset restores the value the checkbox had when it mounted.
+- Not for use inside BlField. For a group, see the fieldset recipe below.
+
+## BlRadioGroup and BlRadio
+
+A `fieldset` with a `legend` that owns the model and the `name`; each BlRadio is one option.
+
+```vue
+<BlRadioGroup v-model="band" legend="Band" hint="Arrow keys move between options.">
+  <BlRadio label="2.4 GHz" value="2.4" hint="Longer range" />
+  <BlRadio label="5 GHz" value="5" />
+</BlRadioGroup>
+```
+
+```html
+<fieldset class="bl-fieldset bl-radio-group" role="radiogroup" aria-describedby="band-hint">
+  <legend class="bl-fieldset__legend">Band</legend>
+  <p id="band-hint" class="bl-fieldset__hint">Arrow keys move between options.</p>
+  <div class="bl-radio">
+    <label class="bl-radio__control">
+      <input class="bl-radio__input" type="radio" name="band" value="2.4" />
+      <span class="bl-radio__dot" aria-hidden="true"></span>
+      <span class="bl-radio__label">2.4 GHz</span>
+    </label>
+  </div>
+</fieldset>
+```
+
+- BlRadioGroup props: `v-model` (`string | number`), `legend`, `hint`, `error`, `disabled`,
+  `required`, `name` (generated when omitted). All its attrs, `class` and `style` included, go on
+  the fieldset. Add `bl-fieldset--inline` to lay the options out in a row.
+- BlRadio props: `label`, `value`, `hint`, `disabled`. Its attrs go on the `<input>`. It belongs
+  inside a BlRadioGroup; on its own it warns in development and renders a plain radio from its
+  attrs.
+- Keyboard is the native one: Tab enters and leaves the group at the checked radio, and the arrow
+  keys move and select.
+- `error` adds `.bl-fieldset--invalid` (a bar down the leading edge), a `p.bl-fieldset__error`,
+  `aria-invalid="true"` on the fieldset and the error id in its `aria-describedby`. Each radio's
+  `aria-describedby` holds only its own hint, so arrow-key moves do not re-read the group message.
+- `required` puts `required` on every radio and `aria-required` on the fieldset. A native form
+  reset restores the value the group had when it mounted.
+- The `radio` module needs the `fieldset` module.
+
+### Checkbox groups (CSS only)
+
+There is no checkbox group component. Wrap BlCheckbox children (or the plain markup above) in the
+`fieldset` classes:
+
+```html
+<fieldset class="bl-fieldset bl-fieldset--invalid" aria-describedby="topics-hint topics-error">
+  <legend class="bl-fieldset__legend">Notify me about</legend>
+  <p id="topics-hint" class="bl-fieldset__hint">Pick any.</p>
+  <p id="topics-error" class="bl-fieldset__error">Choose at least one topic.</p>
+  <!-- BlCheckbox children, or .bl-checkbox markup -->
+</fieldset>
+```
+
+`bl-fieldset--invalid` and the error line are yours to add and remove. Like every error in
+Benchlight, `.bl-fieldset__error` is not a live region; add `role="alert"` where you want it
+announced.
 
 ## BlMedia
 
@@ -576,38 +678,41 @@ Custom properties a consumer may set. API.md lists them under "CSS hooks".
 `dist/modules/<module>.min.css` takes the module name, which differs from the component name in
 places. `tokens` always comes first; `base`, `type`, `motion`, `layout` and `tints` are shared.
 
-| Component                           | Module         |
-| ----------------------------------- | -------------- |
-| BlSiteBar, BlNavLink                | `site-bar`     |
-| BlTabBar, BlTabBarItem              | `tab-bar`      |
-| BlColophon                          | `colophon`     |
-| BlSkipLink                          | `skip-link`    |
-| BlAppearanceSwitch                  | `appearance`   |
-| BlSegmented                         | `segmented`    |
-| BlButton                            | `btn`          |
-| BlField, BlInput, BlSelect, BlRange | `field`        |
-| BlLinkArrow                         | `link-arrow`   |
-| BlSpecPanel, BlSpecRow              | `spec-panel`   |
-| BlTelemetry, BlTelemetryCell        | `telemetry`    |
-| BlLed                               | `led`          |
-| BlEqBars                            | `eq`           |
-| BlMarquee                           | `marquee`      |
-| BlReadout                           | `readout`      |
-| BlMeter                             | `meter`        |
-| BlMsg                               | `msg`          |
-| BlLog                               | `log`          |
-| BlSectionHead                       | `section-head` |
-| BlMeta                              | `meta`         |
-| BlIndex, BlIndexRow                 | `index-row`    |
-| BlPrevNext                          | `prev-next`    |
-| BlProse                             | `prose`        |
-| BlTable                             | `table`        |
-| BlPagination                        | `pagination`   |
-| BlToggle                            | `toggle`       |
-| BlMedia                             | `media`        |
-| BlDisclosure                        | `disclosure`   |
-| BlDialog                            | `dialog`       |
-| BlToaster                           | `toast`        |
+| Component                                       | Module                     |
+| ----------------------------------------------- | -------------------------- |
+| BlSiteBar, BlNavLink                            | `site-bar`                 |
+| BlTabBar, BlTabBarItem                          | `tab-bar`                  |
+| BlColophon                                      | `colophon`                 |
+| BlSkipLink                                      | `skip-link`                |
+| BlAppearanceSwitch                              | `appearance`               |
+| BlSegmented                                     | `segmented`                |
+| BlButton                                        | `btn`                      |
+| BlField, BlInput, BlTextarea, BlSelect, BlRange | `field`                    |
+| `.bl-fieldset` (CSS only)                       | `fieldset`                 |
+| BlLinkArrow                                     | `link-arrow`               |
+| BlSpecPanel, BlSpecRow                          | `spec-panel`               |
+| BlTelemetry, BlTelemetryCell                    | `telemetry`                |
+| BlLed                                           | `led`                      |
+| BlEqBars                                        | `eq`                       |
+| BlMarquee                                       | `marquee`                  |
+| BlReadout                                       | `readout`                  |
+| BlMeter                                         | `meter`                    |
+| BlMsg                                           | `msg`                      |
+| BlLog                                           | `log`                      |
+| BlSectionHead                                   | `section-head`             |
+| BlMeta                                          | `meta`                     |
+| BlIndex, BlIndexRow                             | `index-row`                |
+| BlPrevNext                                      | `prev-next`                |
+| BlProse                                         | `prose`                    |
+| BlTable                                         | `table`                    |
+| BlPagination                                    | `pagination`               |
+| BlToggle                                        | `toggle`                   |
+| BlCheckbox                                      | `checkbox`                 |
+| BlRadioGroup, BlRadio                           | `radio` (needs `fieldset`) |
+| BlMedia                                         | `media`                    |
+| BlDisclosure                                    | `disclosure`               |
+| BlDialog                                        | `dialog`                   |
+| BlToaster                                       | `toast`                    |
 
 ## Supported entry points
 
