@@ -34,6 +34,38 @@ describe('BlToggle', () => {
     expect(w.get('input').attributes('aria-describedby')).toBe(`${hintId} err`)
   })
 
+  it('shows an error outside the label and marks the input invalid', () => {
+    const w = mount(BlToggle, {
+      props: { modelValue: false, label: 'Terms', hint: 'Required', error: 'Accept to continue' }
+    })
+    const input = w.get('input')
+    const error = w.get('.bl-toggle__error')
+    expect(error.text()).toBe('Accept to continue')
+    expect(w.get('label').element.contains(error.element)).toBe(false)
+    expect(input.attributes('aria-invalid')).toBe('true')
+    expect(input.attributes('aria-describedby')).toBe(
+      `${w.get('.bl-toggle__hint').attributes('id')} ${error.attributes('id')}`
+    )
+  })
+
+  it('puts the consumer aria-describedby after the error and lets their aria-invalid win', () => {
+    const w = mount(BlToggle, {
+      props: { modelValue: false, label: 'Terms', error: 'Bad' },
+      attrs: { 'aria-describedby': 'x', 'aria-invalid': 'false' }
+    })
+    expect(w.get('input').attributes('aria-describedby')).toBe(
+      `${w.get('.bl-toggle__error').attributes('id')} x`
+    )
+    expect(w.get('input').attributes('aria-invalid')).toBe('false')
+  })
+
+  it('treats an empty error as valid', () => {
+    const w = mount(BlToggle, { props: { modelValue: false, label: 'Terms', error: '' } })
+    expect(w.find('.bl-toggle__error').exists()).toBe(false)
+    expect(w.get('input').attributes('aria-invalid')).toBeUndefined()
+    expect(w.get('input').attributes('aria-describedby')).toBeUndefined()
+  })
+
   it('omits aria-describedby without a hint', () => {
     const w = mount(BlToggle, { props: { modelValue: false, label: 'Wi-Fi' } })
     expect(w.get('input').attributes('aria-describedby')).toBeUndefined()

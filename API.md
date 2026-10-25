@@ -907,6 +907,7 @@ Exposed: none
 | prop | type | required | default |
 | --- | --- | --- | --- |
 | `disabled` | `boolean \| undefined` | no |  |
+| `error` | `string \| undefined` | no |  |
 | `hint` | `string \| undefined` | no |  |
 | `label` | `string` | yes |  |
 | `modelValue` | `boolean \| undefined` | no | `false` |
@@ -1117,6 +1118,7 @@ Exposed: none
 - `bl-toaster__list`
 - `bl-toggle`
 - `bl-toggle__control`
+- `bl-toggle__error`
 - `bl-toggle__hint`
 - `bl-toggle__input`
 - `bl-toggle__label`

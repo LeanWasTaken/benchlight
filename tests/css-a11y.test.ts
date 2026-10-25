@@ -45,7 +45,15 @@ describe('forced colors', () => {
       ]
     ],
     ['fieldset', ['.bl-fieldset__error::before', '.bl-fieldset--invalid']],
-    ['toggle', ['.bl-toggle__track', '.bl-toggle__input:checked + .bl-toggle__track']],
+    [
+      'toggle',
+      [
+        '.bl-toggle__track',
+        '.bl-toggle__input:checked + .bl-toggle__track',
+        '.bl-toggle__error::before',
+        ".bl-toggle__input[aria-invalid='true']:not(:disabled) + .bl-toggle__track"
+      ]
+    ],
     ['disclosure', ['.bl-disclosure__chevron']],
     ['toast', ['.bl-toast', '.bl-toast__mark', '.bl-toast--danger .bl-toast__mark']]
   ]

@@ -17,6 +17,7 @@
       <span class="bl-toggle__label">{{ label }}</span>
     </label>
     <span v-if="hint" :id="hintId" class="bl-toggle__hint">{{ hint }}</span>
+    <span v-if="error" :id="errorId" class="bl-toggle__error">{{ error }}</span>
   </div>
 </template>
 
@@ -27,6 +28,7 @@
   const props = defineProps<{
     label: string
     hint?: string
+    error?: string
     disabled?: boolean
     name?: string
     value?: string
@@ -35,19 +37,22 @@
   defineOptions({ inheritAttrs: false })
   const attrs = useAttrs()
   const hintId = useId()
+  const errorId = useId()
   const input = ref<HTMLInputElement>()
 
   // class and style belong to the root; every other fallthrough attribute lands on the input.
   // Evaluated in render, so attr changes re-run it. A consumer's aria-describedby is merged
-  // with the hint id instead of replacing it.
+  // with the hint and error ids instead of replacing it. A consumer's aria-invalid wins.
   function inputAttrs(): Record<string, unknown> {
     const rest = { ...attrs }
     delete rest.class
     delete rest.style
     return {
+      ...(props.error ? { 'aria-invalid': 'true' } : {}),
       ...rest,
       'aria-describedby': mergeDescribedBy(
         props.hint ? hintId : undefined,
+        props.error ? errorId : undefined,
         rest['aria-describedby']
       )
     }
