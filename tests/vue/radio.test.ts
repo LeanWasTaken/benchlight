@@ -326,6 +326,34 @@ describe('BlRadioGroup', () => {
     w.unmount()
   })
 
+  it('binds a v-model that starts with no selection and returns to it on reset', async () => {
+    const choice = ref<string | number | undefined>(undefined)
+    const Host = defineComponent({
+      components: { BlRadioGroup, BlRadio },
+      setup: () => ({ choice }),
+      template: `<form>
+        <BlRadioGroup v-model="choice" legend="Plan">
+          <BlRadio label="Basic" value="basic" />
+          <BlRadio label="Pro" :value="2" />
+        </BlRadioGroup>
+      </form>`
+    })
+    const w = mount(Host, { attachTo: document.body })
+    expect(inputs(w).map((i) => i.checked)).toEqual([false, false])
+    await w.findAll('input')[1]!.setValue(true)
+    expect(choice.value).toBe(2)
+    ;(w.get('form').element as HTMLFormElement).reset()
+    await new Promise((r) => setTimeout(r, 0))
+    expect(inputs(w).map((i) => i.checked)).toEqual([false, false])
+    expect(choice.value).toBeUndefined()
+    w.unmount()
+  })
+
+  it('keeps a runtime String/Number check on the model while accepting undefined', () => {
+    const props = (BlRadioGroup as unknown as { props: Record<string, { type?: unknown }> }).props
+    expect(props['modelValue']?.type).toEqual([String, Number])
+  })
+
   it('renders on the server', async () => {
     const html = await renderToString(
       createSSRApp({

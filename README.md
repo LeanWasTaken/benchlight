@@ -413,8 +413,9 @@ A `fieldset` with a `legend` that owns the model and the `name`; each BlRadio is
 </fieldset>
 ```
 
-- BlRadioGroup props: `v-model` (`string | number`), `legend`, `hint`, `error`, `disabled`,
-  `required`, `name` (generated when omitted). All its attrs, `class` and `style` included, go on
+- BlRadioGroup props: `v-model` (`string | number | undefined`; `undefined` is no selection, and
+  a reset with nothing checked emits it), `legend`, `hint`, `error`, `disabled`, `required`,
+  `name` (generated when omitted). All its attrs, `class` and `style` included, go on
   the fieldset. Add `bl-fieldset--inline` to lay the options out in a row.
 - BlRadio props: `label`, `value`, `hint`, `disabled`. Its attrs go on the `<input>`. It belongs
   inside a BlRadioGroup; on its own it warns in development and renders a plain radio from its

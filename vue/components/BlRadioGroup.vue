@@ -26,7 +26,10 @@
     required?: boolean
     name?: string
   }>()
-  const model = defineModel<string | number>()
+  // No selection is `undefined` (a reset with nothing checked emits it), so the type accepts it.
+  // A `| undefined` type param alone compiles to `type: null` (no runtime check), so the runtime
+  // type is spelled out; Vue spreads it over the inferred one.
+  const model = defineModel<string | number | undefined>({ type: [String, Number] })
   defineOptions({ inheritAttrs: false })
   const attrs = useAttrs()
   const generatedName = useId()

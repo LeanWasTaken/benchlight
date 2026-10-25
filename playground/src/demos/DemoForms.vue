@@ -151,7 +151,7 @@
   const message = ref('Too short')
   const terms = ref(false)
   const confirm = ref(false)
-  const plan = ref('')
+  const plan = ref<string | number | undefined>()
   const topicUpdates = ref(false)
   const topicOutages = ref(false)
 </script>
