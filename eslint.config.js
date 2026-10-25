@@ -31,6 +31,11 @@ export default defineConfig(
     languageOptions: { globals: globals.browser, parserOptions: { parser: tseslint.parser } },
     rules: { 'vue/require-default-prop': 'off' }
   },
+  {
+    // Tests define small inline stub components next to each other.
+    files: ['tests/**/*.ts'],
+    rules: { 'vue/one-component-per-file': 'off', 'vue/require-default-prop': 'off' }
+  },
   { files: ['js/**/*.js'], languageOptions: { sourceType: 'script', globals: globals.browser } },
   { files: ['vite/**/*.js', 'scripts/**/*.ts'], languageOptions: { globals: globals.node } },
   prettier
