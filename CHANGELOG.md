@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- License is now MIT, with a `LICENSE` file; `package.json` gains `author`, `repository`,
+  `homepage`, `bugs` and `engines` (Node 20 or newer), and a neutral description. `CHANGELOG.md`
+  and `LICENSE` now ship in the package.
+- `dist/tokens.js` is minified, like every other dist module.
+
 ## 0.7.0 - 2026-10-09
 
 The pre-v1 breaking batch: the last set of renames and attribute changes before the v1 API

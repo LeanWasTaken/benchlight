@@ -3,8 +3,18 @@
   "version": "0.7.0",
   "packageManager": "bun@1.4.2",
   "private": true,
-  "description": "Benchlight, the design system for Krists's personal web projects",
-  "license": "UNLICENSED",
+  "description": "Token-driven CSS, a Tailwind v4 theme and thin Vue/Nuxt components",
+  "license": "MIT",
+  "author": "LeanWasTaken <me@krists.lol>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LeanWasTaken/benchlight.git"
+  },
+  "homepage": "https://github.com/LeanWasTaken/benchlight#readme",
+  "bugs": "https://github.com/LeanWasTaken/benchlight/issues",
+  "engines": {
+    "node": ">=20"
+  },
   "type": "module",
   "files": [
     "tokens",
@@ -16,7 +26,9 @@
     "nuxt",
     "vite",
     "dist",
-    "API.md"
+    "API.md",
+    "CHANGELOG.md",
+    "LICENSE"
   ],
   "exports": {
     "./tokens": {
@@ -46,7 +58,7 @@
     "format:check": "prettier --check .",
     "check": "bun run lint && bun run format:check && bun run typecheck && bun run test",
     "gen": "bun scripts/gen-tokens.ts && bun scripts/gen-prepaint.ts && bun run gen:js",
-    "gen:js": "bun build ./tokens/index.ts --outfile dist/tokens.js --format esm && bun build ./js/appearance.js --outfile dist/appearance.min.js --minify",
+    "gen:js": "bun build ./tokens/index.ts --outfile dist/tokens.js --format esm --minify && bun build ./js/appearance.js --outfile dist/appearance.min.js --minify",
     "bundle": "bun scripts/bundle.ts",
     "build": "bun run gen && bun run bundle && bun run gen:api",
     "gen:api": "bun scripts/gen-api.ts",
