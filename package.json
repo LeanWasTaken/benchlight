@@ -75,6 +75,7 @@
     "test:watch": "vitest",
     "typecheck": "vue-tsc --noEmit && tsc --noEmit -p scripts/tsconfig.json",
     "lint": "eslint .",
+    "lint:package": "publint && attw --pack . --profile esm-only --entrypoints ./tokens ./vite ./js/prepaint-script.mjs ./nuxt",
     "lint:workflows": "docker run --rm -v \"$PWD\":/repo --workdir /repo rhysd/actionlint:1.7.12 -color",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -113,6 +114,7 @@
     }
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
     "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^10.0.1",
     "@nuxt/kit": "^4.5.2",
@@ -130,6 +132,7 @@
     "happy-dom": "^20.14.5",
     "lightningcss": "^1.33.0",
     "prettier": "^3.9.9",
+    "publint": "^0.3.25",
     "tailwindcss": "^4.3.3",
     "typescript": "^6",
     "typescript-eslint": "^8.71.0",

@@ -30,6 +30,8 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run check
       - run: bun run fixtures
+      # ./vue is left out of attw: it ships .vue source, which attw cannot resolve.
+      - run: bun run lint:package
       - name: Lint workflows
         run: bun run lint:workflows
 

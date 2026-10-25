@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- CI runs `publint` and `@arethetypeswrong/cli` (`bun run lint:package`) against the packed tarball.
 - License is now MIT, with a `LICENSE` file; `package.json` gains `author`, `repository`,
   `homepage`, `bugs` and `engines` (Node 20 or newer), and a neutral description. `CHANGELOG.md`
   and `LICENSE` now ship in the package.
