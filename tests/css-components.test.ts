@@ -165,6 +165,7 @@ describe('touch targets', () => {
     ['btn', '.bl-btn'],
     ['field', '.bl-input'],
     ['field', '.bl-select'],
+    ['field', '.bl-textarea'],
     ['field', ".bl-range input[type='range']"]
   ])('%s: %s keeps a 44px minimum', (name, selector) => {
     expect(ruleBody(read(name), selector)['min-height']).toBe('44px')
@@ -286,7 +287,7 @@ describe('anchored behaviour', () => {
   it('gates field hover behind (hover: hover)', () => {
     const css = read('field')
     const gate = ['@media (hover: hover)']
-    for (const selector of ['.bl-input:hover', '.bl-select:hover']) {
+    for (const selector of ['.bl-input:hover', '.bl-select:hover', '.bl-textarea:hover']) {
       expect(ruleBody(css, selector, gate)['border-color']).toBe('var(--bl-ink-3)')
       expect(() => ruleBody(css, selector)).toThrow()
     }
@@ -300,7 +301,7 @@ describe('anchored behaviour', () => {
     const mark = ruleBody(css, '.bl-field__error::before')
     expect(mark['content']).toContain('!')
     expect(mark['border-radius']).toBe('50%')
-    for (const control of ['.bl-input', '.bl-select']) {
+    for (const control of ['.bl-input', '.bl-select', '.bl-textarea']) {
       const invalid = ruleBody(css, `${control}[aria-invalid='true']:not(:disabled)`)
       expect(invalid['border-width']).toBe('2px')
       expect(invalid['border-color']).toBe('var(--bl-danger)')
@@ -433,6 +434,7 @@ describe('intrinsic wrapping (long tokens never widen the page)', () => {
     const css = read('field')
     expect(ruleBody(css, '.bl-input', ['@media (pointer: coarse)'])['font-size']).toBe('1rem')
     expect(ruleBody(css, '.bl-select', ['@media (pointer: coarse)'])['font-size']).toBe('1rem')
+    expect(ruleBody(css, '.bl-textarea', ['@media (pointer: coarse)'])['font-size']).toBe('1rem')
     expect(ruleBody(css, '.bl-input')['font-size']).toBe('var(--bl-text-small)')
   })
 

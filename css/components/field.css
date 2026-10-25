@@ -41,7 +41,8 @@
     text-align: center;
   }
   .bl-input,
-  .bl-select {
+  .bl-select,
+  .bl-textarea {
     width: 100%;
     min-height: 44px;
     padding: 10px 12px;
@@ -56,31 +57,41 @@
   /* iOS Safari zooms the page when a control under 16px takes focus. */
   @media (pointer: coarse) {
     .bl-input,
-    .bl-select {
+    .bl-select,
+    .bl-textarea {
       font-size: 1rem;
     }
   }
   @media (hover: hover) {
     .bl-input:hover,
-    .bl-select:hover {
+    .bl-select:hover,
+    .bl-textarea:hover {
       border-color: var(--bl-ink-3);
     }
   }
   /* Invalid thickens the border (padding gives the width back) instead of only recolouring it;
      a disabled control stays plain. BlRange has no border, so only its error text shows. */
   .bl-input[aria-invalid='true']:not(:disabled),
-  .bl-select[aria-invalid='true']:not(:disabled) {
+  .bl-select[aria-invalid='true']:not(:disabled),
+  .bl-textarea[aria-invalid='true']:not(:disabled) {
     padding: 9px 11px;
     border-width: 2px;
     border-color: var(--bl-danger);
   }
   .bl-input:focus-visible,
   .bl-select:focus-visible,
+  .bl-textarea:focus-visible,
   .bl-input[aria-invalid='true']:not(:disabled):focus-visible,
-  .bl-select[aria-invalid='true']:not(:disabled):focus-visible {
+  .bl-select[aria-invalid='true']:not(:disabled):focus-visible,
+  .bl-textarea[aria-invalid='true']:not(:disabled):focus-visible {
     border-color: var(--bl-trace);
   }
-  .bl-input::placeholder {
+  .bl-textarea {
+    display: block;
+    resize: vertical;
+  }
+  .bl-input::placeholder,
+  .bl-textarea::placeholder {
     color: var(--bl-ink-3);
   }
   .bl-select option {
@@ -143,7 +154,8 @@
       color: Canvas;
     }
     .bl-input[aria-invalid='true']:not(:disabled),
-    .bl-select[aria-invalid='true']:not(:disabled) {
+    .bl-select[aria-invalid='true']:not(:disabled),
+    .bl-textarea[aria-invalid='true']:not(:disabled) {
       border-color: CanvasText;
     }
     .bl-select-wrap::after,

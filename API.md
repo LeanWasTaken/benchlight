@@ -107,6 +107,7 @@
 - `BlTable`
 - `BlTelemetry`
 - `BlTelemetryCell`
+- `BlTextarea`
 - `BlToaster`
 - `BlToggle`
 - `FIELD_CONTEXT`
@@ -878,6 +879,17 @@ Slots: `default`
 Events: none
 Exposed: none
 
+### BlTextarea
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `modelValue` | `string \| undefined` | no | `""` |
+| `rows` | `number \| undefined` | no | `4` |
+
+Slots: none
+Events: `update:modelValue`
+Exposed: none
+
 ### BlToaster
 
 | prop | type | required | default |
@@ -1077,6 +1089,7 @@ Exposed: none
 - `bl-telemetry__cells`
 - `bl-telemetry__label`
 - `bl-telemetry__value`
+- `bl-textarea`
 - `bl-tint-copper`
 - `bl-tint-danger`
 - `bl-tint-phosphor`

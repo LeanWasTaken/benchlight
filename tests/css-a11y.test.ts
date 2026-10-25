@@ -40,7 +40,8 @@ describe('forced colors', () => {
       [
         '.bl-field__error::before',
         ".bl-input[aria-invalid='true']:not(:disabled)",
-        ".bl-select[aria-invalid='true']:not(:disabled)"
+        ".bl-select[aria-invalid='true']:not(:disabled)",
+        ".bl-textarea[aria-invalid='true']:not(:disabled)"
       ]
     ],
     ['toggle', ['.bl-toggle__track', '.bl-toggle__input:checked + .bl-toggle__track']],
@@ -61,9 +62,9 @@ describe('forced colors', () => {
 
 describe('non-text contrast', () => {
   it('draws form controls and control edges with --bl-control-border', () => {
-    expect(body(read('css/components/field.css'), '.bl-input,\n  .bl-select')).toContain(
-      'border: 1px solid var(--bl-control-border);'
-    )
+    expect(
+      body(read('css/components/field.css'), '.bl-input,\n  .bl-select,\n  .bl-textarea')
+    ).toContain('border: 1px solid var(--bl-control-border);')
     expect(body(read('css/components/btn.css'), '.bl-btn--secondary')).toContain(
       'border-color: var(--bl-control-border);'
     )

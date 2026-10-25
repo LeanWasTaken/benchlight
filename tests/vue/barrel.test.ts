@@ -33,6 +33,7 @@ const COMPONENTS = [
   'BlTabBar',
   'BlTabBarItem',
   'BlTable',
+  'BlTextarea',
   'BlToggle',
   'BlMedia',
   'BlDisclosure',
