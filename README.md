@@ -622,15 +622,17 @@ places. `tokens` always comes first; `base`, `type`, `motion`, `layout` and `tin
 
 ## Supported entry points
 
-`package.json` exports the wildcards `./css/*`, `./js/*`, `./fonts/*` and `./dist/*`, which make every
-file path resolvable. Only these are the supported public surface; everything else (for example
-`js/prepaint-script.d.mts`) is internal and may move in a minor release:
+`package.json` lists every public path explicitly, and Node refuses anything else. There is no root
+entry: `import 'benchlight'` does not resolve, so import a subpath. Everything not listed here is
+internal and may move in a minor release:
 
 - `benchlight/vue`, `benchlight/nuxt`, `benchlight/vite`, `benchlight/tokens`
 - `benchlight/tailwind/theme.css`
-- `benchlight/css/index.css` and `benchlight/css/components/*.css`
-- `benchlight/dist/benchlight.min.css`, `benchlight/dist/fonts.min.css` and `benchlight/dist/modules/*`
+- `benchlight/css/index.css`, `benchlight/css/fonts.css` and the foundations `benchlight/css/{tokens,base,type,motion,layout,tints}.css`
+- `benchlight/css/components/*.css` (needs `css/tokens.css`, which sets the layer order)
+- `benchlight/dist/benchlight.min.css`, `benchlight/dist/fonts.min.css`, `benchlight/dist/appearance.min.js` and `benchlight/dist/modules/*.min.css`
 - `benchlight/js/appearance.js`, `benchlight/js/prepaint.js` and `benchlight/js/prepaint-script.mjs`
+- `benchlight/fonts/subset/*`
 
 ## API contract
 

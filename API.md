@@ -3,10 +3,23 @@
 # Benchlight public API
 
 ## Package exports
-- `./css/*`
-- `./dist/*`
-- `./fonts/*`
-- `./js/*`
+- `./css/base.css`
+- `./css/components/*.css`
+- `./css/fonts.css`
+- `./css/index.css`
+- `./css/layout.css`
+- `./css/motion.css`
+- `./css/tints.css`
+- `./css/tokens.css`
+- `./css/type.css`
+- `./dist/appearance.min.js`
+- `./dist/benchlight.min.css`
+- `./dist/fonts.min.css`
+- `./dist/modules/*.min.css`
+- `./fonts/subset/*`
+- `./js/appearance.js`
+- `./js/prepaint-script.mjs`
+- `./js/prepaint.js`
 - `./nuxt`
 - `./package.json`
 - `./tailwind/theme.css`
@@ -54,7 +67,6 @@
 - `dist/modules/toggle.min.css`
 - `dist/modules/tokens.min.css`
 - `dist/modules/type.min.css`
-- `dist/tokens.js`
 
 ## benchlight/vue exports
 - `APPEARANCE_ATTRIBUTE`

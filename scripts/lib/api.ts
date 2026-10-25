@@ -222,7 +222,18 @@ export function renderApi(root: string): string {
   const theme = [
     ...readFileSync(join(root, 'tailwind/theme.css'), 'utf8').matchAll(/^\s+(--[\w-]+):/gm)
   ].map((m) => m[1]!)
-  const dist = files(join(root, 'dist'), '').map((f) => posix(relative(root, f)))
+  const exported = Object.keys(pkg.exports).map(
+    (key) =>
+      new RegExp(
+        `^${key
+          .slice(2)
+          .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
+          .replace('*', '.*')}$`
+      )
+  )
+  const dist = files(join(root, 'dist'), '')
+    .map((f) => posix(relative(root, f)))
+    .filter((f) => exported.some((re) => re.test(f)))
 
   return [
     HEADER,

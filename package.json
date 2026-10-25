@@ -35,19 +35,41 @@
       "types": "./tokens/index.ts",
       "default": "./dist/tokens.js"
     },
-    "./css/*": "./css/*",
-    "./tailwind/theme.css": "./tailwind/theme.css",
-    "./js/*": "./js/*",
-    "./fonts/*": "./fonts/*",
     "./vue": "./vue/index.ts",
     "./nuxt": "./nuxt/module.ts",
     "./vite": {
       "types": "./vite/index.d.ts",
       "default": "./vite/index.js"
     },
-    "./dist/*": "./dist/*",
+    "./tailwind/theme.css": "./tailwind/theme.css",
+    "./css/index.css": "./css/index.css",
+    "./css/fonts.css": "./css/fonts.css",
+    "./css/tokens.css": "./css/tokens.css",
+    "./css/base.css": "./css/base.css",
+    "./css/type.css": "./css/type.css",
+    "./css/motion.css": "./css/motion.css",
+    "./css/layout.css": "./css/layout.css",
+    "./css/tints.css": "./css/tints.css",
+    "./css/components/*.css": "./css/components/*.css",
+    "./js/appearance.js": "./js/appearance.js",
+    "./js/prepaint.js": "./js/prepaint.js",
+    "./js/prepaint-script.mjs": {
+      "types": "./js/prepaint-script.d.mts",
+      "default": "./js/prepaint-script.mjs"
+    },
+    "./dist/benchlight.min.css": "./dist/benchlight.min.css",
+    "./dist/fonts.min.css": "./dist/fonts.min.css",
+    "./dist/appearance.min.js": "./dist/appearance.min.js",
+    "./dist/modules/*.min.css": "./dist/modules/*.min.css",
+    "./fonts/subset/*": "./fonts/subset/*",
     "./package.json": "./package.json"
   },
+  "sideEffects": [
+    "**/*.css",
+    "./js/appearance.js",
+    "./js/prepaint.js",
+    "./dist/appearance.min.js"
+  ],
   "scripts": {
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",

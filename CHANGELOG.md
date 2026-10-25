@@ -6,6 +6,11 @@
   `homepage`, `bugs` and `engines` (Node 20 or newer), and a neutral description. `CHANGELOG.md`
   and `LICENSE` now ship in the package.
 - `dist/tokens.js` is minified, like every other dist module.
+- `package.json` lists every public path explicitly instead of the `./css/*`, `./js/*`, `./fonts/*`
+  and `./dist/*` wildcards, and declares `sideEffects` so bundlers keep CSS and the appearance
+  scripts. Not exported any more: `dist/tokens.js` (use `benchlight/tokens`),
+  `js/prepaint-script.d.mts` as a subpath, `fonts/full/*` and `fonts/OFL-*.txt`. They still ship
+  in the package. There is no root entry; import a subpath.
 
 ## 0.7.0 - 2026-10-09
 
