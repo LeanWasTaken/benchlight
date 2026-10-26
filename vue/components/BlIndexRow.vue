@@ -6,12 +6,12 @@
       class="bl-index-row"
       :class="{ 'bl-index-row--compact': compact }"
     >
-      <span v-if="$slots.icon" class="bl-index-row__icon" aria-hidden="true">
+      <span v-if="$slots['icon']" class="bl-index-row__icon" aria-hidden="true">
         <slot name="icon" />
       </span>
-      <span v-if="$slots.meta" class="bl-index-row__meta"><slot name="meta" /></span>
+      <span v-if="$slots['meta']" class="bl-index-row__meta"><slot name="meta" /></span>
       <span class="bl-index-row__title"><slot name="title" /></span>
-      <span v-if="$slots.default" class="bl-index-row__desc"><slot /></span>
+      <span v-if="$slots['default']" class="bl-index-row__desc"><slot /></span>
     </component>
   </li>
 </template>

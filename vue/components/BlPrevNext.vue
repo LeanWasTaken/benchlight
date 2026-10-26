@@ -59,14 +59,14 @@
   import { computed } from 'vue'
   import { linkBindings } from '../internal/link'
   import { mergeLabels } from '../internal/labels'
-  import type { LinkAs, PrevNextItem, PrevNextLabels } from '../types'
+  import type { LabelOverrides, LinkAs, PrevNextItem, PrevNextLabels } from '../types'
 
   const props = withDefaults(
     defineProps<{
       prev?: PrevNextItem | null
       next?: PrevNextItem | null
       as?: LinkAs
-      labels?: Partial<PrevNextLabels>
+      labels?: Partial<LabelOverrides<PrevNextLabels>>
     }>(),
     { as: 'a' }
   )

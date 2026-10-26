@@ -50,7 +50,7 @@
   import { warn } from '../internal/dev'
   import { mergeLabels } from '../internal/labels'
   import { clampPage, pageCount, pageRange } from '../internal/table'
-  import type { PaginationLabels } from '../types'
+  import type { LabelOverrides, PaginationLabels } from '../types'
 
   /** Page navigation. Renders nothing when there is a single page. See README. */
   const props = withDefaults(
@@ -60,7 +60,7 @@
       /** Accessible name of the nav; falls back to `labels.nav`. */
       label?: string
       siblings?: number
-      labels?: Partial<PaginationLabels>
+      labels?: Partial<LabelOverrides<PaginationLabels>>
     }>(),
     { siblings: 1 }
   )

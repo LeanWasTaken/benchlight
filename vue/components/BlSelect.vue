@@ -22,7 +22,11 @@
   // select. A consumer `id` wins over the field context; a consumer `aria-describedby` is merged
   // after the hint id. A function evaluated in render, so it re-runs on any attr change.
   function selectAttrs(): Record<string, unknown> {
-    const rest = { id: field?.id.value, ...attrs }
+    const rest = {
+      id: field?.id.value,
+      'aria-invalid': field?.invalid?.value === true ? 'true' : undefined,
+      ...attrs
+    }
     delete rest.class
     delete rest.style
     return {

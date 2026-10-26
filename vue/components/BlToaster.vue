@@ -67,13 +67,16 @@
   import { toastFocus, toastHosts } from '../internal/toastHosts'
   import { dismissToast, toastState, type ToastRecord } from '../internal/toastStore'
   import { mergeLabels } from '../internal/labels'
-  import type { ToasterLabels } from '../types'
+  import type { LabelOverrides, ToasterLabels } from '../types'
   import BlButton from './BlButton.vue'
 
   defineOptions({ inheritAttrs: false })
-  const props = withDefaults(defineProps<{ max?: number; labels?: Partial<ToasterLabels> }>(), {
-    max: 3
-  })
+  const props = withDefaults(
+    defineProps<{ max?: number; labels?: Partial<LabelOverrides<ToasterLabels>> }>(),
+    {
+      max: 3
+    }
+  )
   const text = computed<ToasterLabels>(() =>
     mergeLabels(
       {
@@ -143,7 +146,7 @@
   interface Timer {
     remaining: number
     start: number
-    handle?: ReturnType<typeof setTimeout>
+    handle?: ReturnType<typeof setTimeout> | undefined
   }
   const timers = new Map<string, Timer>()
   let hovered = false

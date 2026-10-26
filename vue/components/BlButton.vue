@@ -11,7 +11,7 @@
       'bl-btn--icon': iconOnly()
     }"
   >
-    <span v-if="$slots.icon" class="bl-btn__icon" aria-hidden="true"><slot name="icon" /></span>
+    <span v-if="$slots['icon']" class="bl-btn__icon" aria-hidden="true"><slot name="icon" /></span>
     <Nodes :n="nodes()" />
   </component>
 </template>
@@ -36,7 +36,9 @@
       type?: 'button' | 'submit' | 'reset'
       disabled?: boolean
     }>(),
-    { variant: 'primary', type: 'button', pressed: undefined }
+    // An undefined default keeps an absent `pressed` from casting to false. `as never` passes
+    // exactOptionalPropertyTypes without `| undefined`, which would change the runtime prop check.
+    { variant: 'primary', type: 'button', pressed: undefined as never }
   )
 
   const slots = useSlots()
@@ -52,17 +54,17 @@
   })
   function nodes(): VNode[] {
     if (!cache) {
-      cache = slots.default?.() ?? []
+      cache = slots['default']?.() ?? []
       if (isDev) {
         hasTextState.value = hasContent(cache)
-        iconOnlyState.value = Boolean(slots.icon) && !hasTextState.value
+        iconOnlyState.value = Boolean(slots['icon']) && !hasTextState.value
       }
     }
     return cache
   }
   // Icon-only: the icon slot is filled and the default slot is empty or whitespace.
   function iconOnly(): boolean {
-    return Boolean(slots.icon) && !hasContent(nodes())
+    return Boolean(slots['icon']) && !hasContent(nodes())
   }
   const Nodes = (p: { n?: VNode[] }) => p.n
 

@@ -6,6 +6,7 @@
     min-width: 0;
     margin-bottom: 20px;
   }
+  .bl-field__error,
   .bl-field__hint,
   .bl-field__label {
     overflow-wrap: anywhere;
@@ -15,8 +16,33 @@
     font-size: var(--bl-text-small);
     color: var(--bl-ink-2);
   }
+  /* The error line carries a leading "!" mark in a disc, so the state does not rest on colour. */
+  .bl-field__error {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0;
+    font-size: var(--bl-text-small);
+    color: var(--bl-danger);
+  }
+  .bl-field__error::before {
+    content: '!' / '';
+    flex-shrink: 0;
+    box-sizing: border-box;
+    width: 16px;
+    height: 16px;
+    margin-top: 0.1em;
+    background: var(--bl-danger);
+    border-radius: 50%;
+    color: var(--bl-raised);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+  }
   .bl-input,
-  .bl-select {
+  .bl-select,
+  .bl-textarea {
     width: 100%;
     min-height: 44px;
     padding: 10px 12px;
@@ -31,21 +57,41 @@
   /* iOS Safari zooms the page when a control under 16px takes focus. */
   @media (pointer: coarse) {
     .bl-input,
-    .bl-select {
+    .bl-select,
+    .bl-textarea {
       font-size: 1rem;
     }
   }
   @media (hover: hover) {
     .bl-input:hover,
-    .bl-select:hover {
+    .bl-select:hover,
+    .bl-textarea:hover {
       border-color: var(--bl-ink-3);
     }
   }
+  /* Invalid thickens the border (padding gives the width back) instead of only recolouring it;
+     a disabled control stays plain. BlRange has no border, so only its error text shows. */
+  .bl-input[aria-invalid='true']:not(:disabled),
+  .bl-select[aria-invalid='true']:not(:disabled),
+  .bl-textarea[aria-invalid='true']:not(:disabled) {
+    padding: 9px 11px;
+    border-width: 2px;
+    border-color: var(--bl-danger);
+  }
   .bl-input:focus-visible,
-  .bl-select:focus-visible {
+  .bl-select:focus-visible,
+  .bl-textarea:focus-visible,
+  .bl-input[aria-invalid='true']:not(:disabled):focus-visible,
+  .bl-select[aria-invalid='true']:not(:disabled):focus-visible,
+  .bl-textarea[aria-invalid='true']:not(:disabled):focus-visible {
     border-color: var(--bl-trace);
   }
-  .bl-input::placeholder {
+  .bl-textarea {
+    display: block;
+    resize: vertical;
+  }
+  .bl-input::placeholder,
+  .bl-textarea::placeholder {
     color: var(--bl-ink-3);
   }
   .bl-select option {
@@ -102,6 +148,16 @@
     opacity: 0.45;
   }
   @media (forced-colors: active) {
+    .bl-field__error::before {
+      forced-color-adjust: none;
+      background: CanvasText;
+      color: Canvas;
+    }
+    .bl-input[aria-invalid='true']:not(:disabled),
+    .bl-select[aria-invalid='true']:not(:disabled),
+    .bl-textarea[aria-invalid='true']:not(:disabled) {
+      border-color: CanvasText;
+    }
     .bl-select-wrap::after,
     .bl-select-wrap:hover::after {
       forced-color-adjust: none;

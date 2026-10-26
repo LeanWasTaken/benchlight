@@ -7,7 +7,7 @@ export interface ToastRecord {
   key: number
   message: string
   tone: ToastTone
-  action?: ToastAction
+  action?: ToastAction | undefined
   duration: number
   // bumped when an id is re-toasted, so the toaster restarts its timer
   version: number

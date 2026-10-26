@@ -1,6 +1,6 @@
 # Benchlight
 
-Benchlight, the design system for my personal web projects. Not for client work.
+Benchlight is a token-driven design system: prefixed plain CSS, a Tailwind v4 theme and thin Vue and Nuxt components, built from building blocks.
 
 One token source (`tokens/tokens.ts`) generates prefixed plain CSS in cascade layers, a Tailwind v4
 theme, and minified bundles for any target, from apps to static pages. Thin Vue components render exactly those
@@ -8,38 +8,14 @@ classes.
 
 ## Install
 
-```json
-"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.7.0"
+```sh
+npm install benchlight
+# or
+bun add benchlight
 ```
 
-The repo is private and the URL uses SSH on purpose: bun turns GitHub https URLs into API tarball
-downloads that cannot authenticate to a private repo. Locally, plain SSH access to GitHub is enough.
-Use bun 1.4.2 or newer: bun 1.2.x cannot clone git dependencies on Linux.
-In GitHub Actions, give each consuming repo its own read-only deploy key on `benchlight`
-(`ssh-keygen -t ed25519`, add the public half under benchlight → Settings → Deploy keys, store the
-private half as the secret `BENCHLIGHT_DEPLOY_KEY` in the consuming repo). Install like this, so the
-key is used only by that step:
-
-```yaml
-- name: Load the Benchlight deploy key
-  env:
-    BENCHLIGHT_DEPLOY_KEY: ${{ secrets.BENCHLIGHT_DEPLOY_KEY }}
-  run: |
-    umask 077
-    key="$RUNNER_TEMP/benchlight_deploy_key"
-    hosts="$RUNNER_TEMP/benchlight_known_hosts"
-    printf '%s\n' "$BENCHLIGHT_DEPLOY_KEY" > "$key"
-    echo "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl" > "$hosts"
-    echo "DEPLOY_KEY_FILE=$key" >> "$GITHUB_ENV"
-    echo "DEPLOY_KNOWN_HOSTS=$hosts" >> "$GITHUB_ENV"
-- name: Install
-  run: |
-    export GIT_SSH_COMMAND="ssh -i $DEPLOY_KEY_FILE -o IdentitiesOnly=yes -o UserKnownHostsFile=$DEPLOY_KNOWN_HOSTS -o StrictHostKeyChecking=yes"
-    bun install --frozen-lockfile
-- name: Remove the deploy key
-  if: always()
-  run: rm -f "$DEPLOY_KEY_FILE" "$DEPLOY_KNOWN_HOSTS"
-```
+To track a tag straight from GitHub instead, use `github:LeanWasTaken/benchlight#vX.Y.Z`. With bun, use
+1.4.2 or newer: bun 1.2.x cannot clone git dependencies on Linux.
 
 ## Nuxt
 
@@ -128,10 +104,9 @@ dependency pre-bundling. Tailwind is optional: only if the app uses it, add
 - Compact font subsets are listed in `fonts/subset/manifest.json`.
 - `playground/src/App.vue` is the markup reference.
 
-Size budget: `dist/benchlight.min.css` stays at or under 56,320 B (55 KiB) (`wc -c dist/benchlight.min.css`,
-`tests/bundle.test.ts`; it was 28,672 B in v0.3) and the compact font subsets under 23,552 B in total
-(`tests/fonts.test.ts`). The guard is raised in round KiB when legitimate work needs it, and every
-raise gets a CHANGELOG line.
+Size: `dist/benchlight.min.css` has no size cap; check it with `wc -c dist/benchlight.min.css`. The
+compact font subsets stay under 23,552 B in total (`tests/fonts.test.ts`); the guard is raised in round
+KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
 
 ## Conventions
 
@@ -206,14 +181,33 @@ raise gets a CHANGELOG line.
   reader is at the bottom. An enabled follower starts at the bottom on mount.
   `useScrollLifted(threshold)` takes a number, `false`, a ref or a getter. Both it and
   `useReducedMotion()` return a ref that is `false` on the server and until mounted.
-- **Fields:** BlField passes its `id` and hint id to BlInput, BlSelect and BlRange automatically.
-  Your own `id` on the control wins. Your own `aria-describedby` is merged: the hint id comes
-  first, then yours, without duplicates. BlRange forwards fallthrough attrs (`id`, `aria-label`,
+- **Fields:** BlField passes its `id` and hint id to BlInput, BlTextarea, BlSelect and BlRange
+  automatically. Your own `id` on the control wins. Your own `aria-describedby` is merged: the
+  hint id comes first, then the error id, then yours, without duplicates. BlRange forwards fallthrough attrs (`id`, `aria-label`,
   `disabled`, `name`, listeners) to the slider, which carries the class `bl-range__input`; `class`
   and `style` stay on the wrapper. To override the id, set `id` on BlField instead of on the
   control, so the `<label for>` still matches. For other controls, use the slot props
-  `{ id, describedBy }` or `inject(FIELD_CONTEXT)` from `benchlight/vue`, which holds
-  `{ id, describedBy }` as refs.
+  `{ id, describedBy, invalid }` or `inject(FIELD_CONTEXT)` from `benchlight/vue`, which holds
+  `{ id, describedBy, invalid }` as refs. `describedBy` is the hint id then the error id,
+  space-joined. Read `invalid` as `field?.invalid?.value === true`, so a control also works under
+  a provider that predates it.
+- **Field errors:** set `error` on BlField to mark it invalid; marking it invalid is your job,
+  Benchlight only renders it. An empty string is not an error. BlField adds
+  `.bl-field--invalid` and a `p.bl-field__error` (id `<id>-error`) after the hint; BlInput,
+  BlTextarea, BlSelect and BlRange get `aria-invalid="true"` and the error id in
+  `aria-describedby`. Your own `aria-invalid` on the control wins. The error is not a live region,
+  so it is not announced as you type; add `role="alert"` yourself where you want an announcement. The error line starts
+  with a "!" mark and the control border thickens, so the state does not rest on colour. In plain
+  HTML, `[aria-invalid='true']` on `.bl-input`, `.bl-textarea` or `.bl-select` gets the same
+  styling. Native `required` passes through to the control; there is no built-in required marker.
+  BlToggle, BlCheckbox and BlRadioGroup carry their own label, so they take their own `error`
+  prop with the same output (`.bl-toggle__error`, `.bl-checkbox__error`, `.bl-fieldset__error`).
+- **BlInput:** renders a bare `<input>` with no wrapper, so `class`, `style` and every attribute
+  land on the input. `type` is `'text' | 'email' | 'password' | 'search' | 'tel' | 'url'`
+  (default `'text'`); `number` is left out because the model is a string.
+- **BlTextarea:** the multi-line sibling of BlInput, with the same contract: no wrapper, every
+  attribute (including `class` and `style`) on the `<textarea>`, a string `v-model`, and the
+  field wiring above. `rows` defaults to 4; it resizes vertically only and does not autosize.
 - **Links:** `LinkProps` precedence: `as` a component (e.g. RouterLink) receives `to` if set,
   otherwise `href`; `as` `'a'` (the default when `to` or `href` is set) receives `href`, else a
   string `to`; `as` any other tag receives neither. Misuse logs a `[benchlight]` warning in
@@ -341,8 +335,11 @@ An on/off switch on a native checkbox (`role="switch"`). Full prop list is in [A
 </div>
 ```
 
-- Props: `v-model` (boolean), `label`, `hint`, `disabled`, `name`, `value`. With `name`, the form
-  posts `name=value` only while the switch is on.
+- Props: `v-model` (boolean), `label`, `hint`, `error`, `disabled`, `name`, `value`. With `name`,
+  the form posts `name=value` only while the switch is on.
+- `error` marks the switch invalid: `aria-invalid="true"` on the input, a
+  `span.bl-toggle__error` after the hint, and its id after the hint id in `aria-describedby`.
+  In plain HTML, `aria-invalid="true"` on `.bl-toggle__input` draws the invalid track.
 - The hint stays out of the accessible name: it sits outside the `label` and is wired up with
   `aria-describedby`. A consumer `aria-describedby` is merged with the hint id.
 - Uncontrolled without `v-model`: the toggle keeps its own state; `:model-value` without a
@@ -354,6 +351,101 @@ An on/off switch on a native checkbox (`role="switch"`). Full prop list is in [A
   `data-*`, `aria-*`) goes on the `input`.
 - The thumb moves with a logical inset, so RTL flips it. "On" is shown by position and an inner mark,
   not colour alone.
+
+## BlCheckbox
+
+A checkbox drawn over a native `<input type="checkbox">`, shaped like BlToggle. Full prop list is
+in [API.md](API.md).
+
+```vue
+<BlCheckbox v-model="backups" label="Nightly backups" hint="Runs at 03:00 local time" />
+<BlCheckbox v-model="all" v-model:indeterminate="some" label="All channels" />
+```
+
+```html
+<div class="bl-checkbox">
+  <label class="bl-checkbox__control">
+    <input class="bl-checkbox__input" type="checkbox" aria-describedby="backups-hint" />
+    <span class="bl-checkbox__box" aria-hidden="true"></span>
+    <span class="bl-checkbox__label">Nightly backups</span>
+  </label>
+  <span id="backups-hint" class="bl-checkbox__hint">Runs at 03:00 local time</span>
+</div>
+```
+
+- Props: `v-model` (boolean), `v-model:indeterminate` (boolean), `label`, `hint`, `error`,
+  `disabled`, `name`, `value`. The box shows a tick when checked, a dash when indeterminate and
+  nothing when unchecked, so the state never rests on colour.
+- `indeterminate`: bind `v-model:indeterminate` and handle `update:indeterminate`. A click clears
+  the dash natively and the checkbox emits `update:indeterminate` with `false`; setting it back to
+  `true` restores the dash. If the parent ignores that update, setting `true` again is a no-op
+  until the value changes.
+- `indeterminate` is a DOM property, not an attribute. Server-rendered HTML shows no dash until the
+  component mounts, and in CSS-only use you set it from script
+  (`input.indeterminate = true`); the box draws the dash from `:indeterminate`.
+- `error`, the hint, attrs and form reset work as on BlToggle: `class` and `style` go on the root,
+  every other attribute on the input, the hint and error stay out of the accessible name, and a
+  native form reset restores the value the checkbox had when it mounted.
+- Not for use inside BlField. For a group, see the fieldset recipe below.
+
+## BlRadioGroup and BlRadio
+
+A `fieldset` with a `legend` that owns the model and the `name`; each BlRadio is one option.
+
+```vue
+<BlRadioGroup v-model="band" legend="Band" hint="Arrow keys move between options.">
+  <BlRadio label="2.4 GHz" value="2.4" hint="Longer range" />
+  <BlRadio label="5 GHz" value="5" />
+</BlRadioGroup>
+```
+
+```html
+<fieldset class="bl-fieldset bl-radio-group" role="radiogroup" aria-describedby="band-hint">
+  <legend class="bl-fieldset__legend">Band</legend>
+  <p id="band-hint" class="bl-fieldset__hint">Arrow keys move between options.</p>
+  <div class="bl-radio">
+    <label class="bl-radio__control">
+      <input class="bl-radio__input" type="radio" name="band" value="2.4" />
+      <span class="bl-radio__dot" aria-hidden="true"></span>
+      <span class="bl-radio__label">2.4 GHz</span>
+    </label>
+  </div>
+</fieldset>
+```
+
+- BlRadioGroup props: `v-model` (`string | number | undefined`; `undefined` is no selection, and
+  a reset with nothing checked emits it), `legend`, `hint`, `error`, `disabled`, `required`,
+  `name` (generated when omitted). All its attrs, `class` and `style` included, go on
+  the fieldset. Add `bl-fieldset--inline` to lay the options out in a row.
+- BlRadio props: `label`, `value`, `hint`, `disabled`. Its attrs go on the `<input>`. It belongs
+  inside a BlRadioGroup; on its own it warns in development and renders a plain radio from its
+  attrs.
+- Keyboard is the native one: Tab enters and leaves the group at the checked radio, and the arrow
+  keys move and select.
+- `error` adds `.bl-fieldset--invalid` (a bar down the leading edge), a `p.bl-fieldset__error`,
+  `aria-invalid="true"` on the fieldset and the error id in its `aria-describedby`. Each radio's
+  `aria-describedby` holds only its own hint, so arrow-key moves do not re-read the group message.
+- `required` puts `required` on every radio and `aria-required` on the fieldset. A native form
+  reset restores the value the group had when it mounted.
+- The `radio` module needs the `fieldset` module.
+
+### Checkbox groups (CSS only)
+
+There is no checkbox group component. Wrap BlCheckbox children (or the plain markup above) in the
+`fieldset` classes:
+
+```html
+<fieldset class="bl-fieldset bl-fieldset--invalid" aria-describedby="topics-hint topics-error">
+  <legend class="bl-fieldset__legend">Notify me about</legend>
+  <p id="topics-hint" class="bl-fieldset__hint">Pick any.</p>
+  <p id="topics-error" class="bl-fieldset__error">Choose at least one topic.</p>
+  <!-- BlCheckbox children, or .bl-checkbox markup -->
+</fieldset>
+```
+
+`bl-fieldset--invalid` and the error line are yours to add and remove. Like every error in
+Benchlight, `.bl-fieldset__error` is not a live region; add `role="alert"` where you want it
+announced.
 
 ## BlMedia
 
@@ -587,50 +679,55 @@ Custom properties a consumer may set. API.md lists them under "CSS hooks".
 `dist/modules/<module>.min.css` takes the module name, which differs from the component name in
 places. `tokens` always comes first; `base`, `type`, `motion`, `layout` and `tints` are shared.
 
-| Component                           | Module         |
-| ----------------------------------- | -------------- |
-| BlSiteBar, BlNavLink                | `site-bar`     |
-| BlTabBar, BlTabBarItem              | `tab-bar`      |
-| BlColophon                          | `colophon`     |
-| BlSkipLink                          | `skip-link`    |
-| BlAppearanceSwitch                  | `appearance`   |
-| BlSegmented                         | `segmented`    |
-| BlButton                            | `btn`          |
-| BlField, BlInput, BlSelect, BlRange | `field`        |
-| BlLinkArrow                         | `link-arrow`   |
-| BlSpecPanel, BlSpecRow              | `spec-panel`   |
-| BlTelemetry, BlTelemetryCell        | `telemetry`    |
-| BlLed                               | `led`          |
-| BlEqBars                            | `eq`           |
-| BlMarquee                           | `marquee`      |
-| BlReadout                           | `readout`      |
-| BlMeter                             | `meter`        |
-| BlMsg                               | `msg`          |
-| BlLog                               | `log`          |
-| BlSectionHead                       | `section-head` |
-| BlMeta                              | `meta`         |
-| BlIndex, BlIndexRow                 | `index-row`    |
-| BlPrevNext                          | `prev-next`    |
-| BlProse                             | `prose`        |
-| BlTable                             | `table`        |
-| BlPagination                        | `pagination`   |
-| BlToggle                            | `toggle`       |
-| BlMedia                             | `media`        |
-| BlDisclosure                        | `disclosure`   |
-| BlDialog                            | `dialog`       |
-| BlToaster                           | `toast`        |
+| Component                                       | Module                     |
+| ----------------------------------------------- | -------------------------- |
+| BlSiteBar, BlNavLink                            | `site-bar`                 |
+| BlTabBar, BlTabBarItem                          | `tab-bar`                  |
+| BlColophon                                      | `colophon`                 |
+| BlSkipLink                                      | `skip-link`                |
+| BlAppearanceSwitch                              | `appearance`               |
+| BlSegmented                                     | `segmented`                |
+| BlButton                                        | `btn`                      |
+| BlField, BlInput, BlTextarea, BlSelect, BlRange | `field`                    |
+| `.bl-fieldset` (CSS only)                       | `fieldset`                 |
+| BlLinkArrow                                     | `link-arrow`               |
+| BlSpecPanel, BlSpecRow                          | `spec-panel`               |
+| BlTelemetry, BlTelemetryCell                    | `telemetry`                |
+| BlLed                                           | `led`                      |
+| BlEqBars                                        | `eq`                       |
+| BlMarquee                                       | `marquee`                  |
+| BlReadout                                       | `readout`                  |
+| BlMeter                                         | `meter`                    |
+| BlMsg                                           | `msg`                      |
+| BlLog                                           | `log`                      |
+| BlSectionHead                                   | `section-head`             |
+| BlMeta                                          | `meta`                     |
+| BlIndex, BlIndexRow                             | `index-row`                |
+| BlPrevNext                                      | `prev-next`                |
+| BlProse                                         | `prose`                    |
+| BlTable                                         | `table`                    |
+| BlPagination                                    | `pagination`               |
+| BlToggle                                        | `toggle`                   |
+| BlCheckbox                                      | `checkbox`                 |
+| BlRadioGroup, BlRadio                           | `radio` (needs `fieldset`) |
+| BlMedia                                         | `media`                    |
+| BlDisclosure                                    | `disclosure`               |
+| BlDialog                                        | `dialog`                   |
+| BlToaster                                       | `toast`                    |
 
 ## Supported entry points
 
-`package.json` exports the wildcards `./css/*`, `./js/*`, `./fonts/*` and `./dist/*`, which make every
-file path resolvable. Only these are the supported public surface; everything else (for example
-`js/prepaint-script.d.mts`) is internal and may move in a minor release:
+`package.json` lists every public path explicitly, and Node refuses anything else. There is no root
+entry: `import 'benchlight'` does not resolve, so import a subpath. Everything not listed here is
+internal and may move in a minor release:
 
 - `benchlight/vue`, `benchlight/nuxt`, `benchlight/vite`, `benchlight/tokens`
 - `benchlight/tailwind/theme.css`
-- `benchlight/css/index.css` and `benchlight/css/components/*.css`
-- `benchlight/dist/benchlight.min.css`, `benchlight/dist/fonts.min.css` and `benchlight/dist/modules/*`
+- `benchlight/css/index.css`, `benchlight/css/fonts.css` and the foundations `benchlight/css/{tokens,base,type,motion,layout,tints}.css`
+- `benchlight/css/components/*.css` (needs `css/tokens.css`, which sets the layer order)
+- `benchlight/dist/benchlight.min.css`, `benchlight/dist/fonts.min.css`, `benchlight/dist/appearance.min.js` and `benchlight/dist/modules/*.min.css`
 - `benchlight/js/appearance.js`, `benchlight/js/prepaint.js` and `benchlight/js/prepaint-script.mjs`
+- `benchlight/fonts/subset/*`
 
 ## API contract
 
@@ -647,7 +744,7 @@ tokens.color.dark.canvas // '#101214', e.g. for OG images that cannot read CSS v
 ```
 
 `benchlight/tokens` resolves at runtime to `dist/tokens.js`, because Nuxt's server bundler cannot compile
-TypeScript from `node_modules`. Types still come from `tokens/index.ts`.
+TypeScript from `node_modules`. Types come from the generated `dist/tokens.d.ts`.
 
 ## Development
 
@@ -675,15 +772,15 @@ stale, so rebuild before committing token or CSS changes.
 `bun pm pack` decides what ships: the `files` list in `package.json` plus the always-included files.
 Consumer tags contain only that, never tests or the playground.
 
-1. In one `chore: release vX.Y.Z` commit, bump `version` in `package.json`, add the entry to
-   `CHANGELOG.md` and move the README install pin to `#vX.Y.Z`.
+1. In one `chore: release vX.Y.Z` commit, bump `version` in `package.json` and add the entry to
+   `CHANGELOG.md`.
 2. `bun run build && bun run check && bun run fixtures`.
 3. Push `main`, then push the source tag: `git tag -a src-vX.Y.Z -m src-vX.Y.Z && git push origin src-vX.Y.Z`.
    Never push `vX.Y.Z` yourself.
 4. CI checks that the commit is on `main` and matches `package.json`, runs the checks, builds the
    slim tree from `bun pm pack`, commits it to the `release` branch and tags that commit `vX.Y.Z`.
    A separate job then installs the tag over git+ssh and verifies it is slim.
-5. Bump the `#vX.Y.Z` pin in each consumer. The URL form is unchanged.
+5. Bump the version in each consumer.
 
 Tags up to v0.2.1 are full-tree source tags. Release tags from v0.3.0 on point into the `release`
 branch.

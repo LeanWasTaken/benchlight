@@ -12,6 +12,7 @@
 @import './components/segmented.css';
 @import './components/btn.css';
 @import './components/field.css';
+@import './components/fieldset.css';
 @import './components/link-arrow.css';
 @import './components/spec-panel.css';
 @import './components/telemetry.css';
@@ -30,6 +31,8 @@
 @import './components/table.css';
 @import './components/pagination.css';
 @import './components/toggle.css';
+@import './components/checkbox.css';
+@import './components/radio.css';
 @import './components/media.css';
 @import './components/disclosure.css';
 @import './components/dialog.css';

@@ -3,7 +3,7 @@
     <div class="bl-col bl-site-bar__inner">
       <slot name="brand" />
       <nav
-        v-if="$slots.nav"
+        v-if="$slots['nav']"
         class="bl-site-bar__navwrap"
         :aria-label="navLabel"
         @focusin="revealFocused"
@@ -12,7 +12,7 @@
           <slot name="nav" />
         </ul>
       </nav>
-      <div v-if="$slots.actions" class="bl-site-bar__actions">
+      <div v-if="$slots['actions']" class="bl-site-bar__actions">
         <slot name="actions" />
       </div>
     </div>

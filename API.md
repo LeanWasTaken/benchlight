@@ -3,10 +3,23 @@
 # Benchlight public API
 
 ## Package exports
-- `./css/*`
-- `./dist/*`
-- `./fonts/*`
-- `./js/*`
+- `./css/base.css`
+- `./css/components/*.css`
+- `./css/fonts.css`
+- `./css/index.css`
+- `./css/layout.css`
+- `./css/motion.css`
+- `./css/tints.css`
+- `./css/tokens.css`
+- `./css/type.css`
+- `./dist/appearance.min.js`
+- `./dist/benchlight.min.css`
+- `./dist/fonts.min.css`
+- `./dist/modules/*.min.css`
+- `./fonts/subset/*`
+- `./js/appearance.js`
+- `./js/prepaint-script.mjs`
+- `./js/prepaint.js`
 - `./nuxt`
 - `./package.json`
 - `./tailwind/theme.css`
@@ -21,11 +34,13 @@
 - `dist/modules/appearance.min.css`
 - `dist/modules/base.min.css`
 - `dist/modules/btn.min.css`
+- `dist/modules/checkbox.min.css`
 - `dist/modules/colophon.min.css`
 - `dist/modules/dialog.min.css`
 - `dist/modules/disclosure.min.css`
 - `dist/modules/eq.min.css`
 - `dist/modules/field.min.css`
+- `dist/modules/fieldset.min.css`
 - `dist/modules/index-row.min.css`
 - `dist/modules/layout.min.css`
 - `dist/modules/led.min.css`
@@ -40,6 +55,7 @@
 - `dist/modules/pagination.min.css`
 - `dist/modules/prev-next.min.css`
 - `dist/modules/prose.min.css`
+- `dist/modules/radio.min.css`
 - `dist/modules/readout.min.css`
 - `dist/modules/section-head.min.css`
 - `dist/modules/segmented.min.css`
@@ -54,13 +70,13 @@
 - `dist/modules/toggle.min.css`
 - `dist/modules/tokens.min.css`
 - `dist/modules/type.min.css`
-- `dist/tokens.js`
 
 ## benchlight/vue exports
 - `APPEARANCE_ATTRIBUTE`
 - `APPEARANCE_STORAGE_KEY`
 - `BlAppearanceSwitch`
 - `BlButton`
+- `BlCheckbox`
 - `BlColophon`
 - `BlDialog`
 - `BlDisclosure`
@@ -81,6 +97,8 @@
 - `BlPagination`
 - `BlPrevNext`
 - `BlProse`
+- `BlRadio`
+- `BlRadioGroup`
 - `BlRange`
 - `BlReadout`
 - `BlSectionHead`
@@ -95,6 +113,7 @@
 - `BlTable`
 - `BlTelemetry`
 - `BlTelemetryCell`
+- `BlTextarea`
 - `BlToaster`
 - `BlToggle`
 - `FIELD_CONTEXT`
@@ -136,7 +155,7 @@ interface AppearanceLabels {
     auto: string;
     light: string;
     dark: string;
-    marks?: Partial<{
+    marks?: LabelOverrides<{
         auto: string;
         light: string;
         dark: string;
@@ -185,6 +204,7 @@ interface DialogLabels {
 interface FieldContext {
     id: Readonly<Ref<string>>;
     describedBy: Readonly<Ref<string | undefined>>;
+    invalid: Readonly<Ref<boolean>>;
 }
 ```
 
@@ -195,6 +215,14 @@ interface FollowScrollOptions {
     enabled?: MaybeRefOrGetter<boolean>;
     threshold?: number;
 }
+```
+
+### `LabelOverrides`
+
+```ts
+type LabelOverrides<T> = {
+    [K in keyof T]?: T[K] | undefined;
+};
 ```
 
 ### `LedState`
@@ -408,7 +436,7 @@ interface ToasterLabels {
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `labels` | `Partial<AppearanceLabels> \| undefined` | no |  |
+| `labels` | `Partial<LabelOverrides<AppearanceLabels>> \| undefined` | no |  |
 
 Slots: none
 Events: none
@@ -432,6 +460,23 @@ Slots: `icon`
 Events: none
 Exposed: none
 
+### BlCheckbox
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `disabled` | `boolean \| undefined` | no |  |
+| `error` | `string \| undefined` | no |  |
+| `hint` | `string \| undefined` | no |  |
+| `indeterminate` | `boolean \| undefined` | no | `false` |
+| `label` | `string` | yes |  |
+| `modelValue` | `boolean \| undefined` | no | `false` |
+| `name` | `string \| undefined` | no |  |
+| `value` | `string \| undefined` | no |  |
+
+Slots: none
+Events: `update:indeterminate`, `update:modelValue`
+Exposed: none
+
 ### BlColophon
 
 | prop | type | required | default |
@@ -448,7 +493,7 @@ Exposed: none
 | --- | --- | --- | --- |
 | `description` | `string \| undefined` | no |  |
 | `dismissible` | `boolean \| undefined` | no | `true` |
-| `labels` | `Partial<DialogLabels> \| undefined` | no |  |
+| `labels` | `Partial<LabelOverrides<DialogLabels>> \| undefined` | no |  |
 | `open` | `boolean` | yes |  |
 | `title` | `string` | yes |  |
 
@@ -482,12 +527,13 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `error` | `string \| undefined` | no |  |
 | `hint` | `string \| undefined` | no |  |
 | `id` | `string \| undefined` | no |  |
 | `label` | `string` | yes |  |
 
 Slots: `default`
-Slot props: `default` `{ id: string; describedBy: string | undefined; }`
+Slot props: `default` `{ id: string; describedBy: string | undefined; invalid: boolean; }`
 Events: none
 Exposed: none
 
@@ -521,7 +567,7 @@ Exposed: none
 | prop | type | required | default |
 | --- | --- | --- | --- |
 | `modelValue` | `string \| undefined` | no | `""` |
-| `type` | `string \| undefined` | no | `"text"` |
+| `type` | `"search" \| "text" \| "email" \| "password" \| "tel" \| "url" \| undefined` | no | `"text"` |
 
 Slots: none
 Events: `update:modelValue`
@@ -641,7 +687,7 @@ Exposed: none
 | prop | type | required | default |
 | --- | --- | --- | --- |
 | `label` | `string \| undefined` | no |  |
-| `labels` | `Partial<PaginationLabels> \| undefined` | no |  |
+| `labels` | `Partial<LabelOverrides<PaginationLabels>> \| undefined` | no |  |
 | `page` | `number \| undefined` | no | `1` |
 | `pageSize` | `number` | yes |  |
 | `siblings` | `number \| undefined` | no | `1` |
@@ -656,7 +702,7 @@ Exposed: none
 | prop | type | required | default |
 | --- | --- | --- | --- |
 | `as` | `LinkAs \| undefined` | no | `"a"` |
-| `labels` | `Partial<PrevNextLabels> \| undefined` | no |  |
+| `labels` | `Partial<LabelOverrides<PrevNextLabels>> \| undefined` | no |  |
 | `next` | `PrevNextItem \| null \| undefined` | no |  |
 | `prev` | `PrevNextItem \| null \| undefined` | no |  |
 
@@ -672,6 +718,35 @@ Exposed: none
 
 Slots: `default`
 Events: none
+Exposed: none
+
+### BlRadio
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `disabled` | `boolean \| undefined` | no |  |
+| `hint` | `string \| undefined` | no |  |
+| `label` | `string` | yes |  |
+| `value` | `string \| number` | yes |  |
+
+Slots: none
+Events: none
+Exposed: none
+
+### BlRadioGroup
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `disabled` | `boolean \| undefined` | no |  |
+| `error` | `string \| undefined` | no |  |
+| `hint` | `string \| undefined` | no |  |
+| `legend` | `string` | yes |  |
+| `modelValue` | `string \| number \| undefined` | no |  |
+| `name` | `string \| undefined` | no |  |
+| `required` | `boolean \| undefined` | no |  |
+
+Slots: `default`
+Events: `update:modelValue`
 Exposed: none
 
 ### BlRange
@@ -815,13 +890,13 @@ Exposed: none
 | `captionHidden` | `boolean \| undefined` | no |  |
 | `columns` | `TableColumn<Row>[]` | yes |  |
 | `compact` | `boolean \| undefined` | no |  |
-| `labels` | `Partial<TableLabels> \| undefined` | no |  |
+| `labels` | `Partial<LabelOverrides<TableLabels>> \| undefined` | no |  |
 | `locale` | `string \| undefined` | no |  |
 | `manual` | `boolean \| undefined` | no |  |
 | `onRowActivate` | `((row: Row) => void) \| undefined` | no |  |
 | `page` | `number \| undefined` | no | `1` |
 | `pageSize` | `number \| undefined` | no |  |
-| `paginationLabels` | `Partial<PaginationLabels> \| undefined` | no |  |
+| `paginationLabels` | `Partial<LabelOverrides<PaginationLabels>> \| undefined` | no |  |
 | `rowKey` | `string \| ((row: Row) => string \| number) \| undefined` | no |  |
 | `rowLink` | `((row: Row) => { as?: LinkAs \| undefined; to?: LinkTo \| undefined; href?: string \| undefined; }) \| undefined` | no |  |
 | `rows` | `Row[]` | yes |  |
@@ -856,11 +931,22 @@ Slots: `default`
 Events: none
 Exposed: none
 
+### BlTextarea
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `modelValue` | `string \| undefined` | no | `""` |
+| `rows` | `number \| undefined` | no | `4` |
+
+Slots: none
+Events: `update:modelValue`
+Exposed: none
+
 ### BlToaster
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `labels` | `Partial<ToasterLabels> \| undefined` | no |  |
+| `labels` | `Partial<LabelOverrides<ToasterLabels>> \| undefined` | no |  |
 | `max` | `number \| undefined` | no | `3` |
 
 Slots: none
@@ -872,6 +958,7 @@ Exposed: none
 | prop | type | required | default |
 | --- | --- | --- | --- |
 | `disabled` | `boolean \| undefined` | no |  |
+| `error` | `string \| undefined` | no |  |
 | `hint` | `string \| undefined` | no |  |
 | `label` | `string` | yes |  |
 | `modelValue` | `boolean \| undefined` | no | `false` |
@@ -910,6 +997,13 @@ Exposed: none
 - `bl-btn--pill`
 - `bl-btn--secondary`
 - `bl-btn__icon`
+- `bl-checkbox`
+- `bl-checkbox__box`
+- `bl-checkbox__control`
+- `bl-checkbox__error`
+- `bl-checkbox__hint`
+- `bl-checkbox__input`
+- `bl-checkbox__label`
 - `bl-col`
 - `bl-colophon`
 - `bl-colophon__inner`
@@ -936,8 +1030,15 @@ Exposed: none
 - `bl-eq--active`
 - `bl-eq__bar`
 - `bl-field`
+- `bl-field__error`
 - `bl-field__hint`
 - `bl-field__label`
+- `bl-fieldset`
+- `bl-fieldset--inline`
+- `bl-fieldset--invalid`
+- `bl-fieldset__error`
+- `bl-fieldset__hint`
+- `bl-fieldset__legend`
 - `bl-index`
 - `bl-index--grid`
 - `bl-index--ruled-top`
@@ -996,6 +1097,12 @@ Exposed: none
 - `bl-prev-next__link--prev`
 - `bl-prev-next__title`
 - `bl-prose`
+- `bl-radio`
+- `bl-radio__control`
+- `bl-radio__dot`
+- `bl-radio__hint`
+- `bl-radio__input`
+- `bl-radio__label`
 - `bl-range`
 - `bl-range__value`
 - `bl-readout`
@@ -1054,6 +1161,7 @@ Exposed: none
 - `bl-telemetry__cells`
 - `bl-telemetry__label`
 - `bl-telemetry__value`
+- `bl-textarea`
 - `bl-tint-copper`
 - `bl-tint-danger`
 - `bl-tint-phosphor`
@@ -1074,6 +1182,7 @@ Exposed: none
 - `bl-toaster__list`
 - `bl-toggle`
 - `bl-toggle__control`
+- `bl-toggle__error`
 - `bl-toggle__hint`
 - `bl-toggle__input`
 - `bl-toggle__label`
@@ -1081,8 +1190,10 @@ Exposed: none
 - `bl-toggle__track`
 
 ## Hook-only classes
+- `bl-field--invalid`
 - `bl-pagination__next`
 - `bl-pagination__prev`
+- `bl-radio-group`
 - `bl-range__input`
 
 ## Script-set data attributes

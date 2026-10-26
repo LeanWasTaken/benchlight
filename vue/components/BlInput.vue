@@ -7,7 +7,9 @@
   import { FIELD_CONTEXT } from '../types'
   import { mergeDescribedBy } from '../internal/describedBy'
 
-  withDefaults(defineProps<{ type?: string }>(), { type: 'text' })
+  withDefaults(defineProps<{ type?: 'text' | 'email' | 'password' | 'search' | 'tel' | 'url' }>(), {
+    type: 'text'
+  })
   defineOptions({ inheritAttrs: false })
   const model = defineModel<string>({ default: '' })
   const field = inject(FIELD_CONTEXT, null)
@@ -17,6 +19,7 @@
   function inputAttrs(): Record<string, unknown> {
     return {
       id: field?.id.value,
+      'aria-invalid': field?.invalid?.value === true ? 'true' : undefined,
       ...attrs,
       'aria-describedby': mergeDescribedBy(field?.describedBy.value, attrs['aria-describedby'])
     }

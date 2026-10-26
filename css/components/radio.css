@@ -1,0 +1,125 @@
+@layer components {
+  .bl-radio {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    max-inline-size: 100%;
+  }
+  .bl-radio__control {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    min-block-size: 44px;
+    min-inline-size: 0;
+    color: var(--bl-ink-1);
+    cursor: pointer;
+  }
+  /* The real radio sits invisibly over the dot: native arrows, Tab, forms and no-JS. */
+  .bl-radio__input {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 0;
+    inline-size: 22px;
+    block-size: 22px;
+    margin: 0;
+    translate: 0 -50%;
+    opacity: 0;
+    cursor: inherit;
+  }
+  .bl-radio__dot {
+    position: relative;
+    box-sizing: border-box;
+    flex: none;
+    inline-size: 22px;
+    block-size: 22px;
+    background: var(--bl-surface);
+    border: 1px solid var(--bl-control-border);
+    border-radius: 50%;
+    transition:
+      background-color var(--bl-duration-fast) ease,
+      border-color var(--bl-duration-fast) ease,
+      opacity var(--bl-duration-fast) ease;
+  }
+  /* Checked draws a centre disc, so state never rests on colour: empty ring vs. ring and disc. */
+  .bl-radio__dot::after {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    display: none;
+    background: currentcolor;
+    border-radius: 50%;
+    color: var(--bl-raised);
+  }
+  .bl-radio__input:checked + .bl-radio__dot {
+    background: var(--bl-trace);
+    border-color: var(--bl-trace);
+  }
+  .bl-radio__input:checked + .bl-radio__dot::after {
+    display: block;
+  }
+  .bl-radio__input:focus-visible + .bl-radio__dot {
+    outline: 2px solid var(--bl-trace);
+    outline-offset: 2px;
+  }
+  .bl-radio__label {
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+  .bl-radio__hint {
+    flex-basis: 100%;
+    padding-inline-start: 34px;
+    font-size: var(--bl-text-small);
+    color: var(--bl-ink-2);
+    overflow-wrap: anywhere;
+  }
+  /* Invalid is a group state: .bl-fieldset--invalid (fieldset.css) marks the whole radiogroup. */
+  .bl-radio__input:disabled + .bl-radio__dot {
+    opacity: 0.45;
+  }
+  .bl-radio__control:has(> .bl-radio__input:disabled) {
+    color: var(--bl-ink-2);
+    cursor: not-allowed;
+  }
+  @media (hover: hover) {
+    .bl-radio__control:hover .bl-radio__input:not(:checked, :disabled) + .bl-radio__dot {
+      border-color: var(--bl-ink-3);
+    }
+    @media (forced-colors: active) {
+      .bl-radio__control:hover .bl-radio__input:not(:checked, :disabled) + .bl-radio__dot {
+        border-color: CanvasText;
+      }
+    }
+  }
+  @media (forced-colors: active) {
+    .bl-radio__dot,
+    .bl-radio__dot::after {
+      forced-color-adjust: none;
+    }
+    .bl-radio__dot {
+      background: Canvas;
+      border-color: CanvasText;
+    }
+    .bl-radio__dot::after {
+      color: HighlightText;
+    }
+    .bl-radio__input:focus-visible + .bl-radio__dot {
+      outline-color: CanvasText;
+    }
+    .bl-radio__input:checked + .bl-radio__dot {
+      background: Highlight;
+      border-color: Highlight;
+    }
+    /* Disabled reads as disabled whether checked or not: no Highlight fill, GrayText disc. */
+    .bl-radio__input:disabled + .bl-radio__dot {
+      background: Canvas;
+      border-color: GrayText;
+    }
+    .bl-radio__input:disabled + .bl-radio__dot::after {
+      color: GrayText;
+    }
+    .bl-radio__control:has(> .bl-radio__input:disabled) {
+      color: GrayText;
+    }
+  }
+}

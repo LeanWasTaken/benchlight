@@ -1,10 +1,19 @@
 {
   "name": "benchlight",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "packageManager": "bun@1.4.2",
-  "private": true,
-  "description": "Benchlight, the design system for Krists's personal web projects",
-  "license": "UNLICENSED",
+  "description": "Token-driven CSS, a Tailwind v4 theme and thin Vue/Nuxt components",
+  "license": "MIT",
+  "author": "LeanWasTaken <me@krists.lol>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LeanWasTaken/benchlight.git"
+  },
+  "homepage": "https://github.com/LeanWasTaken/benchlight#readme",
+  "bugs": "https://github.com/LeanWasTaken/benchlight/issues",
+  "engines": {
+    "node": ">=20"
+  },
   "type": "module",
   "files": [
     "tokens",
@@ -16,37 +25,62 @@
     "nuxt",
     "vite",
     "dist",
-    "API.md"
+    "API.md",
+    "CHANGELOG.md",
+    "LICENSE"
   ],
   "exports": {
     "./tokens": {
-      "types": "./tokens/index.ts",
+      "types": "./dist/tokens.d.ts",
       "default": "./dist/tokens.js"
     },
-    "./css/*": "./css/*",
-    "./tailwind/theme.css": "./tailwind/theme.css",
-    "./js/*": "./js/*",
-    "./fonts/*": "./fonts/*",
     "./vue": "./vue/index.ts",
     "./nuxt": "./nuxt/module.ts",
     "./vite": {
       "types": "./vite/index.d.ts",
       "default": "./vite/index.js"
     },
-    "./dist/*": "./dist/*",
+    "./tailwind/theme.css": "./tailwind/theme.css",
+    "./css/index.css": "./css/index.css",
+    "./css/fonts.css": "./css/fonts.css",
+    "./css/tokens.css": "./css/tokens.css",
+    "./css/base.css": "./css/base.css",
+    "./css/type.css": "./css/type.css",
+    "./css/motion.css": "./css/motion.css",
+    "./css/layout.css": "./css/layout.css",
+    "./css/tints.css": "./css/tints.css",
+    "./css/components/*.css": "./css/components/*.css",
+    "./js/appearance.js": "./js/appearance.js",
+    "./js/prepaint.js": "./js/prepaint.js",
+    "./js/prepaint-script.mjs": {
+      "types": "./js/prepaint-script.d.mts",
+      "default": "./js/prepaint-script.mjs"
+    },
+    "./dist/benchlight.min.css": "./dist/benchlight.min.css",
+    "./dist/fonts.min.css": "./dist/fonts.min.css",
+    "./dist/appearance.min.js": "./dist/appearance.min.js",
+    "./dist/modules/*.min.css": "./dist/modules/*.min.css",
+    "./fonts/subset/*": "./fonts/subset/*",
     "./package.json": "./package.json"
   },
+  "sideEffects": [
+    "**/*.css",
+    "./js/appearance.js",
+    "./js/prepaint.js",
+    "./dist/appearance.min.js"
+  ],
   "scripts": {
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "typecheck": "vue-tsc --noEmit && tsc --noEmit -p scripts/tsconfig.json",
     "lint": "eslint .",
+    "lint:package": "publint && attw --pack . --profile esm-only --entrypoints ./tokens ./vite ./js/prepaint-script.mjs ./nuxt",
     "lint:workflows": "docker run --rm -v \"$PWD\":/repo --workdir /repo rhysd/actionlint:1.7.12 -color",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "bun run lint && bun run format:check && bun run typecheck && bun run test",
     "gen": "bun scripts/gen-tokens.ts && bun scripts/gen-prepaint.ts && bun run gen:js",
-    "gen:js": "bun build ./tokens/index.ts --outfile dist/tokens.js --format esm && bun build ./js/appearance.js --outfile dist/appearance.min.js --minify",
+    "gen:js": "bun build ./tokens/index.ts --outfile dist/tokens.js --format esm --minify && bun build ./js/appearance.js --outfile dist/appearance.min.js --minify",
     "bundle": "bun scripts/bundle.ts",
     "build": "bun run gen && bun run bundle && bun run gen:api",
     "gen:api": "bun scripts/gen-api.ts",
@@ -79,6 +113,7 @@
     }
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
     "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^10.0.1",
     "@nuxt/kit": "^4.5.2",
@@ -96,6 +131,7 @@
     "happy-dom": "^20.14.5",
     "lightningcss": "^1.33.0",
     "prettier": "^3.9.9",
+    "publint": "^0.3.25",
     "tailwindcss": "^4.3.3",
     "typescript": "^6",
     "typescript-eslint": "^8.71.0",
