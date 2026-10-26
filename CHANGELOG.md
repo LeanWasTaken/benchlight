@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Correction to 0.8.0: the package is not published on npm yet. The name `benchlight` is reserved with
+  a `0.0.2` placeholder, and the README installs over git+ssh again (`#v0.8.0`). The components ship as
+  `.vue` and `.ts` source, so a consumer needs Vite or Nuxt.
+
 ## 0.8.0 - 2026-10-26
 
 Form controls and one validation convention, settled before the v1 API freeze, plus the npm-ready
