@@ -10,7 +10,9 @@ export const colorNames = [
   'trace',
   'copper',
   'phosphor',
-  'danger'
+  'danger',
+  'on-trace',
+  'on-danger'
 ] as const
 
 export type ColorName = (typeof colorNames)[number]
@@ -28,7 +30,9 @@ const light = {
   trace: '#2151cc',
   copper: '#a6512a',
   phosphor: '#1f7a46',
-  danger: '#a42d37'
+  danger: '#a42d37',
+  'on-trace': '#ffffff',
+  'on-danger': '#ffffff'
 } as const satisfies Record<ColorName, string>
 
 const dark = {
@@ -43,7 +47,9 @@ const dark = {
   trace: '#97b1ff',
   copper: '#e8936a',
   phosphor: '#7bd9a2',
-  danger: '#ff9098'
+  danger: '#ff9098',
+  'on-trace': '#101214',
+  'on-danger': '#101214'
 } as const satisfies Record<ColorName, string>
 
 export const tokens = {

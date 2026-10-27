@@ -1,6 +1,6 @@
 <template>
   <span class="bl-select-wrap" :class="attrs.class" :style="attrs.style as any">
-    <select v-model="model" class="bl-select" v-bind="selectAttrs()">
+    <select v-model="model" class="bl-select" :disabled="disabled" v-bind="selectAttrs()">
       <option v-for="option in options" :key="String(option.value)" :value="option.value">
         {{ option.label }}
       </option>
@@ -13,7 +13,7 @@
   import { FIELD_CONTEXT, type SelectOption } from '../types'
   import { mergeDescribedBy } from '../internal/describedBy'
 
-  defineProps<{ options: SelectOption<T>[] }>()
+  defineProps<{ options: SelectOption<T>[]; disabled?: boolean }>()
   defineOptions({ inheritAttrs: false })
   const model = defineModel<T>()
   const field = inject(FIELD_CONTEXT, null)

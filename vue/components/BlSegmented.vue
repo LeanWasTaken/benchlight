@@ -1,61 +1,61 @@
 <template>
-  <component
-    :is="linked ? 'nav' : 'div'"
+  <div
+    ref="root"
     class="bl-segmented"
     :class="{ 'bl-segmented--compact': compact }"
-    :role="linked ? undefined : 'group'"
-    :aria-label="label"
+    role="radiogroup"
+    :aria-label="ariaLabel"
   >
-    <template v-if="linked">
-      <component
-        :is="tagFor(option)"
-        v-for="option in options"
-        :key="String(option.value)"
-        v-bind="linkBindings(tagFor(option), option.to, option.href)"
-        class="bl-segmented__item"
-        :aria-current="option.current ? 'page' : undefined"
-      >
-        {{ option.label }}
-      </component>
-    </template>
-    <template v-else>
-      <button
-        v-for="option in options"
-        :key="String(option.value)"
-        type="button"
-        class="bl-segmented__item"
-        :aria-pressed="option.value === modelValue"
-        @click="emit('update:modelValue', option.value)"
-      >
-        {{ option.label }}
-      </button>
-    </template>
-  </component>
+    <label v-for="option in options" :key="String(option.value)" class="bl-segmented__item">
+      <input
+        type="radio"
+        :name="groupName"
+        :value="String(option.value)"
+        :checked="option.value === model"
+        :disabled="option.disabled || undefined"
+        @change="model = option.value"
+      />
+      {{ option.label }}
+    </label>
+  </div>
 </template>
 
 <script setup lang="ts" generic="T extends string | number | null">
-  import { computed } from 'vue'
-  import { warnOnce } from '../internal/dev'
-  import { linkBindings, resolveTag } from '../internal/link'
-  import type { LinkAs, SegmentedOption } from '../types'
+  import { computed, onBeforeUnmount, onMounted, ref, useId } from 'vue'
+  import type { SegmentedOption } from '../types'
 
   const props = defineProps<{
     options: SegmentedOption<T>[]
-    modelValue?: T
-    as?: LinkAs
+    ariaLabel?: string
     compact?: boolean
-    label?: string
+    name?: string
   }>()
-  const emit = defineEmits<{ 'update:modelValue': [value: T] }>()
+  const model = defineModel<T>()
+  const generatedName = useId()
+  const groupName = computed(() => props.name || generatedName)
+  const root = ref<HTMLElement>()
 
-  // Link mode when `as` is set or any option links; `as` then only picks the tag.
-  const linked = computed(
-    () => !!props.as || props.options.some((o) => o.to !== undefined || o.href !== undefined)
-  )
-  function tagFor(option: SegmentedOption<T>): LinkAs {
-    if (option.to === undefined && option.href === undefined && !props.as) {
-      warnOnce('BlSegmented: an option has no to/href in link mode.')
-    }
-    return resolveTag(props.as, option.to, option.href, 'a')
+  // A native form reset flips `checked` without an input or change event. The reset event fires
+  // before the controls reset, so restore each radio's `defaultChecked` from the mount value
+  // synchronously, then read the result in a macrotask (as BlRadioGroup does).
+  let form: HTMLFormElement | null = null
+  let initial: T | undefined
+  function inputs(): HTMLInputElement[] {
+    return [...(root.value?.querySelectorAll<HTMLInputElement>('input') ?? [])]
   }
+  function onReset(): void {
+    inputs().forEach((input, i) => {
+      input.defaultChecked = props.options[i]?.value === initial
+    })
+    setTimeout(() => {
+      const index = inputs().findIndex((input) => input.checked)
+      model.value = props.options[index]?.value
+    }, 0)
+  }
+  onMounted(() => {
+    initial = model.value
+    form = root.value?.closest('form') ?? null
+    form?.addEventListener('reset', onReset)
+  })
+  onBeforeUnmount(() => form?.removeEventListener('reset', onReset))
 </script>

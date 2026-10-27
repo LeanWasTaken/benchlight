@@ -1,69 +1,46 @@
 <template>
   <div v-if="wrapped" class="bl-meter-field" :class="attrs.class" :style="attrs.style as any">
-    <div v-if="showLabel || visibleValue !== undefined" class="bl-meter-field__head">
-      <span v-if="showLabel" :id="labelId" class="bl-meter-field__label">{{ label }}</span>
+    <div v-if="label || visibleValue !== undefined" class="bl-meter-field__head">
+      <span v-if="label" :id="labelId" class="bl-meter-field__label">{{ label }}</span>
       <span v-if="visibleValue !== undefined" class="bl-meter-field__value" aria-hidden="true">{{
         visibleValue
       }}</span>
     </div>
-    <div class="bl-meter" v-bind="barAttrs()">
-      <div
-        class="bl-meter__fill"
-        :style="indeterminate ? undefined : { '--bl-meter-value': fraction }"
-      />
+    <div v-bind="barAttrs()">
+      <div class="bl-meter__fill" :style="{ '--bl-meter-value': fraction }" />
     </div>
   </div>
-  <div v-else class="bl-meter" :class="attrs.class" :style="attrs.style as any" v-bind="barAttrs()">
-    <div
-      class="bl-meter__fill"
-      :style="indeterminate ? undefined : { '--bl-meter-value': fraction }"
-    />
+  <div v-else :class="attrs.class" :style="attrs.style as any" v-bind="barAttrs()">
+    <div class="bl-meter__fill" :style="{ '--bl-meter-value': fraction }" />
   </div>
 </template>
 
 <script setup lang="ts">
-  import { computed, useAttrs, useId } from 'vue'
+  import { watch } from 'vue'
+  import { warnOnce } from '../internal/dev'
+  import { useMeterBar } from '../internal/meterBar'
 
   const props = defineProps<{
-    value: number | null
-    label: string
+    value: number
+    /** Visible text above the bar; it names the bar. */
+    label?: string
+    /** Accessible name when there is no visible label. */
+    ariaLabel?: string
     valueText?: string
-    showLabel?: boolean
     showValue?: boolean
   }>()
   defineOptions({ inheritAttrs: false })
-  const attrs = useAttrs()
-  const labelId = useId()
-  const indeterminate = computed(() => props.value === null)
-  const fraction = computed(() => {
-    const value = props.value ?? 0
-    return Number.isNaN(value) ? 0 : Math.min(1, Math.max(0, value))
-  })
-  // The visible value: nothing while indeterminate; it is aria-hidden as the bar exposes it.
-  const visibleValue = computed(() =>
-    props.showValue && !indeterminate.value
-      ? (props.valueText ?? `${Math.round(fraction.value * 100)}%`)
-      : undefined
+  const { attrs, labelId, fraction, visibleValue, wrapped, barAttrs } = useMeterBar(
+    props,
+    'meter',
+    'BlMeter'
   )
-  // The progressbar's attributes; class and style belong to the outer element, every other
-  // fallthrough attribute lands here. A function evaluated in render, so it re-runs on any
-  // attr change.
-  function barAttrs(): Record<string, unknown> {
-    const rest = { ...attrs }
-    delete rest.class
-    delete rest.style
-    const labelled = props.showLabel
-    return {
-      role: 'progressbar',
-      'aria-label': labelled ? undefined : props.label,
-      'aria-labelledby': labelled ? labelId : undefined,
-      'aria-valuemin': 0,
-      'aria-valuemax': 100,
-      'aria-valuenow': indeterminate.value ? undefined : Math.round(fraction.value * 100),
-      'aria-valuetext': props.valueText,
-      'data-indeterminate': indeterminate.value ? '' : undefined,
-      ...rest
-    }
-  }
-  const wrapped = computed(() => Boolean(props.showLabel || props.showValue))
+  watch(
+    () => props.value,
+    (value) => {
+      if (!(value >= 0 && value <= 1))
+        warnOnce(`BlMeter: \`value\` is 0 to 1, got ${value}; it renders clamped.`)
+    },
+    { immediate: true }
+  )
 </script>

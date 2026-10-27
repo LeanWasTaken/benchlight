@@ -14,13 +14,13 @@
      The empty alt text keeps screen readers from announcing it. */
   .bl-meta--sep > * + *::before {
     margin-right: 0.75em;
-    color: var(--bl-separator);
+    color: var(--bl-color-separator);
     content: '—';
     content: '—' / '';
   }
   .bl-meta__key {
     font-weight: 500;
-    color: var(--bl-ink-2);
+    color: var(--bl-color-ink-2);
     transition: color var(--bl-duration-fast) ease;
   }
 }

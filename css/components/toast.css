@@ -55,9 +55,9 @@
     min-block-size: 44px;
     padding-block: 4px;
     padding-inline: 16px 4px;
-    color: var(--bl-ink-1);
-    background: var(--bl-raised);
-    border: 1px solid var(--bl-separator);
+    color: var(--bl-color-ink-1);
+    background: var(--bl-color-raised);
+    border: 1px solid var(--bl-color-separator);
     border-radius: var(--bl-radius-card);
     box-shadow: var(--bl-shadow-float);
     pointer-events: auto;
@@ -67,17 +67,17 @@
     flex: none;
     inline-size: 8px;
     block-size: 8px;
-    background: var(--bl-ink-2);
+    background: var(--bl-color-ink-2);
     border-radius: 50%;
   }
   .bl-toast--success .bl-toast__mark {
-    background: var(--bl-phosphor);
+    background: var(--bl-color-phosphor);
   }
   .bl-toast--danger {
-    border-inline-start: 2px solid var(--bl-danger);
+    border-inline-start: 2px solid var(--bl-color-danger);
   }
   .bl-toast--danger .bl-toast__mark {
-    background: var(--bl-danger);
+    background: var(--bl-color-danger);
     border-radius: 0;
     rotate: 45deg;
   }

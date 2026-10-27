@@ -1,4 +1,4 @@
-import type { TableColumn, TableSort } from '../types'
+import type { TableColumn, TableSort, TableTotal } from '../types'
 
 export type TableRow = Record<string, unknown>
 
@@ -11,19 +11,44 @@ export function isEmpty(value: unknown): boolean {
   )
 }
 
-export function formatCell<R extends TableRow>(row: R, column: TableColumn<R>): string {
-  const value = row[column.key]
-  if (column.format) return column.format(value, row)
+// The three column kinds, seen through one loose shape: the public union cannot be called
+// without narrowing every member.
+interface LooseColumn<R> {
+  key: string
+  slot?: true
+  value?: (row: R) => unknown
+  format?: (value: unknown, row: R) => string
+  numeric?: boolean
+  sortBy?: (row: R) => string | number | null | undefined
+  total?: TableTotal<R>
+  formatTotal?: (value: number, rows: R[]) => string
+}
+const loose = <R extends object>(column: TableColumn<R>) => column as unknown as LooseColumn<R>
+
+/** A cell's value: `value(row)` for a derived column, `row[key]` for a key column, none for a slot-only one. */
+export function columnValue<R extends object>(row: R, column: TableColumn<R>): unknown {
+  const c = loose(column)
+  if (c.slot) return undefined
+  if (c.value) return c.value(row)
+  return (row as TableRow)[c.key]
+}
+
+export function formatCell<R extends object>(row: R, column: TableColumn<R>): string {
+  const c = loose(column)
+  if (c.slot) return ''
+  const value = columnValue(row, column)
+  if (c.format) return c.format(value, row)
   return isEmpty(value) ? '' : String(value)
 }
 
-function sortValue<R extends TableRow>(row: R, column: TableColumn<R>): unknown {
-  const raw = column.sortBy ? column.sortBy(row) : row[column.key]
+function sortValue<R extends object>(row: R, column: TableColumn<R>): unknown {
+  const c = loose(column)
+  const raw = c.sortBy ? c.sortBy(row) : columnValue(row, column)
   if (raw instanceof Date) {
     const time = raw.getTime()
     return Number.isNaN(time) ? null : time
   }
-  if (column.numeric && !isEmpty(raw) && typeof raw !== 'number') {
+  if (c.numeric && !isEmpty(raw) && typeof raw !== 'number') {
     const n = Number(raw)
     return Number.isNaN(n) ? null : n
   }
@@ -31,16 +56,17 @@ function sortValue<R extends TableRow>(row: R, column: TableColumn<R>): unknown 
 }
 
 // Stable sort; empty values (null, undefined, '', NaN) always last; numbers numerically,
-// everything else with a numeric-aware, case-insensitive collator.
-export function sortRows<R extends TableRow>(
+// everything else with a numeric-aware, case-insensitive collator. The collator defaults to
+// 'en', not the runtime's locale, so a server-rendered sort hydrates without a mismatch.
+export function sortRows<R extends object>(
   rows: readonly R[],
   columns: readonly TableColumn<R>[],
   sort: TableSort | null,
   locale?: string
 ): R[] {
   const column = sort && columns.find((c) => c.key === sort.key)
-  if (!sort || !column) return rows.slice()
-  const collator = new Intl.Collator(locale, { numeric: true, sensitivity: 'base' })
+  if (!sort || !column || loose(column).slot) return rows.slice()
+  const collator = new Intl.Collator(locale ?? 'en', { numeric: true, sensitivity: 'base' })
   const dir = sort.dir === 'desc' ? -1 : 1
   return rows
     .map((row, index) => ({ row, index, value: sortValue(row, column) }))
@@ -106,33 +132,36 @@ export function pageRange(page: number, pages: number, siblings = 1): Array<numb
   return out
 }
 
-export function computeTotals<R extends TableRow>(
+// Every total kind goes through formatTotal(value, rows), or String(); never through format().
+export function computeTotals<R extends object>(
   rows: readonly R[],
   columns: readonly TableColumn<R>[]
-): Record<string, string | number> {
-  const out: Record<string, string | number> = {}
+): Record<string, string> {
+  const out: Record<string, string> = {}
+  const all = rows.slice()
   for (const column of columns) {
-    const total = column.total
-    if (!total) continue
+    const c = loose(column)
+    const total = c.total
+    if (!total || c.slot) continue
+    const render = (value: number) => (c.formatTotal ? c.formatTotal(value, all) : String(value))
     if (typeof total === 'function') {
-      out[column.key] = total(rows.slice())
+      out[c.key] = render(total(all))
       continue
     }
-    const values = rows.map((row) => row[column.key]).filter((v) => !isEmpty(v))
+    const values = rows.map((row) => columnValue(row, column)).filter((v) => !isEmpty(v))
     if (total === 'count') {
-      out[column.key] = values.length
+      out[c.key] = render(values.length)
       continue
     }
     const nums = values
       .map((v) => (typeof v === 'number' ? v : Number(v)))
       .filter((n) => !Number.isNaN(n))
     if (total === 'avg' && nums.length === 0) {
-      out[column.key] = ''
+      out[c.key] = ''
       continue
     }
     const sum = nums.reduce((a, b) => a + b, 0)
-    const value = total === 'sum' ? sum : sum / nums.length
-    out[column.key] = column.format ? column.format(value) : value
+    out[c.key] = render(total === 'sum' ? sum : sum / nums.length)
   }
   return out
 }

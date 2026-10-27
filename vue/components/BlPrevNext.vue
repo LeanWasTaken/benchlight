@@ -1,9 +1,9 @@
 <template>
-  <nav v-if="prev || next" class="bl-prev-next" :aria-label="text.nav">
+  <nav v-if="prev || next" class="bl-prev-next" :aria-label="ariaLabel">
     <component
-      :is="as"
+      :is="linkAs"
       v-if="prev"
-      v-bind="linkBindings(as, prev.to, prev.href)"
+      v-bind="linkBindings(linkAs, prev.to, prev.href)"
       class="bl-prev-next__link bl-prev-next__link--prev"
     >
       <span class="bl-prev-next__label">
@@ -27,9 +27,9 @@
     </component>
     <span v-else />
     <component
-      :is="as"
+      :is="linkAs"
       v-if="next"
-      v-bind="linkBindings(as, next.to, next.href)"
+      v-bind="linkBindings(linkAs, next.to, next.href)"
       class="bl-prev-next__link bl-prev-next__link--next"
     >
       <span class="bl-prev-next__label">
@@ -65,12 +65,13 @@
     defineProps<{
       prev?: PrevNextItem | null
       next?: PrevNextItem | null
-      as?: LinkAs
+      linkAs?: LinkAs
+      ariaLabel?: string
       labels?: Partial<LabelOverrides<PrevNextLabels>>
     }>(),
-    { as: 'a' }
+    { linkAs: 'a', ariaLabel: 'Pagination' }
   )
   const text = computed<PrevNextLabels>(() =>
-    mergeLabels({ nav: 'Pagination', prev: 'Previous', next: 'Next' }, props.labels)
+    mergeLabels({ prev: 'Previous', next: 'Next' }, props.labels)
   )
 </script>

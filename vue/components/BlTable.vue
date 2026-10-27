@@ -97,7 +97,7 @@
                     <slot
                       :name="`cell-${column.key}`"
                       :row="row"
-                      :value="row[column.key]"
+                      :value="columnValue(row, column)"
                       :column="column"
                       >{{ formatCell(row, column) }}</slot
                     >
@@ -112,7 +112,7 @@
                   <slot
                     :name="`cell-${column.key}`"
                     :row="row"
-                    :value="row[column.key]"
+                    :value="columnValue(row, column)"
                     :column="column"
                     >{{ formatCell(row, column) }}</slot
                   >
@@ -121,7 +121,7 @@
                   v-else
                   :name="`cell-${column.key}`"
                   :row="row"
-                  :value="row[column.key]"
+                  :value="columnValue(row, column)"
                   :column="column"
                   >{{ formatCell(row, column) }}</slot
                 >
@@ -137,7 +137,7 @@
                 <slot
                   :name="`cell-${column.key}`"
                   :row="row"
-                  :value="row[column.key]"
+                  :value="columnValue(row, column)"
                   :column="column"
                   >{{ formatCell(row, column) }}</slot
                 >
@@ -178,26 +178,28 @@
       v-model:page="currentPage"
       :total="totalCount"
       :page-size="pageSize"
-      :label="paginationLabels?.nav ?? text.pages(caption)"
+      :aria-label="text.pages(caption)"
       :labels="paginationLabels!"
     />
   </div>
 </template>
 
-<script setup lang="ts" generic="Row extends Record<string, unknown>">
-  import { computed, ref, useAttrs, useId, useSlots, watch } from 'vue'
+<script setup lang="ts" generic="Row extends object, C extends TableColumn<Row> = TableColumn<Row>">
+  import { computed, ref, useAttrs, useId } from 'vue'
   import BlPagination from './BlPagination.vue'
   import { useTableFit } from '../internal/useTableFit'
   import { warn } from '../internal/dev'
   import { linkBindings, resolveTag } from '../internal/link'
   import {
     clampPage,
+    columnValue,
     computeTotals,
     formatCell,
     nextSort,
     pageSlice,
     sortRows
   } from '../internal/table'
+  import { useClampedPage } from '../internal/pageClamp'
   import { mergeLabels } from '../internal/labels'
   import type {
     LabelOverrides,
@@ -215,9 +217,9 @@
   const props = defineProps<{
     caption: string
     captionHidden?: boolean
-    columns: TableColumn<Row>[]
+    columns: readonly C[]
     rows: Row[]
-    rowKey?: string | ((row: Row) => string | number)
+    rowKey?: Extract<keyof Row, string> | ((row: Row) => string | number)
     scroll?: boolean
     compact?: boolean
     pageSize?: number
@@ -229,7 +231,9 @@
       to?: LinkTo | undefined
       href?: string | undefined
     }
+    /** What `@row-activate` compiles to. Its presence makes rows interactive (a primary-cell button). */
     onRowActivate?: (row: Row) => void
+    /** Sort collation locale, e.g. `'lv'`. Defaults to `'en'`, so server and client agree. */
     locale?: string
     labels?: Partial<LabelOverrides<TableLabels>>
     paginationLabels?: Partial<LabelOverrides<PaginationLabels>>
@@ -294,12 +298,10 @@
       page.value = value
     }
   })
-  watch(
-    () => [totalCount.value, props.pageSize, page.value] as const,
-    () => {
-      if (props.pageSize && currentPage.value !== page.value) page.value = currentPage.value
-    },
-    { immediate: true }
+  useClampedPage(
+    page,
+    () => totalCount.value,
+    () => props.pageSize ?? 0
   )
   const visibleRows = computed<Row[]>(() =>
     props.pageSize && !props.manual
@@ -319,7 +321,30 @@
     ]
   })
 
-  const slots = useSlots()
+  // A cell slot's value, per column kind: Row[key], what value() returns, or nothing.
+  type CellValue<Col, K> = Col extends { slot: true }
+    ? undefined
+    : Col extends { value: (row: never) => infer V }
+      ? V
+      : K extends keyof Row
+        ? Row[K]
+        : unknown
+  // One `cell-<key>` slot per column key. Columns typed as the whole `TableColumn<Row>` union
+  // have `string` keys, which leaves an index signature whose value is `unknown`.
+  const slots = defineSlots<
+    {
+      caption?: () => unknown
+      empty?: () => unknown
+      footer?: (props: { rows: Row[] }) => unknown
+      [name: `head-${string}`]: ((props: { column: C }) => unknown) | undefined
+    } & {
+      [K in C['key'] as `cell-${K}`]?: (props: {
+        row: Row
+        value: CellValue<Extract<C, { key: K }>, K>
+        column: Extract<C, { key: K }>
+      }) => unknown
+    }
+  >()
   const hasAction = computed(() => !!props.rowLink || !!props.onRowActivate)
   if (props.rowLink && props.onRowActivate)
     warn('BlTable: rowLink and @row-activate are both set; rowLink wins.')
@@ -350,8 +375,11 @@
     row.querySelector<HTMLElement>('.bl-table__action')?.click()
   }
 
-  const totalsMap = computed<Record<string, string | number>>(() =>
-    props.manual ? (props.totals ?? {}) : computeTotals(props.rows, props.columns)
+  // Manual totals arrive computed by the owner, so they render as given; no formatTotal.
+  const totalsMap = computed<Record<string, string>>(() =>
+    props.manual
+      ? Object.fromEntries(Object.entries(props.totals ?? {}).map(([k, v]) => [k, String(v)]))
+      : computeTotals(props.rows, props.columns)
   )
   const hasFooter = computed(
     () =>
@@ -379,7 +407,7 @@
   }
   function keyOf(row: Row, index: number): string | number {
     if (typeof props.rowKey === 'function') return props.rowKey(row)
-    if (props.rowKey) return String(row[props.rowKey])
+    if (props.rowKey) return String((row as Record<string, unknown>)[props.rowKey])
     return index
   }
   function cellClass(column: TableColumn<Row>): Record<string, boolean> {

@@ -1,5 +1,11 @@
 <template>
-  <textarea v-model="model" class="bl-textarea" :rows="rows" v-bind="textareaAttrs()"></textarea>
+  <textarea
+    v-model="model"
+    class="bl-textarea"
+    :rows="rows"
+    :disabled="disabled"
+    v-bind="textareaAttrs()"
+  ></textarea>
 </template>
 
 <script setup lang="ts">
@@ -7,7 +13,7 @@
   import { FIELD_CONTEXT } from '../types'
   import { mergeDescribedBy } from '../internal/describedBy'
 
-  withDefaults(defineProps<{ rows?: number }>(), { rows: 4 })
+  withDefaults(defineProps<{ rows?: number; disabled?: boolean }>(), { rows: 4 })
   defineOptions({ inheritAttrs: false })
   const model = defineModel<string>({ default: '' })
   const field = inject(FIELD_CONTEXT, null)

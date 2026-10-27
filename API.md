@@ -93,9 +93,9 @@
 - `BlMeta`
 - `BlMeter`
 - `BlMsg`
-- `BlNavLink`
 - `BlPagination`
 - `BlPrevNext`
+- `BlProgress`
 - `BlProse`
 - `BlRadio`
 - `BlRadioGroup`
@@ -103,8 +103,10 @@
 - `BlReadout`
 - `BlSectionHead`
 - `BlSegmented`
+- `BlSegmentedNav`
 - `BlSelect`
 - `BlSiteBar`
+- `BlSiteBarLink`
 - `BlSkipLink`
 - `BlSpecPanel`
 - `BlSpecRow`
@@ -127,14 +129,16 @@
 - `useToast`
 
 ## Nuxt auto-imports
-- `ansiToSegments`
-- `riseDelay`
-- `useAppearance`
-- `useFollowScroll`
-- `useMarquee`
-- `useReducedMotion`
-- `useScrollLifted`
-- `useToast`
+Default `Bl` prefix; `autoImports: { prefix }` changes them (`prefix: ''` keeps the bare names).
+
+- `blAnsiToSegments`
+- `blRiseDelay`
+- `useBlAppearance`
+- `useBlFollowScroll`
+- `useBlMarquee`
+- `useBlReducedMotion`
+- `useBlScrollLifted`
+- `useBlToast`
 
 ## Exported types
 
@@ -173,6 +177,33 @@ type AppearanceMode = 'auto' | 'light' | 'dark';
 
 ```ts
 type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
+```
+
+### `ColumnBase`
+
+```ts
+interface ColumnBase<Row extends object> {
+    label: string;
+    align?: 'start' | 'end' | 'center';
+    numeric?: boolean;
+    width?: string;
+    primary?: boolean;
+}
+```
+
+### `DerivedColumn`
+
+```ts
+interface DerivedColumn<Row extends object, V = unknown> extends ColumnBase<Row> {
+    key: string;
+    value: (row: Row) => V;
+    slot?: never;
+    format?(value: V, row: Row): string;
+    sortable?: boolean;
+    sortBy?: (row: Row) => string | number | null | undefined;
+    total?: TableTotal<Row>;
+    formatTotal?: (value: number, rows: Row[]) => string;
+}
 ```
 
 ### `DialogCloseEvent`
@@ -217,6 +248,23 @@ interface FollowScrollOptions {
 }
 ```
 
+### `KeyColumn`
+
+```ts
+type KeyColumn<Row extends object> = {
+    [K in Extract<keyof Row, string>]-?: ColumnBase<Row> & {
+        key: K;
+        value?: never;
+        slot?: never;
+        format?: (value: Row[K], row: Row) => string;
+        sortable?: boolean;
+        sortBy?: (row: Row) => string | number | null | undefined;
+        total?: TableTotal<Row>;
+        formatTotal?: (value: number, rows: Row[]) => string;
+    };
+}[Extract<keyof Row, string>];
+```
+
 ### `LabelOverrides`
 
 ```ts
@@ -235,6 +283,12 @@ type LedState = 'on' | 'off' | 'danger';
 
 ```ts
 type LinkAs = string | Component;
+```
+
+### `LinkCurrent`
+
+```ts
+type LinkCurrent = boolean | 'page' | 'step' | 'location';
 ```
 
 ### `LinkProps`
@@ -277,7 +331,6 @@ type MetaItem = string | {
 
 ```ts
 interface PaginationLabels {
-    nav: string;
     prev: string;
     next: string;
     page: (n: number) => string;
@@ -298,7 +351,6 @@ interface PrevNextItem extends Pick<LinkProps, 'to' | 'href'> {
 
 ```ts
 interface PrevNextLabels {
-    nav: string;
     prev: string;
     next: string;
 }
@@ -320,13 +372,22 @@ interface RiseDelayOptions {
 }
 ```
 
+### `SegmentedNavItem`
+
+```ts
+type SegmentedNavItem = LinkProps & {
+    label: string;
+    current?: LinkCurrent;
+};
+```
+
 ### `SegmentedOption`
 
 ```ts
-interface SegmentedOption<T> extends Pick<LinkProps, 'to' | 'href'> {
+interface SegmentedOption<T> {
     value: T;
     label: string;
-    current?: boolean;
+    disabled?: boolean;
 }
 ```
 
@@ -336,6 +397,21 @@ interface SegmentedOption<T> extends Pick<LinkProps, 'to' | 'href'> {
 interface SelectOption<T> {
     value: T;
     label: string;
+}
+```
+
+### `SlotColumn`
+
+```ts
+interface SlotColumn<Row extends object> extends ColumnBase<Row> {
+    key: string;
+    slot: true;
+    value?: never;
+    format?: never;
+    sortable?: false;
+    sortBy?: never;
+    total?: never;
+    formatTotal?: never;
 }
 ```
 
@@ -358,18 +434,7 @@ type StatusTone = 'neutral' | 'success' | 'danger';
 ### `TableColumn`
 
 ```ts
-interface TableColumn<Row = Record<string, unknown>> {
-    key: string;
-    label: string;
-    align?: 'start' | 'end' | 'center';
-    numeric?: boolean;
-    sortable?: boolean;
-    sortBy?: (row: Row) => string | number | null | undefined;
-    format?: (value: unknown, row?: Row) => string;
-    width?: string;
-    primary?: boolean;
-    total?: 'sum' | 'avg' | 'count' | ((rows: Row[]) => string | number);
-}
+type TableColumn<Row extends object = Record<string, unknown>> = KeyColumn<Row> | DerivedColumn<Row> | SlotColumn<Row>;
 ```
 
 ### `TableLabels`
@@ -392,6 +457,12 @@ interface TableSort {
     key: string;
     dir: 'asc' | 'desc';
 }
+```
+
+### `TableTotal`
+
+```ts
+type TableTotal<Row> = 'sum' | 'avg' | 'count' | ((rows: Row[]) => number);
 ```
 
 ### `ToastAction`
@@ -425,7 +496,6 @@ type ToastTone = StatusTone;
 
 ```ts
 interface ToasterLabels {
-    region: string;
     dismiss: string;
     actionHint: (label: string) => string;
 }
@@ -447,10 +517,10 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `ariaLabel` | `string \| undefined` | no |  |
 | `as` | `LinkAs \| undefined` | no |  |
 | `disabled` | `boolean \| undefined` | no |  |
 | `href` | `string \| undefined` | no |  |
-| `label` | `string \| undefined` | no |  |
 | `pill` | `boolean \| undefined` | no |  |
 | `pressed` | `boolean \| undefined` | no | `undefined` |
 | `to` | `LinkTo \| undefined` | no |  |
@@ -507,7 +577,7 @@ Exposed: none
 | prop | type | required | default |
 | --- | --- | --- | --- |
 | `name` | `string \| undefined` | no |  |
-| `open` | `boolean \| undefined` | no |  |
+| `open` | `boolean \| undefined` | no | `false` |
 | `summary` | `string \| undefined` | no |  |
 
 Slots: `default`, `summary`
@@ -555,7 +625,7 @@ Exposed: none
 | --- | --- | --- | --- |
 | `as` | `LinkAs \| undefined` | no |  |
 | `compact` | `boolean \| undefined` | no |  |
-| `current` | `boolean \| "page" \| "step" \| "location" \| "true" \| undefined` | no |  |
+| `current` | `LinkCurrent \| undefined` | no |  |
 | `href` | `string \| undefined` | no |  |
 | `to` | `LinkTo \| undefined` | no |  |
 
@@ -567,6 +637,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `disabled` | `boolean \| undefined` | no |  |
 | `modelValue` | `string \| undefined` | no | `""` |
 | `type` | `"search" \| "text" \| "email" \| "password" \| "tel" \| "url" \| undefined` | no | `"text"` |
 
@@ -578,7 +649,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `label` | `string \| undefined` | no |  |
+| `ariaLabel` | `string \| undefined` | no |  |
 | `state` | `"danger" \| "off" \| "on" \| undefined` | no | `"off"` |
 
 Slots: none
@@ -603,10 +674,14 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `ariaLabel` | `string \| undefined` | no | `"Log"` |
 | `follow` | `boolean \| undefined` | no | `true` |
-| `label` | `string \| undefined` | no | `"Log"` |
 | `lines` | `string[]` | yes |  |
 | `offset` | `number \| undefined` | no | `0` |
+
+Prop notes:
+
+- `offset`: Absolute index of `lines[0]`, default 0. When a capped buffer drops its oldest line, advance this by one so surviving rows keep their DOM nodes instead of every row being re-patched (which makes screen readers re-announce the log).
 
 Slots: none
 Events: none
@@ -651,11 +726,16 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `label` | `string` | yes |  |
-| `showLabel` | `boolean \| undefined` | no |  |
+| `ariaLabel` | `string \| undefined` | no |  |
+| `label` | `string \| undefined` | no |  |
 | `showValue` | `boolean \| undefined` | no |  |
-| `value` | `number \| null` | yes |  |
+| `value` | `number` | yes |  |
 | `valueText` | `string \| undefined` | no |  |
+
+Prop notes:
+
+- `ariaLabel`: Accessible name when there is no visible label.
+- `label`: Visible text above the bar; it names the bar.
 
 Slots: none
 Events: none
@@ -671,29 +751,20 @@ Slots: `default`
 Events: none
 Exposed: none
 
-### BlNavLink
-
-| prop | type | required | default |
-| --- | --- | --- | --- |
-| `as` | `LinkAs \| undefined` | no |  |
-| `current` | `boolean \| undefined` | no |  |
-| `href` | `string \| undefined` | no |  |
-| `to` | `LinkTo \| undefined` | no |  |
-
-Slots: `default`
-Events: none
-Exposed: none
-
 ### BlPagination
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `label` | `string \| undefined` | no |  |
+| `ariaLabel` | `string \| undefined` | no |  |
 | `labels` | `Partial<LabelOverrides<PaginationLabels>> \| undefined` | no |  |
 | `page` | `number \| undefined` | no | `1` |
 | `pageSize` | `number` | yes |  |
 | `siblings` | `number \| undefined` | no | `1` |
 | `total` | `number` | yes |  |
+
+Prop notes:
+
+- `ariaLabel`: Accessible name of the nav.
 
 Slots: none
 Events: `update:page`
@@ -703,10 +774,30 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `as` | `LinkAs \| undefined` | no | `"a"` |
+| `ariaLabel` | `string \| undefined` | no | `"Pagination"` |
 | `labels` | `Partial<LabelOverrides<PrevNextLabels>> \| undefined` | no |  |
+| `linkAs` | `LinkAs \| undefined` | no | `"a"` |
 | `next` | `PrevNextItem \| null \| undefined` | no |  |
 | `prev` | `PrevNextItem \| null \| undefined` | no |  |
+
+Slots: none
+Events: none
+Exposed: none
+
+### BlProgress
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `ariaLabel` | `string \| undefined` | no |  |
+| `label` | `string \| undefined` | no |  |
+| `showValue` | `boolean \| undefined` | no |  |
+| `value` | `number \| null` | yes |  |
+| `valueText` | `string \| undefined` | no |  |
+
+Prop notes:
+
+- `ariaLabel`: Accessible name when there is no visible label.
+- `label`: Visible text above the bar; it names the bar.
 
 Slots: none
 Events: none
@@ -755,10 +846,11 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `disabled` | `boolean \| undefined` | no |  |
 | `format` | `((value: number) => string) \| undefined` | no |  |
 | `max` | `number \| undefined` | no | `100` |
 | `min` | `number \| undefined` | no | `0` |
-| `modelValue` | `number \| undefined` | no | `0` |
+| `modelValue` | `number \| undefined` | no |  |
 | `step` | `number \| undefined` | no | `1` |
 
 Slots: none
@@ -794,20 +886,34 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `as` | `LinkAs \| undefined` | no |  |
+| `ariaLabel` | `string \| undefined` | no |  |
 | `compact` | `boolean \| undefined` | no |  |
-| `label` | `string \| undefined` | no |  |
 | `modelValue` | `T \| undefined` | no |  |
+| `name` | `string \| undefined` | no |  |
 | `options` | `SegmentedOption<T>[]` | yes |  |
 
 Slots: none
 Events: `update:modelValue`
 Exposed: none
 
+### BlSegmentedNav
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `ariaLabel` | `string \| undefined` | no |  |
+| `compact` | `boolean \| undefined` | no |  |
+| `items` | `SegmentedNavItem[]` | yes |  |
+| `linkAs` | `LinkAs \| undefined` | no |  |
+
+Slots: none
+Events: none
+Exposed: none
+
 ### BlSelect
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `disabled` | `boolean \| undefined` | no |  |
 | `modelValue` | `T \| undefined` | no |  |
 | `options` | `SelectOption<T>[]` | yes |  |
 
@@ -819,10 +925,23 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `ariaLabel` | `string \| undefined` | no | `"Primary"` |
 | `lift` | `number \| false \| undefined` | no | `24` |
-| `navLabel` | `string \| undefined` | no | `"Primary"` |
 
 Slots: `actions`, `brand`, `nav`
+Events: none
+Exposed: none
+
+### BlSiteBarLink
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `as` | `LinkAs \| undefined` | no |  |
+| `current` | `LinkCurrent \| undefined` | no |  |
+| `href` | `string \| undefined` | no |  |
+| `to` | `LinkTo \| undefined` | no |  |
+
+Slots: `default`
 Events: none
 Exposed: none
 
@@ -865,7 +984,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `label` | `string \| undefined` | no | `"Primary"` |
+| `ariaLabel` | `string \| undefined` | no | `"Primary"` |
 
 Slots: `default`
 Events: none
@@ -876,7 +995,7 @@ Exposed: none
 | prop | type | required | default |
 | --- | --- | --- | --- |
 | `as` | `LinkAs \| undefined` | no |  |
-| `current` | `boolean \| undefined` | no |  |
+| `current` | `LinkCurrent \| undefined` | no |  |
 | `href` | `string \| undefined` | no |  |
 | `to` | `LinkTo \| undefined` | no |  |
 
@@ -890,7 +1009,7 @@ Exposed: none
 | --- | --- | --- | --- |
 | `caption` | `string` | yes |  |
 | `captionHidden` | `boolean \| undefined` | no |  |
-| `columns` | `TableColumn<Row>[]` | yes |  |
+| `columns` | `readonly C[]` | yes |  |
 | `compact` | `boolean \| undefined` | no |  |
 | `labels` | `Partial<LabelOverrides<TableLabels>> \| undefined` | no |  |
 | `locale` | `string \| undefined` | no |  |
@@ -899,7 +1018,7 @@ Exposed: none
 | `page` | `number \| undefined` | no | `1` |
 | `pageSize` | `number \| undefined` | no |  |
 | `paginationLabels` | `Partial<LabelOverrides<PaginationLabels>> \| undefined` | no |  |
-| `rowKey` | `string \| ((row: Row) => string \| number) \| undefined` | no |  |
+| `rowKey` | `Extract<keyof Row, string> \| ((row: Row) => string \| number) \| undefined` | no |  |
 | `rowLink` | `((row: Row) => { as?: LinkAs \| undefined; to?: LinkTo \| undefined; href?: string \| undefined; }) \| undefined` | no |  |
 | `rows` | `Row[]` | yes |  |
 | `scroll` | `boolean \| undefined` | no |  |
@@ -907,9 +1026,14 @@ Exposed: none
 | `totalRows` | `number \| undefined` | no |  |
 | `totals` | `Record<string, string \| number> \| undefined` | no |  |
 
+Prop notes:
+
+- `locale`: Sort collation locale, e.g. `'lv'`. Defaults to `'en'`, so server and client agree.
+- `onRowActivate`: What `@row-activate` compiles to. Its presence makes rows interactive (a primary-cell button).
+
 Slots: `caption`, `empty`, `footer`
 Dynamic slots: `cell-<key>`, `head-<key>`
-Slot props: `footer` `{ rows: Row[]; }`, `cell-<key>` `{ row: Row; value: unknown; column: TableColumn<Row> }`, `head-<key>` `{ column: TableColumn<Row> }`
+Slot props: `footer` `{ rows: Row[]; }`, `cell-<key>` `{ row: Row; value: by column kind, Row[key] (key), value() result (derived), undefined (slot-only), unknown if keys are string; column: C }`, `head-<key>` `{ column: C }`
 Events: `update:page`, `update:sort`
 Exposed: none
 
@@ -937,6 +1061,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `disabled` | `boolean \| undefined` | no |  |
 | `modelValue` | `string \| undefined` | no | `""` |
 | `rows` | `number \| undefined` | no | `4` |
 
@@ -948,6 +1073,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `ariaLabel` | `string \| undefined` | no | `"Notifications"` |
 | `labels` | `Partial<LabelOverrides<ToasterLabels>> \| undefined` | no |  |
 | `max` | `number \| undefined` | no | `3` |
 
@@ -1071,6 +1197,7 @@ Exposed: none
 - `bl-meta--sep`
 - `bl-meta__key`
 - `bl-meter`
+- `bl-meter--indeterminate`
 - `bl-meter-field`
 - `bl-meter-field__head`
 - `bl-meter-field__label`
@@ -1205,7 +1332,6 @@ Exposed: none
 - `data-dir`
 - `data-empty`
 - `data-fit`
-- `data-indeterminate`
 - `data-label`
 - `data-lifted`
 - `data-measuring`
@@ -1214,10 +1340,20 @@ Exposed: none
 - `data-stacked`
 
 ## Tokens
-- `--bl-canvas`
-- `--bl-control-border`
-- `--bl-copper`
-- `--bl-danger`
+- `--bl-color-canvas`
+- `--bl-color-control-border`
+- `--bl-color-copper`
+- `--bl-color-danger`
+- `--bl-color-ink-1`
+- `--bl-color-ink-2`
+- `--bl-color-ink-3`
+- `--bl-color-on-danger`
+- `--bl-color-on-trace`
+- `--bl-color-phosphor`
+- `--bl-color-raised`
+- `--bl-color-separator`
+- `--bl-color-surface`
+- `--bl-color-trace`
 - `--bl-duration-base`
 - `--bl-duration-fast`
 - `--bl-duration-page-enter`
@@ -1228,9 +1364,6 @@ Exposed: none
 - `--bl-font-display`
 - `--bl-font-mono`
 - `--bl-font-sans`
-- `--bl-ink-1`
-- `--bl-ink-2`
-- `--bl-ink-3`
 - `--bl-layout-column`
 - `--bl-layout-gutter`
 - `--bl-layout-gutter-narrow`
@@ -1240,17 +1373,13 @@ Exposed: none
 - `--bl-leading-display-md`
 - `--bl-leading-heading`
 - `--bl-leading-lede`
-- `--bl-phosphor`
 - `--bl-radius-card`
 - `--bl-radius-chip`
 - `--bl-radius-pill`
-- `--bl-raised`
-- `--bl-separator`
 - `--bl-shadow-float`
 - `--bl-shadow-glow`
 - `--bl-shadow-thumb`
 - `--bl-shadow-well`
-- `--bl-surface`
 - `--bl-text-annotation`
 - `--bl-text-body`
 - `--bl-text-display-lg`
@@ -1259,7 +1388,6 @@ Exposed: none
 - `--bl-text-heading`
 - `--bl-text-micro`
 - `--bl-text-small`
-- `--bl-trace`
 - `--bl-tracking-annotation`
 - `--bl-tracking-display`
 - `--bl-tracking-heading`
@@ -1288,6 +1416,8 @@ Exposed: none
 - `--color-ink-1`
 - `--color-ink-2`
 - `--color-ink-3`
+- `--color-on-danger`
+- `--color-on-trace`
 - `--color-phosphor`
 - `--color-raised`
 - `--color-separator`
@@ -1295,7 +1425,7 @@ Exposed: none
 - `--color-trace`
 - `--container-column`
 - `--container-prose`
-- `--ease-out`
+- `--ease-bl`
 - `--font-display`
 - `--font-mono`
 - `--font-sans`

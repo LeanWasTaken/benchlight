@@ -1,6 +1,6 @@
 {
   "name": "benchlight",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "packageManager": "bun@1.4.2",
   "description": "Token-driven CSS, a Tailwind v4 theme and thin Vue/Nuxt components",
   "license": "MIT",

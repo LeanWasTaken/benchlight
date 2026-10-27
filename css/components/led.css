@@ -5,17 +5,17 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--bl-ink-3);
+    background: var(--bl-color-ink-3);
     transition:
       background-color var(--bl-duration-fast) ease,
       box-shadow var(--bl-duration-fast) ease;
   }
   .bl-led--on {
-    background: var(--bl-phosphor);
-    box-shadow: var(--bl-shadow-glow) var(--bl-phosphor);
+    background: var(--bl-color-phosphor);
+    box-shadow: var(--bl-shadow-glow) var(--bl-color-phosphor);
   }
   .bl-led--danger {
-    background: var(--bl-danger);
+    background: var(--bl-color-danger);
   }
   @media (forced-colors: active) {
     .bl-led {

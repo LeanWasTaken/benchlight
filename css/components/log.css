@@ -5,43 +5,43 @@
     padding: 12px 16px;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: var(--bl-control-border) transparent;
-    background: var(--bl-surface);
-    border: 1px solid var(--bl-separator);
+    scrollbar-color: var(--bl-color-control-border) transparent;
+    background: var(--bl-color-surface);
+    border: 1px solid var(--bl-color-separator);
     border-radius: var(--bl-radius-card);
     font-family: var(--bl-font-mono);
     font-size: 0.75rem;
     line-height: 1.7;
-    color: var(--bl-ink-2);
+    color: var(--bl-color-ink-2);
     white-space: pre-wrap;
     overflow-wrap: anywhere;
   }
   .bl-ansi-30,
   .bl-ansi-90 {
-    color: var(--bl-ink-3);
+    color: var(--bl-color-ink-3);
   }
   .bl-ansi-31,
   .bl-ansi-91 {
-    color: var(--bl-danger);
+    color: var(--bl-color-danger);
   }
   .bl-ansi-32,
   .bl-ansi-92 {
-    color: var(--bl-phosphor);
+    color: var(--bl-color-phosphor);
   }
   .bl-ansi-33,
   .bl-ansi-93,
   .bl-ansi-35,
   .bl-ansi-95 {
-    color: var(--bl-copper);
+    color: var(--bl-color-copper);
   }
   .bl-ansi-34,
   .bl-ansi-94,
   .bl-ansi-36,
   .bl-ansi-96 {
-    color: var(--bl-trace);
+    color: var(--bl-color-trace);
   }
   .bl-ansi-37,
   .bl-ansi-97 {
-    color: var(--bl-ink-1);
+    color: var(--bl-color-ink-1);
   }
 }

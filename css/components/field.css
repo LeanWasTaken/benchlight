@@ -14,7 +14,7 @@
   .bl-field__hint {
     margin: 0;
     font-size: var(--bl-text-small);
-    color: var(--bl-ink-2);
+    color: var(--bl-color-ink-2);
   }
   /* The error line carries a leading "!" mark in a disc, so the state does not rest on colour. */
   .bl-field__error {
@@ -23,7 +23,7 @@
     gap: 8px;
     margin: 0;
     font-size: var(--bl-text-small);
-    color: var(--bl-danger);
+    color: var(--bl-color-danger);
   }
   .bl-field__error::before {
     content: '!' / '';
@@ -32,9 +32,9 @@
     width: 16px;
     height: 16px;
     margin-top: 0.1em;
-    background: var(--bl-danger);
+    background: var(--bl-color-danger);
     border-radius: 50%;
-    color: var(--bl-raised);
+    color: var(--bl-color-on-danger);
     font-size: 11px;
     font-weight: 700;
     line-height: 16px;
@@ -46,12 +46,12 @@
     width: 100%;
     min-height: 44px;
     padding: 10px 12px;
-    background: var(--bl-raised);
-    border: 1px solid var(--bl-control-border);
+    background: var(--bl-color-raised);
+    border: 1px solid var(--bl-color-control-border);
     border-radius: var(--bl-radius-chip);
     font: inherit;
     font-size: var(--bl-text-small);
-    color: var(--bl-ink-1);
+    color: var(--bl-color-ink-1);
     transition: border-color var(--bl-duration-fast) ease;
   }
   /* iOS Safari zooms the page when a control under 16px takes focus. */
@@ -66,7 +66,7 @@
     .bl-input:hover,
     .bl-select:hover,
     .bl-textarea:hover {
-      border-color: var(--bl-ink-3);
+      border-color: var(--bl-color-ink-3);
     }
   }
   /* Invalid thickens the border (padding gives the width back) instead of only recolouring it;
@@ -76,7 +76,7 @@
   .bl-textarea[aria-invalid='true']:not(:disabled) {
     padding: 9px 11px;
     border-width: 2px;
-    border-color: var(--bl-danger);
+    border-color: var(--bl-color-danger);
   }
   .bl-input:focus-visible,
   .bl-select:focus-visible,
@@ -84,7 +84,7 @@
   .bl-input[aria-invalid='true']:not(:disabled):focus-visible,
   .bl-select[aria-invalid='true']:not(:disabled):focus-visible,
   .bl-textarea[aria-invalid='true']:not(:disabled):focus-visible {
-    border-color: var(--bl-trace);
+    border-color: var(--bl-color-trace);
   }
   .bl-textarea {
     display: block;
@@ -92,11 +92,11 @@
   }
   .bl-input::placeholder,
   .bl-textarea::placeholder {
-    color: var(--bl-ink-3);
+    color: var(--bl-color-ink-3);
   }
   .bl-select option {
-    background: var(--bl-raised);
-    color: var(--bl-ink-1);
+    background: var(--bl-color-raised);
+    color: var(--bl-color-ink-1);
   }
   /* BlSelect wraps the select so a themed chevron can sit on top of it. A bare .bl-select keeps
      the native arrow; only a single-line select inside the wrapper drops it. The chevron is a
@@ -122,7 +122,7 @@
     width: 10px;
     height: 6px;
     translate: 0 -50%;
-    background: var(--bl-ink-2);
+    background: var(--bl-color-ink-2);
     -webkit-mask: var(
         --bl-chevron-mask,
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6' fill='none' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E")
@@ -141,7 +141,7 @@
   }
   @media (hover: hover) {
     .bl-select-wrap:hover:not(:has(> .bl-select:disabled))::after {
-      background: var(--bl-ink-1);
+      background: var(--bl-color-ink-1);
     }
   }
   .bl-select-wrap:has(> .bl-select:disabled)::after {
@@ -168,6 +168,14 @@
       opacity: 1;
     }
   }
+  /* A disabled field dims like a disabled button; the range dims whole, value text included. */
+  .bl-input:disabled,
+  .bl-select:disabled,
+  .bl-textarea:disabled,
+  .bl-range:has(> :disabled) {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
   .bl-range {
     display: flex;
     flex-wrap: wrap;
@@ -179,7 +187,7 @@
     flex: 1;
     min-width: 96px;
     min-height: 44px;
-    accent-color: var(--bl-trace);
+    accent-color: var(--bl-color-trace);
   }
   /* Consumers reserve value width with --bl-range-value-width so the track length stays fixed. */
   .bl-range__value {

@@ -1,6 +1,6 @@
 @layer components {
   .bl-disclosure {
-    border-block: 1px solid var(--bl-separator);
+    border-block: 1px solid var(--bl-color-separator);
   }
   .bl-disclosure + .bl-disclosure {
     border-block-start: 0;
@@ -13,7 +13,7 @@
     padding-block: 10px;
     list-style: none;
     font-weight: 500;
-    color: var(--bl-ink-1);
+    color: var(--bl-color-ink-1);
     cursor: pointer;
   }
   .bl-disclosure__summary::-webkit-details-marker {
@@ -29,7 +29,7 @@
     flex: none;
     inline-size: 10px;
     block-size: 6px;
-    background: var(--bl-ink-2);
+    background: var(--bl-color-ink-2);
     -webkit-mask: var(
         --bl-chevron-mask,
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6' fill='none' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E")
@@ -51,7 +51,7 @@
   }
   @media (hover: hover) {
     .bl-disclosure__summary:hover .bl-disclosure__chevron {
-      background: var(--bl-ink-1);
+      background: var(--bl-color-ink-1);
     }
   }
   @media (prefers-reduced-motion: reduce) {

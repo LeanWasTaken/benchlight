@@ -1,5 +1,121 @@
 # Changelog
 
+## 0.9.0 - 2026-10-27
+
+The v1 API freeze: one prop vocabulary, typed BlTable columns, one controlled-model rule and
+prefixed names for everything Benchlight puts in a consumer's global scope (Nuxt auto-imports,
+colour tokens, the Tailwind easing). Almost every change breaks, and none keeps an alias. Use the
+table below to migrate; it is grouped by area.
+
+### Migration
+
+<!-- prettier-ignore -->
+| Before | After |
+| --- | --- |
+| BlButton, BlLed `label` | `ariaLabel` (or the plain `aria-label` attribute) |
+| BlLog, BlTabBar `label` | `ariaLabel` (or `aria-label`); same defaults |
+| BlSiteBar `navLabel` | `ariaLabel` (or `aria-label`); it names the `<nav>` |
+| BlPagination `label` and `labels.nav` | `ariaLabel` (or `aria-label`) |
+| BlPrevNext `labels.nav` | `ariaLabel` (or `aria-label`) |
+| BlToaster `labels.region` | `ariaLabel` (or `aria-label`) |
+| BlPrevNext `as` | `linkAs` |
+| BlIndexRow `current="true"` | `current` (`true` now renders `aria-current="page"`, not `"true"`) |
+| BlSiteBarLink, BlTabBarItem, BlIndexRow `current` | `LinkCurrent`: `boolean \| 'page' \| 'step' \| 'location'`; `true` means `'page'` |
+| `disabled` on BlInput, BlSelect, BlTextarea or BlRange | unchanged in templates; it is now a declared prop, so it is no longer in `$attrs` |
+| BlMeter `label` with `showLabel` | `label` is always visible: drop `showLabel`; for a hidden name use `ariaLabel` instead of `label` |
+| `<BlMeter :value="null">`, or BlMeter as a task bar | `<BlProgress :value="null">` / BlProgress (BlMeter now announces `role="meter"`) |
+| BlMeter `:value` above 1 (for example `75`) | a 0 to 1 fraction; outside 0 to 1 (or `NaN`) it warns once in development and renders clamped |
+| BlSegmented `label` | `ariaLabel`; `modelValue` still works, but it renders radios, not `aria-pressed` buttons |
+| BlSegmented options with `to`, `href` or `current`, or BlSegmented `as` | BlSegmentedNav `items` (`as` → `linkAs`; an item's own `as` overrides `linkAs`) |
+| `SegmentedOption` `to`, `href`, `current` | gone; `SegmentedOption` gains `disabled`, and links are `SegmentedNavItem` |
+| `<BlMsg tone="info">`, `"ok"`, `"err"` | `tone="neutral"` (or omit), `"success"`, `"danger"`; the old values now render the neutral tone |
+| BlNavLink | BlSiteBarLink (import and template; same props, slots and `bl-site-bar__link` class) |
+| BlSectionHead root `<header class="bl-section-head">` | a `<div>`: select `.bl-section-head`, not `header.bl-section-head`, and give `heading` (or `eyebrow` with `bar`) a value. Host CSS that resets `div` margins (for example `.x > div`) now reaches it |
+| BlTabBarItem `.bl-tab-bar__icon` with no `icon` slot | not rendered; target the item, not the empty span |
+| a script `const columns = [...]` passed to BlTable, unannotated (inline template column literals are checked as they are) | annotate it `TableColumn<Row>[]`, or `as const satisfies readonly TableColumn<Row>[]` to type the cell slots |
+| `interface X extends TableColumn<Row>` | `TableColumn<Row>` is now a union (`KeyColumn \| DerivedColumn \| SlotColumn`), so it cannot be extended; use an intersection: `type X = TableColumn<Row> & { … }` |
+| BlTable `rowKey` as any string | a key of `Row` (or a function `(row) => string \| number`) |
+| `{ key: 'actions', label: '' }` plus a `#cell-actions` slot | `{ key: 'actions', label: '', slot: true }` |
+| a column whose `key` is not a row key, read via `sortBy` or `format(_, row)` | `{ key, value: (row) => … }` |
+| `format: (value: unknown, row?: Row) => …` | `format: (value: Row[K], row: Row) => …` |
+| `format` relied on to format a `total` | `formatTotal: (value, rows) => …`; without it totals render with `String()` |
+| `total: (rows) => '3 bands'` (a string) | `total: (rows) => rows.length, formatTotal: (n) => n + ' bands'` |
+| BlTable `paginationLabels.nav` | removed; its pagination is named by `labels.pages(caption)` |
+| sort order following the runtime's locale | pass `locale` (for example `locale="lv"`); the default is `'en'` |
+| BlTable resetting `page` to 1 while `rows` are empty | `page` is left alone until rows load, so a `?page=3` deep link survives an async load |
+| BlPagination `page` past the last page | once `total > 0` it emits the clamped page (`update:page`); nothing while `total` is 0 |
+| BlRange with no `v-model` showing `0` | it shows `min`; an out-of-range or off-step value is shown clamped and snapped, never emitted |
+| BlDialog `:open` plus `@update:open` | unchanged; `open` is now a required `v-model:open`. BlDisclosure `open` works unbound (local state) |
+| Nuxt auto-import `useToast` | `useBlToast`; or set `autoImports: { prefix: '' }` to keep every bare name |
+| Nuxt auto-import `useAppearance` | `useBlAppearance` |
+| Nuxt auto-import `useScrollLifted` | `useBlScrollLifted` |
+| Nuxt auto-import `useReducedMotion` | `useBlReducedMotion` |
+| Nuxt auto-import `useMarquee` | `useBlMarquee` |
+| Nuxt auto-import `useFollowScroll` | `useBlFollowScroll` |
+| Nuxt auto-import `riseDelay`, `ansiToSegments` | `blRiseDelay`, `blAnsiToSegments` |
+| `var(--bl-trace)` (and `canvas`, `surface`, `raised`, `separator`, `control-border`, `ink-1`, `ink-2`, `ink-3`, `copper`, `phosphor`, `danger`) | `var(--bl-color-trace)` and so on; search for `--bl-` followed by one of those names |
+| text on a trace or danger fill using `var(--bl-canvas)` or `var(--bl-raised)` | `var(--bl-color-on-trace)` / `var(--bl-color-on-danger)` |
+| raw CSS `<button class="bl-segmented__item" aria-pressed="true">` | a radio group: `<label class="bl-segmented__item"><input type="radio" checked> …</label>`; or, for links, `<a class="bl-segmented__item" aria-current="page">` (BlSegmentedNav markup) |
+| raw CSS `<div class="bl-meter" data-indeterminate>` | `class="bl-meter bl-meter--indeterminate"`; use `role="meter"` for a gauge |
+| Tailwind `ease-out` expecting the Benchlight curve | `ease-bl`; `ease-out` is Tailwind's own again |
+
+### Added
+
+- BlProgress, the task readout (`role="progressbar"`, `value: number | null`, `null` for
+  indeterminate), with BlMeter's props; both use the `meter` CSS module.
+- BlSegmentedNav, a `<nav>` of links with `aria-current`, named by `ariaLabel`. `linkAs` sets the
+  link component for every item, and a `SegmentedNavItem` may set its own `as`, which wins.
+- BlTable slot-only columns (`slot: true`), derived columns (`value(row)`) and `formatTotal`.
+- `--bl-color-on-trace` and `--bl-color-on-danger`: text and marks on a trace or danger fill
+  (light `#ffffff`, dark the canvas colour, both at least 4.5:1). `benchlight/tokens` gains the
+  two names.
+- The Tailwind `ease-bl` utility, and `autoImports: { prefix }` in the Nuxt module.
+- The `LinkCurrent` type.
+- BlSegmented `name` (the radio group's `name`; a generated one by default).
+- A development warning when BlMeter or BlProgress has no name (`label`, `ariaLabel` or
+  `aria-labelledby`).
+
+### Changed
+
+- BlTable columns are typed from the row (generics `Row extends object` and
+  `C extends TableColumn<Row>`, so interface rows compile). A column is a key column (`key` is a
+  row key), a derived column (`value(row)`) or a slot-only column (`slot: true`). With literal
+  columns, each `cell-<key>` slot's `value` follows its column's kind and unknown slot names fail
+  type-checking.
+- BlTable totals render through `formatTotal(value, rows)` (else `String()`), never `format`; a
+  custom `total` function returns a number. Manual `totals` render as given.
+- One prop vocabulary. `label` is only ever visible text; a name with no visible text is
+  `ariaLabel` (the plain `aria-label` attribute maps to it and lands on the right element).
+  BlPrevNext takes `linkAs` for its link component, `current` is `LinkCurrent` everywhere, and
+  `disabled` is a declared prop on BlInput, BlSelect, BlTextarea and BlRange.
+- One controlled-model rule: a component shows a corrected value but emits only what the user
+  chose, except a page number that no longer exists once data has loaded. BlTable stops resetting
+  `page` while it has no rows, BlPagination emits a clamped page once `total > 0`, BlRange's
+  uncontrolled default is `min`, BlDialog's `open` is a required `v-model:open` and BlDisclosure
+  works unbound.
+- BlSegmented is a native radio group (`role="radiogroup"`, `v-model`, works unbound) and no
+  longer renders links; link sets move to BlSegmentedNav.
+- BlMeter is a gauge: `role="meter"`, `value: number`, no indeterminate state (a `null` passed at
+  runtime renders as 0), and a dev warning when `value` is outside 0 to 1 (it renders clamped).
+  The indeterminate bar is now `.bl-meter--indeterminate`, not `[data-indeterminate]`.
+- The Nuxt module auto-imports composables and helpers with a `Bl` prefix (`useToast` →
+  `useBlToast`, `riseDelay` → `blRiseDelay`), ending the clash with `@nuxt/ui`'s `useToast`.
+  `autoImports` is now `boolean | { prefix?: string }`; `false` still turns them off,
+  `{ prefix: 'Acme' }` renames them and `{ prefix: '' }` restores the bare names. Explicit imports
+  from `benchlight/vue` keep their names.
+- The default sort collator is `'en'`, not the runtime locale, so server and client agree.
+- Every colour token moves under `--bl-color-*` (`--bl-trace` is now `--bl-color-trace`, and
+  likewise `canvas`, `surface`, `raised`, `separator`, `control-border`, `ink-1`, `ink-2`,
+  `ink-3`, `copper`, `phosphor`, `danger`). Tailwind utility names do not change, and
+  `benchlight/tokens` is unchanged apart from the two new names. The on-colour tokens replace the
+  canvas and raised colours components used on trace and danger fills.
+- The Tailwind theme no longer overrides `ease-out`; the Benchlight curve is `ease-bl`.
+- Small cleanups. BlMsg drops the pre-0.7 `info`, `ok` and `err` tones (and their dev warning);
+  BlNavLink is renamed BlSiteBarLink, since it only works inside BlSiteBar's list (props, slots
+  and CSS classes are unchanged); BlSectionHead renders a `<div>`, not a `<header>` (a `banner`
+  landmark outside sectioning elements), and warns in development when its heading is empty;
+  BlTabBarItem renders the icon span only when the `icon` slot has content.
+
 ## 0.8.1 - 2026-10-27
 
 Non-breaking fixes from an audit of 0.8.0. Two behaviours change for the host app: under reduced

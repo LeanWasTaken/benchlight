@@ -9,7 +9,7 @@ classes.
 ## Install
 
 ```json
-"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.8.1"
+"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.9.0"
 ```
 
 The repo is private and the URL uses SSH on purpose: bun turns GitHub https URLs into API tarball
@@ -65,12 +65,15 @@ export default defineNuxtConfig({
 ```
 
 The module adds the fonts and component CSS, the no-flash appearance script, auto-imported `Bl*`
-components and composables (`useAppearance`, `useScrollLifted`, `useFollowScroll`,
-`useReducedMotion`, `useMarquee`, `riseDelay`, `ansiToSegments`, `useToast`).
-`benchlight: { fonts: false }` skips the bundled fonts, and `benchlight: { autoImports: false }`
-skips the composable and helper auto-imports (components stay auto-imported), so they do not
-collide with another library's. `BlSiteBar` wraps its nav in a `<nav>` landmark labelled by
-`navLabel` (default `Primary`). The Tailwind lines are optional: skip them if the app does not use
+components and composables, which take the `Bl` prefix (`useBlAppearance`, `useBlScrollLifted`,
+`useBlFollowScroll`, `useBlReducedMotion`, `useBlMarquee`, `blRiseDelay`, `blAnsiToSegments`,
+`useBlToast`). Explicit imports from `benchlight/vue` keep the bare names.
+`benchlight: { fonts: false }` skips the bundled fonts. `benchlight: { autoImports: false }` skips
+the composable and helper auto-imports (components stay auto-imported), and
+`benchlight: { autoImports: { prefix: 'Acme' } }` renames them (`useAcmeToast`, `acmeRiseDelay`;
+the prefix goes after `use` for `use*` names and is prepended lower-cased for the rest;
+`prefix: ''` restores the bare names). `BlSiteBar` wraps its nav in a `<nav>` landmark labelled by
+`ariaLabel` (default `Primary`; the plain `aria-label` attribute works too). The Tailwind lines are optional: skip them if the app does not use
 Tailwind.
 
 ```vue
@@ -84,7 +87,9 @@ Tailwind.
   <BlSiteBar>
     <template #brand><NuxtLink to="/" class="bl-site-bar__brand">MY SITE</NuxtLink></template>
     <template #nav>
-      <BlNavLink :as="NuxtLink" to="/projects" :current="isActive('/projects')">Projects</BlNavLink>
+      <BlSiteBarLink :as="NuxtLink" to="/projects" :current="isActive('/projects')"
+        >Projects</BlSiteBarLink
+      >
     </template>
     <template #actions><BlAppearanceSwitch /></template>
   </BlSiteBar>
@@ -113,7 +118,23 @@ import { BlButton } from 'benchlight/vue'
 `benchlight()` inlines the no-flash appearance script and keeps the shipped `.vue` source out of
 dependency pre-bundling. Tailwind is optional: only if the app uses it, add
 `@import 'benchlight/tailwind/theme.css';` after `@import 'tailwindcss';`. The theme maps the
-`--bl-control-border` token to the `border-control-border` utility.
+`--bl-color-control-border` token to the `border-control-border` utility.
+
+## Colour tokens
+
+Every colour is a `--bl-color-*` custom property (`canvas`, `surface`, `raised`, `separator`,
+`control-border`, `ink-1` to `ink-3`, `trace`, `copper`, `phosphor`, `danger`, `on-trace`,
+`on-danger`); Tailwind utilities keep their names (`bg-surface`, `text-ink-1`).
+
+- `trace` is the accent and focus colour: links, focus rings, selected and pressed states.
+- `phosphor` is the live/OK signal (an LED on, a success message).
+- `copper` is the secondary warm accent and the ANSI colour in `BlLog`.
+- `danger` is the error colour.
+- `on-trace` and `on-danger` are the text and mark colour on a `trace` or `danger` fill (pressed
+  buttons, the checkbox tick, the radio dot, the error disc). Both keep at least 4.5:1 against
+  their fill in both themes, so re-theme `trace` and `danger` together with their on-colour.
+
+Tailwind's own `ease-out` is no longer overridden; the Benchlight curve is the `ease-bl` utility.
 
 ## Static pages (no build step)
 
@@ -142,12 +163,13 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
   `html::after { content: none }` if you need the pseudo-element.
 - Library CSS lives in `@layer base` / `@layer components`; utilities and your own CSS win without
   `!important`.
-- States are ARIA or native attributes (`aria-current`, `aria-pressed`, `:checked`, `:disabled`);
+- States are ARIA or native attributes (`aria-current`, `:checked`, `:disabled`, and `aria-pressed`
+  on `.bl-btn` toggles only);
   the current item uses `aria-current` (`page`, `step`, `location` or `true`; any value but `false`
   is styled). The `data-*` attributes below are script-set, so do not set them yourself (apart from
   the CSS-only cases in the table notes). `data-lifted` (site bar, `js/appearance.js`),
   `data-overflowing` (BlMarquee), `data-fit`, `data-stacked` and `data-measuring` (BlTable),
-  `data-ready` (BlAppearanceSwitch), `data-indeterminate` (BlMeter), `data-action`, `data-dir`,
+  `data-ready` (BlAppearanceSwitch), `data-action`, `data-dir`,
   `data-label` and `data-empty` (BlTable), `data-bl-appearance` (on `<html>`) and `data-bl-lift`
   (you set it; `js/appearance.js` reads it).
 - Appearance: `data-bl-appearance="light|dark"` on `<html>` (absent = auto), stored as
@@ -157,8 +179,9 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
   that follow the OS in `auto` mode switch instantly.
 - Text on a tint is `ink-1`, `trace` or `danger`; copper and phosphor are marks only there.
 - Borders of controls (inputs, secondary buttons, switch thumb, selected segment, meter edge) use
-  `--bl-control-border`, which keeps at least 3:1 against canvas, surface and raised. Hit areas are
-  44px. Forced-colors mode keeps LEDs, meter fill, EQ bars and the selected segment visible.
+  `--bl-color-control-border`, which keeps at least 3:1 against canvas, surface and raised. Hit
+  areas are 44px. Forced-colors mode keeps LEDs, meter fill, EQ bars and the selected segment
+  visible.
 
 ### Adding a component
 
@@ -187,9 +210,11 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
 - Long unbroken content (URLs, hashes, compound words) wraps instead of widening the page.
 - The stress suite is the contract: `/stress.html` renders every component with hostile content and
   `tests/visual/stress.spec.ts` checks it (see Development).
-- **Link attrs.** `BlNavLink` and `BlIndexRow` render an `li` around the link: `class` and `style`
+- **Link attrs.** `BlSiteBarLink` and `BlIndexRow` render an `li` around the link: `class` and `style`
   go on the `li`; `target`, `rel`, `aria-label`, `data-*` and listeners such as `@click` go on the
-  inner link or button. A set `current` prop wins over a consumer `aria-current`.
+  inner link or button. A set `current` prop (`true`, `'page'`, `'step'` or `'location'`; `true` means `'page'`) wins over a
+  consumer `aria-current`. `BlPrevNext` takes `linkAs` for the component that renders its links,
+  and `ariaLabel` (default `Pagination`) for its nav.
 - **Gutter.** `BlIndexRow` and `BlPrevNext` links bleed 12px either side for the hover background, so
   the host needs at least 12px of side padding. `.bl-col` provides 16-24px.
 - **Site bar.** The nav scrolls horizontally on one line when it does not fit. A brand under about
@@ -211,7 +236,7 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
 - **Fields:** BlField passes its `id` and hint id to BlInput, BlTextarea, BlSelect and BlRange
   automatically. Your own `id` on the control wins. Your own `aria-describedby` is merged: the
   hint id comes first, then the error id, then yours, without duplicates. BlRange forwards fallthrough attrs (`id`, `aria-label`,
-  `disabled`, `name`, listeners) to the slider, which carries the class `bl-range__input`; `class`
+  `name`, listeners; `disabled` is a prop on BlInput, BlSelect, BlTextarea and BlRange) to the slider, which carries the class `bl-range__input`; `class`
   and `style` stay on the wrapper. To override the id, set `id` on BlField instead of on the
   control, so the `<label for>` still matches. For other controls, use the slot props
   `{ id, describedBy, invalid }` or `inject(FIELD_CONTEXT)` from `benchlight/vue`, which holds
@@ -245,19 +270,25 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
 - **BlSiteBar** `lift` is reactive. **BlPrevNext** renders nothing without neighbours. `LinkTo`
   accepts any object, so typed router locations pass.
 - **BlButton:** fill only the `icon` slot for an icon-only button (`bl-btn--icon`, 44px square;
-  `pill` makes it a circle) and name it with `label` (sets `aria-label`; it is for icon-only buttons
+  `pill` makes it a circle) and name it with `ariaLabel` (sets `aria-label`; it is for icon-only buttons
   and replaces visible text as the accessible name, so a dev warning flags it on a button with
   text). `pressed` makes a toggle button (`aria-pressed`, all variants; ignored on links) with an
   inset ring as well as a colour change. `variant="ghost"` is transparent until hovered. The dev
   warnings run after mount and again whenever the props, attributes or slot content change. With raw
   CSS, add `bl-btn--icon`, `bl-btn--ghost` or `aria-pressed` yourself.
-- **BlMeter:** `:value="null"` renders an indeterminate meter. `valueText` sets `aria-valuetext`
-  ("2.1 of 4 GB"). `showLabel` and `showValue` render the label and value visibly (the value is
-  `valueText` or a percentage, hidden while indeterminate and `aria-hidden`); the bar is then
-  labelled by the visible label. CSS-only: wrap the bar,
-  `<div class="bl-meter-field"><div class="bl-meter-field__head"><span class="bl-meter-field__label">…</span><span class="bl-meter-field__value">…</span></div><div class="bl-meter" role="progressbar" …></div></div>`;
-  the wrapper owns the block margin. `class` and `style` go on the outer element (the wrapper when
-  wrapped, otherwise the bar); every other attribute goes on the progressbar.
+- **BlMeter and BlProgress:** BlMeter is a gauge (`role="meter"`, a disk or battery level) and
+  BlProgress is a task (`role="progressbar"`, an upload). Both take `value` 0 to 1 and emit
+  `aria-valuemin="0"`, `aria-valuemax="100"` and `aria-valuenow` as a whole percentage. BlMeter's
+  `value` is a plain `number`: above 1 it dev-warns and renders full, and it has no indeterminate
+  state. BlProgress takes `:value="null"` for indeterminate (no `aria-valuenow`, `bl-meter--indeterminate`,
+  and no visible value). `valueText` sets `aria-valuetext` ("2.1 of 4 GB"). `label` renders visible
+  text above the bar (and names it); with no visible text use `ariaLabel`. `showValue` renders the
+  value visibly (`valueText` or a percentage, `aria-hidden`). A dev warning fires when neither
+  `label` nor `ariaLabel` is set. BlProgress uses the `meter` CSS module. CSS-only: wrap the bar,
+  `<div class="bl-meter-field"><div class="bl-meter-field__head"><span class="bl-meter-field__label">…</span><span class="bl-meter-field__value">…</span></div><div class="bl-meter" role="meter" …></div></div>`
+  (`role="progressbar"` for a task; add `bl-meter--indeterminate` and drop `aria-valuenow` for an
+  unknown one); the wrapper owns the block margin. `class` and `style` go on the outer element (the
+  wrapper when wrapped, otherwise the bar); every other attribute goes on the bar.
 - **BlTelemetry:** `--bl-telemetry-columns` now applies at every width (it used to apply only from
   640px). The default is auto-fit with 12rem cells; with no custom columns, six cells lay out 3x2 when
   there is room.
@@ -271,12 +302,19 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
   Under reduced motion, overflowing text wraps instead. The scroll holds still while the pointer is
   over it or focus is inside it, and while `paused` is true (`<BlMarquee :paused="…">`, or
   `useMarquee(box, text, { paused })`), so a page can offer its own pause control (WCAG 2.2.2).
-- **BlSegmented:** wraps, with a 16px row gap.
+- **BlSegmented / BlSegmentedNav:** both wrap, with a 16px row gap. `BlSegmented` is a native radio
+  group: `<BlSegmented v-model="size" :options="[{ value: 's', label: 'S', disabled: true }]"
+aria-label="Size" />` (`disabled` is optional per option; `name` optional, `compact`; works
+  without `v-model`; a form reset restores the mount value; a model matching no option checks
+  nothing and emits nothing). `BlSegmentedNav` is a `<nav>` of links:
+  `<BlSegmentedNav :items="[{ label: 'en', href: '/en', current: true }]" aria-label="Language"
+link-as="…" />`; each item needs `to` or `href`, and `current` is
+  `boolean | 'page' | 'step' | 'location'`. An item's own `as` overrides `linkAs` for that item.
 - **Inputs and selects:** 16px on coarse pointers, so iOS does not zoom on focus.
 - **BlSelect / `.bl-select-wrap`:** BlSelect renders `<span class="bl-select-wrap"><select
 class="bl-select">`; `class` and `style` go on the wrapper (so `$el` is the wrapper: use `$el.querySelector('select')`,
   and style the control with `.x > .bl-select` or `:deep(.bl-select)`), other attributes and listeners on the select. In
-  CSS-only markup the same wrapper draws a themed chevron (`--bl-chevron-mask`, `--bl-ink-2`) and
+  CSS-only markup the same wrapper draws a themed chevron (`--bl-chevron-mask`, `--bl-color-ink-2`) and
   hides the native arrow for a single-line select; a bare `.bl-select` keeps the native arrow, and
   `multiple` or `size` selects keep theirs inside the wrapper.
 - **BlProse:** the measure is `min(720px, 68ch)`; images, video and iframes are capped to the column;
@@ -299,9 +337,19 @@ modules and `pagination` needs `layout` (the bundle CLI warns otherwise).
 - **Grid and flex hosts.** A BlTable inside a CSS grid or flex item needs `min-width: 0` (or
   `min-inline-size: 0`) on that item; otherwise the item grows to the table's width and it never stacks.
 - **Scroll mode:** `scroll` never stacks; the table scrolls horizontally and the first column is sticky.
-- **Columns** are `{ key, label, align?, numeric?, sortable?, sortBy?, format?, width?, primary?, total? }`.
-  The primary column (the first unless one sets `primary`) is the row header. `v-model:sort` and
-  `v-model:page` are optional; set `rowKey` when sorting, paging or using row actions.
+- **Columns** (`TableColumn<Row>`) come in three kinds, all with `label`, `align?`, `numeric?`,
+  `width?` and `primary?`. A **key column** `{ key, format?, sortable?, sortBy?, total?, formatTotal? }`
+  shows a field: `key` must be a key of `Row` and `format(value, row)` gets `Row[key]`. A **derived
+  column** `{ key, value(row), format?, ... }` shows a computed value; `format` gets what `value`
+  returns. Inside a `TableColumn<Row>[]` array, annotate a derived column's `format` parameter or
+  type the column as `DerivedColumn<Row, V>`. A **slot-only column** `{ key, slot: true }` renders
+  only through its `cell-<key>` slot and is never sorted or totalled. With literal columns
+  (`[...] as const satisfies readonly TableColumn<Row>[]`) each `cell-<key>` slot's `value` follows
+  its column: `Row[key]`, what `value` returns, or `undefined` for a slot-only column, and an unknown
+  slot name fails type-checking. Columns typed `TableColumn<Row>[]` have `string` keys, so there
+  every cell slot's `value` is `unknown`. The primary column (the first unless one sets `primary`)
+  is the row header. `v-model:sort` and `v-model:page` are optional; set `rowKey` when sorting,
+  paging or using row actions.
 - **Attrs:** the naming, description and structure attributes (`aria-label`, `aria-labelledby`,
   `aria-describedby`, `aria-description`, `aria-details`, `aria-roledescription`, `aria-rowcount`,
   `aria-colcount`) go on the `<table>`, so a note on units or a totals row can describe it. Every
@@ -317,19 +365,20 @@ modules and `pagination` needs `layout` (the bundle CLI warns otherwise).
   Clicking anywhere on the row forwards to it, except on other controls and while text is selected.
   Modifier-clicks work only on the link itself.
 - **Totals:** a column `total` of `'sum'`, `'avg'`, `'count'` or a function over all rows (not just the
-  page). `format(value)` formats the result. The footer renders the cells; the `footer` slot replaces
-  them.
+  page); a function returns a number. `formatTotal(value, rows)` formats every kind (else `String()`);
+  `format` never applies to totals, and `manual` mode's `totals` render as given. The footer renders
+  the cells; the `footer` slot replaces them.
 - **i18n:** `labels` (`total`, `empty`, `sortStrip`, `sortAscending`, `sortDescending`, and
   `pages: (caption) => string` for the pagination's name) and `paginationLabels` (`nav`, `prev`,
-  `next`, `page`, `pageOf`, `range`); `locale` sets the sort collation. Every `labels` prop in the
+  `next`, `page`, `pageOf`, `range`); `locale` sets the sort collation (default `'en'`, so a
+  server-rendered sort hydrates unchanged; for example `locale="lv"`). Every `labels` prop in the
   library (BlAppearanceSwitch, BlPrevNext, BlDialog, BlToaster, BlPagination, BlTable) treats an
   `undefined` value as "use the default", so an i18n lookup that finds nothing never blanks a
   string. BlAppearanceSwitch also takes `labels.marks` (`{ auto, light, dark }`, default A / L / D).
 - With async data, BlTable clamps `page` to 1 while there are no rows, so set the page after rows
   arrive (or use `manual` with `totalRows`).
 - **BlPagination** renders nothing for a single page. Standalone: `total`, `pageSize`,
-  `v-model:page`, and `label` or `labels.nav` to name the nav (a dev warning fires when neither is
-  set).
+  `v-model:page`, and `ariaLabel` to name the nav (a dev warning fires when it is not set).
 - **CSS-only use:** wrap a `table` in `div.bl-table` (modifiers `.bl-table--compact`,
   `.bl-table--scroll`). Classes: `.bl-table__num`, `.bl-table__primary`, `.bl-table__label` (a
   `span aria-hidden="true"` in each body cell), `.bl-table__sort`, `.bl-table__sort-strip`,
@@ -652,9 +701,9 @@ const id = toast({ message: 'Item deleted', action: { label: 'Undo', onClick: re
 - Re-toasting an existing `id` replaces it in place: a visible toast keeps its slot and its timer
   restarts; a queued one keeps its queue position.
 - BlToaster takes `class`, `data-*` and `aria-*` on its `<section class="bl-toaster">` (inside the
-  teleport); an `aria-label` there replaces the `labels.region` text.
-- BlToaster props: `max` (default 3 visible; the rest queue first in, first out) and `labels`
-  (`{ region, dismiss, actionHint }`, defaults `'Notifications'`, `'Dismiss'` and
+  teleport); its `ariaLabel` prop (default `Notifications`) names it.
+- BlToaster props: `max` (default 3 visible; the rest queue first in, first out), `ariaLabel` and
+  `labels` (`{ dismiss, actionHint }`, defaults `'Dismiss'` and
   `` (label) => `${label} available` ``).
 - Timers pause while a mouse pointer is over the toaster, while focus is inside it and while the
   tab is hidden, then resume with the time left. Toasts never take focus; when a focused toast
@@ -676,9 +725,8 @@ const id = toast({ message: 'Item deleted', action: { label: 'Undo', onClick: re
 - SSR: `toast()` does nothing on the server and returns `''`. The toaster renders its section and
   both live regions empty, and the list only after mount, so a toast fired before hydration
   cannot cause a mismatch.
-- Nuxt UI also auto-imports a `useToast`. In an app that uses both, set
-  `benchlight: { autoImports: false }` and import Benchlight's explicitly where you need it:
-  `import { useToast } from 'benchlight/vue'`.
+- In Nuxt the auto-import is `useBlToast`, so it does not collide with Nuxt UI's `useToast`.
+  `import { useToast } from 'benchlight/vue'` keeps the bare name.
 - CSS-only: the classes work on the markup above; timers, queueing and announcements are yours.
   A toaster outside an open modal dialog is inert, so place it inside the dialog while one is
   open.
@@ -710,12 +758,12 @@ places. `tokens` always comes first; `base`, `type`, `motion`, `layout` and `tin
 
 | Component                                       | Module                     |
 | ----------------------------------------------- | -------------------------- |
-| BlSiteBar, BlNavLink                            | `site-bar`                 |
+| BlSiteBar, BlSiteBarLink                        | `site-bar`                 |
 | BlTabBar, BlTabBarItem                          | `tab-bar`                  |
 | BlColophon                                      | `colophon`                 |
 | BlSkipLink                                      | `skip-link`                |
 | BlAppearanceSwitch                              | `appearance`               |
-| BlSegmented                                     | `segmented`                |
+| BlSegmented, BlSegmentedNav                     | `segmented`                |
 | BlButton                                        | `btn`                      |
 | BlField, BlInput, BlTextarea, BlSelect, BlRange | `field`                    |
 | `.bl-fieldset` (CSS only)                       | `fieldset`                 |
@@ -727,6 +775,7 @@ places. `tokens` always comes first; `base`, `type`, `motion`, `layout` and `tin
 | BlMarquee                                       | `marquee`                  |
 | BlReadout                                       | `readout`                  |
 | BlMeter                                         | `meter`                    |
+| BlProgress                                      | `meter`                    |
 | BlMsg                                           | `msg`                      |
 | BlLog                                           | `log`                      |
 | BlSectionHead                                   | `section-head`             |

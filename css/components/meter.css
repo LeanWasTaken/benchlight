@@ -13,7 +13,7 @@
     font-size: var(--bl-text-micro);
     letter-spacing: var(--bl-tracking-annotation);
     text-transform: uppercase;
-    color: var(--bl-ink-2);
+    color: var(--bl-color-ink-2);
   }
   .bl-meter-field__label,
   .bl-meter-field__value {
@@ -23,15 +23,15 @@
   .bl-meter-field__value {
     margin-inline-start: auto;
     font-variant-numeric: tabular-nums;
-    color: var(--bl-ink-1);
+    color: var(--bl-color-ink-1);
   }
   .bl-meter {
     height: 4px;
     margin: 16px 0;
     overflow: hidden;
     border-radius: 2px;
-    background: var(--bl-separator);
-    box-shadow: 0 0 0 1px var(--bl-control-border);
+    background: var(--bl-color-separator);
+    box-shadow: 0 0 0 1px var(--bl-color-control-border);
   }
   .bl-meter-field > .bl-meter {
     margin: 0;
@@ -39,10 +39,10 @@
   .bl-meter__fill {
     width: calc(var(--bl-meter-value, 0) * 100%);
     height: 100%;
-    background: var(--bl-trace);
+    background: var(--bl-color-trace);
     transition: width var(--bl-duration-fast) var(--bl-ease-out);
   }
-  .bl-meter[data-indeterminate] .bl-meter__fill {
+  .bl-meter--indeterminate .bl-meter__fill {
     width: 30%;
     animation: bl-meter-slide 1.2s var(--bl-ease-out) infinite;
   }
@@ -64,7 +64,7 @@
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .bl-meter[data-indeterminate] .bl-meter__fill {
+    .bl-meter--indeterminate .bl-meter__fill {
       width: 100%;
       opacity: 0.4;
       animation: none;

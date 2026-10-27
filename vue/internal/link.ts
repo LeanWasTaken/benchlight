@@ -1,4 +1,4 @@
-import type { LinkAs, LinkTo } from '../types'
+import type { LinkAs, LinkCurrent, LinkTo } from '../types'
 import { warn } from './dev'
 
 // The rendered tag: an explicit `as`, else an anchor when there is a link target, else the fallback.
@@ -29,4 +29,9 @@ export function linkBindings(as: LinkAs, to?: LinkTo, href?: string): Record<str
     warn('a router component in `as` expects `to`; it received `href` instead.')
   }
   return to !== undefined ? { to } : { href }
+}
+
+// The `aria-current` value for a `current` prop: `true` means 'page'; false or unset is absent.
+export function currentValue(current: LinkCurrent | undefined): string | undefined {
+  return current === true ? 'page' : current || undefined
 }

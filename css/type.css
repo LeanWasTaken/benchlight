@@ -10,7 +10,7 @@
     letter-spacing: var(--bl-tracking-display);
     line-height: var(--bl-leading-display);
     overflow-wrap: break-word;
-    color: var(--bl-ink-1);
+    color: var(--bl-color-ink-1);
   }
   .bl-display--xl {
     font-size: var(--bl-text-display-xl);
@@ -36,7 +36,7 @@
     font-size: var(--bl-text-annotation);
     letter-spacing: var(--bl-tracking-annotation);
     font-variant-numeric: tabular-nums;
-    color: var(--bl-ink-3);
+    color: var(--bl-color-ink-3);
   }
   .bl-silkscreen,
   .bl-table thead th,
@@ -52,13 +52,13 @@
     font-weight: 500;
     letter-spacing: var(--bl-tracking-silkscreen);
     text-transform: uppercase;
-    color: var(--bl-ink-3);
+    color: var(--bl-color-ink-3);
   }
   .bl-lede {
     max-width: min(var(--bl-layout-prose), 68ch);
     margin: 0;
     font-size: var(--bl-text-body);
     line-height: var(--bl-leading-lede);
-    color: var(--bl-ink-2);
+    color: var(--bl-color-ink-2);
   }
 }
