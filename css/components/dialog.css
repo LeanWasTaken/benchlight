@@ -158,8 +158,9 @@
       scale: none;
       translate: none;
     }
-    /* base.css gives every element a 0.01ms transition here; on html it would make the gutter
-       padding trail the scrollbar by a frame, shifting the page on open and close. */
+    /* A 0.01ms transition on html (base.css gives one to bl- elements; a host may give html one)
+       would make the gutter padding trail the scrollbar by a frame, shifting the page on open and
+       close. */
     html:has(dialog.bl-dialog) {
       transition-property: none;
     }

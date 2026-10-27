@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.8.1 - 2026-10-27
+
+Non-breaking fixes from an audit of 0.8.0. Two behaviours change for the host app: under reduced
+motion Benchlight no longer shortens the host's own animations, and it no longer forces
+`scroll-behavior: auto` on `html`.
+
+- Fix: `vite` peer range now includes `^8.0.0`; npm failed with ERESOLVE in a fresh Nuxt 4.6 app.
+- Fix: `dist` no longer lowers `:dir(rtl)` to a `:lang(ar|he|...)` list, which put the toggle thumb and
+  checkbox tick in the wrong place on `dir="rtl"` pages without an RTL `lang` (and the reverse).
+- Fix: BlTable's focusable scroll region, sort buttons and row actions draw their focus ring inset,
+  because `.bl-table` clipped the outside ring (WCAG 2.4.7).
+- Added: BlMarquee pauses while hovered or while focus is inside it, and takes a `paused` prop
+  (`useMarquee` takes a `paused` option) so overflowing text can be stopped (WCAG 2.2.2).
+- Fix: the reduced-motion reset in `base` only targets `bl-` elements. It was `!important` on every
+  element and overrode the host app's own animations, even its `!important` ones.
+- Fix: `base` no longer sets `border-radius` on every focused element or removes the focus ring from
+  `tabindex="-1"` elements, which changed the host app's own focus styles.
+
+- Correction to 0.8.0: the package is not published on npm yet. The name `benchlight` is reserved with
+  a `0.0.2` placeholder, and the README installs over git+ssh again (`#v0.8.0`). The components ship as
+  `.vue` and `.ts` source, so a consumer needs Vite or Nuxt.
+
 ## 0.8.0 - 2026-10-26
 
 Form controls and one validation convention, settled before the v1 API freeze, plus the npm-ready

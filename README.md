@@ -8,14 +8,41 @@ classes.
 
 ## Install
 
-```sh
-npm install benchlight
-# or
-bun add benchlight
+```json
+"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.8.1"
 ```
 
-To track a tag straight from GitHub instead, use `github:LeanWasTaken/benchlight#vX.Y.Z`. With bun, use
-1.4.2 or newer: bun 1.2.x cannot clone git dependencies on Linux.
+The repo is private and the URL uses SSH on purpose: bun turns GitHub https URLs into API tarball
+downloads that cannot authenticate to a private repo. Locally, plain SSH access to GitHub is enough.
+Use bun 1.4.2 or newer: bun 1.2.x cannot clone git dependencies on Linux.
+In GitHub Actions, give each consuming repo its own read-only deploy key on `benchlight`
+(`ssh-keygen -t ed25519`, add the public half under benchlight → Settings → Deploy keys, store the
+private half as the secret `BENCHLIGHT_DEPLOY_KEY` in the consuming repo). Install like this, so the
+key is used only by that step:
+
+```yaml
+- name: Load the Benchlight deploy key
+  env:
+    BENCHLIGHT_DEPLOY_KEY: ${{ secrets.BENCHLIGHT_DEPLOY_KEY }}
+  run: |
+    umask 077
+    key="$RUNNER_TEMP/benchlight_deploy_key"
+    hosts="$RUNNER_TEMP/benchlight_known_hosts"
+    printf '%s\n' "$BENCHLIGHT_DEPLOY_KEY" > "$key"
+    echo "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl" > "$hosts"
+    echo "DEPLOY_KEY_FILE=$key" >> "$GITHUB_ENV"
+    echo "DEPLOY_KNOWN_HOSTS=$hosts" >> "$GITHUB_ENV"
+- name: Install
+  run: |
+    export GIT_SSH_COMMAND="ssh -i $DEPLOY_KEY_FILE -o IdentitiesOnly=yes -o UserKnownHostsFile=$DEPLOY_KNOWN_HOSTS -o StrictHostKeyChecking=yes"
+    bun install --frozen-lockfile
+- name: Remove the deploy key
+  if: always()
+  run: rm -f "$DEPLOY_KEY_FILE" "$DEPLOY_KNOWN_HOSTS"
+```
+
+Benchlight is not on npm yet (the name is reserved). The components ship as `.vue` and `.ts` source, not
+built JavaScript, so the consuming app needs Vite or Nuxt to compile them.
 
 ## Nuxt
 
@@ -241,7 +268,9 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
   (default 56px), so the track does not change length while dragging.
 - **BlMeta:** `separator` draws dashes in CSS (`.bl-meta--sep`); the `.bl-meta__sep` element is gone.
 - **BlMarquee / `useMarquee`:** re-measures when the container, the content or the fonts change.
-  Under reduced motion, overflowing text wraps instead.
+  Under reduced motion, overflowing text wraps instead. The scroll holds still while the pointer is
+  over it or focus is inside it, and while `paused` is true (`<BlMarquee :paused="…">`, or
+  `useMarquee(box, text, { paused })`), so a page can offer its own pause control (WCAG 2.2.2).
 - **BlSegmented:** wraps, with a 16px row gap.
 - **Inputs and selects:** 16px on coarse pointers, so iOS does not zoom on focus.
 - **BlSelect / `.bl-select-wrap`:** BlSelect renders `<span class="bl-select-wrap"><select
@@ -772,15 +801,15 @@ stale, so rebuild before committing token or CSS changes.
 `bun pm pack` decides what ships: the `files` list in `package.json` plus the always-included files.
 Consumer tags contain only that, never tests or the playground.
 
-1. In one `chore: release vX.Y.Z` commit, bump `version` in `package.json` and add the entry to
-   `CHANGELOG.md`.
+1. In one `chore: release vX.Y.Z` commit, bump `version` in `package.json`, add the entry to
+   `CHANGELOG.md` and move the README install pin to `#vX.Y.Z`.
 2. `bun run build && bun run check && bun run fixtures`.
 3. Push `main`, then push the source tag: `git tag -a src-vX.Y.Z -m src-vX.Y.Z && git push origin src-vX.Y.Z`.
    Never push `vX.Y.Z` yourself.
 4. CI checks that the commit is on `main` and matches `package.json`, runs the checks, builds the
    slim tree from `bun pm pack`, commits it to the `release` branch and tags that commit `vX.Y.Z`.
    A separate job then installs the tag over git+ssh and verifies it is slim.
-5. Bump the version in each consumer.
+5. Bump the `#vX.Y.Z` pin in each consumer. The URL form is unchanged.
 
 Tags up to v0.2.1 are full-tree source tags. Release tags from v0.3.0 on point into the `release`
 branch.
