@@ -81,3 +81,9 @@
   max-height: 6rem;
   overflow: auto;
 }
+/* Inline code in demo slots outside .bl-prose would otherwise use the UA `monospace` system font.
+   Headless Chromium on macOS lays it out with different metrics until it is first painted, so the
+   first full-page capture shifted the page by 1px and the playground screenshot never settled. */
+code {
+  font-family: var(--bl-font-mono);
+}
