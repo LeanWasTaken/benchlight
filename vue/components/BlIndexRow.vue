@@ -18,20 +18,20 @@
 
 <script setup lang="ts">
   import { computed, useAttrs, type StyleValue } from 'vue'
-  import { linkBindings, resolveTag } from '../internal/link'
-  import type { LinkAs, LinkTo } from '../types'
+  import { currentValue, linkBindings, resolveTag } from '../internal/link'
+  import type { LinkAs, LinkCurrent, LinkTo } from '../types'
 
   const props = defineProps<{
     as?: LinkAs
     to?: LinkTo
     href?: string
-    current?: boolean | 'page' | 'step' | 'location' | 'true'
+    current?: LinkCurrent
     compact?: boolean
   }>()
 
   defineOptions({ inheritAttrs: false })
   const attrs = useAttrs()
-  const ariaCurrent = computed(() => (props.current === true ? 'true' : props.current || undefined))
+  const ariaCurrent = computed(() => currentValue(props.current))
   const tag = computed(() => resolveTag(props.as, props.to, props.href, 'div'))
   const bindings = computed(() => {
     if (tag.value === 'div') return linkBindings('div', props.to, props.href)

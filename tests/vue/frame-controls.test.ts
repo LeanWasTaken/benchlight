@@ -13,6 +13,7 @@ import BlRange from '../../vue/components/BlRange.vue'
 import BlSegmented from '../../vue/components/BlSegmented.vue'
 import BlSelect from '../../vue/components/BlSelect.vue'
 import BlSiteBar from '../../vue/components/BlSiteBar.vue'
+import BlTextarea from '../../vue/components/BlTextarea.vue'
 import BlSkipLink from '../../vue/components/BlSkipLink.vue'
 import BlTabBar from '../../vue/components/BlTabBar.vue'
 import BlTabBarItem from '../../vue/components/BlTabBarItem.vue'
@@ -68,8 +69,23 @@ describe('BlSiteBar', () => {
     const slots = { nav: '<li>n</li>' }
     const wrapper = mount(BlSiteBar, { slots })
     expect(wrapper.find('nav[aria-label="Primary"] > ul.bl-site-bar__nav').exists()).toBe(true)
-    const custom = mount(BlSiteBar, { props: { navLabel: 'Galvenā' }, slots })
+    const custom = mount(BlSiteBar, { props: { ariaLabel: 'Galvenā' }, slots })
     expect(custom.find('nav.bl-site-bar__navwrap').attributes('aria-label')).toBe('Galvenā')
+  })
+
+  it('names the nav from a plain aria-label attribute, not the root', () => {
+    const wrapper = mount(BlSiteBar, {
+      attrs: { 'aria-label': 'Main' },
+      slots: { nav: '<li>n</li>' }
+    })
+    expect(wrapper.find('nav[aria-label="Main"]').exists()).toBe(true)
+    expect(wrapper.element.tagName).toBe('HEADER')
+    expect(wrapper.attributes('aria-label')).toBeUndefined()
+  })
+
+  it('does not use the old navLabel as the name', () => {
+    const wrapper = mount(BlSiteBar, { attrs: { navLabel: 'Old' }, slots: { nav: '<li>n</li>' } })
+    expect(wrapper.find('nav').attributes('aria-label')).toBe('Primary')
   })
 
   it('scrolls only the nav scroller to reveal a focused link, never the window', async () => {
@@ -423,15 +439,18 @@ describe('BlButton', () => {
   describe('icon-only', () => {
     const icon = '<svg />'
     it('adds bl-btn--icon when only the icon slot is filled', () => {
-      const wrapper = mount(BlButton, { props: { label: 'Close' }, slots: { icon } })
+      const wrapper = mount(BlButton, { props: { ariaLabel: 'Close' }, slots: { icon } })
       expect(wrapper.classes()).toContain('bl-btn--icon')
     })
 
     it('treats a whitespace-only or comment-only default slot as empty', () => {
-      const blank = mount(BlButton, { props: { label: 'x' }, slots: { icon, default: '  \n ' } })
+      const blank = mount(BlButton, {
+        props: { ariaLabel: 'x' },
+        slots: { icon, default: '  \n ' }
+      })
       expect(blank.classes()).toContain('bl-btn--icon')
       const comment = mount(BlButton, {
-        props: { label: 'x' },
+        props: { ariaLabel: 'x' },
         slots: { icon, default: '<!-- note -->' }
       })
       expect(comment.classes()).toContain('bl-btn--icon')
@@ -441,7 +460,7 @@ describe('BlButton', () => {
       const Host = defineComponent({
         components: { BlButton },
         props: { show: Boolean },
-        template: `<BlButton label="x"><template #icon><svg /></template><template v-if="show">Save</template></BlButton>`
+        template: `<BlButton aria-label="x"><template #icon><svg /></template><template v-if="show">Save</template></BlButton>`
       })
       const wrapper = mount(Host)
       expect(wrapper.classes()).toContain('bl-btn--icon')
@@ -458,19 +477,21 @@ describe('BlButton', () => {
     })
 
     it('keeps the pill modifier alongside the icon one', () => {
-      const wrapper = mount(BlButton, { props: { pill: true, label: 'x' }, slots: { icon } })
+      const wrapper = mount(BlButton, { props: { pill: true, ariaLabel: 'x' }, slots: { icon } })
       expect(wrapper.classes()).toEqual(['bl-btn', 'bl-btn--pill', 'bl-btn--icon'])
     })
   })
 
-  describe('label', () => {
+  describe('ariaLabel', () => {
     const icon = '<svg />'
     it('sets aria-label on a button, a link and a router link', () => {
-      expect(mount(BlButton, { props: { label: 'Copy' } }).attributes('aria-label')).toBe('Copy')
+      expect(mount(BlButton, { props: { ariaLabel: 'Copy' } }).attributes('aria-label')).toBe(
+        'Copy'
+      )
       expect(
-        mount(BlButton, { props: { label: 'Copy', href: '/x' } }).attributes('aria-label')
+        mount(BlButton, { props: { ariaLabel: 'Copy', href: '/x' } }).attributes('aria-label')
       ).toBe('Copy')
-      const router = mount(BlButton, { props: { label: 'Copy', as: RouterLinkLike, to: '/x' } })
+      const router = mount(BlButton, { props: { ariaLabel: 'Copy', as: RouterLinkLike, to: '/x' } })
       expect(router.attributes('aria-label')).toBe('Copy')
     })
 
@@ -491,17 +512,28 @@ describe('BlButton', () => {
       expect(warn).toHaveBeenCalledTimes(1)
     })
 
-    it('warns when label is set on a button with visible text', () => {
+    it('warns when ariaLabel is set on a button with visible text', () => {
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      mount(BlButton, { props: { label: 'Submit form' }, slots: { default: 'Send' } })
-      expect(warn).toHaveBeenCalledWith(expect.stringContaining('`label`'))
+      mount(BlButton, { props: { ariaLabel: 'Submit form' }, slots: { default: 'Send' } })
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('`ariaLabel`'))
     })
 
-    it('does not warn about label when the button has no visible text', () => {
+    it('does not warn about ariaLabel when the button has no visible text', () => {
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      mount(BlButton, { props: { label: 'Close' } })
-      mount(BlButton, { props: { label: 'Close' }, slots: { default: '  ' } })
+      mount(BlButton, { props: { ariaLabel: 'Close' } })
+      mount(BlButton, { props: { ariaLabel: 'Close' }, slots: { default: '  ' } })
       expect(warn).not.toHaveBeenCalled()
+    })
+
+    it('treats the old label prop as a plain attribute, not the name', () => {
+      const wrapper = mount(BlButton, { attrs: { label: 'Copy' } })
+      expect(wrapper.attributes('aria-label')).toBeUndefined()
+      expect(wrapper.attributes('label')).toBe('Copy')
+    })
+
+    it('names the button from a plain aria-label attribute', () => {
+      const wrapper = mount(BlButton, { attrs: { 'aria-label': 'Copy' } })
+      expect(wrapper.attributes('aria-label')).toBe('Copy')
     })
 
     it('warns only when icon-only and unnamed', () => {
@@ -510,7 +542,7 @@ describe('BlButton', () => {
       expect(warn).toHaveBeenCalledTimes(1)
       expect(warn).toHaveBeenCalledWith(expect.stringContaining('[benchlight] BlButton'))
       warn.mockClear()
-      mount(BlButton, { props: { label: 'Close' }, slots: { icon } })
+      mount(BlButton, { props: { ariaLabel: 'Close' }, slots: { icon } })
       mount(BlButton, { attrs: { 'aria-label': 'Close' }, slots: { icon } })
       mount(BlButton, { attrs: { 'aria-labelledby': 'x' }, slots: { icon } })
       mount(BlButton, { slots: { icon, default: 'Save' } })
@@ -855,5 +887,68 @@ describe('form controls', () => {
     expect((wrapper.get('input').element as HTMLInputElement).value).toBe('8')
     const fine = mount(BlRange, { props: { modelValue: 1, min: 0, max: 1, step: 0.1 } })
     expect(fine.find('.bl-range__value').text()).toBe('1')
+  })
+})
+
+describe('current on link components', () => {
+  it.each([
+    ['BlNavLink', BlNavLink],
+    ['BlTabBarItem', BlTabBarItem]
+  ] as const)('%s maps true to page and passes step and location', (_name, Component) => {
+    const attr = (current?: boolean | 'page' | 'step' | 'location') =>
+      mount(Component, { props: { href: '/x', ...(current === undefined ? {} : { current }) } })
+        .find('a')
+        .attributes('aria-current')
+    expect(attr(true)).toBe('page')
+    expect(attr('page')).toBe('page')
+    expect(attr('step')).toBe('step')
+    expect(attr('location')).toBe('location')
+    expect(attr(false)).toBeUndefined()
+    expect(attr()).toBeUndefined()
+  })
+})
+
+describe('BlTabBar ariaLabel', () => {
+  it('names the nav from ariaLabel or a plain aria-label, not twice', () => {
+    expect(mount(BlTabBar, { props: { ariaLabel: 'Tabs' } }).attributes('aria-label')).toBe('Tabs')
+    const wrapper = mount(BlTabBar, { attrs: { 'aria-label': 'Mine' } })
+    expect(wrapper.element.tagName).toBe('NAV')
+    expect(wrapper.attributes('aria-label')).toBe('Mine')
+  })
+})
+
+describe('disabled on form controls', () => {
+  const options = [{ value: 'a', label: 'A' }]
+  const native = (wrapper: { element: Element }, selector: string): Element =>
+    wrapper.element.matches(selector) ? wrapper.element : wrapper.element.querySelector(selector)!
+
+  it.each([
+    ['BlInput', () => mount(BlInput, { props: { disabled: true } }), BlInput, 'input.bl-input'],
+    [
+      'BlTextarea',
+      () => mount(BlTextarea, { props: { disabled: true } }),
+      BlTextarea,
+      'textarea.bl-textarea'
+    ],
+    [
+      'BlSelect',
+      () => mount(BlSelect, { props: { options, disabled: true } }),
+      BlSelect,
+      'select.bl-select'
+    ],
+    [
+      'BlRange',
+      () => mount(BlRange, { props: { disabled: true } }),
+      BlRange,
+      'input.bl-range__input'
+    ]
+  ] as const)('%s declares disabled and renders it on the native control', (_n, make, C, sel) => {
+    expect(Object.keys((C as unknown as { props: object }).props)).toContain('disabled')
+    expect(native(make(), sel).hasAttribute('disabled')).toBe(true)
+  })
+
+  it('leaves the control enabled by default', () => {
+    expect(native(mount(BlInput), 'input').hasAttribute('disabled')).toBe(false)
+    expect(native(mount(BlRange), 'input').hasAttribute('disabled')).toBe(false)
   })
 })

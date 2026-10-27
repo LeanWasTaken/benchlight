@@ -14,10 +14,10 @@
   <div class="pg-stack">
     <BlReadout value="94.2" unit="Mbps" />
     <BlReadout :value="12" />
-    <BlMeter :value="0.62" label="Download" />
-    <BlMeter :value="null" label="Scanning" />
-    <BlMeter :value="0.52" label="Storage" show-label show-value />
-    <BlMeter :value="0.52" label="Memory" value-text="2.1 of 4 GB" show-label show-value />
+    <BlMeter :value="0.62" aria-label="Download" />
+    <BlMeter :value="null" aria-label="Scanning" />
+    <BlMeter :value="0.52" label="Storage" show-value />
+    <BlMeter :value="0.52" label="Memory" value-text="2.1 of 4 GB" show-value />
   </div>
 
   <BlSectionHead :level="3" eyebrow="Status" heading="Messages, LEDs, bars" />
@@ -50,7 +50,7 @@
 
   <BlSectionHead :level="3" eyebrow="Log" heading="Follows only while pinned" />
   <div class="pg-stack">
-    <BlLog :lines="lines" :follow="follow" :offset="offset" label="Device log" />
+    <BlLog :lines="lines" :follow="follow" :offset="offset" aria-label="Device log" />
     <div class="pg-row">
       <BlButton variant="secondary" @click="appendLogLine">Append line</BlButton>
       <BlToggle v-model="follow" label="Follow output" />

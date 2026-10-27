@@ -168,6 +168,14 @@
       opacity: 1;
     }
   }
+  /* A disabled field dims like a disabled button; the range dims whole, value text included. */
+  .bl-input:disabled,
+  .bl-select:disabled,
+  .bl-textarea:disabled,
+  .bl-range:has(> :disabled) {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
   .bl-range {
     display: flex;
     flex-wrap: wrap;

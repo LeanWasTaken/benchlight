@@ -11,7 +11,7 @@
     <BlButton as="a" href="#controls" variant="secondary">As a link</BlButton>
   </div>
   <div class="pg-row">
-    <BlButton label="Copy">
+    <BlButton aria-label="Copy">
       <template #icon>
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <rect x="5" y="5" width="8" height="8" rx="1" />
@@ -19,28 +19,28 @@
         </svg>
       </template>
     </BlButton>
-    <BlButton variant="secondary" label="Close">
+    <BlButton variant="secondary" aria-label="Close">
       <template #icon>
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M3 3l10 10M13 3L3 13" />
         </svg>
       </template>
     </BlButton>
-    <BlButton variant="ghost" label="Settings">
+    <BlButton variant="ghost" aria-label="Settings">
       <template #icon>
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M2 4h12M2 8h12M2 12h12" />
         </svg>
       </template>
     </BlButton>
-    <BlButton variant="secondary" pill label="Next">
+    <BlButton variant="secondary" pill aria-label="Next">
       <template #icon>
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M6 3l5 5-5 5" />
         </svg>
       </template>
     </BlButton>
-    <BlButton variant="secondary" label="Mute" :pressed="muted" @click="muted = !muted">
+    <BlButton variant="secondary" aria-label="Mute" :pressed="muted" @click="muted = !muted">
       <template #icon>
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M2 6h3l4-3v10l-4-3H2z" />

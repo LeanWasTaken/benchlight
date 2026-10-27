@@ -5,7 +5,7 @@
       <nav
         v-if="$slots['nav']"
         class="bl-site-bar__navwrap"
-        :aria-label="navLabel"
+        :aria-label="ariaLabel"
         @focusin="revealFocused"
       >
         <ul class="bl-site-bar__nav">
@@ -22,9 +22,9 @@
 <script setup lang="ts">
   import { useScrollLifted } from '../composables/useScrollLifted'
 
-  const props = withDefaults(defineProps<{ lift?: number | false; navLabel?: string }>(), {
+  const props = withDefaults(defineProps<{ lift?: number | false; ariaLabel?: string }>(), {
     lift: 24,
-    navLabel: 'Primary'
+    ariaLabel: 'Primary'
   })
   const lifted = useScrollLifted(() => props.lift)
 

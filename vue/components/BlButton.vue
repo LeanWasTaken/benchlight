@@ -30,7 +30,7 @@
       to?: LinkTo
       href?: string
       variant?: 'primary' | 'secondary' | 'danger' | 'ghost'
-      label?: string
+      ariaLabel?: string
       pressed?: boolean
       pill?: boolean
       type?: 'button' | 'submit' | 'reset'
@@ -79,7 +79,7 @@
     props.disabled && linkTag.value !== 'button' ? 'a' : linkTag.value
   )
   const bindings = computed(() => {
-    const name = props.label === undefined ? {} : { 'aria-label': props.label }
+    const name = props.ariaLabel === undefined ? {} : { 'aria-label': props.ariaLabel }
     if (tag.value === 'button') {
       return {
         ...linkBindings('button', props.to, props.href),
@@ -112,18 +112,17 @@
           )
         if (
           iconOnlyState.value &&
-          props.label === undefined &&
-          attrs['aria-label'] === undefined &&
+          props.ariaLabel === undefined &&
           attrs['aria-labelledby'] === undefined
         )
           once(
             'name',
-            'BlButton: an icon-only button needs a `label`, `aria-label` or `aria-labelledby`.'
+            'BlButton: an icon-only button needs an `ariaLabel` (`aria-label`) or `aria-labelledby`.'
           )
-        if (props.label !== undefined && hasTextState.value)
+        if (props.ariaLabel !== undefined && hasTextState.value)
           once(
             'label',
-            'BlButton: `label` replaces the visible text as the accessible name; use it for icon-only buttons.'
+            'BlButton: `ariaLabel` replaces the visible text as the accessible name; use it for icon-only buttons.'
           )
       },
       { flush: 'post' }

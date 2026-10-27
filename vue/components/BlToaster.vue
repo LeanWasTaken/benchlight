@@ -3,7 +3,7 @@
     <section
       ref="root"
       class="bl-toaster"
-      :aria-label="text.region"
+      :aria-label="ariaLabel"
       v-bind="$attrs"
       @pointerenter="onPointer($event, true)"
       @pointerleave="onPointer($event, false)"
@@ -32,7 +32,7 @@
           <BlButton
             class="bl-toast__dismiss"
             variant="ghost"
-            :label="text.dismiss"
+            :aria-label="text.dismiss"
             :aria-describedby="`${uid}-${t.key}`"
             @click="dismissToast(t.id)"
           >
@@ -72,15 +72,19 @@
 
   defineOptions({ inheritAttrs: false })
   const props = withDefaults(
-    defineProps<{ max?: number; labels?: Partial<LabelOverrides<ToasterLabels>> }>(),
+    defineProps<{
+      max?: number
+      ariaLabel?: string
+      labels?: Partial<LabelOverrides<ToasterLabels>>
+    }>(),
     {
-      max: 3
+      max: 3,
+      ariaLabel: 'Notifications'
     }
   )
   const text = computed<ToasterLabels>(() =>
     mergeLabels(
       {
-        region: 'Notifications',
         dismiss: 'Dismiss',
         actionHint: (label: string) => `${label} available`
       },

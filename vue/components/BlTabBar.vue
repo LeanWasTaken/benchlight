@@ -1,9 +1,9 @@
 <template>
-  <nav class="bl-tab-bar" :aria-label="label">
+  <nav class="bl-tab-bar" :aria-label="ariaLabel">
     <slot />
   </nav>
 </template>
 
 <script setup lang="ts">
-  withDefaults(defineProps<{ label?: string }>(), { label: 'Primary' })
+  withDefaults(defineProps<{ ariaLabel?: string }>(), { ariaLabel: 'Primary' })
 </script>

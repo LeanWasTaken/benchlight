@@ -178,7 +178,7 @@
       v-model:page="currentPage"
       :total="totalCount"
       :page-size="pageSize"
-      :label="paginationLabels?.nav ?? text.pages(caption)"
+      :aria-label="text.pages(caption)"
       :labels="paginationLabels!"
     />
   </div>

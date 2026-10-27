@@ -111,7 +111,8 @@
   />
   <BlPrevNext
     :prev="{ title: 'Only a previous', href: '#content' }"
-    :labels="{ nav: 'Chapters', prev: 'Earlier' }"
+    aria-label="Chapters"
+    :labels="{ prev: 'Earlier' }"
   />
 
   <BlSectionHead :level="3" eyebrow="Prose" heading="Long-form text" />

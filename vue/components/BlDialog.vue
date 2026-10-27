@@ -17,7 +17,7 @@
           v-if="dismissible"
           class="bl-dialog__close"
           variant="ghost"
-          :label="text.close"
+          :aria-label="text.close"
           @click="closeWith('button')"
         >
           <template #icon>

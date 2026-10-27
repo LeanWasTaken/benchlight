@@ -4,7 +4,7 @@ import BlPagination from '../../vue/components/BlPagination.vue'
 
 const make = (props: Record<string, unknown> = {}) =>
   mount(BlPagination, {
-    props: { total: 120, pageSize: 10, label: 'Clients pages', page: 5, ...props },
+    props: { total: 120, pageSize: 10, ariaLabel: 'Clients pages', page: 5, ...props },
     attachTo: document.body
   })
 

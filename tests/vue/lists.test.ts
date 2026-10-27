@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
-import { h } from 'vue'
+import { defineComponent, h } from 'vue'
 import BlIndex from '../../vue/components/BlIndex.vue'
 import BlIndexRow from '../../vue/components/BlIndexRow.vue'
 import BlMeta from '../../vue/components/BlMeta.vue'
@@ -128,7 +128,7 @@ describe('BlIndex and BlIndexRow', () => {
       props: { as: 'button', current: true, compact: true },
       slots: { title: 'home-wifi' }
     }).find('.bl-index-row')
-    expect(row.attributes('aria-current')).toBe('true')
+    expect(row.attributes('aria-current')).toBe('page')
     expect(row.classes()).toContain('bl-index-row--compact')
   })
 
@@ -136,7 +136,7 @@ describe('BlIndex and BlIndexRow', () => {
     ['page', 'page'],
     ['step', 'step'],
     ['location', 'location'],
-    ['true', 'true']
+    [true, 'page']
   ] as const)('renders current="%s" as aria-current="%s"', (current, expected) => {
     const row = mount(BlIndexRow, { props: { current }, slots: { title: 't' } }).find(
       '.bl-index-row'
@@ -177,6 +177,43 @@ describe('BlPrevNext', () => {
     expect(wrapper.element.children).toHaveLength(2)
     expect(wrapper.find('.bl-prev-next__label').text()).toBe('Nākamais')
     expect(wrapper.find('.bl-prev-next__icon > svg').exists()).toBe(true)
+  })
+})
+
+describe('BlPrevNext linkAs and ariaLabel', () => {
+  const Router = defineComponent({
+    props: { to: { type: [String, Object], required: true } },
+    setup(props, { slots }) {
+      return () => h('a', { href: String(props.to), 'data-router': '' }, slots['default']?.())
+    }
+  })
+
+  it('renders its items with linkAs', () => {
+    const wrapper = mount(BlPrevNext, {
+      props: { linkAs: Router, prev: { title: 'A', to: '/a' }, next: { title: 'B', to: '/b' } }
+    })
+    expect(wrapper.findAll('a[data-router]')).toHaveLength(2)
+  })
+
+  it('no longer takes `as` for the item component', () => {
+    const wrapper = mount(BlPrevNext, {
+      attrs: { as: Router },
+      props: { prev: { title: 'A', href: '/a' } }
+    })
+    expect(wrapper.find('a[data-router]').exists()).toBe(false)
+    expect(wrapper.find('a.bl-prev-next__link').attributes('href')).toBe('/a')
+  })
+
+  it('names the nav with ariaLabel or a plain aria-label attribute', () => {
+    const item = { title: 'A', href: '/a' }
+    expect(
+      mount(BlPrevNext, { props: { prev: item, ariaLabel: 'Posts' } }).attributes('aria-label')
+    ).toBe('Posts')
+    expect(
+      mount(BlPrevNext, { props: { prev: item }, attrs: { 'aria-label': 'More' } }).attributes(
+        'aria-label'
+      )
+    ).toBe('More')
   })
 })
 

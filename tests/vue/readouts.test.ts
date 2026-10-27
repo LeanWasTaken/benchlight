@@ -96,7 +96,7 @@ describe('small readouts', () => {
     expect(hidden.attributes('aria-hidden')).toBe('true')
     expect(hidden.attributes('role')).toBeUndefined()
     expect(hidden.attributes('aria-label')).toBeUndefined()
-    const named = mount(BlLed, { props: { state: 'danger', label: 'Link down' } })
+    const named = mount(BlLed, { props: { state: 'danger', ariaLabel: 'Link down' } })
     expect(named.attributes('role')).toBe('img')
     expect(named.attributes('aria-label')).toBe('Link down')
     expect(named.attributes('aria-hidden')).toBeUndefined()
@@ -198,7 +198,7 @@ describe('small readouts', () => {
 })
 
 describe('BlMeter', () => {
-  const meter = (value: number) => mount(BlMeter, { props: { value, label: 'Download' } })
+  const meter = (value: number) => mount(BlMeter, { props: { value, ariaLabel: 'Download' } })
 
   it('exposes a progressbar with an integer percentage', () => {
     const wrapper = meter(0.426)
@@ -226,14 +226,14 @@ describe('BlMeter', () => {
   })
 
   it('renders null as indeterminate', () => {
-    const wrapper = mount(BlMeter, { props: { value: null, label: 'Scanning' } })
+    const wrapper = mount(BlMeter, { props: { value: null, ariaLabel: 'Scanning' } })
     expect(wrapper.attributes('aria-valuenow')).toBeUndefined()
     expect(wrapper.attributes('data-indeterminate')).toBe('')
     expect(wrapper.find('.bl-meter__fill').attributes('style')).toBeUndefined()
   })
 
   it('switches between indeterminate and determinate reactively', async () => {
-    const wrapper = mount(BlMeter, { props: { value: null as number | null, label: 'Upload' } })
+    const wrapper = mount(BlMeter, { props: { value: null as number | null, ariaLabel: 'Upload' } })
     await wrapper.setProps({ value: 0.5 })
     expect(wrapper.attributes('aria-valuenow')).toBe('50')
     expect(wrapper.attributes('data-indeterminate')).toBeUndefined()
@@ -246,9 +246,9 @@ describe('BlMeter', () => {
 
 describe('BlMeter label and value', () => {
   const field = (props: Record<string, unknown>) =>
-    mount(BlMeter, { props: { value: 0.426, label: 'Download', ...props } })
+    mount(BlMeter, { props: { value: 0.426, ariaLabel: 'Download', ...props } })
 
-  it('renders the bare progressbar with neither flag', () => {
+  it('renders the bare progressbar with neither label nor value', () => {
     const wrapper = field({})
     expect(wrapper.classes()).toEqual(['bl-meter'])
     expect(wrapper.attributes('aria-valuetext')).toBeUndefined()
@@ -256,7 +256,7 @@ describe('BlMeter label and value', () => {
     expect(wrapper.find('.bl-meter-field').exists()).toBe(false)
   })
 
-  it('renders markup identical to the unflagged meter', () => {
+  it('renders a bare bar named by ariaLabel', () => {
     expect(field({}).html()).toBe(
       [
         '<div class="bl-meter" role="progressbar" aria-label="Download" aria-valuemin="0" aria-valuemax="100" aria-valuenow="43">',
@@ -270,7 +270,7 @@ describe('BlMeter label and value', () => {
     const wrapper = field({}).vm.$el as HTMLElement
     expect(wrapper.matches('.bl-meter[role=progressbar]')).toBe(true)
     const attrs = mount(BlMeter, {
-      props: { value: 0.5, label: 'Download' },
+      props: { value: 0.5, ariaLabel: 'Download' },
       attrs: { id: 'disk', class: 'x', style: 'color: red', 'aria-describedby': 'hint' }
     })
     expect(attrs.element.matches('[role=progressbar].bl-meter.x#disk')).toBe(true)
@@ -280,7 +280,7 @@ describe('BlMeter label and value', () => {
 
   it('puts class and style on the wrapper and other attributes on the bar when wrapped', () => {
     const wrapper = mount(BlMeter, {
-      props: { value: 0.5, label: 'Download', showValue: true },
+      props: { value: 0.5, ariaLabel: 'Download', showValue: true },
       attrs: { id: 'disk', class: 'x', style: 'color: red', 'aria-describedby': 'hint' }
     })
     expect(wrapper.classes()).toEqual(['bl-meter-field', 'x'])
@@ -300,7 +300,7 @@ describe('BlMeter label and value', () => {
   })
 
   it('wraps the bar and labels it by the visible label', () => {
-    const wrapper = field({ showLabel: true })
+    const wrapper = field({ label: 'Download', ariaLabel: undefined })
     expect(wrapper.classes()).toEqual(['bl-meter-field'])
     const label = wrapper.find('.bl-meter-field__head .bl-meter-field__label')
     expect(label.text()).toBe('Download')
@@ -311,7 +311,7 @@ describe('BlMeter label and value', () => {
     expect(wrapper.find('.bl-meter-field__value').exists()).toBe(false)
   })
 
-  it('keeps aria-label when only the value is shown', () => {
+  it('names the bar by ariaLabel when only the value is shown', () => {
     const wrapper = field({ showValue: true })
     expect(wrapper.find('.bl-meter').attributes('aria-label')).toBe('Download')
     expect(wrapper.find('.bl-meter-field__label').exists()).toBe(false)
@@ -326,9 +326,39 @@ describe('BlMeter label and value', () => {
   })
 
   it('shows no value while indeterminate', () => {
-    const wrapper = field({ value: null, showLabel: true, showValue: true })
+    const wrapper = field({ value: null, label: 'Download', ariaLabel: undefined, showValue: true })
     expect(wrapper.find('.bl-meter-field__label').exists()).toBe(true)
     expect(wrapper.find('.bl-meter-field__value').exists()).toBe(false)
+  })
+
+  it('renders no visible label for ariaLabel alone, and a visible one for label', () => {
+    const hidden = mount(BlMeter, { props: { value: 0.5, ariaLabel: 'Disk' } })
+    expect(hidden.find('.bl-meter-field__label').exists()).toBe(false)
+    expect(hidden.text()).toBe('')
+    expect(hidden.attributes('aria-label')).toBe('Disk')
+    const visible = mount(BlMeter, { props: { value: 0.5, label: 'Disk' } })
+    expect(visible.find('.bl-meter-field__label').text()).toBe('Disk')
+    expect(visible.find('.bl-meter').attributes('aria-label')).toBeUndefined()
+  })
+
+  it('warns when neither label nor ariaLabel names it', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    mount(BlMeter, { props: { value: 0.5 } })
+    expect(warn.mock.calls.flat().join(' ')).toContain('BlMeter')
+    warn.mockClear()
+    mount(BlMeter, { props: { value: 0.5, ariaLabel: 'Disk' } })
+    mount(BlMeter, { props: { value: 0.5, label: 'Disk' } })
+    expect(warn).not.toHaveBeenCalled()
+    warn.mockRestore()
+  })
+
+  it('treats an empty label as no label and warns', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const wrapper = mount(BlMeter, { props: { value: 0.5, label: '' } })
+    expect(wrapper.find('.bl-meter-field__label').exists()).toBe(false)
+    expect(wrapper.attributes('aria-labelledby')).toBeUndefined()
+    expect(warn.mock.calls.flat().join(' ')).toContain('BlMeter')
+    warn.mockRestore()
   })
 
   it('sets aria-valuetext on the progressbar', () => {
@@ -408,7 +438,7 @@ describe('BlLog', () => {
     expect(wrapper.attributes('aria-label')).toBe('Log')
     expect(wrapper.attributes('aria-live')).toBeUndefined()
     expect(
-      mount(BlLog, { props: { lines: [], label: 'Device log' } }).attributes('aria-label')
+      mount(BlLog, { props: { lines: [], ariaLabel: 'Device log' } }).attributes('aria-label')
     ).toBe('Device log')
   })
 

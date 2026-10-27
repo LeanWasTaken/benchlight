@@ -1,5 +1,5 @@
 <template>
-  <nav v-if="pages > 1" class="bl-pagination" :aria-label="navLabel">
+  <nav v-if="pages > 1" class="bl-pagination" :aria-label="ariaLabel">
     <ul class="bl-pagination__list">
       <li>
         <button
@@ -58,8 +58,8 @@
     defineProps<{
       total: number
       pageSize: number
-      /** Accessible name of the nav; falls back to `labels.nav`. */
-      label?: string
+      /** Accessible name of the nav. */
+      ariaLabel?: string
       siblings?: number
       labels?: Partial<LabelOverrides<PaginationLabels>>
     }>(),
@@ -67,8 +67,8 @@
   )
   const page = defineModel<number>('page', { default: 1 })
 
-  const text = computed<Omit<PaginationLabels, 'nav'>>(() =>
-    mergeLabels<Omit<PaginationLabels, 'nav'>>(
+  const text = computed<PaginationLabels>(() =>
+    mergeLabels<PaginationLabels>(
       {
         prev: 'Previous',
         next: 'Next',
@@ -79,12 +79,11 @@
       props.labels
     )
   )
-  const navLabel = computed(() => props.label ?? props.labels?.nav)
   watch(
-    navLabel,
+    () => props.ariaLabel,
     (name) => {
       if (name === undefined)
-        warn('BlPagination: set `label` or `labels.nav` to name the navigation.')
+        warn('BlPagination: set `ariaLabel` (`aria-label`) to name the navigation.')
     },
     { immediate: true }
   )

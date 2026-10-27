@@ -1,7 +1,7 @@
 <template>
   <div v-if="wrapped" class="bl-meter-field" :class="attrs.class" :style="attrs.style as any">
-    <div v-if="showLabel || visibleValue !== undefined" class="bl-meter-field__head">
-      <span v-if="showLabel" :id="labelId" class="bl-meter-field__label">{{ label }}</span>
+    <div v-if="label || visibleValue !== undefined" class="bl-meter-field__head">
+      <span v-if="label" :id="labelId" class="bl-meter-field__label">{{ label }}</span>
       <span v-if="visibleValue !== undefined" class="bl-meter-field__value" aria-hidden="true">{{
         visibleValue
       }}</span>
@@ -22,13 +22,16 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, useAttrs, useId } from 'vue'
+  import { computed, useAttrs, useId, watch } from 'vue'
+  import { warn } from '../internal/dev'
 
   const props = defineProps<{
     value: number | null
-    label: string
+    /** Visible text above the bar; it names the bar. */
+    label?: string
+    /** Accessible name when there is no visible label. */
+    ariaLabel?: string
     valueText?: string
-    showLabel?: boolean
     showValue?: boolean
   }>()
   defineOptions({ inheritAttrs: false })
@@ -52,10 +55,10 @@
     const rest = { ...attrs }
     delete rest.class
     delete rest.style
-    const labelled = props.showLabel
+    const labelled = Boolean(props.label)
     return {
       role: 'progressbar',
-      'aria-label': labelled ? undefined : props.label,
+      'aria-label': labelled ? undefined : props.ariaLabel,
       'aria-labelledby': labelled ? labelId : undefined,
       'aria-valuemin': 0,
       'aria-valuemax': 100,
@@ -65,5 +68,13 @@
       ...rest
     }
   }
-  const wrapped = computed(() => Boolean(props.showLabel || props.showValue))
+  const wrapped = computed(() => Boolean(props.label) || Boolean(props.showValue))
+  watch(
+    () => [props.label, props.ariaLabel, attrs['aria-labelledby']],
+    ([label, ariaLabel, labelledby]) => {
+      if (!label && ariaLabel === undefined && labelledby === undefined)
+        warn('BlMeter: set `label` (visible) or `ariaLabel` (`aria-label`) to name the meter.')
+    },
+    { immediate: true }
+  )
 </script>

@@ -4,6 +4,9 @@ export type LinkAs = string | Component
 // `object`, not an index-signature record: router location types are interfaces, which lack one.
 export type LinkTo = string | object
 
+/** What `current` accepts on a link-like component; `true` means `'page'`. */
+export type LinkCurrent = boolean | 'page' | 'step' | 'location'
+
 /**
  * Link props shared by every link-rendering component.
  * - `as` a component (e.g. RouterLink): receives `to` if set, otherwise `href`.
@@ -59,7 +62,6 @@ export interface AppearanceLabels {
 }
 
 export interface PrevNextLabels {
-  nav: string
   prev: string
   next: string
 }
@@ -143,12 +145,11 @@ export interface TableLabels {
   sortStrip: string
   sortAscending: string
   sortDescending: string
-  /** Accessible name of the table's pagination when `paginationLabels.nav` is not set. */
+  /** Accessible name of the table's pagination. */
   pages: (caption: string) => string
 }
 
 export interface PaginationLabels {
-  nav: string
   prev: string
   next: string
   page: (n: number) => string
@@ -192,7 +193,6 @@ export interface ToastOptions {
 }
 
 export interface ToasterLabels {
-  region: string
   dismiss: string
   actionHint: (label: string) => string
 }

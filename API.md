@@ -281,6 +281,12 @@ type LedState = 'on' | 'off' | 'danger';
 type LinkAs = string | Component;
 ```
 
+### `LinkCurrent`
+
+```ts
+type LinkCurrent = boolean | 'page' | 'step' | 'location';
+```
+
 ### `LinkProps`
 
 ```ts
@@ -321,7 +327,6 @@ type MetaItem = string | {
 
 ```ts
 interface PaginationLabels {
-    nav: string;
     prev: string;
     next: string;
     page: (n: number) => string;
@@ -342,7 +347,6 @@ interface PrevNextItem extends Pick<LinkProps, 'to' | 'href'> {
 
 ```ts
 interface PrevNextLabels {
-    nav: string;
     prev: string;
     next: string;
 }
@@ -479,7 +483,6 @@ type ToastTone = StatusTone;
 
 ```ts
 interface ToasterLabels {
-    region: string;
     dismiss: string;
     actionHint: (label: string) => string;
 }
@@ -501,10 +504,10 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `ariaLabel` | `string \| undefined` | no |  |
 | `as` | `LinkAs \| undefined` | no |  |
 | `disabled` | `boolean \| undefined` | no |  |
 | `href` | `string \| undefined` | no |  |
-| `label` | `string \| undefined` | no |  |
 | `pill` | `boolean \| undefined` | no |  |
 | `pressed` | `boolean \| undefined` | no | `undefined` |
 | `to` | `LinkTo \| undefined` | no |  |
@@ -609,7 +612,7 @@ Exposed: none
 | --- | --- | --- | --- |
 | `as` | `LinkAs \| undefined` | no |  |
 | `compact` | `boolean \| undefined` | no |  |
-| `current` | `boolean \| "page" \| "step" \| "location" \| "true" \| undefined` | no |  |
+| `current` | `LinkCurrent \| undefined` | no |  |
 | `href` | `string \| undefined` | no |  |
 | `to` | `LinkTo \| undefined` | no |  |
 
@@ -621,6 +624,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `disabled` | `boolean \| undefined` | no |  |
 | `modelValue` | `string \| undefined` | no | `""` |
 | `type` | `"search" \| "text" \| "email" \| "password" \| "tel" \| "url" \| undefined` | no | `"text"` |
 
@@ -632,7 +636,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `label` | `string \| undefined` | no |  |
+| `ariaLabel` | `string \| undefined` | no |  |
 | `state` | `"danger" \| "off" \| "on" \| undefined` | no | `"off"` |
 
 Slots: none
@@ -657,8 +661,8 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `ariaLabel` | `string \| undefined` | no | `"Log"` |
 | `follow` | `boolean \| undefined` | no | `true` |
-| `label` | `string \| undefined` | no | `"Log"` |
 | `lines` | `string[]` | yes |  |
 | `offset` | `number \| undefined` | no | `0` |
 
@@ -709,11 +713,16 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `label` | `string` | yes |  |
-| `showLabel` | `boolean \| undefined` | no |  |
+| `ariaLabel` | `string \| undefined` | no |  |
+| `label` | `string \| undefined` | no |  |
 | `showValue` | `boolean \| undefined` | no |  |
 | `value` | `number \| null` | yes |  |
 | `valueText` | `string \| undefined` | no |  |
+
+Prop notes:
+
+- `ariaLabel`: Accessible name when there is no visible label.
+- `label`: Visible text above the bar; it names the bar.
 
 Slots: none
 Events: none
@@ -734,7 +743,7 @@ Exposed: none
 | prop | type | required | default |
 | --- | --- | --- | --- |
 | `as` | `LinkAs \| undefined` | no |  |
-| `current` | `boolean \| undefined` | no |  |
+| `current` | `LinkCurrent \| undefined` | no |  |
 | `href` | `string \| undefined` | no |  |
 | `to` | `LinkTo \| undefined` | no |  |
 
@@ -746,7 +755,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `label` | `string \| undefined` | no |  |
+| `ariaLabel` | `string \| undefined` | no |  |
 | `labels` | `Partial<LabelOverrides<PaginationLabels>> \| undefined` | no |  |
 | `page` | `number \| undefined` | no | `1` |
 | `pageSize` | `number` | yes |  |
@@ -755,7 +764,7 @@ Exposed: none
 
 Prop notes:
 
-- `label`: Accessible name of the nav; falls back to `labels.nav`.
+- `ariaLabel`: Accessible name of the nav.
 
 Slots: none
 Events: `update:page`
@@ -765,8 +774,9 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `as` | `LinkAs \| undefined` | no | `"a"` |
+| `ariaLabel` | `string \| undefined` | no | `"Pagination"` |
 | `labels` | `Partial<LabelOverrides<PrevNextLabels>> \| undefined` | no |  |
+| `linkAs` | `LinkAs \| undefined` | no | `"a"` |
 | `next` | `PrevNextItem \| null \| undefined` | no |  |
 | `prev` | `PrevNextItem \| null \| undefined` | no |  |
 
@@ -817,6 +827,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `disabled` | `boolean \| undefined` | no |  |
 | `format` | `((value: number) => string) \| undefined` | no |  |
 | `max` | `number \| undefined` | no | `100` |
 | `min` | `number \| undefined` | no | `0` |
@@ -870,6 +881,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `disabled` | `boolean \| undefined` | no |  |
 | `modelValue` | `T \| undefined` | no |  |
 | `options` | `SelectOption<T>[]` | yes |  |
 
@@ -881,8 +893,8 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `ariaLabel` | `string \| undefined` | no | `"Primary"` |
 | `lift` | `number \| false \| undefined` | no | `24` |
-| `navLabel` | `string \| undefined` | no | `"Primary"` |
 
 Slots: `actions`, `brand`, `nav`
 Events: none
@@ -927,7 +939,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `label` | `string \| undefined` | no | `"Primary"` |
+| `ariaLabel` | `string \| undefined` | no | `"Primary"` |
 
 Slots: `default`
 Events: none
@@ -938,7 +950,7 @@ Exposed: none
 | prop | type | required | default |
 | --- | --- | --- | --- |
 | `as` | `LinkAs \| undefined` | no |  |
-| `current` | `boolean \| undefined` | no |  |
+| `current` | `LinkCurrent \| undefined` | no |  |
 | `href` | `string \| undefined` | no |  |
 | `to` | `LinkTo \| undefined` | no |  |
 
@@ -1004,6 +1016,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `disabled` | `boolean \| undefined` | no |  |
 | `modelValue` | `string \| undefined` | no | `""` |
 | `rows` | `number \| undefined` | no | `4` |
 
@@ -1015,6 +1028,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `ariaLabel` | `string \| undefined` | no | `"Notifications"` |
 | `labels` | `Partial<LabelOverrides<ToasterLabels>> \| undefined` | no |  |
 | `max` | `number \| undefined` | no | `3` |
 

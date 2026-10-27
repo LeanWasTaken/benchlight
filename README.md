@@ -70,7 +70,7 @@ components and composables (`useAppearance`, `useScrollLifted`, `useFollowScroll
 `benchlight: { fonts: false }` skips the bundled fonts, and `benchlight: { autoImports: false }`
 skips the composable and helper auto-imports (components stay auto-imported), so they do not
 collide with another library's. `BlSiteBar` wraps its nav in a `<nav>` landmark labelled by
-`navLabel` (default `Primary`). The Tailwind lines are optional: skip them if the app does not use
+`ariaLabel` (default `Primary`; the plain `aria-label` attribute works too). The Tailwind lines are optional: skip them if the app does not use
 Tailwind.
 
 ```vue
@@ -189,7 +189,9 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
   `tests/visual/stress.spec.ts` checks it (see Development).
 - **Link attrs.** `BlNavLink` and `BlIndexRow` render an `li` around the link: `class` and `style`
   go on the `li`; `target`, `rel`, `aria-label`, `data-*` and listeners such as `@click` go on the
-  inner link or button. A set `current` prop wins over a consumer `aria-current`.
+  inner link or button. A set `current` prop (`true`, `'page'`, `'step'` or `'location'`; `true` means `'page'`) wins over a
+  consumer `aria-current`. `BlPrevNext` takes `linkAs` for the component that renders its links,
+  and `ariaLabel` (default `Pagination`) for its nav.
 - **Gutter.** `BlIndexRow` and `BlPrevNext` links bleed 12px either side for the hover background, so
   the host needs at least 12px of side padding. `.bl-col` provides 16-24px.
 - **Site bar.** The nav scrolls horizontally on one line when it does not fit. A brand under about
@@ -211,7 +213,7 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
 - **Fields:** BlField passes its `id` and hint id to BlInput, BlTextarea, BlSelect and BlRange
   automatically. Your own `id` on the control wins. Your own `aria-describedby` is merged: the
   hint id comes first, then the error id, then yours, without duplicates. BlRange forwards fallthrough attrs (`id`, `aria-label`,
-  `disabled`, `name`, listeners) to the slider, which carries the class `bl-range__input`; `class`
+  `name`, listeners; `disabled` is a prop on BlInput, BlSelect, BlTextarea and BlRange) to the slider, which carries the class `bl-range__input`; `class`
   and `style` stay on the wrapper. To override the id, set `id` on BlField instead of on the
   control, so the `<label for>` still matches. For other controls, use the slot props
   `{ id, describedBy, invalid }` or `inject(FIELD_CONTEXT)` from `benchlight/vue`, which holds
@@ -245,16 +247,16 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
 - **BlSiteBar** `lift` is reactive. **BlPrevNext** renders nothing without neighbours. `LinkTo`
   accepts any object, so typed router locations pass.
 - **BlButton:** fill only the `icon` slot for an icon-only button (`bl-btn--icon`, 44px square;
-  `pill` makes it a circle) and name it with `label` (sets `aria-label`; it is for icon-only buttons
+  `pill` makes it a circle) and name it with `ariaLabel` (sets `aria-label`; it is for icon-only buttons
   and replaces visible text as the accessible name, so a dev warning flags it on a button with
   text). `pressed` makes a toggle button (`aria-pressed`, all variants; ignored on links) with an
   inset ring as well as a colour change. `variant="ghost"` is transparent until hovered. The dev
   warnings run after mount and again whenever the props, attributes or slot content change. With raw
   CSS, add `bl-btn--icon`, `bl-btn--ghost` or `aria-pressed` yourself.
 - **BlMeter:** `:value="null"` renders an indeterminate meter. `valueText` sets `aria-valuetext`
-  ("2.1 of 4 GB"). `showLabel` and `showValue` render the label and value visibly (the value is
-  `valueText` or a percentage, hidden while indeterminate and `aria-hidden`); the bar is then
-  labelled by the visible label. CSS-only: wrap the bar,
+  ("2.1 of 4 GB"). `label` renders visible text above the bar (and names it); with no visible text use `ariaLabel`. `showValue` renders the value visibly (the value is
+  `valueText` or a percentage, hidden while indeterminate and `aria-hidden`). A dev warning fires
+  when neither `label` nor `ariaLabel` is set. CSS-only: wrap the bar,
   `<div class="bl-meter-field"><div class="bl-meter-field__head"><span class="bl-meter-field__label">…</span><span class="bl-meter-field__value">…</span></div><div class="bl-meter" role="progressbar" …></div></div>`;
   the wrapper owns the block margin. `class` and `style` go on the outer element (the wrapper when
   wrapped, otherwise the bar); every other attribute goes on the progressbar.
@@ -340,8 +342,7 @@ modules and `pagination` needs `layout` (the bundle CLI warns otherwise).
 - With async data, BlTable clamps `page` to 1 while there are no rows, so set the page after rows
   arrive (or use `manual` with `totalRows`).
 - **BlPagination** renders nothing for a single page. Standalone: `total`, `pageSize`,
-  `v-model:page`, and `label` or `labels.nav` to name the nav (a dev warning fires when neither is
-  set).
+  `v-model:page`, and `ariaLabel` to name the nav (a dev warning fires when it is not set).
 - **CSS-only use:** wrap a `table` in `div.bl-table` (modifiers `.bl-table--compact`,
   `.bl-table--scroll`). Classes: `.bl-table__num`, `.bl-table__primary`, `.bl-table__label` (a
   `span aria-hidden="true"` in each body cell), `.bl-table__sort`, `.bl-table__sort-strip`,
@@ -664,9 +665,9 @@ const id = toast({ message: 'Item deleted', action: { label: 'Undo', onClick: re
 - Re-toasting an existing `id` replaces it in place: a visible toast keeps its slot and its timer
   restarts; a queued one keeps its queue position.
 - BlToaster takes `class`, `data-*` and `aria-*` on its `<section class="bl-toaster">` (inside the
-  teleport); an `aria-label` there replaces the `labels.region` text.
-- BlToaster props: `max` (default 3 visible; the rest queue first in, first out) and `labels`
-  (`{ region, dismiss, actionHint }`, defaults `'Notifications'`, `'Dismiss'` and
+  teleport); its `ariaLabel` prop (default `Notifications`) names it.
+- BlToaster props: `max` (default 3 visible; the rest queue first in, first out), `ariaLabel` and
+  `labels` (`{ dismiss, actionHint }`, defaults `'Dismiss'` and
   `` (label) => `${label} available` ``).
 - Timers pause while a mouse pointer is over the toaster, while focus is inside it and while the
   tab is hidden, then resume with the time left. Toasts never take focus; when a focused toast

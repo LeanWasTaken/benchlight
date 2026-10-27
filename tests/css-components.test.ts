@@ -323,6 +323,20 @@ describe('anchored behaviour', () => {
     }
   })
 
+  it('dims disabled fields like a disabled button', () => {
+    const css = read('field')
+    for (const selector of [
+      '.bl-input:disabled',
+      '.bl-select:disabled',
+      '.bl-textarea:disabled',
+      '.bl-range:has(> :disabled)'
+    ]) {
+      const rule = ruleBody(css, selector)
+      expect(rule['opacity'], selector).toBe('0.45')
+      expect(rule['cursor'], selector).toBe('not-allowed')
+    }
+  })
+
   it('styles the field error line and invalid controls without relying on colour', () => {
     const css = read('field')
     const error = ruleBody(css, '.bl-field__error')

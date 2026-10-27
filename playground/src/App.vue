@@ -1,6 +1,6 @@
 <template>
   <BlSkipLink />
-  <BlSiteBar nav-label="Playground sections">
+  <BlSiteBar aria-label="Playground sections">
     <template #brand>
       <a class="bl-site-bar__brand" href="#top">BENCHLIGHT</a>
     </template>
@@ -85,7 +85,7 @@
       ><BlLinkArrow href="#top" direction="up-right" quiet>Top</BlLinkArrow></template
     >
   </BlColophon>
-  <BlTabBar label="Playground">
+  <BlTabBar aria-label="Playground">
     <BlTabBarItem
       v-for="item in tabs"
       :key="item.id"

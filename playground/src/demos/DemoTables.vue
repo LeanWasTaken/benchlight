@@ -87,13 +87,17 @@
       :page-size="4"
       :total-rows="clients.length"
       :totals="{ signal: 'avg -58 dBm' }"
-      :pagination-labels="{ nav: 'Manual pages' }"
     />
   </div>
 
   <BlSectionHead :level="3" eyebrow="Pagination" heading="Standalone" />
-  <BlPagination v-model:page="standalonePage" label="Standalone pages" :total="95" :page-size="5" />
-  <BlPagination :page="10" label="Sibling pages" :total="200" :page-size="10" :siblings="2" />
+  <BlPagination
+    v-model:page="standalonePage"
+    aria-label="Standalone pages"
+    :total="95"
+    :page-size="5"
+  />
+  <BlPagination :page="10" aria-label="Sibling pages" :total="200" :page-size="10" :siblings="2" />
 </template>
 
 <script setup lang="ts">

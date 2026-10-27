@@ -9,6 +9,11 @@
   type-checking.
 - Breaking: totals render through the new `formatTotal(value, rows)` (else `String()`), never
   `format`; a custom `total` function returns a number.
+- Breaking: one prop vocabulary. `label` is only ever visible text; a name with no visible text is
+  `ariaLabel` (the plain `aria-label` attribute maps to it and lands on the right element).
+  `BlPrevNext` takes `linkAs` for its link component, `current` is `boolean | 'page' | 'step' |
+'location'` everywhere (`LinkCurrent`), and `disabled` is a declared prop on BlInput, BlSelect,
+  BlTextarea and BlRange.
 - Breaking: the default sort collator is `'en'`, not the runtime locale, so server and client agree.
 
 Migration (working list):
@@ -24,6 +29,15 @@ Migration (working list):
 - `BlTable` relied on resetting `page` to 1 while `rows` were empty → it now leaves `page` alone until rows load
 - `BlRange` with no `v-model` showed `0` → it shows `min`; an out-of-range or off-step value is shown clamped and snapped, never emitted
 - `BlDialog` `open` is now a required `v-model:open`; `BlDisclosure` `open` works unbound (local state)
+- `BlButton`, `BlLed` `label` → `ariaLabel` (or `aria-label`); `BlLog`, `BlTabBar` `label` → `ariaLabel`
+- `BlSiteBar` `navLabel` → `ariaLabel` (or `aria-label`)
+- `BlPagination` `label` and `labels.nav` → `ariaLabel`; `BlPrevNext` `labels.nav` → `ariaLabel`
+- `BlTable` `paginationLabels.nav` removed; its pagination is named by `labels.pages(caption)`
+- `BlToaster` `labels.region` → `ariaLabel` (or `aria-label`)
+- `BlMeter` `label` is now visible: drop `showLabel`; for a hidden name use `ariaLabel` instead of `label`
+- `BlPrevNext` `as` → `linkAs`
+- `BlIndexRow` `current="true"` → `current` (`true` now renders `aria-current="page"`, not `"true"`)
+- `BlNavLink`, `BlTabBarItem`, `BlIndexRow` `current` also takes `'step'` and `'location'`
 
 ## 0.8.1 - 2026-10-27
 

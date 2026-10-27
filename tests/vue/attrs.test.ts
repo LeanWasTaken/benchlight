@@ -93,9 +93,8 @@ describe('BlToaster aria-label', () => {
     resetToastStore()
   })
 
-  it('lets a consumer aria-label win over labels.region', async () => {
+  it('names the region from ariaLabel or a plain aria-label attribute', async () => {
     const w = mount(BlToaster, {
-      props: { labels: { region: 'From labels' } },
       attrs: { 'aria-label': 'Mine' },
       attachTo: document.body
     })

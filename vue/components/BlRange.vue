@@ -8,6 +8,7 @@
       :max="max"
       :step="step"
       :aria-valuetext="text"
+      :disabled="disabled"
       v-bind="inputAttrs()"
       @input="model = Number(($event.target as HTMLInputElement).value)"
     />
@@ -28,10 +29,11 @@
       max?: number
       step?: number
       format?: (value: number) => string
+      disabled?: boolean
     }>(),
     { min: 0, max: 100, step: 1 }
   )
-  // Everything but class/style belongs to the slider (aria-label, disabled, name, listeners);
+  // Everything but class/style belongs to the slider (aria-label, name, listeners);
   // class/style stay on the wrapper that carries the layout.
   defineOptions({ inheritAttrs: false })
   const attrs = useAttrs()

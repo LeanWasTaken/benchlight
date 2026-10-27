@@ -44,7 +44,7 @@
     <section v-if="show('button-icon-row')" data-case="button-icon-row">
       <h2 class="st-label">button-icon-row</h2>
       <div data-box style="display: flex; flex-wrap: wrap; gap: 8px">
-        <BlButton v-for="n in 12" :key="n" variant="secondary" :label="`Action ${n}`">
+        <BlButton v-for="n in 12" :key="n" variant="secondary" :aria-label="`Action ${n}`">
           <template #icon>
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M3 3l10 10M13 3L3 13" />
@@ -57,7 +57,7 @@
     <section v-if="show('button-icon-toolbar')" data-case="button-icon-toolbar">
       <h2 class="st-label">button-icon-toolbar</h2>
       <div data-box style="display: flex; flex-wrap: nowrap; gap: 8px; overflow: hidden">
-        <BlButton v-for="n in 12" :key="n" variant="ghost" :label="`Tool ${n}`">
+        <BlButton v-for="n in 12" :key="n" variant="ghost" :aria-label="`Tool ${n}`">
           <template #icon>
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M3 8h10" />
@@ -74,7 +74,6 @@
           :value="0.62"
           :label="german + ' ' + german"
           :value-text="hash + ' of ' + hash"
-          show-label
           show-value
         />
       </div>
@@ -571,7 +570,7 @@
     <section v-if="show('pagination-many')" data-case="pagination-many">
       <h2 class="st-label">pagination-many</h2>
       <div data-box>
-        <BlPagination :total="1000" :page-size="10" :page="50" label="Many pages" />
+        <BlPagination :total="1000" :page-size="10" :page="50" aria-label="Many pages" />
       </div>
     </section>
 

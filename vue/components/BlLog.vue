@@ -4,7 +4,7 @@
     class="bl-log"
     role="log"
     tabindex="0"
-    :aria-label="label"
+    :aria-label="ariaLabel"
   ><template v-for="(segments, row) in parsed" :key="offset + row"><span v-for="(segment, index) in segments" :key="index" v-bind="segment.className ? { class: segment.className } : {}">{{ segment.text }}</span>{{ row < parsed.length - 1 ? '\n' : '' }}</template></pre>
 </template>
 
@@ -18,7 +18,7 @@
     defineProps<{
       lines: string[]
       follow?: boolean
-      label?: string
+      ariaLabel?: string
       /**
        * Absolute index of `lines[0]`, default 0. When a capped buffer drops its oldest line,
        * advance this by one so surviving rows keep their DOM nodes instead of every row being
@@ -26,7 +26,7 @@
        */
       offset?: number
     }>(),
-    { follow: true, label: 'Log', offset: 0 }
+    { follow: true, ariaLabel: 'Log', offset: 0 }
   )
   const element = ref<HTMLElement | null>(null)
   const parsed = computed(() => props.lines.map(ansiToSegments))

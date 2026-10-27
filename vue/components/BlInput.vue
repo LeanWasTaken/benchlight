@@ -1,5 +1,5 @@
 <template>
-  <input v-model="model" class="bl-input" :type="type" v-bind="inputAttrs()" />
+  <input v-model="model" class="bl-input" :type="type" :disabled="disabled" v-bind="inputAttrs()" />
 </template>
 
 <script setup lang="ts">
@@ -7,9 +7,13 @@
   import { FIELD_CONTEXT } from '../types'
   import { mergeDescribedBy } from '../internal/describedBy'
 
-  withDefaults(defineProps<{ type?: 'text' | 'email' | 'password' | 'search' | 'tel' | 'url' }>(), {
-    type: 'text'
-  })
+  withDefaults(
+    defineProps<{
+      type?: 'text' | 'email' | 'password' | 'search' | 'tel' | 'url'
+      disabled?: boolean
+    }>(),
+    { type: 'text' }
+  )
   defineOptions({ inheritAttrs: false })
   const model = defineModel<string>({ default: '' })
   const field = inject(FIELD_CONTEXT, null)

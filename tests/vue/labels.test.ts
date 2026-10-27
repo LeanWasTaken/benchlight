@@ -3,8 +3,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import BlAppearanceSwitch from '../../vue/components/BlAppearanceSwitch.vue'
 import BlDialog from '../../vue/components/BlDialog.vue'
+import BlLed from '../../vue/components/BlLed.vue'
+import BlLog from '../../vue/components/BlLog.vue'
+import BlMeter from '../../vue/components/BlMeter.vue'
 import BlPagination from '../../vue/components/BlPagination.vue'
 import BlPrevNext from '../../vue/components/BlPrevNext.vue'
+import BlTabBar from '../../vue/components/BlTabBar.vue'
 import BlTableOf from '../../vue/components/BlTable.vue'
 import BlToaster from '../../vue/components/BlToaster.vue'
 import { mergeLabels } from '../../vue/internal/labels'
@@ -48,6 +52,63 @@ describe('mergeLabels', () => {
   })
 })
 
+// The pre-0.9 naming props are gone: passed anyway, they fall through as plain attributes or are
+// ignored, and the default or `ariaLabel` names the element.
+describe('removed naming props no longer name the element', () => {
+  it('BlLed label', () => {
+    const w = mount(BlLed, { attrs: { label: 'Old' } })
+    expect(w.attributes('aria-label')).toBeUndefined()
+    expect(w.attributes('aria-hidden')).toBe('true')
+  })
+
+  it('BlLog label', () => {
+    const w = mount(BlLog, { props: { lines: [] }, attrs: { label: 'Old' } })
+    expect(w.attributes('aria-label')).toBe('Log')
+  })
+
+  it('BlTabBar label', () => {
+    const w = mount(BlTabBar, { attrs: { label: 'Old' } })
+    expect(w.attributes('aria-label')).toBe('Primary')
+  })
+
+  it('BlPagination label', () => {
+    const w = mount(BlPagination, {
+      props: { total: 30, pageSize: 10, page: 1, ariaLabel: 'Pages' },
+      attrs: { label: 'Old' }
+    })
+    expect(w.attributes('aria-label')).toBe('Pages')
+  })
+
+  it('BlPrevNext labels.nav', () => {
+    const w = mount(BlPrevNext, {
+      props: {
+        prev: { title: 'A', href: '/a' },
+        labels: { nav: 'Old' } as never
+      }
+    })
+    expect(w.attributes('aria-label')).toBe('Pagination')
+  })
+
+  it('BlToaster labels.region', async () => {
+    const w = mount(BlToaster, {
+      props: { labels: { region: 'Old' } as never },
+      attachTo: document.body
+    })
+    await nextTick()
+    expect(document.querySelector('.bl-toaster')!.getAttribute('aria-label')).toBe('Notifications')
+    w.unmount()
+  })
+
+  it('BlMeter showLabel', () => {
+    const w = mount(BlMeter, {
+      props: { value: 0.5, ariaLabel: 'Disk' },
+      attrs: { showLabel: true }
+    })
+    expect(w.find('.bl-meter-field__label').exists()).toBe(false)
+    expect(w.attributes('aria-label')).toBe('Disk')
+  })
+})
+
 describe('undefined label values fall back to the defaults', () => {
   it('BlAppearanceSwitch', () => {
     const w = mount(BlAppearanceSwitch, {
@@ -66,7 +127,7 @@ describe('undefined label values fall back to the defaults', () => {
       props: {
         prev: { title: 'A', href: '/a' },
         next: { title: 'B', href: '/b' },
-        labels: { nav: undefined, prev: undefined }
+        labels: { prev: undefined }
       }
     })
     expect(w.attributes('aria-label')).toBe('Pagination')
@@ -85,7 +146,7 @@ describe('undefined label values fall back to the defaults', () => {
 
   it('BlToaster', async () => {
     const w = mount(BlToaster, {
-      props: { labels: { region: undefined, dismiss: undefined, actionHint: undefined } },
+      props: { labels: { dismiss: undefined, actionHint: undefined } },
       attachTo: document.body
     })
     await nextTick()
@@ -128,29 +189,30 @@ describe('undefined label values fall back to the defaults', () => {
   })
 })
 
-describe('BlPagination label', () => {
+describe('BlPagination ariaLabel', () => {
   const props = { total: 120, pageSize: 10, page: 5 }
 
-  it('falls back to labels.nav', () => {
-    const w = mount(BlPagination, { props: { ...props, labels: { nav: 'Seiten' } } })
+  it('names the nav and not the root', () => {
+    const w = mount(BlPagination, { props: { ...props, ariaLabel: 'Seiten' } })
     expect(w.get('nav').attributes('aria-label')).toBe('Seiten')
   })
 
-  it('prefers the label prop over labels.nav', () => {
-    const w = mount(BlPagination, { props: { ...props, label: 'Own', labels: { nav: 'Seiten' } } })
-    expect(w.get('nav').attributes('aria-label')).toBe('Own')
+  it('maps a plain aria-label attribute to the nav only', () => {
+    const w = mount(BlPagination, { props, attrs: { 'aria-label': 'Main' } })
+    expect(w.element.tagName).toBe('NAV')
+    expect(w.attributes('aria-label')).toBe('Main')
   })
 
-  it('warns in development when neither is set', () => {
+  it('warns in development when unnamed', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     mount(BlPagination, { props })
     expect(warn.mock.calls.flat().join(' ')).toContain('BlPagination')
     warn.mockRestore()
   })
 
-  it('does not warn when labels.nav is set', () => {
+  it('does not warn when named', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    mount(BlPagination, { props: { ...props, labels: { nav: 'Seiten' } } })
+    mount(BlPagination, { props: { ...props, ariaLabel: 'Seiten' } })
     expect(warn).not.toHaveBeenCalled()
     warn.mockRestore()
   })
@@ -197,7 +259,7 @@ describe('BlTable sort-state and pagination-name labels', () => {
     expect(await stripText({ labels, sort: { key: 'name', dir: 'desc' } })).toBe(', absteigend')
   })
 
-  it('names the pagination via labels.pages, then paginationLabels.nav', () => {
+  it('names the pagination via labels.pages', () => {
     const many = Array.from({ length: 30 }, (_, i) => ({ mac: String(i), name: 'x' }))
     const nav = (props: Record<string, unknown>) =>
       mount(BlTable, {
@@ -207,8 +269,5 @@ describe('BlTable sort-state and pagination-name labels', () => {
         .attributes('aria-label')
     expect(nav({})).toBe('Clients, pages')
     expect(nav({ labels: { pages: (c: string) => `${c} Seiten` } })).toBe('Clients Seiten')
-    expect(
-      nav({ labels: { pages: (c: string) => `${c} Seiten` }, paginationLabels: { nav: 'Nav' } })
-    ).toBe('Nav')
   })
 })
