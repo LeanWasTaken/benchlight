@@ -28,6 +28,7 @@ const COMPONENTS = [
   'BlReadout',
   'BlSectionHead',
   'BlSegmented',
+  'BlSegmentedNav',
   'BlSelect',
   'BlSiteBar',
   'BlSkipLink',

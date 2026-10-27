@@ -105,7 +105,6 @@ const REQUIRED: Record<string, string[]> = {
     '.bl-appearance__option::before'
   ],
   segmented: [
-    ".bl-segmented__item[aria-pressed='true']",
     ".bl-segmented__item[aria-current]:not([aria-current='false'])",
     '.bl-segmented__item:has(:checked)',
     '.bl-segmented--compact .bl-segmented__item',

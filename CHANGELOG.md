@@ -14,6 +14,8 @@
   `BlPrevNext` takes `linkAs` for its link component, `current` is `boolean | 'page' | 'step' |
 'location'` everywhere (`LinkCurrent`), and `disabled` is a declared prop on BlInput, BlSelect,
   BlTextarea and BlRange.
+- Breaking: `BlSegmented` is a native radio group (`role="radiogroup"`, `v-model`, works unbound)
+  and no longer renders links; the new `BlSegmentedNav` is a `<nav>` of links with `aria-current`.
 - Breaking: the default sort collator is `'en'`, not the runtime locale, so server and client agree.
 
 Migration (working list):
@@ -37,6 +39,9 @@ Migration (working list):
 - `BlMeter` `label` is now visible: drop `showLabel`; for a hidden name use `ariaLabel` instead of `label`
 - `BlPrevNext` `as` → `linkAs`
 - `BlIndexRow` `current="true"` → `current` (`true` now renders `aria-current="page"`, not `"true"`)
+- `BlSegmented` `label` → `ariaLabel`; `modelValue` still works, but it renders radios, not `aria-pressed` buttons
+- `BlSegmented` options with `to`/`href`/`current`, or `as` → `BlSegmentedNav` `items` (`as` → `linkAs`)
+- `BlSegmented` `SegmentedOption` loses `to`, `href`, `current` and gains `disabled`; links are `SegmentedNavItem`
 - `BlNavLink`, `BlTabBarItem`, `BlIndexRow` `current` also takes `'step'` and `'location'`
 
 ## 0.8.1 - 2026-10-27

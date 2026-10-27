@@ -34,7 +34,7 @@ describe('forced colors', () => {
     ['meter', ['.bl-meter', '.bl-meter__fill']],
     ['eq', ['.bl-eq__bar', '.bl-eq--active .bl-eq__bar']],
     ['msg', ['.bl-msg--success::before', '.bl-msg--danger::before']],
-    ['segmented', [".bl-segmented__item[aria-pressed='true']"]],
+    ['segmented', [".bl-segmented__item[aria-current]:not([aria-current='false'])"]],
     [
       'field',
       [
@@ -107,7 +107,7 @@ describe('non-text contrast', () => {
     expect(
       body(
         read('css/components/segmented.css'),
-        ".bl-segmented__item[aria-pressed='true'],\n  .bl-segmented__item[aria-current]:not([aria-current='false']),\n  .bl-segmented__item:has(:checked)"
+        ".bl-segmented__item[aria-current]:not([aria-current='false']),\n  .bl-segmented__item:has(:checked)"
       )
     ).toContain('var(--bl-control-border)')
   })

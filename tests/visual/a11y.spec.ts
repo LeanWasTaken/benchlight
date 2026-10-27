@@ -90,8 +90,12 @@ test('a keyboard-focused radio segmented item shows a ring', async ({ page }) =>
   const item = page.locator('.bl-segmented__item', { has: radio })
   await radio.focus()
   await page.keyboard.press('ArrowRight')
-  const next = page.locator('.bl-segmented__item', { has: page.getByRole('radio', { name: 'L' }) })
+  const next = page.locator('.bl-segmented__item', {
+    has: page.getByRole('radio', { name: 'L', exact: true })
+  })
   await expect(next.locator('input')).toBeFocused()
+  await expect(next.locator('input')).toBeChecked()
+  await expect(radio).not.toBeChecked()
   const ring = await next.evaluate((el) => {
     const style = getComputedStyle(el)
     return { style: style.outlineStyle, width: style.outlineWidth }
@@ -121,7 +125,6 @@ test.describe('forced colors', () => {
     '.bl-meter',
     '.bl-meter__fill',
     '.bl-eq__bar',
-    '.bl-segmented__item[aria-pressed="true"]',
     '.bl-segmented__item:has(:checked)',
     '.bl-btn[aria-pressed="true"]'
   ]) {
@@ -186,8 +189,8 @@ test.describe('forced colors', () => {
       const highlight = bg(probe)
       probe.remove()
       return {
-        on: bg(document.querySelector('.bl-segmented__item[aria-pressed="true"]')!),
-        off: bg(document.querySelector('.bl-segmented__item[aria-pressed="false"]')!),
+        on: bg(document.querySelector('.bl-segmented__item:has(:checked)')!),
+        off: bg(document.querySelector('.bl-segmented__item:not(:has(:checked))')!),
         highlight
       }
     })

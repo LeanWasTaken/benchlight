@@ -273,7 +273,14 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
   Under reduced motion, overflowing text wraps instead. The scroll holds still while the pointer is
   over it or focus is inside it, and while `paused` is true (`<BlMarquee :paused="…">`, or
   `useMarquee(box, text, { paused })`), so a page can offer its own pause control (WCAG 2.2.2).
-- **BlSegmented:** wraps, with a 16px row gap.
+- **BlSegmented / BlSegmentedNav:** both wrap, with a 16px row gap. `BlSegmented` is a native radio
+  group: `<BlSegmented v-model="size" :options="[{ value: 's', label: 'S', disabled: true }]"
+aria-label="Size" />` (`disabled` is optional per option; `name` optional, `compact`; works
+  without `v-model`; a form reset restores the mount value; a model matching no option checks
+  nothing and emits nothing). `BlSegmentedNav` is a `<nav>` of links:
+  `<BlSegmentedNav :items="[{ label: 'en', href: '/en', current: true }]" aria-label="Language"
+link-as="…" />`; each item needs `to` or `href`, and `current` is
+  `boolean | 'page' | 'step' | 'location'`.
 - **Inputs and selects:** 16px on coarse pointers, so iOS does not zoom on focus.
 - **BlSelect / `.bl-select-wrap`:** BlSelect renders `<span class="bl-select-wrap"><select
 class="bl-select">`; `class` and `style` go on the wrapper (so `$el` is the wrapper: use `$el.querySelector('select')`,
@@ -728,7 +735,7 @@ places. `tokens` always comes first; `base`, `type`, `motion`, `layout` and `tin
 | BlColophon                                      | `colophon`                 |
 | BlSkipLink                                      | `skip-link`                |
 | BlAppearanceSwitch                              | `appearance`               |
-| BlSegmented                                     | `segmented`                |
+| BlSegmented, BlSegmentedNav                     | `segmented`                |
 | BlButton                                        | `btn`                      |
 | BlField, BlInput, BlTextarea, BlSelect, BlRange | `field`                    |
 | `.bl-fieldset` (CSS only)                       | `fieldset`                 |

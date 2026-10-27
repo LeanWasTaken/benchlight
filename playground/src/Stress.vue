@@ -110,7 +110,7 @@
       <h2 class="st-label">segmented-long</h2>
       <div data-box>
         <BlSegmented
-          label="Long labels"
+          aria-label="Long labels"
           :options="[
             { value: 'a', label: 'Konfigurationsverwaltungssystem' },
             { value: 'b', label: 'Short' }
@@ -438,7 +438,7 @@
     <section v-if="show('segmented-12')" data-case="segmented-12">
       <h2 class="st-label">segmented-12</h2>
       <div data-box>
-        <BlSegmented label="Twelve" :options="twelve" model-value="o1" />
+        <BlSegmented aria-label="Twelve" :options="twelve" model-value="o1" />
       </div>
     </section>
 

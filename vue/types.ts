@@ -21,10 +21,15 @@ export interface LinkProps {
   href?: string
 }
 
-export interface SegmentedOption<T> extends Pick<LinkProps, 'to' | 'href'> {
+export interface SegmentedOption<T> {
   value: T
   label: string
-  current?: boolean
+  disabled?: boolean
+}
+
+export type SegmentedNavItem = LinkProps & {
+  label: string
+  current?: LinkCurrent
 }
 
 export interface SelectOption<T> {

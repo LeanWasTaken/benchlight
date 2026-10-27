@@ -24,6 +24,7 @@
     border-radius: var(--bl-radius-pill);
     font-family: var(--bl-font-mono);
     font-size: var(--bl-text-annotation);
+    line-height: normal;
     color: var(--bl-ink-2);
     text-decoration: none;
     cursor: pointer;
@@ -51,11 +52,10 @@
     color: var(--bl-ink-3);
   }
   @media (hover: hover) {
-    .bl-segmented__item:hover {
+    .bl-segmented__item:not(:has(input:disabled)):hover {
       color: var(--bl-ink-1);
     }
   }
-  .bl-segmented__item[aria-pressed='true'],
   .bl-segmented__item[aria-current]:not([aria-current='false']),
   .bl-segmented__item:has(:checked) {
     background: var(--bl-raised);
@@ -73,8 +73,11 @@
     opacity: 0;
     pointer-events: none;
   }
+  .bl-segmented__item:has(input:disabled) {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
   @media (forced-colors: active) {
-    .bl-segmented__item[aria-pressed='true'],
     .bl-segmented__item[aria-current]:not([aria-current='false']),
     .bl-segmented__item:has(:checked) {
       forced-color-adjust: none;

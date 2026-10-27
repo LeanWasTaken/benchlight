@@ -58,16 +58,11 @@
 
   <BlSectionHead :level="3" eyebrow="Segmented" heading="Buttons, links and radios" />
   <div class="pg-row">
-    <BlSegmented v-model="filter" :options="filters" label="Category" />
-    <BlSegmented as="a" compact :options="locales" label="Language" />
+    <BlSegmented v-model="filter" :options="filters" aria-label="Category" />
+    <BlSegmentedNav compact :items="locales" aria-label="Language" />
   </div>
   <div class="pg-row">
-    <div class="bl-segmented" role="radiogroup" aria-label="Size">
-      <label v-for="size in ['S', 'M', 'L']" :key="size" class="bl-segmented__item">
-        <input v-model="sizeChoice" type="radio" name="size" :value="size" />
-        {{ size }}
-      </label>
-    </div>
+    <BlSegmented v-model="sizeChoice" :options="sizes" aria-label="Size" name="size" />
   </div>
 
   <BlSectionHead :level="3" eyebrow="Links" heading="Arrows">
@@ -86,14 +81,16 @@
 
 <script setup lang="ts">
   import { ref } from 'vue'
-  import { BlButton, BlLinkArrow, BlSectionHead, BlSegmented } from '../../../vue'
+  import type { SegmentedOption } from '../../../vue'
+  import { BlButton, BlLinkArrow, BlSectionHead, BlSegmented, BlSegmentedNav } from '../../../vue'
 
   const muted = ref(false)
   const bold = ref(false)
   const ghostOn = ref(false)
   const filter = ref<string | null>(null)
   const sizeChoice = ref('M')
-  const filters = [
+  const sizes = ['S', 'M', 'L'].map((size) => ({ value: size, label: size }))
+  const filters: SegmentedOption<string | null>[] = [
     { value: null, label: 'All' },
     { value: 'software', label: 'Software' },
     { value: 'hardware', label: 'Hardware' },

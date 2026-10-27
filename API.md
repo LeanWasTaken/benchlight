@@ -103,6 +103,7 @@
 - `BlReadout`
 - `BlSectionHead`
 - `BlSegmented`
+- `BlSegmentedNav`
 - `BlSelect`
 - `BlSiteBar`
 - `BlSkipLink`
@@ -368,13 +369,22 @@ interface RiseDelayOptions {
 }
 ```
 
+### `SegmentedNavItem`
+
+```ts
+type SegmentedNavItem = LinkProps & {
+    label: string;
+    current?: LinkCurrent;
+};
+```
+
 ### `SegmentedOption`
 
 ```ts
-interface SegmentedOption<T> extends Pick<LinkProps, 'to' | 'href'> {
+interface SegmentedOption<T> {
     value: T;
     label: string;
-    current?: boolean;
+    disabled?: boolean;
 }
 ```
 
@@ -867,14 +877,27 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `as` | `LinkAs \| undefined` | no |  |
+| `ariaLabel` | `string \| undefined` | no |  |
 | `compact` | `boolean \| undefined` | no |  |
-| `label` | `string \| undefined` | no |  |
 | `modelValue` | `T \| undefined` | no |  |
+| `name` | `string \| undefined` | no |  |
 | `options` | `SegmentedOption<T>[]` | yes |  |
 
 Slots: none
 Events: `update:modelValue`
+Exposed: none
+
+### BlSegmentedNav
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `ariaLabel` | `string \| undefined` | no |  |
+| `compact` | `boolean \| undefined` | no |  |
+| `items` | `SegmentedNavItem[]` | yes |  |
+| `linkAs` | `LinkAs \| undefined` | no |  |
+
+Slots: none
+Events: none
 Exposed: none
 
 ### BlSelect

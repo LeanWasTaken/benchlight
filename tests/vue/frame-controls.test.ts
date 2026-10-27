@@ -10,7 +10,6 @@ import BlInput from '../../vue/components/BlInput.vue'
 import BlLinkArrow from '../../vue/components/BlLinkArrow.vue'
 import BlNavLink from '../../vue/components/BlNavLink.vue'
 import BlRange from '../../vue/components/BlRange.vue'
-import BlSegmented from '../../vue/components/BlSegmented.vue'
 import BlSelect from '../../vue/components/BlSelect.vue'
 import BlSiteBar from '../../vue/components/BlSiteBar.vue'
 import BlTextarea from '../../vue/components/BlTextarea.vue'
@@ -270,96 +269,6 @@ describe('BlAppearanceSwitch', () => {
   it('renders auto checked on the server', async () => {
     const html = await renderToString(createSSRApp(BlAppearanceSwitch))
     expect(html).toMatch(/value="auto"[^>]*checked/)
-  })
-})
-
-describe('BlSegmented', () => {
-  const options = [
-    { value: null, label: 'All' },
-    { value: 'hardware', label: 'Hardware' }
-  ]
-
-  it('renders pressed buttons and emits the chosen value', async () => {
-    const wrapper = mount(BlSegmented, { props: { options, modelValue: null, label: 'Category' } })
-    const buttons = wrapper.findAll('button.bl-segmented__item')
-    expect(buttons.map((b) => b.attributes('aria-pressed'))).toEqual(['true', 'false'])
-    expect(wrapper.attributes('role')).toBe('group')
-    await buttons[1]!.trigger('click')
-    expect(wrapper.emitted('update:modelValue')).toEqual([['hardware']])
-  })
-
-  it('renders a labelled nav of links with aria-current="page" in links mode', () => {
-    const wrapper = mount(BlSegmented, {
-      props: {
-        as: 'a',
-        compact: true,
-        label: 'Language',
-        options: [
-          { value: 'en', label: 'en', href: '/en', current: true },
-          { value: 'lv', label: 'lv', href: '/lv' }
-        ]
-      }
-    })
-    expect(wrapper.element.tagName).toBe('NAV')
-    expect(wrapper.attributes('aria-label')).toBe('Language')
-    expect(wrapper.attributes('role')).toBeUndefined()
-    expect(wrapper.classes()).toContain('bl-segmented--compact')
-    const links = wrapper.findAll('a.bl-segmented__item')
-    expect(links.map((l) => l.attributes('href'))).toEqual(['/en', '/lv'])
-    expect(links[0]!.attributes('aria-current')).toBe('page')
-    expect(links[1]!.attributes('aria-current')).toBeUndefined()
-  })
-
-  it('switches to link mode when an option has href or to, with no as', () => {
-    const wrapper = mount(BlSegmented, {
-      props: {
-        label: 'Language',
-        options: [
-          { value: 'en', label: 'en', href: '/en', current: true },
-          { value: 'lv', label: 'lv', href: '/lv' }
-        ]
-      }
-    })
-    expect(wrapper.element.tagName).toBe('NAV')
-    expect(wrapper.find('button').exists()).toBe(false)
-    expect(wrapper.findAll('a.bl-segmented__item').map((l) => l.attributes('href'))).toEqual([
-      '/en',
-      '/lv'
-    ])
-  })
-
-  it('uses as only to pick the tag when options have to', () => {
-    const Router = defineComponent({
-      props: { to: String },
-      setup:
-        (props, { slots }) =>
-        () =>
-          h('a', { href: props.to, 'data-router': '' }, slots['default']?.())
-    })
-    const wrapper = mount(BlSegmented, {
-      props: { as: Router, options: [{ value: 'a', label: 'A', to: '/a' }] }
-    })
-    expect(wrapper.find('a[data-router]').attributes('href')).toBe('/a')
-  })
-
-  it('warns when an option has no to/href in link mode', () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    mount(BlSegmented, {
-      props: {
-        options: [
-          { value: 'a', label: 'A', href: '/a' },
-          { value: 'b', label: 'B' }
-        ]
-      }
-    })
-    expect(warn).toHaveBeenCalledWith(expect.stringContaining('option has no to/href'))
-    warn.mockRestore()
-  })
-
-  it('stays a button group when neither as nor any option links', () => {
-    const wrapper = mount(BlSegmented, { props: { options, modelValue: null } })
-    expect(wrapper.element.tagName).toBe('DIV')
-    expect(wrapper.findAll('button')).toHaveLength(2)
   })
 })
 
