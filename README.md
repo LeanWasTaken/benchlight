@@ -9,7 +9,7 @@ classes.
 ## Install
 
 ```json
-"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.8.1"
+"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.9.0"
 ```
 
 The repo is private and the URL uses SSH on purpose: bun turns GitHub https URLs into API tarball
@@ -163,7 +163,8 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
   `html::after { content: none }` if you need the pseudo-element.
 - Library CSS lives in `@layer base` / `@layer components`; utilities and your own CSS win without
   `!important`.
-- States are ARIA or native attributes (`aria-current`, `aria-pressed`, `:checked`, `:disabled`);
+- States are ARIA or native attributes (`aria-current`, `:checked`, `:disabled`, and `aria-pressed`
+  on `.bl-btn` toggles only);
   the current item uses `aria-current` (`page`, `step`, `location` or `true`; any value but `false`
   is styled). The `data-*` attributes below are script-set, so do not set them yourself (apart from
   the CSS-only cases in the table notes). `data-lifted` (site bar, `js/appearance.js`),
@@ -178,8 +179,9 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
   that follow the OS in `auto` mode switch instantly.
 - Text on a tint is `ink-1`, `trace` or `danger`; copper and phosphor are marks only there.
 - Borders of controls (inputs, secondary buttons, switch thumb, selected segment, meter edge) use
-  `--bl-color-control-border`, which keeps at least 3:1 against canvas, surface and raised. Hit areas are
-  44px. Forced-colors mode keeps LEDs, meter fill, EQ bars and the selected segment visible.
+  `--bl-color-control-border`, which keeps at least 3:1 against canvas, surface and raised. Hit
+  areas are 44px. Forced-colors mode keeps LEDs, meter fill, EQ bars and the selected segment
+  visible.
 
 ### Adding a component
 
@@ -307,7 +309,7 @@ aria-label="Size" />` (`disabled` is optional per option; `name` optional, `comp
   nothing and emits nothing). `BlSegmentedNav` is a `<nav>` of links:
   `<BlSegmentedNav :items="[{ label: 'en', href: '/en', current: true }]" aria-label="Language"
 link-as="…" />`; each item needs `to` or `href`, and `current` is
-  `boolean | 'page' | 'step' | 'location'`.
+  `boolean | 'page' | 'step' | 'location'`. An item's own `as` overrides `linkAs` for that item.
 - **Inputs and selects:** 16px on coarse pointers, so iOS does not zoom on focus.
 - **BlSelect / `.bl-select-wrap`:** BlSelect renders `<span class="bl-select-wrap"><select
 class="bl-select">`; `class` and `style` go on the wrapper (so `$el` is the wrapper: use `$el.querySelector('select')`,
