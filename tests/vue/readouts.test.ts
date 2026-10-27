@@ -170,21 +170,16 @@ describe('small readouts', () => {
     expect(danger.attributes('role')).toBe('alert')
   })
 
-  it('BlMsg maps the old info/ok/err tones with one dev warning each', async () => {
+  it('BlMsg no longer maps the pre-0.7 info/ok/err tones', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    const map = { info: 'neutral', ok: 'success', err: 'danger' } as const
-    for (const [old, now] of Object.entries(map)) {
+    for (const old of ['info', 'ok', 'err']) {
       const wrapper = mount(BlMsg, { props: { tone: old as never } })
-      expect(wrapper.classes().join(' ')).not.toContain(`bl-msg--${old}`)
-      if (now !== 'neutral') expect(wrapper.classes()).toContain(`bl-msg--${now}`)
-      expect(wrapper.attributes('role')).toBe(now === 'danger' ? 'alert' : 'status')
-      mount(BlMsg, { props: { tone: old as never } })
+      expect(wrapper.classes()).not.toContain('bl-msg--success')
+      expect(wrapper.classes()).not.toContain('bl-msg--danger')
+      expect(wrapper.attributes('role')).toBe('status')
     }
-    const messages = warn.mock.calls.map((call) => String(call[0]))
-    expect(messages).toHaveLength(3)
-    expect(messages.join('\n')).toMatch(/"info".*"neutral"/)
-    expect(messages.join('\n')).toMatch(/"ok".*"success"/)
-    expect(messages.join('\n')).toMatch(/"err".*"danger"/)
+    expect(warn).not.toHaveBeenCalled()
+    warn.mockRestore()
   })
 
   it('BlMsg wraps the slot in one text box so runs and links share a column', () => {

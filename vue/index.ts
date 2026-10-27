@@ -1,5 +1,5 @@
 export { default as BlSiteBar } from './components/BlSiteBar.vue'
-export { default as BlNavLink } from './components/BlNavLink.vue'
+export { default as BlSiteBarLink } from './components/BlSiteBarLink.vue'
 export { default as BlTabBar } from './components/BlTabBar.vue'
 export { default as BlTabBarItem } from './components/BlTabBarItem.vue'
 export { default as BlColophon } from './components/BlColophon.vue'

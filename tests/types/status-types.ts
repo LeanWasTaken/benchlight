@@ -1,7 +1,7 @@
 import BlButton from '../../vue/components/BlButton.vue'
 import BlDialog from '../../vue/components/BlDialog.vue'
 import BlIndexRow from '../../vue/components/BlIndexRow.vue'
-import BlNavLink from '../../vue/components/BlNavLink.vue'
+import BlSiteBarLink from '../../vue/components/BlSiteBarLink.vue'
 import BlTabBarItem from '../../vue/components/BlTabBarItem.vue'
 import BlLed from '../../vue/components/BlLed.vue'
 import BlMeter from '../../vue/components/BlMeter.vue'
@@ -41,7 +41,7 @@ assertType<Equal<DialogCloseEvent, { reason: DialogCloseReason; returnValue: str
 type DialogClose = Parameters<NonNullable<Props<typeof BlDialog>['onClose']>>[0]
 assertType<Equal<DialogClose, DialogCloseEvent>>()
 assertType<Equal<LinkCurrent, boolean | 'page' | 'step' | 'location'>>()
-assertType<Equal<NonNullable<Props<typeof BlNavLink>['current']>, LinkCurrent>>()
+assertType<Equal<NonNullable<Props<typeof BlSiteBarLink>['current']>, LinkCurrent>>()
 assertType<Equal<NonNullable<Props<typeof BlTabBarItem>['current']>, LinkCurrent>>()
 assertType<Equal<NonNullable<Props<typeof BlIndexRow>['current']>, LinkCurrent>>()
 

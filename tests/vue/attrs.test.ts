@@ -2,7 +2,7 @@ import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import BlIndexRow from '../../vue/components/BlIndexRow.vue'
-import BlNavLink from '../../vue/components/BlNavLink.vue'
+import BlSiteBarLink from '../../vue/components/BlSiteBarLink.vue'
 import BlTableOf from '../../vue/components/BlTable.vue'
 import BlToaster from '../../vue/components/BlToaster.vue'
 import { resetToastStore } from '../../vue/internal/toastStore'
@@ -20,7 +20,7 @@ const forwarded = {
 }
 
 describe.each([
-  ['BlNavLink', BlNavLink, 'a.bl-site-bar__link', {}],
+  ['BlSiteBarLink', BlSiteBarLink, 'a.bl-site-bar__link', {}],
   ['BlIndexRow', BlIndexRow, 'a.bl-index-row', { title: 't' }]
 ] as const)('%s attribute forwarding', (_name, Comp, link, slots) => {
   const make = (onClick?: (e: Event) => void) =>

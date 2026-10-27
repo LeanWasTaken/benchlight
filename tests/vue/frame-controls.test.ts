@@ -8,7 +8,7 @@ import BlColophon from '../../vue/components/BlColophon.vue'
 import BlField from '../../vue/components/BlField.vue'
 import BlInput from '../../vue/components/BlInput.vue'
 import BlLinkArrow from '../../vue/components/BlLinkArrow.vue'
-import BlNavLink from '../../vue/components/BlNavLink.vue'
+import BlSiteBarLink from '../../vue/components/BlSiteBarLink.vue'
 import BlRange from '../../vue/components/BlRange.vue'
 import BlSelect from '../../vue/components/BlSelect.vue'
 import BlSiteBar from '../../vue/components/BlSiteBar.vue'
@@ -149,9 +149,9 @@ describe('BlSiteBar', () => {
   })
 })
 
-describe('BlNavLink', () => {
+describe('BlSiteBarLink', () => {
   it('renders an anchor in a list item with aria-current for the current page', () => {
-    const wrapper = mount(BlNavLink, {
+    const wrapper = mount(BlSiteBarLink, {
       props: { href: '/about', current: true },
       slots: { default: 'About' }
     })
@@ -161,7 +161,7 @@ describe('BlNavLink', () => {
   })
 
   it('hands to to a router component', () => {
-    const wrapper = mount(BlNavLink, { props: { as: RouterLinkLike, to: '/projects' } })
+    const wrapper = mount(BlSiteBarLink, { props: { as: RouterLinkLike, to: '/projects' } })
     expect(wrapper.find('a[data-router]').attributes('href')).toBe('/projects')
   })
 })
@@ -185,6 +185,16 @@ describe('BlTabBar', () => {
     expect(item.find('.bl-tab-bar__label').text()).toBe('Home')
     // The old name is split so a repo-wide grep for it only finds CHANGELOG history.
     expect(wrapper.html()).not.toContain('bl-tab' + 'bar')
+  })
+
+  it('renders the icon span only when the icon slot has content', () => {
+    const bare = mount(BlTabBarItem, { props: { href: '/' }, slots: { default: 'Home' } })
+    expect(bare.find('.bl-tab-bar__icon').exists()).toBe(false)
+    const empty = mount(BlTabBarItem, {
+      props: { href: '/' },
+      slots: { icon: () => [], default: 'Home' }
+    })
+    expect(empty.find('.bl-tab-bar__icon').exists()).toBe(false)
   })
 })
 
@@ -339,8 +349,8 @@ describe('BlButton', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     mount(BlButton, { slots: { default: 'Save' } })
     mount(BlButton, { props: { href: '/x' } })
-    mount(BlNavLink, { props: { href: '/about' } })
-    mount(BlNavLink, { props: { as: markRaw(RouterLinkLike), to: '/projects' } })
+    mount(BlSiteBarLink, { props: { href: '/about' } })
+    mount(BlSiteBarLink, { props: { as: markRaw(RouterLinkLike), to: '/projects' } })
     expect(warn).not.toHaveBeenCalled()
     warn.mockRestore()
   })
@@ -801,7 +811,7 @@ describe('form controls', () => {
 
 describe('current on link components', () => {
   it.each([
-    ['BlNavLink', BlNavLink],
+    ['BlSiteBarLink', BlSiteBarLink],
     ['BlTabBarItem', BlTabBarItem]
   ] as const)('%s maps true to page and passes step and location', (_name, Component) => {
     const attr = (current?: boolean | 'page' | 'step' | 'location') =>

@@ -11,7 +11,7 @@
   align-content: start;
   min-inline-size: 0;
 }
-.pg-main > section > :is(h2, h3, div, ul, form, p) {
+.pg-main > section > :is(h2, h3, div, ul, form, p):not(.bl-section-head) {
   margin-block: 0;
 }
 .pg-row {

@@ -6,7 +6,7 @@
         <NuxtLink to="/" class="bl-site-bar__brand">FIXTURE</NuxtLink>
       </template>
       <template #nav>
-        <BlNavLink :as="NuxtLink" to="/" current>Home</BlNavLink>
+        <BlSiteBarLink :as="NuxtLink" to="/" current>Home</BlSiteBarLink>
       </template>
       <template #actions>
         <BlAppearanceSwitch />

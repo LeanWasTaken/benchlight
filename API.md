@@ -93,7 +93,6 @@
 - `BlMeta`
 - `BlMeter`
 - `BlMsg`
-- `BlNavLink`
 - `BlPagination`
 - `BlPrevNext`
 - `BlProgress`
@@ -107,6 +106,7 @@
 - `BlSegmentedNav`
 - `BlSelect`
 - `BlSiteBar`
+- `BlSiteBarLink`
 - `BlSkipLink`
 - `BlSpecPanel`
 - `BlSpecRow`
@@ -751,19 +751,6 @@ Slots: `default`
 Events: none
 Exposed: none
 
-### BlNavLink
-
-| prop | type | required | default |
-| --- | --- | --- | --- |
-| `as` | `LinkAs \| undefined` | no |  |
-| `current` | `LinkCurrent \| undefined` | no |  |
-| `href` | `string \| undefined` | no |  |
-| `to` | `LinkTo \| undefined` | no |  |
-
-Slots: `default`
-Events: none
-Exposed: none
-
 ### BlPagination
 
 | prop | type | required | default |
@@ -942,6 +929,19 @@ Exposed: none
 | `lift` | `number \| false \| undefined` | no | `24` |
 
 Slots: `actions`, `brand`, `nav`
+Events: none
+Exposed: none
+
+### BlSiteBarLink
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `as` | `LinkAs \| undefined` | no |  |
+| `current` | `LinkCurrent \| undefined` | no |  |
+| `href` | `string \| undefined` | no |  |
+| `to` | `LinkTo \| undefined` | no |  |
+
+Slots: `default`
 Events: none
 Exposed: none
 

@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { defineComponent, h } from 'vue'
 import BlIndex from '../../vue/components/BlIndex.vue'
 import BlIndexRow from '../../vue/components/BlIndexRow.vue'
@@ -45,6 +45,17 @@ describe('BlSectionHead', () => {
       expect(wrapper.find('a').exists()).toBe(false)
       expect(wrapper.find('[class*="__action"]').exists()).toBe(false)
     }
+  })
+
+  it('is a div, not a banner landmark, and warns when the heading is empty', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    expect(mount(BlSectionHead, { props: { heading: 'x' } }).element.tagName).toBe('DIV')
+    expect(warn).not.toHaveBeenCalled()
+    mount(BlSectionHead, { props: { eyebrow: 'Only an eyebrow' } })
+    mount(BlSectionHead, { props: { bar: true } })
+    const messages = warn.mock.calls.map((call) => String(call[0]))
+    expect(messages.filter((m) => m.includes('BlSectionHead')).length).toBeGreaterThanOrEqual(1)
+    warn.mockRestore()
   })
 
   it('ruled adds the hairline modifier', () => {

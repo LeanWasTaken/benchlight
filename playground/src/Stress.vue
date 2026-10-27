@@ -9,9 +9,9 @@
       </a>
     </template>
     <template v-if="chrome.links > 0" #nav>
-      <BlNavLink v-for="(l, i) in links(chrome.links)" :key="i" href="#" :current="i === 0">
+      <BlSiteBarLink v-for="(l, i) in links(chrome.links)" :key="i" href="#" :current="i === 0">
         {{ l }}
-      </BlNavLink>
+      </BlSiteBarLink>
     </template>
     <template #actions><BlAppearanceSwitch /></template>
   </BlSiteBar>
@@ -806,7 +806,7 @@
     BlMeter,
     BlProgress,
     BlMsg,
-    BlNavLink,
+    BlSiteBarLink,
     BlPrevNext,
     BlProse,
     BlRadio,

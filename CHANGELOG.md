@@ -34,6 +34,11 @@
   raised colours components used there; light uses white, dark uses the canvas colour, both at
   least 4.5:1.
 - Breaking: the Tailwind theme no longer overrides `ease-out`; the Benchlight curve is `ease-bl`.
+- Breaking: small cleanups. `BlMsg` drops the pre-0.7 `info`, `ok` and `err` tones (and their dev
+  warning); `BlNavLink` is renamed `BlSiteBarLink`, since it only works inside `BlSiteBar`'s list
+  (props, slots and CSS classes are unchanged); `BlSectionHead` renders a `<div>`, not a
+  `<header>` (a `banner` landmark outside sectioning elements), and warns in development when its
+  heading is empty; `BlTabBarItem` renders the icon span only when the `icon` slot has content.
 
 Migration (working list):
 
@@ -61,8 +66,12 @@ Migration (working list):
 - `BlIndexRow` `current="true"` → `current` (`true` now renders `aria-current="page"`, not `"true"`)
 - `BlSegmented` `label` → `ariaLabel`; `modelValue` still works, but it renders radios, not `aria-pressed` buttons
 - `BlSegmented` options with `to`/`href`/`current`, or `as` → `BlSegmentedNav` `items` (`as` → `linkAs`)
+- `BlMsg` `tone="info"` → `tone="neutral"` (or omit it); `"ok"` → `"success"`; `"err"` → `"danger"`. The aliases now fall back to the neutral tone
+- `BlNavLink` → `BlSiteBarLink` (import and template; same props and slots, same `bl-site-bar__link` class)
+- `BlSectionHead` root `<header class="bl-section-head">` → `<div>`; CSS or tests that selected `header.bl-section-head` → `.bl-section-head`; give `heading` (or `eyebrow` with `bar`) a value
+- `BlTabBarItem` without an `icon` slot no longer renders `.bl-tab-bar__icon`; target the item, not the empty span
 - `BlSegmented` `SegmentedOption` loses `to`, `href`, `current` and gains `disabled`; links are `SegmentedNavItem`
-- `BlNavLink`, `BlTabBarItem`, `BlIndexRow` `current` also takes `'step'` and `'location'`
+- `BlSiteBarLink`, `BlTabBarItem`, `BlIndexRow` `current` also takes `'step'` and `'location'`
 - Nuxt auto-import `useAppearance` → `useBlAppearance`; or set `autoImports: { prefix: '' }` to keep bare names
 - Nuxt auto-import `useScrollLifted` → `useBlScrollLifted`
 - Nuxt auto-import `useReducedMotion` → `useBlReducedMotion`

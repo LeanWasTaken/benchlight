@@ -87,7 +87,9 @@ Tailwind.
   <BlSiteBar>
     <template #brand><NuxtLink to="/" class="bl-site-bar__brand">MY SITE</NuxtLink></template>
     <template #nav>
-      <BlNavLink :as="NuxtLink" to="/projects" :current="isActive('/projects')">Projects</BlNavLink>
+      <BlSiteBarLink :as="NuxtLink" to="/projects" :current="isActive('/projects')"
+        >Projects</BlSiteBarLink
+      >
     </template>
     <template #actions><BlAppearanceSwitch /></template>
   </BlSiteBar>
@@ -206,7 +208,7 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
 - Long unbroken content (URLs, hashes, compound words) wraps instead of widening the page.
 - The stress suite is the contract: `/stress.html` renders every component with hostile content and
   `tests/visual/stress.spec.ts` checks it (see Development).
-- **Link attrs.** `BlNavLink` and `BlIndexRow` render an `li` around the link: `class` and `style`
+- **Link attrs.** `BlSiteBarLink` and `BlIndexRow` render an `li` around the link: `class` and `style`
   go on the `li`; `target`, `rel`, `aria-label`, `data-*` and listeners such as `@click` go on the
   inner link or button. A set `current` prop (`true`, `'page'`, `'step'` or `'location'`; `true` means `'page'`) wins over a
   consumer `aria-current`. `BlPrevNext` takes `linkAs` for the component that renders its links,
@@ -754,7 +756,7 @@ places. `tokens` always comes first; `base`, `type`, `motion`, `layout` and `tin
 
 | Component                                       | Module                     |
 | ----------------------------------------------- | -------------------------- |
-| BlSiteBar, BlNavLink                            | `site-bar`                 |
+| BlSiteBar, BlSiteBarLink                        | `site-bar`                 |
 | BlTabBar, BlTabBarItem                          | `tab-bar`                  |
 | BlColophon                                      | `colophon`                 |
 | BlSkipLink                                      | `skip-link`                |

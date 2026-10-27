@@ -5,13 +5,16 @@
     class="bl-tab-bar__item"
     :aria-current="currentValue(current)"
   >
-    <span class="bl-tab-bar__icon" aria-hidden="true"><slot name="icon" /></span>
+    <span v-if="hasContent($slots['icon']?.())" class="bl-tab-bar__icon" aria-hidden="true"
+      ><slot name="icon"
+    /></span>
     <span class="bl-tab-bar__label"><slot /></span>
   </component>
 </template>
 
 <script setup lang="ts">
   import { computed } from 'vue'
+  import { hasContent } from '../internal/slots'
   import { currentValue, linkBindings, resolveTag } from '../internal/link'
   import type { LinkAs, LinkCurrent, LinkTo } from '../types'
 

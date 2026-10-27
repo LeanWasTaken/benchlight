@@ -5,9 +5,14 @@
       <a class="bl-site-bar__brand" href="#top">BENCHLIGHT</a>
     </template>
     <template #nav>
-      <BlNavLink v-for="s in sections" :key="s.id" :href="`#${s.id}`" :current="s.id === 'tokens'">
+      <BlSiteBarLink
+        v-for="s in sections"
+        :key="s.id"
+        :href="`#${s.id}`"
+        :current="s.id === 'tokens'"
+      >
         {{ s.nav }}
-      </BlNavLink>
+      </BlSiteBarLink>
     </template>
     <template #actions>
       <BlAppearanceSwitch />
@@ -114,7 +119,7 @@
     BlLinkArrow,
     BlMarquee,
     BlMeta,
-    BlNavLink,
+    BlSiteBarLink,
     BlSectionHead,
     BlSiteBar,
     BlSkipLink,
