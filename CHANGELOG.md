@@ -20,6 +20,11 @@
   dev warning when `value > 1` (it renders full). The new `BlProgress` is the task readout
   (`role="progressbar"`, `value: number | null`) with the same props; both share the `meter` CSS.
   The indeterminate bar is now `.bl-meter--indeterminate`, not `[data-indeterminate]`.
+- Breaking: the Nuxt module auto-imports composables and helpers with a `Bl` prefix
+  (`useToast` → `useBlToast`, `riseDelay` → `blRiseDelay`), ending the clash with `@nuxt/ui`'s
+  `useToast`. `autoImports` is now `boolean | { prefix?: string }`; `false` still turns them off,
+  `{ prefix: 'Acme' }` renames them and `{ prefix: '' }` restores the bare names. Explicit imports
+  from `benchlight/vue` keep their names.
 - Breaking: the default sort collator is `'en'`, not the runtime locale, so server and client agree.
 
 Migration (working list):
@@ -50,6 +55,13 @@ Migration (working list):
 - `BlSegmented` options with `to`/`href`/`current`, or `as` → `BlSegmentedNav` `items` (`as` → `linkAs`)
 - `BlSegmented` `SegmentedOption` loses `to`, `href`, `current` and gains `disabled`; links are `SegmentedNavItem`
 - `BlNavLink`, `BlTabBarItem`, `BlIndexRow` `current` also takes `'step'` and `'location'`
+- Nuxt auto-import `useAppearance` → `useBlAppearance`; or set `autoImports: { prefix: '' }` to keep bare names
+- Nuxt auto-import `useScrollLifted` → `useBlScrollLifted`
+- Nuxt auto-import `useReducedMotion` → `useBlReducedMotion`
+- Nuxt auto-import `useMarquee` → `useBlMarquee`
+- Nuxt auto-import `useFollowScroll` → `useBlFollowScroll`
+- Nuxt auto-import `useToast` → `useBlToast`
+- Nuxt auto-import `riseDelay` → `blRiseDelay`; `ansiToSegments` → `blAnsiToSegments`
 
 ## 0.8.1 - 2026-10-27
 

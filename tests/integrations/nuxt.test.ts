@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { PREPAINT } from '../../js/prepaint-script.mjs'
+import { prefixedName } from '../../nuxt/module'
 
 const kit = vi.hoisted(() => ({
   addComponentsDir: vi.fn(),
@@ -24,8 +25,11 @@ interface TestNuxt {
 
 type Definition = {
   meta: { name: string; configKey: string }
-  defaults: { fonts: boolean; autoImports: boolean }
-  setup: (options: { fonts: boolean; autoImports?: boolean }, nuxt: TestNuxt) => void
+  defaults: { fonts: boolean; autoImports: boolean | { prefix?: string } }
+  setup: (
+    options: { fonts: boolean; autoImports?: boolean | { prefix?: string } },
+    nuxt: TestNuxt
+  ) => void
 }
 
 const load = async () => (await import('../../nuxt/module')).default as unknown as Definition
@@ -85,20 +89,46 @@ describe('nuxt module', () => {
     })
   })
 
-  it('auto-imports the composables and helpers from the vue entry', async () => {
+  const names = [
+    'useAppearance',
+    'useScrollLifted',
+    'useReducedMotion',
+    'useMarquee',
+    'useFollowScroll',
+    'riseDelay',
+    'ansiToSegments',
+    'useToast'
+  ]
+  type Entry = { name: string; as: string; from: string }
+
+  it('auto-imports the composables and helpers from the vue entry with the Bl prefix', async () => {
     ;(await load()).setup({ fonts: true, autoImports: true }, makeNuxt())
-    const imports = kit.addImports.mock.calls[0]![0] as Array<{ name: string; from: string }>
-    expect(imports.map((entry) => entry.name)).toEqual([
-      'useAppearance',
-      'useScrollLifted',
-      'useReducedMotion',
-      'useMarquee',
-      'useFollowScroll',
-      'riseDelay',
-      'ansiToSegments',
-      'useToast'
-    ])
+    const imports = kit.addImports.mock.calls[0]![0] as Entry[]
+    expect(imports.map((entry) => entry.name)).toEqual(names)
+    expect(imports).toContainEqual({
+      name: 'useToast',
+      as: 'useBlToast',
+      from: '/pkg/nuxt/../vue/index'
+    })
+    expect(imports.map((entry) => entry.as)).toEqual(names.map((name) => prefixedName(name, 'Bl')))
     expect(new Set(imports.map((entry) => entry.from))).toEqual(new Set(['/pkg/nuxt/../vue/index']))
+  })
+
+  it('applies a custom prefix and an empty prefix restores the bare names', async () => {
+    ;(await load()).setup({ fonts: true, autoImports: { prefix: 'Acme' } }, makeNuxt())
+    const custom = kit.addImports.mock.calls[0]![0] as Entry[]
+    expect(custom.map((entry) => entry.as)).toContain('useAcmeToast')
+    expect(custom.map((entry) => entry.as)).toContain('acmeRiseDelay')
+    kit.addImports.mockClear()
+    ;(await load()).setup({ fonts: true, autoImports: { prefix: '' } }, makeNuxt())
+    const bare = kit.addImports.mock.calls[0]![0] as Entry[]
+    expect(bare.map((entry) => entry.as)).toEqual(names)
+  })
+
+  it('uses the default prefix for an options object without one', async () => {
+    ;(await load()).setup({ fonts: true, autoImports: {} }, makeNuxt())
+    const imports = kit.addImports.mock.calls[0]![0] as Entry[]
+    expect(imports.map((entry) => entry.as)).toContain('useBlToast')
   })
 
   it('skips the composable auto-imports when autoImports is off, keeping components', async () => {
@@ -122,5 +152,31 @@ describe('nuxt module', () => {
     nuxt.options.vite = {}
     ;(await load()).setup({ fonts: true, autoImports: true }, nuxt)
     expect(nuxt.options.vite.optimizeDeps).toEqual({ exclude: ['benchlight'] })
+  })
+})
+
+describe('prefixedName', () => {
+  it('puts the prefix after use for use* names', () => {
+    expect(prefixedName('useToast', 'Bl')).toBe('useBlToast')
+  })
+
+  it('prepends a lower-cased prefix to other names', () => {
+    expect(prefixedName('riseDelay', 'Bl')).toBe('blRiseDelay')
+    expect(prefixedName('ansiToSegments', 'Acme')).toBe('acmeAnsiToSegments')
+  })
+
+  it('returns the name unchanged for an empty prefix', () => {
+    expect(prefixedName('useToast', '')).toBe('useToast')
+    expect(prefixedName('riseDelay', '')).toBe('riseDelay')
+  })
+
+  it('keeps the inner capitals of a camel-cased prefix', () => {
+    expect(prefixedName('useToast', 'AcmeUi')).toBe('useAcmeUiToast')
+    expect(prefixedName('riseDelay', 'AcmeUi')).toBe('acmeUiRiseDelay')
+    expect(prefixedName('useToast', 'acme')).toBe('useAcmeToast')
+  })
+
+  it('does not treat a lower-case word starting with use as a composable', () => {
+    expect(prefixedName('user', 'Bl')).toBe('blUser')
   })
 })

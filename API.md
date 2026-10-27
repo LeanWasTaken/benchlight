@@ -129,14 +129,16 @@
 - `useToast`
 
 ## Nuxt auto-imports
-- `ansiToSegments`
-- `riseDelay`
-- `useAppearance`
-- `useFollowScroll`
-- `useMarquee`
-- `useReducedMotion`
-- `useScrollLifted`
-- `useToast`
+Default `Bl` prefix; `autoImports: { prefix }` changes them (`prefix: ''` keeps the bare names).
+
+- `blAnsiToSegments`
+- `blRiseDelay`
+- `useBlAppearance`
+- `useBlFollowScroll`
+- `useBlMarquee`
+- `useBlReducedMotion`
+- `useBlScrollLifted`
+- `useBlToast`
 
 ## Exported types
 

@@ -65,11 +65,14 @@ export default defineNuxtConfig({
 ```
 
 The module adds the fonts and component CSS, the no-flash appearance script, auto-imported `Bl*`
-components and composables (`useAppearance`, `useScrollLifted`, `useFollowScroll`,
-`useReducedMotion`, `useMarquee`, `riseDelay`, `ansiToSegments`, `useToast`).
-`benchlight: { fonts: false }` skips the bundled fonts, and `benchlight: { autoImports: false }`
-skips the composable and helper auto-imports (components stay auto-imported), so they do not
-collide with another library's. `BlSiteBar` wraps its nav in a `<nav>` landmark labelled by
+components and composables, which take the `Bl` prefix (`useBlAppearance`, `useBlScrollLifted`,
+`useBlFollowScroll`, `useBlReducedMotion`, `useBlMarquee`, `blRiseDelay`, `blAnsiToSegments`,
+`useBlToast`). Explicit imports from `benchlight/vue` keep the bare names.
+`benchlight: { fonts: false }` skips the bundled fonts. `benchlight: { autoImports: false }` skips
+the composable and helper auto-imports (components stay auto-imported), and
+`benchlight: { autoImports: { prefix: 'Acme' } }` renames them (`useAcmeToast`, `acmeRiseDelay`;
+the prefix goes after `use` for `use*` names and is prepended lower-cased for the rest;
+`prefix: ''` restores the bare names). `BlSiteBar` wraps its nav in a `<nav>` landmark labelled by
 `ariaLabel` (default `Primary`; the plain `aria-label` attribute works too). The Tailwind lines are optional: skip them if the app does not use
 Tailwind.
 
@@ -702,9 +705,8 @@ const id = toast({ message: 'Item deleted', action: { label: 'Undo', onClick: re
 - SSR: `toast()` does nothing on the server and returns `''`. The toaster renders its section and
   both live regions empty, and the list only after mount, so a toast fired before hydration
   cannot cause a mismatch.
-- Nuxt UI also auto-imports a `useToast`. In an app that uses both, set
-  `benchlight: { autoImports: false }` and import Benchlight's explicitly where you need it:
-  `import { useToast } from 'benchlight/vue'`.
+- In Nuxt the auto-import is `useBlToast`, so it does not collide with Nuxt UI's `useToast`.
+  `import { useToast } from 'benchlight/vue'` keeps the bare name.
 - CSS-only: the classes work on the markup above; timers, queueing and announcements are yours.
   A toaster outside an open modal dialog is inert, so place it inside the dialog while one is
   open.

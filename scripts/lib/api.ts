@@ -2,6 +2,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { basename, join, relative, sep } from 'node:path'
 import ts from 'typescript'
 import { createChecker } from 'vue-component-meta'
+import { prefixedName } from '../../nuxt/module'
 import { classNames, customPropertyDeclarations, propertyNames, stripNoise } from './css-scan'
 
 const HEADER =
@@ -263,7 +264,9 @@ export function renderApi(root: string): string {
     list(barrelExports(root)),
     '',
     '## Nuxt auto-imports',
-    list(sorted(autoImports(root))),
+    "Default `Bl` prefix; `autoImports: { prefix }` changes them (`prefix: ''` keeps the bare names).",
+    '',
+    list(sorted(autoImports(root).map((name) => prefixedName(name, 'Bl')))),
     '',
     '## Exported types',
     '',
