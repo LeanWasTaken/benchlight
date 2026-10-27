@@ -26,6 +26,14 @@
   `{ prefix: 'Acme' }` renames them and `{ prefix: '' }` restores the bare names. Explicit imports
   from `benchlight/vue` keep their names.
 - Breaking: the default sort collator is `'en'`, not the runtime locale, so server and client agree.
+- Breaking: every colour token moves under `--bl-color-*` (`--bl-trace` is now
+  `--bl-color-trace`, and likewise `canvas`, `surface`, `raised`, `separator`, `control-border`,
+  `ink-1`, `ink-2`, `ink-3`, `copper`, `phosphor`, `danger`). Tailwind utility names do not change,
+  and `benchlight/tokens` is unchanged apart from the two new names. New `--bl-color-on-trace` and
+  `--bl-color-on-danger` tokens (text and marks on a trace or danger fill) replace the canvas and
+  raised colours components used there; light uses white, dark uses the canvas colour, both at
+  least 4.5:1.
+- Breaking: the Tailwind theme no longer overrides `ease-out`; the Benchlight curve is `ease-bl`.
 
 Migration (working list):
 
@@ -58,6 +66,9 @@ Migration (working list):
 - Nuxt auto-import `useAppearance` → `useBlAppearance`; or set `autoImports: { prefix: '' }` to keep bare names
 - Nuxt auto-import `useScrollLifted` → `useBlScrollLifted`
 - Nuxt auto-import `useReducedMotion` → `useBlReducedMotion`
+- `var(--bl-trace)` (and `canvas`, `surface`, `raised`, `separator`, `control-border`, `ink-1`, `ink-2`, `ink-3`, `copper`, `phosphor`, `danger`) → `var(--bl-color-trace)` etc.; search for `--bl-` followed by one of those names
+- text on a trace or danger fill using `var(--bl-canvas)` or `var(--bl-raised)` → `var(--bl-color-on-trace)` / `var(--bl-color-on-danger)`
+- Tailwind `ease-out` expecting the Benchlight curve → `ease-bl`; `ease-out` is Tailwind's own again
 - Nuxt auto-import `useMarquee` → `useBlMarquee`
 - Nuxt auto-import `useFollowScroll` → `useBlFollowScroll`
 - Nuxt auto-import `useToast` → `useBlToast`

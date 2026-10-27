@@ -9,8 +9,8 @@
     align-items: center;
     justify-content: space-around;
     padding: 6px;
-    background: var(--bl-surface);
-    border: 1px solid var(--bl-separator);
+    background: var(--bl-color-surface);
+    border: 1px solid var(--bl-color-separator);
     border-radius: var(--bl-radius-card);
     box-shadow: var(--bl-shadow-float);
   }
@@ -26,7 +26,7 @@
     gap: 2px;
     padding: 8px 4px;
     border-radius: var(--bl-radius-chip);
-    color: var(--bl-ink-2);
+    color: var(--bl-color-ink-2);
     text-decoration: none;
     transition:
       color var(--bl-duration-fast) ease,
@@ -34,12 +34,12 @@
   }
   @media (hover: hover) {
     .bl-tab-bar__item:hover {
-      color: var(--bl-ink-1);
+      color: var(--bl-color-ink-1);
     }
   }
   .bl-tab-bar__item[aria-current]:not([aria-current='false']) {
-    color: var(--bl-trace);
-    background: color-mix(in srgb, var(--bl-trace) 10%, transparent);
+    color: var(--bl-color-trace);
+    background: color-mix(in srgb, var(--bl-color-trace) 10%, transparent);
   }
   .bl-tab-bar__icon {
     display: inline-flex;

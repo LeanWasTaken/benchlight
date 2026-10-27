@@ -1,4 +1,4 @@
-export declare const colorNames: readonly ["canvas", "surface", "raised", "separator", "control-border", "ink-1", "ink-2", "ink-3", "trace", "copper", "phosphor", "danger"];
+export declare const colorNames: readonly ["canvas", "surface", "raised", "separator", "control-border", "ink-1", "ink-2", "ink-3", "trace", "copper", "phosphor", "danger", "on-trace", "on-danger"];
 export type ColorName = (typeof colorNames)[number];
 export type Theme = 'light' | 'dark';
 export declare const tokens: {
@@ -16,6 +16,8 @@ export declare const tokens: {
             readonly copper: "#a6512a";
             readonly phosphor: "#1f7a46";
             readonly danger: "#a42d37";
+            readonly 'on-trace': "#ffffff";
+            readonly 'on-danger': "#ffffff";
         };
         readonly dark: {
             readonly canvas: "#101214";
@@ -30,6 +32,8 @@ export declare const tokens: {
             readonly copper: "#e8936a";
             readonly phosphor: "#7bd9a2";
             readonly danger: "#ff9098";
+            readonly 'on-trace': "#101214";
+            readonly 'on-danger': "#101214";
         };
     };
     readonly font: {

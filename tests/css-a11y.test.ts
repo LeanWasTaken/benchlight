@@ -23,7 +23,7 @@ describe('keyboard focus on radio-mode segmented items', () => {
   const css = read('css/components/segmented.css')
   it('rings the label when its hidden radio takes focus', () => {
     const rule = body(css, '.bl-segmented__item:has(input:focus-visible)')
-    expect(rule).toContain('outline: 2px solid var(--bl-trace);')
+    expect(rule).toContain('outline: 2px solid var(--bl-color-trace);')
     expect(rule).toContain('outline-offset: 2px;')
   })
 })
@@ -91,25 +91,25 @@ describe('forced colors', () => {
 })
 
 describe('non-text contrast', () => {
-  it('draws form controls and control edges with --bl-control-border', () => {
+  it('draws form controls and control edges with --bl-color-control-border', () => {
     expect(
       body(read('css/components/field.css'), '.bl-input,\n  .bl-select,\n  .bl-textarea')
-    ).toContain('border: 1px solid var(--bl-control-border);')
+    ).toContain('border: 1px solid var(--bl-color-control-border);')
     expect(body(read('css/components/btn.css'), '.bl-btn--secondary')).toContain(
-      'border-color: var(--bl-control-border);'
+      'border-color: var(--bl-color-control-border);'
     )
     expect(body(read('css/components/meter.css'), '.bl-meter')).toContain(
-      'var(--bl-control-border)'
+      'var(--bl-color-control-border)'
     )
     expect(body(read('css/components/appearance.css'), '.bl-appearance__track::before')).toContain(
-      'border: 1px solid var(--bl-control-border);'
+      'border: 1px solid var(--bl-color-control-border);'
     )
     expect(
       body(
         read('css/components/segmented.css'),
         ".bl-segmented__item[aria-current]:not([aria-current='false']),\n  .bl-segmented__item:has(:checked)"
       )
-    ).toContain('var(--bl-control-border)')
+    ).toContain('var(--bl-color-control-border)')
   })
 })
 
@@ -130,12 +130,12 @@ describe('.bl-prose under a CSS reset', () => {
 describe('focus ring', () => {
   it('outranks a reset that styles :-moz-focusring at the same layer', () => {
     expect(body(read('css/base.css'), ':focus-visible:focus-visible')).toContain(
-      'outline: 2px solid var(--bl-trace);'
+      'outline: 2px solid var(--bl-color-trace);'
     )
   })
   it('survives minification', () => {
     expect(buildDist(new URL('..', import.meta.url).pathname).bundle).toMatch(
-      /:focus-visible:focus-visible\{outline:2px solid var\(--bl-trace\)/
+      /:focus-visible:focus-visible\{outline:2px solid var\(--bl-color-trace\)/
     )
   })
 })

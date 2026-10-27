@@ -8,14 +8,14 @@
     min-width: 0;
     max-width: 100%;
     padding: 8px 16px;
-    background: var(--bl-ink-1);
+    background: var(--bl-color-ink-1);
     border: 1px solid transparent;
     border-radius: var(--bl-radius-chip);
     font: inherit;
     font-size: 0.875rem;
     font-weight: 500;
     line-height: 1.5;
-    color: var(--bl-canvas);
+    color: var(--bl-color-canvas);
     text-align: center;
     overflow-wrap: anywhere;
     text-decoration: none;
@@ -28,53 +28,54 @@
       opacity var(--bl-duration-fast) ease;
   }
   .bl-btn--secondary {
-    background: var(--bl-surface);
-    border-color: var(--bl-control-border);
-    color: var(--bl-ink-1);
+    background: var(--bl-color-surface);
+    border-color: var(--bl-color-control-border);
+    color: var(--bl-color-ink-1);
   }
   .bl-btn--danger {
-    background: color-mix(in srgb, var(--bl-danger) 8%, var(--bl-surface));
-    border-color: color-mix(in srgb, var(--bl-danger) 35%, var(--bl-separator));
-    color: var(--bl-danger);
+    background: color-mix(in srgb, var(--bl-color-danger) 8%, var(--bl-color-surface));
+    border-color: color-mix(in srgb, var(--bl-color-danger) 35%, var(--bl-color-separator));
+    color: var(--bl-color-danger);
   }
   .bl-btn--ghost {
     background: transparent;
     border-color: transparent;
-    color: var(--bl-ink-2);
+    color: var(--bl-color-ink-2);
   }
   @media (hover: hover) {
     .bl-btn:hover {
-      background: color-mix(in srgb, var(--bl-ink-1) 82%, var(--bl-canvas));
+      background: color-mix(in srgb, var(--bl-color-ink-1) 82%, var(--bl-color-canvas));
     }
     .bl-btn--secondary:hover {
-      background: var(--bl-raised);
+      background: var(--bl-color-raised);
     }
     .bl-btn--danger:hover {
-      background: color-mix(in srgb, var(--bl-danger) 14%, var(--bl-surface));
+      background: color-mix(in srgb, var(--bl-color-danger) 14%, var(--bl-color-surface));
     }
     .bl-btn--ghost:hover {
-      background: color-mix(in srgb, var(--bl-ink-1) 6%, transparent);
-      color: var(--bl-ink-1);
+      background: color-mix(in srgb, var(--bl-color-ink-1) 6%, transparent);
+      color: var(--bl-color-ink-1);
     }
   }
   /* Toggle state: a filled or tinted trace look plus an inset ring, so it is never hue alone.
      Declared after the hover rules, with its own hover feedback below. */
   .bl-btn[aria-pressed='true'] {
-    background: var(--bl-trace);
-    border-color: var(--bl-trace);
-    box-shadow: inset 0 0 0 2px var(--bl-canvas);
-    color: var(--bl-canvas);
+    background: var(--bl-color-trace);
+    border-color: var(--bl-color-trace);
+    box-shadow: inset 0 0 0 2px var(--bl-color-canvas);
+    color: var(--bl-color-on-trace);
   }
   .bl-btn--danger[aria-pressed='true'] {
-    background: var(--bl-danger);
-    border-color: var(--bl-danger);
+    background: var(--bl-color-danger);
+    border-color: var(--bl-color-danger);
+    color: var(--bl-color-on-danger);
   }
   .bl-btn--secondary[aria-pressed='true'],
   .bl-btn--ghost[aria-pressed='true'] {
-    background: color-mix(in srgb, var(--bl-trace) 10%, var(--bl-surface));
-    border-color: var(--bl-trace);
-    box-shadow: inset 0 0 0 1px var(--bl-trace);
-    color: var(--bl-trace);
+    background: color-mix(in srgb, var(--bl-color-trace) 10%, var(--bl-color-surface));
+    border-color: var(--bl-color-trace);
+    box-shadow: inset 0 0 0 1px var(--bl-color-trace);
+    color: var(--bl-color-trace);
   }
   .bl-btn--secondary[aria-pressed='true'] .bl-btn__icon,
   .bl-btn--ghost[aria-pressed='true'] .bl-btn__icon {
@@ -82,14 +83,14 @@
   }
   @media (hover: hover) {
     .bl-btn[aria-pressed='true']:hover {
-      background: color-mix(in srgb, var(--bl-trace) 88%, var(--bl-ink-1));
+      background: color-mix(in srgb, var(--bl-color-trace) 88%, var(--bl-color-ink-1));
     }
     .bl-btn--danger[aria-pressed='true']:hover {
-      background: color-mix(in srgb, var(--bl-danger) 88%, var(--bl-ink-1));
+      background: color-mix(in srgb, var(--bl-color-danger) 88%, var(--bl-color-ink-1));
     }
     .bl-btn--secondary[aria-pressed='true']:hover,
     .bl-btn--ghost[aria-pressed='true']:hover {
-      background: color-mix(in srgb, var(--bl-trace) 16%, var(--bl-surface));
+      background: color-mix(in srgb, var(--bl-color-trace) 16%, var(--bl-color-surface));
     }
   }
   .bl-btn--pill {
@@ -115,7 +116,7 @@
     height: 18px;
   }
   .bl-btn--secondary .bl-btn__icon {
-    color: var(--bl-ink-2);
+    color: var(--bl-color-ink-2);
   }
   .bl-btn:disabled,
   .bl-btn[aria-disabled='true'] {

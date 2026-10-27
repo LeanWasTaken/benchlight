@@ -12,7 +12,7 @@
     gap: 12px;
     min-block-size: 44px;
     min-inline-size: 0;
-    color: var(--bl-ink-1);
+    color: var(--bl-color-ink-1);
     cursor: pointer;
   }
   /* The real checkbox sits invisibly over the box: native clicks, Space, forms and no-JS. */
@@ -33,8 +33,8 @@
     flex: none;
     inline-size: 22px;
     block-size: 22px;
-    background: var(--bl-surface);
-    border: 1px solid var(--bl-control-border);
+    background: var(--bl-color-surface);
+    border: 1px solid var(--bl-color-control-border);
     border-radius: var(--bl-radius-chip);
     transition:
       background-color var(--bl-duration-fast) ease,
@@ -46,12 +46,12 @@
     content: '';
     position: absolute;
     display: none;
-    color: var(--bl-raised);
+    color: var(--bl-color-on-trace);
   }
   .bl-checkbox__input:checked + .bl-checkbox__box,
   .bl-checkbox__input:indeterminate + .bl-checkbox__box {
-    background: var(--bl-trace);
-    border-color: var(--bl-trace);
+    background: var(--bl-color-trace);
+    border-color: var(--bl-color-trace);
   }
   .bl-checkbox__input:checked + .bl-checkbox__box::after {
     display: block;
@@ -78,7 +78,7 @@
     rotate: none;
   }
   .bl-checkbox__input:focus-visible + .bl-checkbox__box {
-    outline: 2px solid var(--bl-trace);
+    outline: 2px solid var(--bl-color-trace);
     outline-offset: 2px;
   }
   .bl-checkbox__label {
@@ -89,7 +89,7 @@
     flex-basis: 100%;
     padding-inline-start: 34px;
     font-size: var(--bl-text-small);
-    color: var(--bl-ink-2);
+    color: var(--bl-color-ink-2);
     overflow-wrap: anywhere;
   }
   .bl-checkbox__error {
@@ -99,7 +99,7 @@
     flex-basis: 100%;
     padding-inline-start: 34px;
     font-size: var(--bl-text-small);
-    color: var(--bl-danger);
+    color: var(--bl-color-danger);
     overflow-wrap: anywhere;
   }
   /* Same leading "!" mark as .bl-field__error, so the state does not rest on colour. */
@@ -110,9 +110,9 @@
     width: 16px;
     height: 16px;
     margin-top: 0.1em;
-    background: var(--bl-danger);
+    background: var(--bl-color-danger);
     border-radius: 50%;
-    color: var(--bl-raised);
+    color: var(--bl-color-on-danger);
     font-size: 11px;
     font-weight: 700;
     line-height: 16px;
@@ -120,21 +120,21 @@
   }
   /* Invalid doubles the box border with an inset ring; a disabled checkbox stays plain. */
   .bl-checkbox__input[aria-invalid='true']:not(:disabled) + .bl-checkbox__box {
-    border-color: var(--bl-danger);
-    box-shadow: inset 0 0 0 1px var(--bl-danger);
+    border-color: var(--bl-color-danger);
+    box-shadow: inset 0 0 0 1px var(--bl-color-danger);
   }
   .bl-checkbox__input:disabled + .bl-checkbox__box {
     opacity: 0.45;
   }
   .bl-checkbox__control:has(> .bl-checkbox__input:disabled) {
-    color: var(--bl-ink-2);
+    color: var(--bl-color-ink-2);
     cursor: not-allowed;
   }
   @media (hover: hover) {
     .bl-checkbox__control:hover
       .bl-checkbox__input:not(:checked, :indeterminate, :disabled)
       + .bl-checkbox__box {
-      border-color: var(--bl-ink-3);
+      border-color: var(--bl-color-ink-3);
     }
     @media (forced-colors: active) {
       .bl-checkbox__control:hover

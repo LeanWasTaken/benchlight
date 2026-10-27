@@ -59,7 +59,7 @@ describe('API.md exported types', () => {
 describe('API.md tokens', () => {
   it('lists every --bl-* token declared in css/tokens.css', () => {
     const tokens = section('Tokens')
-    expect(tokens).toContain('`--bl-canvas`')
+    expect(tokens).toContain('`--bl-color-canvas`')
     const declared = new Set(
       [...readFileSync(join(ROOT, 'css/tokens.css'), 'utf8').matchAll(/(--bl-[\w-]+)\s*:/g)].map(
         (m) => m[1]!

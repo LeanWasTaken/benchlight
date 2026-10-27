@@ -1,15 +1,15 @@
 /* Text on a tint must be ink-1, trace or danger (spec §4.1). */
 @layer components {
   .bl-tint-trace {
-    background: color-mix(in srgb, var(--bl-trace) 10%, transparent);
+    background: color-mix(in srgb, var(--bl-color-trace) 10%, transparent);
   }
   .bl-tint-copper {
-    background: color-mix(in srgb, var(--bl-copper) 10%, transparent);
+    background: color-mix(in srgb, var(--bl-color-copper) 10%, transparent);
   }
   .bl-tint-phosphor {
-    background: color-mix(in srgb, var(--bl-phosphor) 10%, transparent);
+    background: color-mix(in srgb, var(--bl-color-phosphor) 10%, transparent);
   }
   .bl-tint-danger {
-    background: color-mix(in srgb, var(--bl-danger) 10%, transparent);
+    background: color-mix(in srgb, var(--bl-color-danger) 10%, transparent);
   }
 }

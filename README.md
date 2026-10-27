@@ -116,7 +116,23 @@ import { BlButton } from 'benchlight/vue'
 `benchlight()` inlines the no-flash appearance script and keeps the shipped `.vue` source out of
 dependency pre-bundling. Tailwind is optional: only if the app uses it, add
 `@import 'benchlight/tailwind/theme.css';` after `@import 'tailwindcss';`. The theme maps the
-`--bl-control-border` token to the `border-control-border` utility.
+`--bl-color-control-border` token to the `border-control-border` utility.
+
+## Colour tokens
+
+Every colour is a `--bl-color-*` custom property (`canvas`, `surface`, `raised`, `separator`,
+`control-border`, `ink-1` to `ink-3`, `trace`, `copper`, `phosphor`, `danger`, `on-trace`,
+`on-danger`); Tailwind utilities keep their names (`bg-surface`, `text-ink-1`).
+
+- `trace` is the accent and focus colour: links, focus rings, selected and pressed states.
+- `phosphor` is the live/OK signal (an LED on, a success message).
+- `copper` is the secondary warm accent and the ANSI colour in `BlLog`.
+- `danger` is the error colour.
+- `on-trace` and `on-danger` are the text and mark colour on a `trace` or `danger` fill (pressed
+  buttons, the checkbox tick, the radio dot, the error disc). Both keep at least 4.5:1 against
+  their fill in both themes, so re-theme `trace` and `danger` together with their on-colour.
+
+Tailwind's own `ease-out` is no longer overridden; the Benchlight curve is the `ease-bl` utility.
 
 ## Static pages (no build step)
 
@@ -160,7 +176,7 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
   that follow the OS in `auto` mode switch instantly.
 - Text on a tint is `ink-1`, `trace` or `danger`; copper and phosphor are marks only there.
 - Borders of controls (inputs, secondary buttons, switch thumb, selected segment, meter edge) use
-  `--bl-control-border`, which keeps at least 3:1 against canvas, surface and raised. Hit areas are
+  `--bl-color-control-border`, which keeps at least 3:1 against canvas, surface and raised. Hit areas are
   44px. Forced-colors mode keeps LEDs, meter fill, EQ bars and the selected segment visible.
 
 ### Adding a component
@@ -294,7 +310,7 @@ link-as="…" />`; each item needs `to` or `href`, and `current` is
 - **BlSelect / `.bl-select-wrap`:** BlSelect renders `<span class="bl-select-wrap"><select
 class="bl-select">`; `class` and `style` go on the wrapper (so `$el` is the wrapper: use `$el.querySelector('select')`,
   and style the control with `.x > .bl-select` or `:deep(.bl-select)`), other attributes and listeners on the select. In
-  CSS-only markup the same wrapper draws a themed chevron (`--bl-chevron-mask`, `--bl-ink-2`) and
+  CSS-only markup the same wrapper draws a themed chevron (`--bl-chevron-mask`, `--bl-color-ink-2`) and
   hides the native arrow for a single-line select; a bare `.bl-select` keeps the native arrow, and
   `multiple` or `size` selects keep theirs inside the wrapper.
 - **BlProse:** the measure is `min(720px, 68ch)`; images, video and iframes are capped to the column;

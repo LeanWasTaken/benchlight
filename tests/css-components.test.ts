@@ -317,7 +317,7 @@ describe('anchored behaviour', () => {
     const css = read('field')
     const gate = ['@media (hover: hover)']
     for (const selector of ['.bl-input:hover', '.bl-select:hover', '.bl-textarea:hover']) {
-      expect(ruleBody(css, selector, gate)['border-color']).toBe('var(--bl-ink-3)')
+      expect(ruleBody(css, selector, gate)['border-color']).toBe('var(--bl-color-ink-3)')
       expect(() => ruleBody(css, selector)).toThrow()
     }
   })
@@ -339,7 +339,7 @@ describe('anchored behaviour', () => {
   it('styles the field error line and invalid controls without relying on colour', () => {
     const css = read('field')
     const error = ruleBody(css, '.bl-field__error')
-    expect(error['color']).toBe('var(--bl-danger)')
+    expect(error['color']).toBe('var(--bl-color-danger)')
     expect(error['display']).toBe('flex')
     const mark = ruleBody(css, '.bl-field__error::before')
     expect(mark['content']).toContain('!')
@@ -347,7 +347,7 @@ describe('anchored behaviour', () => {
     for (const control of ['.bl-input', '.bl-select', '.bl-textarea']) {
       const invalid = ruleBody(css, `${control}[aria-invalid='true']:not(:disabled)`)
       expect(invalid['border-width']).toBe('2px')
-      expect(invalid['border-color']).toBe('var(--bl-danger)')
+      expect(invalid['border-color']).toBe('var(--bl-color-danger)')
     }
   })
 
@@ -357,13 +357,13 @@ describe('anchored behaviour', () => {
     expect(ruleBody(css, '.bl-fieldset')['min-width']).toBe('0')
     expect(ruleBody(css, '.bl-fieldset')['border']).toBe('0')
     const error = ruleBody(css, '.bl-fieldset__error')
-    expect(error['color']).toBe('var(--bl-danger)')
+    expect(error['color']).toBe('var(--bl-color-danger)')
     expect(error['display']).toBe('flex')
     const mark = ruleBody(css, '.bl-fieldset__error::before')
     expect(mark['content']).toContain('!')
     expect(mark['border-radius']).toBe('50%')
     expect(ruleBody(css, '.bl-fieldset--invalid')['border-inline-start']).toContain(
-      'var(--bl-danger)'
+      'var(--bl-color-danger)'
     )
     expect(ruleBody(css, '.bl-fieldset--inline')['flex-direction']).toBe('row')
   })
@@ -380,13 +380,13 @@ describe('anchored behaviour', () => {
   it('marks pressed with an inset ring on every variant, not hue alone', () => {
     const css = read('btn')
     expect(ruleBody(css, ".bl-btn[aria-pressed='true']")['box-shadow']).toBe(
-      'inset 0 0 0 2px var(--bl-canvas)'
+      'inset 0 0 0 2px var(--bl-color-canvas)'
     )
     expect(ruleBody(css, ".bl-btn--danger[aria-pressed='true']")['background']).toBe(
-      'var(--bl-danger)'
+      'var(--bl-color-danger)'
     )
     const tinted = ruleBody(css, ".bl-btn--ghost[aria-pressed='true']")
-    expect(tinted['box-shadow']).toBe('inset 0 0 0 1px var(--bl-trace)')
+    expect(tinted['box-shadow']).toBe('inset 0 0 0 1px var(--bl-color-trace)')
   })
 
   it('gives pressed buttons hover feedback only where hover exists', () => {
@@ -433,27 +433,29 @@ describe('anchored behaviour', () => {
 
   it('lights an on LED in phosphor with a glow', () => {
     const on = ruleBody(read('led'), '.bl-led--on')
-    expect(on['background']).toBe('var(--bl-phosphor)')
-    expect(on['box-shadow']).toBe('var(--bl-shadow-glow) var(--bl-phosphor)')
+    expect(on['background']).toBe('var(--bl-color-phosphor)')
+    expect(on['box-shadow']).toBe('var(--bl-shadow-glow) var(--bl-color-phosphor)')
   })
 
   it('draws a trace-coloured focus outline on the switch track', () => {
     const focus = ruleBody(read('appearance'), '.bl-appearance__track:has(input:focus-visible)')
-    expect(focus['outline']).toBe('2px solid var(--bl-trace)')
+    expect(focus['outline']).toBe('2px solid var(--bl-color-trace)')
   })
 })
 
 describe('text on tints (spec §4.1)', () => {
   it('bl-msg--success uses ink-1 text and carries phosphor in the LED mark', () => {
     const css = read('msg')
-    expect(css).toMatch(/\.bl-msg--success\s*\{[^}]*color:\s*var\(--bl-ink-1\)/)
-    expect(css).toMatch(/\.bl-msg--success::before\s*\{[^}]*background:\s*var\(--bl-phosphor\)/)
+    expect(css).toMatch(/\.bl-msg--success\s*\{[^}]*color:\s*var\(--bl-color-ink-1\)/)
+    expect(css).toMatch(
+      /\.bl-msg--success::before\s*\{[^}]*background:\s*var\(--bl-color-phosphor\)/
+    )
   })
 
   it('bl-msg--danger carries a diamond mark in the danger colour', () => {
     const css = read('msg')
     const mark = /\.bl-msg--danger::before\s*\{([^}]*)\}/.exec(css)?.[1] ?? ''
-    expect(mark).toMatch(/background:\s*var\(--bl-danger\)/)
+    expect(mark).toMatch(/background:\s*var\(--bl-color-danger\)/)
     expect(mark).toMatch(/rotate:\s*45deg/)
     expect(mark).toMatch(/content:\s*''/)
   })
@@ -531,7 +533,7 @@ describe('intrinsic wrapping (long tokens never widen the page)', () => {
     const table = ruleBody(css, '.bl-prose table')
     expect(table['display']).toBe('block')
     expect(table['overflow-x']).toBe('auto')
-    expect(ruleBody(css, '.bl-prose hr')['border-top']).toContain('var(--bl-separator)')
+    expect(ruleBody(css, '.bl-prose hr')['border-top']).toContain('var(--bl-color-separator)')
     expect(ruleBody(css, '.bl-prose :not(pre) > code')['overflow-wrap']).toBe('anywhere')
     expect(ruleBody(css, '.bl-prose ol')['padding-left']).toBe('1.75em')
     expect(ruleBody(type, '.bl-lede')['max-width']).toBe('min(var(--bl-layout-prose), 68ch)')
@@ -705,7 +707,7 @@ describe('select chevron', () => {
         /^var\(\s*--bl-chevron-mask,\s*url\("data:image\/svg\+xml,.*"\)\s*\) center \/ contain no-repeat$/
       )
     }
-    expect(chevron['background']).toBe('var(--bl-ink-2)')
+    expect(chevron['background']).toBe('var(--bl-color-ink-2)')
     expect(chevron['inset-inline-end']).toBe('16px')
     expect(chevron['pointer-events']).toBe('none')
     expect(chevron).not.toHaveProperty('right')
@@ -714,7 +716,7 @@ describe('select chevron', () => {
   it('brightens on hover only where hover exists, and dims when disabled', () => {
     const sel = '.bl-select-wrap:hover:not(:has(> .bl-select:disabled))::after'
     const hover = ruleBody(css, sel, ['@media (hover: hover)'])
-    expect(hover['background']).toBe('var(--bl-ink-1)')
+    expect(hover['background']).toBe('var(--bl-color-ink-1)')
     expect(() => ruleBody(css, sel)).toThrow()
     const off = ruleBody(css, '.bl-select-wrap:has(> .bl-select:disabled)::after')
     expect(off['opacity']).toBe('0.45')
@@ -745,13 +747,13 @@ describe('themed scrollbars', () => {
     (file, selector) => {
       const rule = ruleBody(read(file), selector)
       expect(rule['scrollbar-width']).toBe('thin')
-      expect(rule['scrollbar-color']).toBe('var(--bl-control-border) transparent')
+      expect(rule['scrollbar-color']).toBe('var(--bl-color-control-border) transparent')
     }
   )
 
   it('themes the page scrollbar on a transparent track, inherited by every scroller', () => {
     const root = ruleBody(readFileSync(new URL('../css/base.css', import.meta.url), 'utf8'), 'html')
-    expect(root['scrollbar-color']).toBe('var(--bl-control-border) transparent')
+    expect(root['scrollbar-color']).toBe('var(--bl-color-control-border) transparent')
     expect(root['scrollbar-width']).toBeUndefined()
   })
   it('draws a 1px edge beside a classic page scrollbar only', () => {
@@ -779,7 +781,7 @@ describe('themed scrollbars', () => {
         if (!scrolls) continue
         if (d['scrollbar-width'] === 'none') continue
         expect(d['scrollbar-color'], `${name}.css: ${rule.selectors.join(', ')}`).toBe(
-          'var(--bl-control-border) transparent'
+          'var(--bl-color-control-border) transparent'
         )
       }
     }
@@ -847,7 +849,7 @@ describe('checkbox', () => {
   })
   it('keeps the invalid ring off a disabled checkbox, in both modes', () => {
     const sel = ".bl-checkbox__input[aria-invalid='true']:not(:disabled) + .bl-checkbox__box"
-    expect(ruleBody(css, sel)['box-shadow']).toContain('var(--bl-danger)')
+    expect(ruleBody(css, sel)['box-shadow']).toContain('var(--bl-color-danger)')
     expect(ruleBody(css, sel, forced)['box-shadow']).toContain('CanvasText')
     expect(css).not.toMatch(/aria-invalid='true'\](?!:not\(:disabled\))/)
   })
@@ -1052,7 +1054,7 @@ describe('toast', () => {
   it('paints the phosphor mark only for success', () => {
     expect(ruleBody(css, '.bl-toast__mark')['background']).not.toContain('phosphor')
     expect(ruleBody(css, '.bl-toast--success .bl-toast__mark')['background']).toBe(
-      'var(--bl-phosphor)'
+      'var(--bl-color-phosphor)'
     )
     const forced = ['@media (forced-colors: active)']
     expect(ruleBody(css, '.bl-toast--success .bl-toast__mark', forced)['background']).toBe(
@@ -1279,5 +1281,18 @@ describe('renamed blocks and hooks', () => {
     for (const old of ['bl-sw' + 'itch', 'bl-tab' + 'bar', '--bl-' + 'col-min'])
       expect(all).not.toContain(old)
     expect(all).not.toMatch(new RegExp('bl-section-head__' + 'action(?!s)'))
+  })
+})
+
+describe('on-colour tokens', () => {
+  it('uses on-trace and on-danger for text and marks on filled accents', () => {
+    const read = (f: string) =>
+      readFileSync(new URL(`../css/components/${f}.css`, import.meta.url), 'utf8')
+    expect(read('btn')).toMatch(/aria-pressed='true'\] \{[^}]*color: var\(--bl-color-on-trace\)/)
+    expect(read('checkbox')).toContain('color: var(--bl-color-on-trace)')
+    expect(read('radio')).toContain('color: var(--bl-color-on-trace)')
+    for (const f of ['field', 'fieldset', 'toggle', 'checkbox']) {
+      expect(read(f)).toContain('color: var(--bl-color-on-danger)')
+    }
   })
 })

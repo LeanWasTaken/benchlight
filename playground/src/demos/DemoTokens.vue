@@ -1,8 +1,8 @@
 <template>
   <div class="pg-swatches">
     <div v-for="name in colorNames" :key="name" class="pg-swatch">
-      <span class="pg-chip" :style="{ background: `var(--bl-${name})` }" />
-      <span class="bl-annotation">--bl-{{ name }}</span>
+      <span class="pg-chip" :style="{ background: `var(--bl-color-${name})` }" />
+      <span class="bl-annotation">--bl-color-{{ name }}</span>
     </div>
   </div>
 

@@ -14,7 +14,7 @@ describe('tokens', () => {
     }
   })
 
-  it('keeps the Benchlight colour values and adds danger', () => {
+  it('keeps the Benchlight colour values and adds danger and the on-colours', () => {
     expect(tokens.color.light).toEqual({
       canvas: '#eff1f3',
       surface: '#f8f9fa',
@@ -27,7 +27,9 @@ describe('tokens', () => {
       trace: '#2151cc',
       copper: '#a6512a',
       phosphor: '#1f7a46',
-      danger: '#a42d37'
+      danger: '#a42d37',
+      'on-trace': '#ffffff',
+      'on-danger': '#ffffff'
     })
     expect(tokens.color.dark).toEqual({
       canvas: '#101214',
@@ -41,7 +43,9 @@ describe('tokens', () => {
       trace: '#97b1ff',
       copper: '#e8936a',
       phosphor: '#7bd9a2',
-      danger: '#ff9098'
+      danger: '#ff9098',
+      'on-trace': '#101214',
+      'on-danger': '#101214'
     })
   })
 

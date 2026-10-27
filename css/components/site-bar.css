@@ -3,15 +3,15 @@
     position: sticky;
     top: 0;
     z-index: 40;
-    background: var(--bl-canvas);
+    background: var(--bl-color-canvas);
     border-bottom: 1px solid transparent;
     transition:
       background-color var(--bl-duration-base) ease,
       border-color var(--bl-duration-base) ease;
   }
   .bl-site-bar[data-lifted] {
-    background: var(--bl-surface);
-    border-bottom-color: var(--bl-separator);
+    background: var(--bl-color-surface);
+    border-bottom-color: var(--bl-color-separator);
   }
   .bl-site-bar__inner {
     display: flex;
@@ -33,7 +33,7 @@
     font-size: var(--bl-text-annotation);
     font-weight: 500;
     letter-spacing: var(--bl-tracking-nav);
-    color: var(--bl-ink-1);
+    color: var(--bl-color-ink-1);
     text-decoration: none;
   }
   /* The nav is a one-line horizontal scroller: the bar never grows taller (scroll-padding stays
@@ -93,16 +93,16 @@
     letter-spacing: var(--bl-tracking-nav);
     text-transform: uppercase;
     text-decoration: none;
-    color: var(--bl-ink-2);
+    color: var(--bl-color-ink-2);
     transition: color var(--bl-duration-fast) ease;
   }
   @media (hover: hover) {
     .bl-site-bar__link:hover {
-      color: var(--bl-ink-1);
+      color: var(--bl-color-ink-1);
     }
   }
   .bl-site-bar__link[aria-current]:not([aria-current='false']) {
-    color: var(--bl-trace);
+    color: var(--bl-color-trace);
   }
   .bl-site-bar__actions {
     display: flex;

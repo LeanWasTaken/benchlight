@@ -373,7 +373,7 @@ test.describe('themed scrollbars', () => {
     await page.goto('/')
     const { width, color } = await page.evaluate(read)
     expect(width).toBe('thin')
-    // --bl-control-border (#69707a) thumb on a transparent track.
+    // --bl-color-control-border (#69707a) thumb on a transparent track.
     expect(color).toBe('rgb(105, 112, 122) rgba(0, 0, 0, 0)')
   })
 

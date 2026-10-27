@@ -9,37 +9,37 @@
     margin: 12px 0 0;
     padding: 10px 12px;
     border-radius: var(--bl-radius-chip);
-    background: color-mix(in srgb, var(--bl-trace) 10%, transparent);
+    background: color-mix(in srgb, var(--bl-color-trace) 10%, transparent);
     font-family: var(--bl-font-mono);
     font-size: var(--bl-text-annotation);
-    color: var(--bl-trace);
+    color: var(--bl-color-trace);
     overflow-wrap: anywhere;
   }
   .bl-msg__text {
     min-width: 0;
   }
   .bl-msg--success {
-    background: color-mix(in srgb, var(--bl-phosphor) 10%, transparent);
-    color: var(--bl-ink-1);
+    background: color-mix(in srgb, var(--bl-color-phosphor) 10%, transparent);
+    color: var(--bl-color-ink-1);
   }
   .bl-msg--success::before {
     flex-shrink: 0;
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--bl-phosphor);
-    box-shadow: var(--bl-shadow-glow) var(--bl-phosphor);
+    background: var(--bl-color-phosphor);
+    box-shadow: var(--bl-shadow-glow) var(--bl-color-phosphor);
     content: '';
   }
   .bl-msg--danger {
-    background: color-mix(in srgb, var(--bl-danger) 10%, transparent);
-    color: var(--bl-danger);
+    background: color-mix(in srgb, var(--bl-color-danger) 10%, transparent);
+    color: var(--bl-color-danger);
   }
   .bl-msg--danger::before {
     flex-shrink: 0;
     width: 8px;
     height: 8px;
-    background: var(--bl-danger);
+    background: var(--bl-color-danger);
     rotate: 45deg;
     content: '';
   }

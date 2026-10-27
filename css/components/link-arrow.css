@@ -10,7 +10,7 @@
     overflow-wrap: anywhere;
     text-transform: uppercase;
     text-decoration: none;
-    color: var(--bl-ink-2);
+    color: var(--bl-color-ink-2);
     transition: color var(--bl-duration-fast) ease;
   }
   .bl-link-arrow::before {
@@ -21,15 +21,15 @@
   }
   @media (hover: hover) {
     .bl-link-arrow:hover {
-      color: var(--bl-trace);
+      color: var(--bl-color-trace);
     }
   }
   .bl-link-arrow--quiet {
-    color: var(--bl-ink-3);
+    color: var(--bl-color-ink-3);
   }
   @media (hover: hover) {
     .bl-link-arrow--quiet:hover {
-      color: var(--bl-ink-1);
+      color: var(--bl-color-ink-1);
     }
   }
   .bl-link-arrow__icon {

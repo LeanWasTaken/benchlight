@@ -12,7 +12,7 @@
     gap: 12px;
     min-block-size: 44px;
     min-inline-size: 0;
-    color: var(--bl-ink-1);
+    color: var(--bl-color-ink-1);
     cursor: pointer;
   }
   /* The real checkbox sits invisibly over the track: native clicks, Space, forms and no-JS. */
@@ -32,8 +32,8 @@
     flex: none;
     inline-size: 40px;
     block-size: 24px;
-    background: var(--bl-surface);
-    border: 1px solid var(--bl-control-border);
+    background: var(--bl-color-surface);
+    border: 1px solid var(--bl-color-control-border);
     border-radius: var(--bl-radius-pill);
     transition:
       background-color var(--bl-duration-fast) ease,
@@ -46,8 +46,8 @@
     inset-inline-start: 2px;
     inline-size: 18px;
     block-size: 18px;
-    background: var(--bl-raised);
-    border: 1px solid var(--bl-control-border);
+    background: var(--bl-color-raised);
+    border: 1px solid var(--bl-color-control-border);
     border-radius: 50%;
     box-shadow: var(--bl-shadow-thumb);
     transition:
@@ -55,13 +55,13 @@
       border-color var(--bl-duration-fast) ease;
   }
   .bl-toggle__input:checked + .bl-toggle__track {
-    background: var(--bl-trace);
-    border-color: var(--bl-trace);
+    background: var(--bl-color-trace);
+    border-color: var(--bl-color-trace);
   }
   .bl-toggle__input:checked + .bl-toggle__track .bl-toggle__thumb {
     /* Travel: track width, less both borders, the 18px thumb and a 2px inset on each side. */
     translate: calc(40px - 2px - 18px - 2px - 2px) 0;
-    border-color: var(--bl-trace);
+    border-color: var(--bl-color-trace);
   }
   .bl-toggle__input:checked + .bl-toggle__track .bl-toggle__thumb:dir(rtl) {
     translate: calc((40px - 2px - 18px - 2px - 2px) * -1) 0;
@@ -74,11 +74,11 @@
     margin: auto;
     inline-size: 6px;
     block-size: 6px;
-    background: var(--bl-trace);
+    background: var(--bl-color-trace);
     border-radius: 50%;
   }
   .bl-toggle__input:focus-visible + .bl-toggle__track {
-    outline: 2px solid var(--bl-trace);
+    outline: 2px solid var(--bl-color-trace);
     outline-offset: 2px;
   }
   .bl-toggle__label {
@@ -89,7 +89,7 @@
     flex-basis: 100%;
     padding-inline-start: 52px;
     font-size: var(--bl-text-small);
-    color: var(--bl-ink-2);
+    color: var(--bl-color-ink-2);
     overflow-wrap: anywhere;
   }
   .bl-toggle__error {
@@ -99,7 +99,7 @@
     flex-basis: 100%;
     padding-inline-start: 52px;
     font-size: var(--bl-text-small);
-    color: var(--bl-danger);
+    color: var(--bl-color-danger);
     overflow-wrap: anywhere;
   }
   /* Same leading "!" mark as .bl-field__error, so the state does not rest on colour. */
@@ -110,9 +110,9 @@
     width: 16px;
     height: 16px;
     margin-top: 0.1em;
-    background: var(--bl-danger);
+    background: var(--bl-color-danger);
     border-radius: 50%;
-    color: var(--bl-raised);
+    color: var(--bl-color-on-danger);
     font-size: 11px;
     font-weight: 700;
     line-height: 16px;
@@ -121,19 +121,19 @@
   /* Invalid doubles the track border (an inset ring keeps the box and thumb travel unchanged);
      a disabled toggle stays plain. */
   .bl-toggle__input[aria-invalid='true']:not(:disabled) + .bl-toggle__track {
-    border-color: var(--bl-danger);
-    box-shadow: inset 0 0 0 1px var(--bl-danger);
+    border-color: var(--bl-color-danger);
+    box-shadow: inset 0 0 0 1px var(--bl-color-danger);
   }
   .bl-toggle__input:disabled + .bl-toggle__track {
     opacity: 0.45;
   }
   .bl-toggle__control:has(> .bl-toggle__input:disabled) {
-    color: var(--bl-ink-2);
+    color: var(--bl-color-ink-2);
     cursor: not-allowed;
   }
   @media (hover: hover) {
     .bl-toggle__control:hover .bl-toggle__input:not(:checked, :disabled) + .bl-toggle__track {
-      border-color: var(--bl-ink-3);
+      border-color: var(--bl-color-ink-3);
     }
     @media (forced-colors: active) {
       .bl-toggle__control:hover .bl-toggle__input:not(:checked, :disabled) + .bl-toggle__track {

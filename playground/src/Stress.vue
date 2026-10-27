@@ -990,7 +990,7 @@
     font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.1em;
-    color: var(--bl-ink-3);
+    color: var(--bl-color-ink-3);
   }
   .st-filler {
     padding-block: 8px;

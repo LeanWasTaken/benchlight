@@ -18,8 +18,8 @@
     clip-path: none;
     padding: 6px 12px;
     border-radius: var(--bl-radius-pill);
-    background: var(--bl-ink-1);
-    color: var(--bl-canvas);
+    background: var(--bl-color-ink-1);
+    color: var(--bl-color-canvas);
     font-size: 0.875rem;
     font-weight: 500;
     text-decoration: none;

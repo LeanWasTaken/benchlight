@@ -4,7 +4,7 @@
     overflow-wrap: break-word;
     font-size: var(--bl-text-body);
     line-height: var(--bl-leading-lede);
-    color: var(--bl-ink-2);
+    color: var(--bl-color-ink-2);
     counter-reset: bl-section;
   }
   .bl-prose h2 {
@@ -13,7 +13,7 @@
     font-weight: 600;
     line-height: 2rem;
     letter-spacing: var(--bl-tracking-heading);
-    color: var(--bl-ink-1);
+    color: var(--bl-color-ink-1);
     counter-increment: bl-section;
   }
   .bl-prose h2::before {
@@ -22,7 +22,7 @@
     font-size: var(--bl-text-annotation);
     font-weight: 500;
     letter-spacing: var(--bl-tracking-nav);
-    color: var(--bl-trace);
+    color: var(--bl-color-trace);
     vertical-align: middle;
     content: '\00a7' counter(bl-section, decimal-leading-zero);
   }
@@ -32,21 +32,21 @@
     font-weight: 600;
     line-height: 1.75rem;
     letter-spacing: var(--bl-tracking-heading);
-    color: var(--bl-ink-1);
+    color: var(--bl-color-ink-1);
   }
   .bl-prose h4 {
     margin: 24px 0 8px;
     font-size: 1rem;
     font-weight: 600;
     line-height: 1.5rem;
-    color: var(--bl-ink-1);
+    color: var(--bl-color-ink-1);
   }
   .bl-prose :is(h5, h6) {
     margin: 20px 0 8px;
     font-size: var(--bl-text-small);
     font-weight: 600;
     line-height: 1.5rem;
-    color: var(--bl-ink-1);
+    color: var(--bl-color-ink-1);
   }
   .bl-prose strong {
     font-weight: 600;
@@ -68,7 +68,7 @@
     margin-bottom: 6px;
   }
   .bl-prose a {
-    color: var(--bl-trace);
+    color: var(--bl-color-trace);
     text-decoration: underline;
     text-underline-offset: 3px;
   }
@@ -82,45 +82,45 @@
     text-decoration: none;
   }
   .bl-prose :is(h2, h3) a:focus-visible::after {
-    color: var(--bl-ink-3);
+    color: var(--bl-color-ink-3);
     content: ' #';
   }
   @media (hover: hover) {
     .bl-prose :is(h2, h3) a:hover::after {
-      color: var(--bl-ink-3);
+      color: var(--bl-color-ink-3);
       content: ' #';
     }
   }
   .bl-prose :not(pre) > code {
     padding: 2px 4px;
     overflow-wrap: anywhere;
-    background: var(--bl-surface);
-    border: 1px solid var(--bl-separator);
+    background: var(--bl-color-surface);
+    border: 1px solid var(--bl-color-separator);
     border-radius: 4px;
     font-family: var(--bl-font-mono);
     font-size: var(--bl-text-annotation);
-    color: var(--bl-ink-1);
+    color: var(--bl-color-ink-1);
   }
   .bl-prose pre {
     margin: 16px 0;
     padding: 16px;
     overflow-x: auto;
     scrollbar-width: thin;
-    scrollbar-color: var(--bl-control-border) transparent;
-    background: var(--bl-surface);
-    border: 1px solid var(--bl-separator);
+    scrollbar-color: var(--bl-color-control-border) transparent;
+    background: var(--bl-color-surface);
+    border: 1px solid var(--bl-color-separator);
     border-radius: var(--bl-radius-card);
     font-size: var(--bl-text-annotation);
   }
   .bl-prose pre code {
     font-family: var(--bl-font-mono);
-    color: var(--bl-ink-1);
+    color: var(--bl-color-ink-1);
   }
   .bl-prose blockquote {
     margin: 16px 0;
     padding-left: 16px;
-    border-left: 2px solid var(--bl-separator);
-    color: var(--bl-ink-2);
+    border-left: 2px solid var(--bl-color-separator);
+    color: var(--bl-color-ink-2);
     font-style: italic;
   }
   .bl-prose :is(img, video, iframe, svg, canvas) {
@@ -133,21 +133,21 @@
     margin: 16px 0;
     overflow-x: auto;
     scrollbar-width: thin;
-    scrollbar-color: var(--bl-control-border) transparent;
+    scrollbar-color: var(--bl-color-control-border) transparent;
     border-collapse: collapse;
   }
   .bl-prose :is(th, td) {
     padding: 8px 12px;
-    border: 1px solid var(--bl-separator);
+    border: 1px solid var(--bl-color-separator);
     text-align: left;
   }
   .bl-prose th {
     font-weight: 600;
-    color: var(--bl-ink-1);
+    color: var(--bl-color-ink-1);
   }
   .bl-prose hr {
     margin: 32px 0;
     border: 0;
-    border-top: 1px solid var(--bl-separator);
+    border-top: 1px solid var(--bl-color-separator);
   }
 }

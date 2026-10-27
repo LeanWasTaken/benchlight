@@ -17,7 +17,7 @@
     display: flex;
   }
   .bl-dialog::backdrop {
-    background: color-mix(in srgb, var(--bl-canvas) 70%, transparent);
+    background: color-mix(in srgb, var(--bl-color-canvas) 70%, transparent);
     opacity: 0;
     transition: opacity var(--bl-duration-base) ease;
   }
@@ -50,9 +50,9 @@
     inline-size: 100%;
     min-block-size: 0;
     max-block-size: 100%;
-    color: var(--bl-ink-1);
-    background: var(--bl-surface);
-    border: 1px solid var(--bl-separator);
+    color: var(--bl-color-ink-1);
+    background: var(--bl-color-surface);
+    border: 1px solid var(--bl-color-separator);
     border-radius: var(--bl-radius-card);
     box-shadow: var(--bl-shadow-float);
     opacity: 0;
@@ -97,7 +97,7 @@
   .bl-dialog__description {
     margin: 0;
     padding-inline: 20px;
-    color: var(--bl-ink-2);
+    color: var(--bl-color-ink-2);
     overflow-wrap: anywhere;
   }
   .bl-dialog__body {
@@ -108,7 +108,7 @@
     overscroll-behavior: contain;
     overflow-wrap: anywhere;
     scrollbar-width: thin;
-    scrollbar-color: var(--bl-control-border) transparent;
+    scrollbar-color: var(--bl-color-control-border) transparent;
   }
   .bl-dialog__foot {
     display: flex;
@@ -116,7 +116,7 @@
     justify-content: flex-end;
     gap: 8px;
     padding: 12px 20px 20px;
-    border-block-start: 1px solid var(--bl-separator);
+    border-block-start: 1px solid var(--bl-color-separator);
   }
   /* Scroll lock: CSS only. BlDialog measures the scrollbar it removes into --bl-dialog-gutter. */
   html:has(dialog.bl-dialog[open]:modal) {

@@ -2,8 +2,8 @@
   .bl-spec-panel {
     margin: 0;
     overflow: hidden;
-    background: var(--bl-surface);
-    border: 1px solid var(--bl-separator);
+    background: var(--bl-color-surface);
+    border: 1px solid var(--bl-color-separator);
     border-radius: var(--bl-radius-card);
   }
   .bl-spec-row {
@@ -14,7 +14,7 @@
     padding: 12px 16px;
   }
   .bl-spec-row + .bl-spec-row {
-    border-top: 1px solid var(--bl-separator);
+    border-top: 1px solid var(--bl-color-separator);
   }
   .bl-spec-row__label {
     flex: 0 1 8rem;
@@ -31,11 +31,11 @@
     font-size: var(--bl-text-annotation);
     line-height: var(--bl-leading-lede);
     font-variant-numeric: tabular-nums;
-    color: var(--bl-ink-1);
+    color: var(--bl-color-ink-1);
     overflow-wrap: anywhere;
   }
   .bl-spec-row__value a {
-    color: var(--bl-trace);
+    color: var(--bl-color-trace);
     text-decoration: underline;
     text-underline-offset: 3px;
   }

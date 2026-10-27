@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { compile } from '@tailwindcss/node'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { renderTailwindTheme, renderTokensCss, staticVars } from '../scripts/lib/render-tokens'
@@ -16,7 +16,7 @@ describe('renderTokensCss', () => {
   })
 
   it('puts light colours and every static token on :root', () => {
-    expect(css).toContain('    --bl-canvas: #eff1f3;')
+    expect(css).toContain('    --bl-color-canvas: #eff1f3;')
     expect(css).toContain('    --bl-text-micro: 0.6875rem;')
     expect(css).toContain('    --bl-ease-out: cubic-bezier(0.32, 0.72, 0, 1);')
   })
@@ -31,7 +31,7 @@ describe('renderTokensCss', () => {
   })
 
   it('emits dark colours twice and static tokens once', () => {
-    expect(css.match(/--bl-canvas: #101214;/g)).toHaveLength(2)
+    expect(css.match(/--bl-color-canvas: #101214;/g)).toHaveLength(2)
     expect(css.match(/--bl-ease-out:/g)).toHaveLength(1)
   })
 
@@ -69,7 +69,7 @@ describe('Tailwind v4 theme', () => {
       'text-annotation',
       'max-w-column',
       'rounded-card',
-      'ease-out',
+      'ease-bl',
       'shadow-float',
       'tracking-silkscreen'
     ])
@@ -81,13 +81,13 @@ describe('Tailwind v4 theme', () => {
       'text-annotation',
       'max-w-column',
       'rounded-card',
-      'ease-out',
+      'ease-bl',
       'shadow-float',
       'tracking-silkscreen'
     ]) {
       expect(css).toMatch(rule(selector))
     }
-    expect(css).toContain('var(--bl-canvas)')
+    expect(css).toContain('var(--bl-color-canvas)')
     expect(css).toContain('var(--bl-ease-out)')
   })
 
@@ -100,5 +100,36 @@ describe('Tailwind v4 theme', () => {
     const css = compiler.build(['font-sans'])
     expect(css).not.toContain('--bl-font-sans-features')
     expect(css).not.toMatch(/--default-font-feature-settings:[^;]*var\(/)
+  })
+})
+
+describe('colour token namespace', () => {
+  const OLD =
+    /--bl-(canvas|surface|raised|separator|control-border|ink-[123]|trace|copper|phosphor|danger)\b/
+  const walk = (dir: string): string[] =>
+    readdirSync(new URL(`../${dir}`, import.meta.url), { withFileTypes: true }).flatMap((e) =>
+      e.isDirectory() ? walk(`${dir}/${e.name}`) : [`${dir}/${e.name}`]
+    )
+
+  it('leaves no bare colour custom property in css, tailwind, dist or vue', () => {
+    const offenders = ['css', 'tailwind', 'dist', 'vue']
+      .flatMap(walk)
+      .filter((f) => /\.(css|vue|ts|js|mjs)$/.test(f))
+      .filter((f) => OLD.test(read(f)))
+    expect(offenders).toEqual([])
+  })
+
+  it('emits every colour under --bl-color-*, including the on-colours', () => {
+    const css = renderTokensCss(tokens)
+    for (const name of ['canvas', 'trace', 'ink-1', 'on-trace', 'on-danger']) {
+      expect(css).toContain(`--bl-color-${name}:`)
+    }
+  })
+
+  it('names the Tailwind ease utility ease-bl and leaves ease-out alone', () => {
+    const theme = renderTailwindTheme(tokens)
+    expect(theme).toContain('--ease-bl:')
+    expect(theme).not.toContain('--ease-out:')
+    expect(theme).toContain('--color-on-trace: var(--bl-color-on-trace);')
   })
 })

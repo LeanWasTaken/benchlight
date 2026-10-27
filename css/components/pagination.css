@@ -24,7 +24,7 @@
     border-radius: var(--bl-radius-chip);
     background: none;
     font: inherit;
-    color: var(--bl-ink-2);
+    color: var(--bl-color-ink-2);
     cursor: pointer;
     transition:
       background-color var(--bl-duration-fast) ease,
@@ -33,9 +33,9 @@
       opacity var(--bl-duration-fast) ease;
   }
   .bl-pagination__page[aria-current]:not([aria-current='false']) {
-    border-color: var(--bl-control-border);
-    background: var(--bl-raised);
-    color: var(--bl-ink-1);
+    border-color: var(--bl-color-control-border);
+    background: var(--bl-color-raised);
+    color: var(--bl-color-ink-1);
   }
   .bl-pagination [aria-disabled='true'] {
     opacity: 0.45;
@@ -43,13 +43,13 @@
   }
   @media (hover: hover) {
     .bl-pagination button:not([aria-disabled='true']):hover {
-      background: var(--bl-raised);
-      color: var(--bl-ink-1);
+      background: var(--bl-color-raised);
+      color: var(--bl-color-ink-1);
     }
   }
   .bl-pagination__gap {
     padding: 0 4px;
-    color: var(--bl-ink-3);
+    color: var(--bl-color-ink-3);
   }
   .bl-pagination__range {
     margin: 0;

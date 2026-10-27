@@ -52,11 +52,11 @@ describe('WCAG AA for text tokens', () => {
     }
   )
 
-  // Pressed BlButton: primary is canvas text on a trace fill; secondary and ghost are trace text
+  // Pressed BlButton: primary is on-trace text on a trace fill; secondary and ghost are trace text
   // and a trace border on a 10% trace tint over the surface.
-  it.each(THEMES)('%s pressed primary button: canvas on trace is at least 4.5:1', (theme) => {
+  it.each(THEMES)('%s pressed primary button: on-trace on trace is at least 4.5:1', (theme) => {
     const c = tokens.color[theme]
-    expect(contrast(hexToRgb(c.canvas), hexToRgb(c.trace))).toBeGreaterThanOrEqual(4.5)
+    expect(contrast(hexToRgb(c['on-trace']), hexToRgb(c.trace))).toBeGreaterThanOrEqual(4.5)
   })
 
   it.each(THEMES.flatMap((theme) => SURFACES.map((bg) => [theme, bg] as const)))(
@@ -77,21 +77,27 @@ describe('WCAG AA for text tokens', () => {
     }
   })
 
-  // Pressed danger is canvas text on a danger fill; pressed hover mixes the fill 12% toward ink-1,
-  // which only raises the contrast of the canvas text.
-  it.each(THEMES)('%s pressed danger button: canvas on danger, edge, and hover fill', (theme) => {
-    const c = tokens.color[theme]
-    const canvas = hexToRgb(c.canvas)
-    const danger = hexToRgb(c.danger)
-    expect(contrast(canvas, danger)).toBeGreaterThanOrEqual(4.5)
-    for (const bg of SURFACES) {
-      expect(contrast(danger, hexToRgb(c[bg]))).toBeGreaterThanOrEqual(3)
+  // Pressed danger is on-danger text on a danger fill; pressed hover mixes the fill 12% toward ink-1,
+  // which only raises the contrast of the on-colour text.
+  it.each(THEMES)(
+    '%s pressed danger button: on-danger on danger, edge, and hover fill',
+    (theme) => {
+      const c = tokens.color[theme]
+      const onDanger = hexToRgb(c['on-danger'])
+      const danger = hexToRgb(c.danger)
+      expect(contrast(onDanger, danger)).toBeGreaterThanOrEqual(4.5)
+      for (const bg of SURFACES) {
+        expect(contrast(danger, hexToRgb(c[bg]))).toBeGreaterThanOrEqual(3)
+      }
+      for (const [fill, on] of [
+        [c.trace, c['on-trace']] as const,
+        [c.danger, c['on-danger']] as const
+      ]) {
+        const hover = mix(hexToRgb(fill), hexToRgb(c['ink-1']), 0.88)
+        expect(contrast(hexToRgb(on), hover)).toBeGreaterThanOrEqual(4.5)
+      }
     }
-    for (const fill of [c.trace, c.danger]) {
-      const hover = mix(hexToRgb(fill), hexToRgb(c['ink-1']), 0.88)
-      expect(contrast(canvas, hover)).toBeGreaterThanOrEqual(4.5)
-    }
-  })
+  )
 
   it.each(THEMES)('%s pressed secondary/ghost hover: trace on a 16%% tint', (theme) => {
     const c = tokens.color[theme]
@@ -158,4 +164,19 @@ describe('toast marks', () => {
       expect(contrast(hexToRgb(c[mark]), hexToRgb(c.raised))).toBeGreaterThanOrEqual(3)
     }
   )
+})
+
+describe('on-colour tokens', () => {
+  it.each(
+    THEMES.flatMap(
+      (theme) =>
+        [
+          ['on-trace', 'trace', theme],
+          ['on-danger', 'danger', theme]
+        ] as const
+    )
+  )('%s on %s in %s is at least 4.5:1', (on, fill, theme) => {
+    const c = tokens.color[theme]
+    expect(contrast(hexToRgb(c[on]), hexToRgb(c[fill]))).toBeGreaterThanOrEqual(4.5)
+  })
 })

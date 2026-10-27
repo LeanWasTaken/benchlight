@@ -1,7 +1,7 @@
 @layer components {
   .bl-colophon {
     padding-block: 32px;
-    border-top: 1px solid var(--bl-separator);
+    border-top: 1px solid var(--bl-color-separator);
   }
   .bl-colophon__inner {
     display: flex;
@@ -34,7 +34,7 @@
   }
   @media (hover: hover) {
     .bl-colophon__items a:hover {
-      color: var(--bl-ink-1);
+      color: var(--bl-color-ink-1);
     }
   }
 }

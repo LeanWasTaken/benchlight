@@ -18,7 +18,7 @@
   .bl-eq__bar {
     width: 2.5px;
     border-radius: 1px;
-    background: var(--bl-ink-3);
+    background: var(--bl-color-ink-3);
     opacity: 0.4;
     transform-origin: bottom;
     transition:
@@ -42,7 +42,7 @@
     animation-delay: 360ms;
   }
   .bl-eq--active .bl-eq__bar {
-    background: var(--bl-phosphor);
+    background: var(--bl-color-phosphor);
     opacity: 1;
     animation-name: bl-eq;
     animation-duration: 0.8s;

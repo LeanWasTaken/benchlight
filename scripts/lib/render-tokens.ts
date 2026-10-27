@@ -18,7 +18,7 @@ const STATIC_GROUPS = [
 ] as const
 
 export function colorVars(t: Tokens, theme: Theme): Vars {
-  return Object.entries(t.color[theme]).map(([name, value]) => [`--bl-${name}`, value])
+  return Object.entries(t.color[theme]).map(([name, value]) => [`--bl-color-${name}`, value])
 }
 
 export function staticVars(t: Tokens): Vars {
@@ -68,7 +68,8 @@ const TEXT_LEADING: Record<string, string> = {
 
 export function renderTailwindTheme(t: Tokens): string {
   const lines: string[] = []
-  for (const name of Object.keys(t.color.light)) lines.push(`--color-${name}: var(--bl-${name});`)
+  for (const name of Object.keys(t.color.light))
+    lines.push(`--color-${name}: var(--bl-color-${name});`)
   for (const name of ['sans', 'mono', 'display']) {
     lines.push(`--font-${name}: var(--bl-font-${name});`)
   }
@@ -82,7 +83,7 @@ export function renderTailwindTheme(t: Tokens): string {
   }
   for (const name of Object.keys(t.radius))
     lines.push(`--radius-${name}: var(--bl-radius-${name});`)
-  lines.push('--ease-out: var(--bl-ease-out);')
+  lines.push('--ease-bl: var(--bl-ease-out);')
   lines.push('--container-column: var(--bl-layout-column);')
   lines.push('--container-prose: var(--bl-layout-prose);')
   for (const name of ['thumb', 'float', 'well'])

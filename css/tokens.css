@@ -4,18 +4,20 @@
 
 @layer base {
   :root {
-    --bl-canvas: #eff1f3;
-    --bl-surface: #f8f9fa;
-    --bl-raised: #ffffff;
-    --bl-separator: #d9dde1;
-    --bl-control-border: #7f858c;
-    --bl-ink-1: #1a1d21;
-    --bl-ink-2: #4e555d;
-    --bl-ink-3: #646c75;
-    --bl-trace: #2151cc;
-    --bl-copper: #a6512a;
-    --bl-phosphor: #1f7a46;
-    --bl-danger: #a42d37;
+    --bl-color-canvas: #eff1f3;
+    --bl-color-surface: #f8f9fa;
+    --bl-color-raised: #ffffff;
+    --bl-color-separator: #d9dde1;
+    --bl-color-control-border: #7f858c;
+    --bl-color-ink-1: #1a1d21;
+    --bl-color-ink-2: #4e555d;
+    --bl-color-ink-3: #646c75;
+    --bl-color-trace: #2151cc;
+    --bl-color-copper: #a6512a;
+    --bl-color-phosphor: #1f7a46;
+    --bl-color-danger: #a42d37;
+    --bl-color-on-trace: #ffffff;
+    --bl-color-on-danger: #ffffff;
     --bl-font-sans: Geist, ui-sans-serif, system-ui, sans-serif;
     --bl-font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, monospace;
     --bl-font-display: 'Bricolage Grotesque', 'Avenir Next Condensed', 'Arial Narrow', sans-serif;
@@ -59,34 +61,38 @@
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-bl-appearance='light']) {
-      --bl-canvas: #101214;
-      --bl-surface: #16191c;
-      --bl-raised: #1c2024;
-      --bl-separator: #2a2f35;
-      --bl-control-border: #69707a;
-      --bl-ink-1: #e8eaed;
-      --bl-ink-2: #a2a9b0;
-      --bl-ink-3: #8a929b;
-      --bl-trace: #97b1ff;
-      --bl-copper: #e8936a;
-      --bl-phosphor: #7bd9a2;
-      --bl-danger: #ff9098;
+      --bl-color-canvas: #101214;
+      --bl-color-surface: #16191c;
+      --bl-color-raised: #1c2024;
+      --bl-color-separator: #2a2f35;
+      --bl-color-control-border: #69707a;
+      --bl-color-ink-1: #e8eaed;
+      --bl-color-ink-2: #a2a9b0;
+      --bl-color-ink-3: #8a929b;
+      --bl-color-trace: #97b1ff;
+      --bl-color-copper: #e8936a;
+      --bl-color-phosphor: #7bd9a2;
+      --bl-color-danger: #ff9098;
+      --bl-color-on-trace: #101214;
+      --bl-color-on-danger: #101214;
       color-scheme: dark;
     }
   }
   :root[data-bl-appearance='dark'] {
-    --bl-canvas: #101214;
-    --bl-surface: #16191c;
-    --bl-raised: #1c2024;
-    --bl-separator: #2a2f35;
-    --bl-control-border: #69707a;
-    --bl-ink-1: #e8eaed;
-    --bl-ink-2: #a2a9b0;
-    --bl-ink-3: #8a929b;
-    --bl-trace: #97b1ff;
-    --bl-copper: #e8936a;
-    --bl-phosphor: #7bd9a2;
-    --bl-danger: #ff9098;
+    --bl-color-canvas: #101214;
+    --bl-color-surface: #16191c;
+    --bl-color-raised: #1c2024;
+    --bl-color-separator: #2a2f35;
+    --bl-color-control-border: #69707a;
+    --bl-color-ink-1: #e8eaed;
+    --bl-color-ink-2: #a2a9b0;
+    --bl-color-ink-3: #8a929b;
+    --bl-color-trace: #97b1ff;
+    --bl-color-copper: #e8936a;
+    --bl-color-phosphor: #7bd9a2;
+    --bl-color-danger: #ff9098;
+    --bl-color-on-trace: #101214;
+    --bl-color-on-danger: #101214;
     color-scheme: dark;
   }
 }

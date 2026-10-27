@@ -4,7 +4,7 @@
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
     column-gap: 32px;
     margin-top: 40px;
-    border-top: 1px solid var(--bl-separator);
+    border-top: 1px solid var(--bl-color-separator);
   }
   /* A lone link (no placeholder sibling) stays half width instead of spanning the row. */
   .bl-prev-next__link:only-child {
@@ -25,7 +25,7 @@
   }
   @media (hover: hover) {
     .bl-prev-next__link:hover {
-      background: var(--bl-surface);
+      background: var(--bl-color-surface);
     }
   }
   .bl-prev-next__link--next {
@@ -63,12 +63,12 @@
     overflow-wrap: anywhere;
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--bl-ink-1);
+    color: var(--bl-color-ink-1);
     transition: color var(--bl-duration-fast) ease;
   }
   @media (hover: hover) {
     .bl-prev-next__link:hover .bl-prev-next__title {
-      color: var(--bl-trace);
+      color: var(--bl-color-trace);
     }
   }
 }

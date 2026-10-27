@@ -1,8 +1,8 @@
 @layer components {
   .bl-telemetry {
     overflow: hidden;
-    background: var(--bl-surface);
-    border: 1px solid var(--bl-separator);
+    background: var(--bl-color-surface);
+    border: 1px solid var(--bl-color-separator);
     border-radius: var(--bl-radius-card);
   }
   .bl-ruler {
@@ -11,15 +11,15 @@
     background:
       repeating-linear-gradient(
         90deg,
-        var(--bl-separator) 0,
-        var(--bl-separator) 1px,
+        var(--bl-color-separator) 0,
+        var(--bl-color-separator) 1px,
         transparent 1px,
         transparent 8px
       ),
       repeating-linear-gradient(
         90deg,
-        var(--bl-ink-3) 0,
-        var(--bl-ink-3) 1px,
+        var(--bl-color-ink-3) 0,
+        var(--bl-color-ink-3) 1px,
         transparent 1px,
         transparent 40px
       );
@@ -48,7 +48,7 @@
   }
   /* Dividers are shadows on the top-left edge of each cell; the grid clips the outer ones. */
   .bl-telemetry__cell {
-    box-shadow: -1px -1px 0 0 var(--bl-separator);
+    box-shadow: -1px -1px 0 0 var(--bl-color-separator);
   }
   .bl-telemetry__value {
     display: flex;
@@ -61,7 +61,7 @@
     font-family: var(--bl-font-mono);
     font-size: var(--bl-text-annotation);
     font-variant-numeric: tabular-nums;
-    color: var(--bl-ink-1);
+    color: var(--bl-color-ink-1);
   }
   @media (forced-colors: active) {
     /* Shadows are removed in forced colours; draw the dividers as borders and let the clipped grid hide the outer ones. */

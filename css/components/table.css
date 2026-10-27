@@ -5,9 +5,9 @@
     min-inline-size: 0;
     overflow-x: auto;
     scrollbar-width: thin;
-    scrollbar-color: var(--bl-control-border) transparent;
-    background: var(--bl-surface);
-    border: 1px solid var(--bl-separator);
+    scrollbar-color: var(--bl-color-control-border) transparent;
+    background: var(--bl-color-surface);
+    border: 1px solid var(--bl-color-separator);
     border-radius: var(--bl-radius-card);
   }
   .bl-table[data-fit]:not(.bl-table--scroll) {
@@ -16,7 +16,7 @@
   .bl-table--scroll .bl-table__scroller {
     overflow-x: auto;
     scrollbar-width: thin;
-    scrollbar-color: var(--bl-control-border) transparent;
+    scrollbar-color: var(--bl-color-control-border) transparent;
   }
   /* .bl-table clips with overflow, so an outside ring (base.css: 2px solid, 2px offset) is cut off:
      draw it inside the box instead, at the same 2px width. */
@@ -32,7 +32,7 @@
     padding: 16px 16px 4px;
     text-align: start;
     font-weight: 500;
-    color: var(--bl-ink-1);
+    color: var(--bl-color-ink-1);
   }
   /* :where keeps the base alignment at zero specificity so .bl-table__end and __center win. */
   .bl-table :where(th, td) {
@@ -48,18 +48,18 @@
     overflow-wrap: anywhere;
   }
   .bl-table thead th {
-    border-bottom: 1px solid var(--bl-separator);
+    border-bottom: 1px solid var(--bl-color-separator);
   }
   .bl-table tbody tr + tr > *,
   .bl-table tfoot tr > * {
-    border-top: 1px solid var(--bl-separator);
+    border-top: 1px solid var(--bl-color-separator);
   }
   .bl-table--compact tbody tr:not([data-action]) > * {
     padding-block: 8px;
   }
   .bl-table__primary {
     font-weight: 500;
-    color: var(--bl-ink-1);
+    color: var(--bl-color-ink-1);
   }
   .bl-table__num {
     font-variant-numeric: tabular-nums;
@@ -109,7 +109,7 @@
   }
   .bl-table__empty {
     text-align: center;
-    color: var(--bl-ink-3);
+    color: var(--bl-color-ink-3);
   }
   .bl-table--scroll .bl-table__table {
     inline-size: max-content;
@@ -119,8 +119,8 @@
     position: sticky;
     inset-inline-start: 0;
     z-index: 2;
-    background: var(--bl-surface);
-    box-shadow: inset -1px 0 var(--bl-separator);
+    background: var(--bl-color-surface);
+    box-shadow: inset -1px 0 var(--bl-color-separator);
   }
   /* Fit measurement (vue/internal/useTableFit.ts): the narrowest table that still reads well. */
   /* No transitions while measuring: reduced motion gives every property a 0.01ms transition, and a
@@ -161,7 +161,7 @@
   }
   .bl-table[data-stacked] tbody tr + tr,
   .bl-table[data-stacked] tfoot tr {
-    border-top: 1px solid var(--bl-separator);
+    border-top: 1px solid var(--bl-color-separator);
   }
   .bl-table[data-stacked] :is(th, td) {
     padding: 2px 0;
@@ -187,7 +187,7 @@
     align-items: center;
     gap: 0 16px;
     padding: 8px 16px;
-    border-bottom: 1px solid var(--bl-separator);
+    border-bottom: 1px solid var(--bl-color-separator);
   }
   .bl-table__sort-strip .bl-table__sort {
     margin-block: 0;
@@ -232,7 +232,7 @@
     background: none;
     font: inherit;
     text-align: start;
-    color: var(--bl-trace);
+    color: var(--bl-color-trace);
     text-decoration: none;
     cursor: pointer;
   }
@@ -257,26 +257,26 @@
       text-underline-offset: 3px;
     }
     .bl-table tbody tr[data-action]:hover {
-      background: color-mix(in srgb, var(--bl-trace) 6%, transparent);
+      background: color-mix(in srgb, var(--bl-color-trace) 6%, transparent);
     }
     .bl-table--scroll tbody tr[data-action]:hover > :first-child {
-      background: color-mix(in srgb, var(--bl-trace) 6%, var(--bl-surface));
+      background: color-mix(in srgb, var(--bl-color-trace) 6%, var(--bl-color-surface));
     }
   }
   .bl-table tbody tr[data-action]:focus-within {
-    background: color-mix(in srgb, var(--bl-trace) 6%, transparent);
+    background: color-mix(in srgb, var(--bl-color-trace) 6%, transparent);
   }
   .bl-table--scroll tbody tr[data-action]:focus-within > :first-child {
-    background: color-mix(in srgb, var(--bl-trace) 6%, var(--bl-surface));
+    background: color-mix(in srgb, var(--bl-color-trace) 6%, var(--bl-color-surface));
   }
   .bl-table > .bl-pagination {
     margin: 0;
     padding: 8px 16px;
-    border-top: 1px solid var(--bl-separator);
+    border-top: 1px solid var(--bl-color-separator);
   }
   .bl-table__total > * {
     font-weight: 500;
-    color: var(--bl-ink-1);
+    color: var(--bl-color-ink-1);
   }
   @media (forced-colors: active) {
     .bl-table--scroll tr > :first-child {

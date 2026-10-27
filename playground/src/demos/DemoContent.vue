@@ -68,8 +68,8 @@
     <BlMedia as="li" align="center">
       <template #figure>
         <svg viewBox="0 0 64 64" role="img" aria-label="Thumbnail">
-          <rect width="64" height="64" rx="6" fill="var(--bl-raised)" />
-          <circle cx="32" cy="32" r="14" fill="var(--bl-trace)" />
+          <rect width="64" height="64" rx="6" fill="var(--bl-color-raised)" />
+          <circle cx="32" cy="32" r="14" fill="var(--bl-color-trace)" />
         </svg>
       </template>
       <strong>Project title</strong>
@@ -79,7 +79,7 @@
     <BlMedia as="li">
       <template #figure>
         <svg viewBox="0 0 64 64" role="img" aria-label="Square thumbnail">
-          <rect width="64" height="64" rx="6" fill="var(--bl-raised)" />
+          <rect width="64" height="64" rx="6" fill="var(--bl-color-raised)" />
         </svg>
       </template>
       <strong>Top-aligned, with a long unbroken value</strong>
@@ -88,7 +88,7 @@
     <BlMedia as="li" class="pg-media-large">
       <template #figure>
         <svg viewBox="0 0 64 64" role="img" aria-label="Large thumbnail">
-          <rect width="64" height="64" rx="6" fill="var(--bl-raised)" />
+          <rect width="64" height="64" rx="6" fill="var(--bl-color-raised)" />
         </svg>
       </template>
       <strong>Larger figure</strong>
@@ -98,7 +98,7 @@
   <BlMedia as="article">
     <template #figure>
       <svg viewBox="0 0 64 64" role="img" aria-label="Article thumbnail">
-        <rect width="64" height="64" rx="6" fill="var(--bl-raised)" />
+        <rect width="64" height="64" rx="6" fill="var(--bl-color-raised)" />
       </svg>
     </template>
     <strong>Rendered as an article</strong>

@@ -12,7 +12,7 @@
     gap: 12px;
     min-block-size: 44px;
     min-inline-size: 0;
-    color: var(--bl-ink-1);
+    color: var(--bl-color-ink-1);
     cursor: pointer;
   }
   /* The real radio sits invisibly over the dot: native arrows, Tab, forms and no-JS. */
@@ -33,8 +33,8 @@
     flex: none;
     inline-size: 22px;
     block-size: 22px;
-    background: var(--bl-surface);
-    border: 1px solid var(--bl-control-border);
+    background: var(--bl-color-surface);
+    border: 1px solid var(--bl-color-control-border);
     border-radius: 50%;
     transition:
       background-color var(--bl-duration-fast) ease,
@@ -49,17 +49,17 @@
     display: none;
     background: currentcolor;
     border-radius: 50%;
-    color: var(--bl-raised);
+    color: var(--bl-color-on-trace);
   }
   .bl-radio__input:checked + .bl-radio__dot {
-    background: var(--bl-trace);
-    border-color: var(--bl-trace);
+    background: var(--bl-color-trace);
+    border-color: var(--bl-color-trace);
   }
   .bl-radio__input:checked + .bl-radio__dot::after {
     display: block;
   }
   .bl-radio__input:focus-visible + .bl-radio__dot {
-    outline: 2px solid var(--bl-trace);
+    outline: 2px solid var(--bl-color-trace);
     outline-offset: 2px;
   }
   .bl-radio__label {
@@ -70,7 +70,7 @@
     flex-basis: 100%;
     padding-inline-start: 34px;
     font-size: var(--bl-text-small);
-    color: var(--bl-ink-2);
+    color: var(--bl-color-ink-2);
     overflow-wrap: anywhere;
   }
   /* Invalid is a group state: .bl-fieldset--invalid (fieldset.css) marks the whole radiogroup. */
@@ -78,12 +78,12 @@
     opacity: 0.45;
   }
   .bl-radio__control:has(> .bl-radio__input:disabled) {
-    color: var(--bl-ink-2);
+    color: var(--bl-color-ink-2);
     cursor: not-allowed;
   }
   @media (hover: hover) {
     .bl-radio__control:hover .bl-radio__input:not(:checked, :disabled) + .bl-radio__dot {
-      border-color: var(--bl-ink-3);
+      border-color: var(--bl-color-ink-3);
     }
     @media (forced-colors: active) {
       .bl-radio__control:hover .bl-radio__input:not(:checked, :disabled) + .bl-radio__dot {

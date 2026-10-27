@@ -39,20 +39,20 @@
   border-radius: 8px;
 }
 .pg-swatch {
-  background: var(--bl-surface);
-  border: 1px solid var(--bl-separator);
+  background: var(--bl-color-surface);
+  border: 1px solid var(--bl-color-separator);
 }
 .pg-tint {
-  color: var(--bl-ink-1);
-  border: 1px solid var(--bl-separator);
+  color: var(--bl-color-ink-1);
+  border: 1px solid var(--bl-color-separator);
 }
 .pg-chip {
   height: 36px;
-  border: 1px solid var(--bl-separator);
+  border: 1px solid var(--bl-color-separator);
   border-radius: 5px;
 }
 .pg-dim {
-  color: var(--bl-ink-3);
+  color: var(--bl-color-ink-3);
 }
 .pg-mono {
   font-family: var(--bl-font-mono);

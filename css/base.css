@@ -7,8 +7,8 @@
   html {
     /* Inherited: the page scrollbar and every scroller below it get a themed thumb on a
        transparent track. Classic page scrollbars still take their own lane beside fixed bars. */
-    scrollbar-color: var(--bl-control-border) transparent;
-    background: var(--bl-canvas);
+    scrollbar-color: var(--bl-color-control-border) transparent;
+    background: var(--bl-color-canvas);
     font-family: var(--bl-font-sans);
     -webkit-font-smoothing: antialiased;
     scroll-padding-block: var(--bl-scroll-offset-top, 72px) var(--bl-scroll-offset-bottom, 0px);
@@ -16,8 +16,8 @@
   body {
     min-height: 100dvh;
     margin: 0;
-    background: var(--bl-canvas);
-    color: var(--bl-ink-1);
+    background: var(--bl-color-canvas);
+    color: var(--bl-color-ink-1);
     font-size: var(--bl-text-body);
     line-height: var(--bl-leading-body);
     transition:
@@ -45,7 +45,7 @@
       bottom: 0;
       z-index: 41;
       inline-size: max(0px, min(1px, 100vw - 100%));
-      background: var(--bl-separator);
+      background: var(--bl-color-separator);
       pointer-events: none;
     }
     html:dir(rtl)::after {
@@ -53,11 +53,11 @@
     }
   }
   ::selection {
-    background: color-mix(in srgb, var(--bl-trace) 25%, transparent);
+    background: color-mix(in srgb, var(--bl-color-trace) 25%, transparent);
   }
   /* Doubled so a reset's :-moz-focusring rule (same layer, later source) cannot win. */
   :focus-visible:focus-visible {
-    outline: 2px solid var(--bl-trace);
+    outline: 2px solid var(--bl-color-trace);
     outline-offset: 2px;
   }
   :focus:not(:focus-visible) {
