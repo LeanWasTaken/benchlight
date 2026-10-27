@@ -1,4 +1,12 @@
-import { onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue'
+import {
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  toValue,
+  watch,
+  type MaybeRefOrGetter,
+  type Ref
+} from 'vue'
 import { cssTime } from '../internal/cssTime'
 import { useReducedMotion } from './useReducedMotion'
 
@@ -9,14 +17,17 @@ export interface MarqueeOptions {
   pause?: number
   /** extra px scrolled past the end */
   overshoot?: number
+  /** holds the scroll still while true; hover and focus inside the container pause it as well */
+  paused?: MaybeRefOrGetter<boolean>
 }
 
 // Pauses at both ends, never animates under reduced motion (the CSS wraps the text instead); mask
-// edges follow the text. Re-measures on container, content and font changes.
+// edges follow the text. Holds still while hovered, while focus is inside, or while `paused` is
+// true (WCAG 2.2.2). Re-measures on container, content and font changes.
 export function useMarquee(
   container: Ref<HTMLElement | null>,
   content: Ref<HTMLElement | null>,
-  { speed = 22, pause = 0.18, overshoot = 14 }: MarqueeOptions = {}
+  { speed = 22, pause = 0.18, overshoot = 14, paused = false }: MarqueeOptions = {}
 ): { overflowing: Ref<boolean>; refresh: () => void } {
   const overflowing = ref(false)
   const reduced = useReducedMotion()
@@ -26,6 +37,34 @@ export function useMarquee(
   let disposed = false
   let resizeObserver: ResizeObserver | null = null
   let mutationObserver: MutationObserver | null = null
+  let hovered = false
+  let focused = false
+
+  function syncPlayState(): void {
+    const hold = hovered || focused || toValue(paused)
+    for (const animation of animations) {
+      if (hold) animation.pause()
+      else animation.play()
+    }
+  }
+
+  const onPointerEnter = (): void => {
+    hovered = true
+    syncPlayState()
+  }
+  const onPointerLeave = (): void => {
+    hovered = false
+    syncPlayState()
+  }
+  const onFocusIn = (): void => {
+    focused = true
+    syncPlayState()
+  }
+  const onFocusOut = (event: FocusEvent): void => {
+    focused =
+      event.relatedTarget instanceof Node && !!container.value?.contains(event.relatedTarget)
+    syncPlayState()
+  }
 
   function stop(): void {
     for (const animation of animations) animation.cancel()
@@ -79,6 +118,7 @@ export function useMarquee(
         timing
       )
     ]
+    if (hovered || focused || toValue(paused)) syncPlayState()
   }
 
   // Observers fire on mount and for changes that leave the widths alone (animated transforms
@@ -99,8 +139,14 @@ export function useMarquee(
   const onObserved = (): void => schedule(refreshIfChanged)
 
   watch(reduced, refresh)
+  watch(() => toValue(paused), syncPlayState)
   onMounted(() => {
     refresh()
+    const box = container.value
+    box?.addEventListener('pointerenter', onPointerEnter)
+    box?.addEventListener('pointerleave', onPointerLeave)
+    box?.addEventListener('focusin', onFocusIn)
+    box?.addEventListener('focusout', onFocusOut)
     window.addEventListener('resize', onResize, { passive: true })
     if (typeof ResizeObserver !== 'undefined') {
       resizeObserver = new ResizeObserver(onObserved)
@@ -124,6 +170,11 @@ export function useMarquee(
   onBeforeUnmount(() => {
     disposed = true
     stop()
+    const box = container.value
+    box?.removeEventListener('pointerenter', onPointerEnter)
+    box?.removeEventListener('pointerleave', onPointerLeave)
+    box?.removeEventListener('focusin', onFocusIn)
+    box?.removeEventListener('focusout', onFocusOut)
     if (resizeTimer) clearTimeout(resizeTimer)
     window.removeEventListener('resize', onResize)
     resizeObserver?.disconnect()

@@ -15,10 +15,12 @@
   import { ref, watch } from 'vue'
   import { useMarquee } from '../composables/useMarquee'
 
-  const props = defineProps<{ title?: string; contentKey?: unknown }>()
+  const props = defineProps<{ title?: string; contentKey?: unknown; paused?: boolean }>()
   const container = ref<HTMLElement | null>(null)
   const content = ref<HTMLElement | null>(null)
-  const { overflowing, refresh } = useMarquee(container, content)
+  const { overflowing, refresh } = useMarquee(container, content, {
+    paused: () => props.paused === true
+  })
 
   watch(
     () => props.contentKey,

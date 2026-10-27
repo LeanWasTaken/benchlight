@@ -268,7 +268,9 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
   (default 56px), so the track does not change length while dragging.
 - **BlMeta:** `separator` draws dashes in CSS (`.bl-meta--sep`); the `.bl-meta__sep` element is gone.
 - **BlMarquee / `useMarquee`:** re-measures when the container, the content or the fonts change.
-  Under reduced motion, overflowing text wraps instead.
+  Under reduced motion, overflowing text wraps instead. The scroll holds still while the pointer is
+  over it or focus is inside it, and while `paused` is true (`<BlMarquee :paused="…">`, or
+  `useMarquee(box, text, { paused })`), so a page can offer its own pause control (WCAG 2.2.2).
 - **BlSegmented:** wraps, with a 16px row gap.
 - **Inputs and selects:** 16px on coarse pointers, so iOS does not zoom on focus.
 - **BlSelect / `.bl-select-wrap`:** BlSelect renders `<span class="bl-select-wrap"><select

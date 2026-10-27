@@ -260,6 +260,7 @@ interface MarqueeOptions {
     speed?: number;
     pause?: number;
     overshoot?: number;
+    paused?: MaybeRefOrGetter<boolean>;
 }
 ```
 
@@ -616,6 +617,7 @@ Exposed: none
 | prop | type | required | default |
 | --- | --- | --- | --- |
 | `contentKey` | `unknown` | no |  |
+| `paused` | `boolean \| undefined` | no |  |
 | `title` | `string \| undefined` | no |  |
 
 Slots: `default`

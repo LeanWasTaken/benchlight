@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createSSRApp, defineComponent, h, nextTick, ref, watch } from 'vue'
+import { createSSRApp, defineComponent, h, nextTick, ref, watch, type Ref } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 import { riseDelay } from '../../vue/composables/riseDelay'
 import { resetAppearanceState, useAppearance } from '../../vue/composables/useAppearance'
@@ -320,6 +320,67 @@ describe('useMarquee', () => {
     const { result } = withSetup(() => useMarquee(ref(box), ref(text)))
     expect(result.overflowing.value).toBe(true)
     expect(animate).not.toHaveBeenCalled()
+  })
+})
+
+describe('useMarquee pausing', () => {
+  function setup(paused: Ref<boolean> = ref(false)) {
+    const box = document.createElement('div')
+    const inner = document.createElement('button')
+    box.append(inner)
+    const text = document.createElement('div')
+    Object.defineProperty(box, 'clientWidth', { value: 100 })
+    Object.defineProperty(text, 'scrollWidth', { value: 300 })
+    const pause = vi.fn()
+    const play = vi.fn()
+    const animate = vi.fn(() => ({ cancel: vi.fn(), pause, play }) as unknown as Animation)
+    box.animate = animate
+    text.animate = animate
+    const { wrapper } = withSetup(() => useMarquee(ref(box), ref(text), { paused }))
+    return { box, inner, pause, play, wrapper }
+  }
+
+  it('pauses both animations while hovered and resumes on leave', () => {
+    const { box, pause, play } = setup()
+    box.dispatchEvent(new Event('pointerenter'))
+    expect(pause).toHaveBeenCalledTimes(2)
+    box.dispatchEvent(new Event('pointerleave'))
+    expect(play).toHaveBeenCalledTimes(2)
+  })
+
+  it('pauses while focus is inside and resumes when it leaves', () => {
+    const { box, inner, pause, play } = setup()
+    box.dispatchEvent(new FocusEvent('focusin', { bubbles: true }))
+    expect(pause).toHaveBeenCalledTimes(2)
+    box.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: inner }))
+    expect(play).not.toHaveBeenCalled()
+    box.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }))
+    expect(play).toHaveBeenCalledTimes(2)
+  })
+
+  it('follows the paused option', async () => {
+    const paused = ref(true)
+    const { pause, play } = setup(paused)
+    expect(pause).toHaveBeenCalledTimes(2)
+    paused.value = false
+    await nextTick()
+    expect(play).toHaveBeenCalledTimes(2)
+  })
+
+  it('stays paused while hovered even after paused turns off', async () => {
+    const paused = ref(true)
+    const { box, play } = setup(paused)
+    box.dispatchEvent(new Event('pointerenter'))
+    paused.value = false
+    await nextTick()
+    expect(play).not.toHaveBeenCalled()
+  })
+
+  it('removes its listeners on unmount', () => {
+    const { box, pause, wrapper } = setup()
+    wrapper.unmount()
+    box.dispatchEvent(new Event('pointerenter'))
+    expect(pause).not.toHaveBeenCalled()
   })
 })
 
