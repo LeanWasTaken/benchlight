@@ -16,6 +16,10 @@
   BlTextarea and BlRange.
 - Breaking: `BlSegmented` is a native radio group (`role="radiogroup"`, `v-model`, works unbound)
   and no longer renders links; the new `BlSegmentedNav` is a `<nav>` of links with `aria-current`.
+- Breaking: `BlMeter` is a gauge: `role="meter"`, `value: number`, no indeterminate state, and a
+  dev warning when `value > 1` (it renders full). The new `BlProgress` is the task readout
+  (`role="progressbar"`, `value: number | null`) with the same props; both share the `meter` CSS.
+  The indeterminate bar is now `.bl-meter--indeterminate`, not `[data-indeterminate]`.
 - Breaking: the default sort collator is `'en'`, not the runtime locale, so server and client agree.
 
 Migration (working list):
@@ -37,6 +41,9 @@ Migration (working list):
 - `BlTable` `paginationLabels.nav` removed; its pagination is named by `labels.pages(caption)`
 - `BlToaster` `labels.region` → `ariaLabel` (or `aria-label`)
 - `BlMeter` `label` is now visible: drop `showLabel`; for a hidden name use `ariaLabel` instead of `label`
+- `<BlMeter :value="null">` → `<BlProgress :value="null">`; a determinate task bar → `BlProgress` (BlMeter now announces `role="meter"`)
+- raw CSS: `<div class="bl-meter" data-indeterminate>` → `class="bl-meter bl-meter--indeterminate"`; use `role="meter"` for a gauge
+- `BlMeter` `:value` above 1 (for example `75`) → pass a 0 to 1 fraction; it now warns and renders full
 - `BlPrevNext` `as` → `linkAs`
 - `BlIndexRow` `current="true"` → `current` (`true` now renders `aria-current="page"`, not `"true"`)
 - `BlSegmented` `label` → `ariaLabel`; `modelValue` still works, but it renders radios, not `aria-pressed` buttons

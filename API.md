@@ -96,6 +96,7 @@
 - `BlNavLink`
 - `BlPagination`
 - `BlPrevNext`
+- `BlProgress`
 - `BlProse`
 - `BlRadio`
 - `BlRadioGroup`
@@ -726,7 +727,7 @@ Exposed: none
 | `ariaLabel` | `string \| undefined` | no |  |
 | `label` | `string \| undefined` | no |  |
 | `showValue` | `boolean \| undefined` | no |  |
-| `value` | `number \| null` | yes |  |
+| `value` | `number` | yes |  |
 | `valueText` | `string \| undefined` | no |  |
 
 Prop notes:
@@ -789,6 +790,25 @@ Exposed: none
 | `linkAs` | `LinkAs \| undefined` | no | `"a"` |
 | `next` | `PrevNextItem \| null \| undefined` | no |  |
 | `prev` | `PrevNextItem \| null \| undefined` | no |  |
+
+Slots: none
+Events: none
+Exposed: none
+
+### BlProgress
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `ariaLabel` | `string \| undefined` | no |  |
+| `label` | `string \| undefined` | no |  |
+| `showValue` | `boolean \| undefined` | no |  |
+| `value` | `number \| null` | yes |  |
+| `valueText` | `string \| undefined` | no |  |
+
+Prop notes:
+
+- `ariaLabel`: Accessible name when there is no visible label.
+- `label`: Visible text above the bar; it names the bar.
 
 Slots: none
 Events: none
@@ -1175,6 +1195,7 @@ Exposed: none
 - `bl-meta--sep`
 - `bl-meta__key`
 - `bl-meter`
+- `bl-meter--indeterminate`
 - `bl-meter-field`
 - `bl-meter-field__head`
 - `bl-meter-field__label`
@@ -1309,7 +1330,6 @@ Exposed: none
 - `data-dir`
 - `data-empty`
 - `data-fit`
-- `data-indeterminate`
 - `data-label`
 - `data-lifted`
 - `data-measuring`

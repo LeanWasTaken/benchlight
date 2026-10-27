@@ -4,6 +4,8 @@ import BlIndexRow from '../../vue/components/BlIndexRow.vue'
 import BlNavLink from '../../vue/components/BlNavLink.vue'
 import BlTabBarItem from '../../vue/components/BlTabBarItem.vue'
 import BlLed from '../../vue/components/BlLed.vue'
+import BlMeter from '../../vue/components/BlMeter.vue'
+import BlProgress from '../../vue/components/BlProgress.vue'
 import BlMsg from '../../vue/components/BlMsg.vue'
 import type {
   ButtonVariant,
@@ -42,3 +44,11 @@ assertType<Equal<LinkCurrent, boolean | 'page' | 'step' | 'location'>>()
 assertType<Equal<NonNullable<Props<typeof BlNavLink>['current']>, LinkCurrent>>()
 assertType<Equal<NonNullable<Props<typeof BlTabBarItem>['current']>, LinkCurrent>>()
 assertType<Equal<NonNullable<Props<typeof BlIndexRow>['current']>, LinkCurrent>>()
+
+// BlMeter is a gauge with no indeterminate state; only BlProgress takes null.
+assertType<Equal<Props<typeof BlMeter>['value'], number>>()
+assertType<Equal<Props<typeof BlProgress>['value'], number | null>>()
+// @ts-expect-error value: null is BlProgress only
+const meterProps: Props<typeof BlMeter> = { value: null, ariaLabel: 'Disk' }
+const progressProps: Props<typeof BlProgress> = { value: null, ariaLabel: 'Upload' }
+void [meterProps, progressProps]

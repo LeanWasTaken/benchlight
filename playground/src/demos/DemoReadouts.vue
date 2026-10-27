@@ -15,7 +15,9 @@
     <BlReadout value="94.2" unit="Mbps" />
     <BlReadout :value="12" />
     <BlMeter :value="0.62" aria-label="Download" />
-    <BlMeter :value="null" aria-label="Scanning" />
+    <BlProgress :value="0.4" aria-label="Uploading" />
+    <BlProgress :value="null" aria-label="Scanning" />
+    <BlProgress :value="null" label="Indexing" show-value />
     <BlMeter :value="0.52" label="Storage" show-value />
     <BlMeter :value="0.52" label="Memory" value-text="2.1 of 4 GB" show-value />
   </div>
@@ -66,6 +68,7 @@
     BlLed,
     BlLog,
     BlMeter,
+    BlProgress,
     BlMsg,
     BlReadout,
     BlSectionHead,

@@ -6,6 +6,7 @@ import BlLed from '../../vue/components/BlLed.vue'
 import BlLog from '../../vue/components/BlLog.vue'
 import BlMarquee from '../../vue/components/BlMarquee.vue'
 import BlMeter from '../../vue/components/BlMeter.vue'
+import BlProgress from '../../vue/components/BlProgress.vue'
 import BlMsg from '../../vue/components/BlMsg.vue'
 import BlReadout from '../../vue/components/BlReadout.vue'
 import BlSpecRow from '../../vue/components/BlSpecRow.vue'
@@ -200,10 +201,10 @@ describe('small readouts', () => {
 describe('BlMeter', () => {
   const meter = (value: number) => mount(BlMeter, { props: { value, ariaLabel: 'Download' } })
 
-  it('exposes a progressbar with an integer percentage', () => {
+  it('exposes a meter with an integer percentage', () => {
     const wrapper = meter(0.426)
     expect(wrapper.attributes()).toMatchObject({
-      role: 'progressbar',
+      role: 'meter',
       'aria-label': 'Download',
       'aria-valuemin': '0',
       'aria-valuemax': '100',
@@ -217,30 +218,124 @@ describe('BlMeter', () => {
     [-1, '0', '0'],
     [Number.POSITIVE_INFINITY, '100', '1'],
     [Number.NaN, '0', '0']
-  ])('clamps %s to %s%%', (value, now, fill) => {
+  ])('clamps %s to %s%% and warns', (value, now, fill) => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const wrapper = meter(value)
+    expect(warn.mock.calls.flat().join(' ')).toContain(`got ${value}`)
     expect(wrapper.attributes('aria-valuenow')).toBe(now)
     expect(wrapper.find('.bl-meter__fill').attributes('style')).toContain(
       `--bl-meter-value: ${fill}`
     )
   })
 
+  it('warns when value is above 1 and renders full', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const wrapper = meter(75)
+    expect(warn.mock.calls.flat().join(' ')).toContain('BlMeter')
+    expect(wrapper.attributes('aria-valuenow')).toBe('100')
+    expect(wrapper.find('.bl-meter__fill').attributes('style')).toContain('--bl-meter-value: 1')
+    warn.mockClear()
+    meter(1)
+    meter(0.4)
+    expect(warn).not.toHaveBeenCalled()
+    warn.mockRestore()
+  })
+
+  it('warns once per out-of-range value, not on every render', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    meter(-0.25)
+    meter(-0.25)
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0]?.[0]).toContain('got -0.25')
+  })
+
+  it('has no indeterminate state: a runtime null clamps to 0', () => {
+    const wrapper = meter(null as unknown as number)
+    expect(wrapper.classes()).toEqual(['bl-meter'])
+    expect(wrapper.classes()).not.toContain('bl-meter--indeterminate')
+    expect(wrapper.attributes('aria-valuenow')).toBe('0')
+    expect(wrapper.find('.bl-meter__fill').attributes('style')).toContain('--bl-meter-value: 0')
+  })
+})
+
+describe('BlProgress', () => {
+  it('exposes a progressbar with an integer percentage', () => {
+    const wrapper = mount(BlProgress, { props: { value: 0.426, ariaLabel: 'Upload' } })
+    expect(wrapper.attributes()).toMatchObject({
+      role: 'progressbar',
+      'aria-label': 'Upload',
+      'aria-valuemin': '0',
+      'aria-valuemax': '100',
+      'aria-valuenow': '43'
+    })
+    expect(wrapper.classes()).toEqual(['bl-meter'])
+    expect(wrapper.find('.bl-meter__fill').attributes('style')).toContain('--bl-meter-value: 0.426')
+  })
+
   it('renders null as indeterminate', () => {
-    const wrapper = mount(BlMeter, { props: { value: null, ariaLabel: 'Scanning' } })
+    const wrapper = mount(BlProgress, { props: { value: null, ariaLabel: 'Scanning' } })
     expect(wrapper.attributes('aria-valuenow')).toBeUndefined()
-    expect(wrapper.attributes('data-indeterminate')).toBe('')
+    expect(wrapper.classes()).toEqual(['bl-meter', 'bl-meter--indeterminate'])
     expect(wrapper.find('.bl-meter__fill').attributes('style')).toBeUndefined()
   })
 
   it('switches between indeterminate and determinate reactively', async () => {
-    const wrapper = mount(BlMeter, { props: { value: null as number | null, ariaLabel: 'Upload' } })
+    const wrapper = mount(BlProgress, {
+      props: { value: null as number | null, ariaLabel: 'Upload' }
+    })
     await wrapper.setProps({ value: 0.5 })
     expect(wrapper.attributes('aria-valuenow')).toBe('50')
-    expect(wrapper.attributes('data-indeterminate')).toBeUndefined()
+    expect(wrapper.classes()).toEqual(['bl-meter'])
     expect(wrapper.find('.bl-meter__fill').attributes('style')).toContain('--bl-meter-value: 0.5')
     await wrapper.setProps({ value: null })
     expect(wrapper.attributes('aria-valuenow')).toBeUndefined()
-    expect(wrapper.attributes('data-indeterminate')).toBe('')
+    expect(wrapper.classes()).toContain('bl-meter--indeterminate')
+  })
+
+  it('shows no value while indeterminate, keeps the label, and wraps class on the field', () => {
+    const wrapper = mount(BlProgress, {
+      props: { value: null, label: 'Indexing', showValue: true },
+      attrs: { class: 'x' }
+    })
+    expect(wrapper.classes()).toEqual(['bl-meter-field', 'x'])
+    expect(wrapper.find('.bl-meter-field__label').text()).toBe('Indexing')
+    expect(wrapper.find('.bl-meter-field__value').exists()).toBe(false)
+    expect(wrapper.find('[role=progressbar]').classes()).toContain('bl-meter--indeterminate')
+  })
+
+  it('shows a percentage or valueText when determinate', () => {
+    const wrapper = mount(BlProgress, {
+      props: { value: 0.5, label: 'Upload', showValue: true, valueText: '2 of 4 files' }
+    })
+    expect(wrapper.find('.bl-meter-field__value').text()).toBe('2 of 4 files')
+    expect(wrapper.find('[role=progressbar]').attributes('aria-valuetext')).toBe('2 of 4 files')
+  })
+
+  it('omits aria-valuetext while indeterminate', () => {
+    const wrapper = mount(BlProgress, {
+      props: { value: null, ariaLabel: 'Scanning', valueText: 'x' }
+    })
+    expect(wrapper.attributes('aria-valuetext')).toBeUndefined()
+  })
+
+  it.each([-1, Number.NaN])('clamps %s to 0', (value) => {
+    const wrapper = mount(BlProgress, { props: { value, ariaLabel: 'Upload' } })
+    expect(wrapper.attributes('aria-valuenow')).toBe('0')
+    expect(wrapper.find('.bl-meter__fill').attributes('style')).toContain('--bl-meter-value: 0')
+  })
+
+  it('warns without a name, and treats an empty label as none', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    mount(BlProgress, { props: { value: 0.5 } })
+    expect(warn.mock.calls.flat().join(' ')).toContain('BlProgress')
+    warn.mockClear()
+    mount(BlProgress, { props: { value: 0.5, label: '' } })
+    expect(warn.mock.calls.flat().join(' ')).toContain('BlProgress')
+    warn.mockClear()
+    mount(BlProgress, { props: { value: 0.5, ariaLabel: 'Upload' } })
+    mount(BlProgress, { props: { value: null, label: 'Upload' } })
+    expect(warn).not.toHaveBeenCalled()
+    warn.mockRestore()
   })
 })
 
@@ -248,7 +343,7 @@ describe('BlMeter label and value', () => {
   const field = (props: Record<string, unknown>) =>
     mount(BlMeter, { props: { value: 0.426, ariaLabel: 'Download', ...props } })
 
-  it('renders the bare progressbar with neither label nor value', () => {
+  it('renders the bare meter with neither label nor value', () => {
     const wrapper = field({})
     expect(wrapper.classes()).toEqual(['bl-meter'])
     expect(wrapper.attributes('aria-valuetext')).toBeUndefined()
@@ -259,7 +354,7 @@ describe('BlMeter label and value', () => {
   it('renders a bare bar named by ariaLabel', () => {
     expect(field({}).html()).toBe(
       [
-        '<div class="bl-meter" role="progressbar" aria-label="Download" aria-valuemin="0" aria-valuemax="100" aria-valuenow="43">',
+        '<div class="bl-meter" role="meter" aria-label="Download" aria-valuemin="0" aria-valuemax="100" aria-valuenow="43">',
         '  <div class="bl-meter__fill" style="--bl-meter-value: 0.426;"></div>',
         '</div>'
       ].join('\n')
@@ -268,12 +363,12 @@ describe('BlMeter label and value', () => {
 
   it('puts every fallthrough attribute on the bar when unwrapped', () => {
     const wrapper = field({}).vm.$el as HTMLElement
-    expect(wrapper.matches('.bl-meter[role=progressbar]')).toBe(true)
+    expect(wrapper.matches('.bl-meter[role=meter]')).toBe(true)
     const attrs = mount(BlMeter, {
       props: { value: 0.5, ariaLabel: 'Download' },
       attrs: { id: 'disk', class: 'x', style: 'color: red', 'aria-describedby': 'hint' }
     })
-    expect(attrs.element.matches('[role=progressbar].bl-meter.x#disk')).toBe(true)
+    expect(attrs.element.matches('[role=meter].bl-meter.x#disk')).toBe(true)
     expect(attrs.attributes('aria-describedby')).toBe('hint')
     expect(attrs.attributes('style')).toContain('color: red')
   })
@@ -286,17 +381,11 @@ describe('BlMeter label and value', () => {
     expect(wrapper.classes()).toEqual(['bl-meter-field', 'x'])
     expect(wrapper.attributes('style')).toContain('color: red')
     expect(wrapper.attributes('id')).toBeUndefined()
-    const bar = wrapper.find('[role=progressbar]')
+    const bar = wrapper.find('[role=meter]')
     expect(bar.attributes('id')).toBe('disk')
     expect(bar.attributes('aria-describedby')).toBe('hint')
     expect(bar.classes()).toEqual(['bl-meter'])
     expect(bar.attributes('style')).toBeUndefined()
-  })
-
-  it('renders no head while a value-only meter is indeterminate', () => {
-    expect(field({ value: null, showValue: true }).find('.bl-meter-field__head').exists()).toBe(
-      false
-    )
   })
 
   it('wraps the bar and labels it by the visible label', () => {
@@ -305,7 +394,7 @@ describe('BlMeter label and value', () => {
     const label = wrapper.find('.bl-meter-field__head .bl-meter-field__label')
     expect(label.text()).toBe('Download')
     const bar = wrapper.find('.bl-meter')
-    expect(bar.attributes('role')).toBe('progressbar')
+    expect(bar.attributes('role')).toBe('meter')
     expect(bar.attributes('aria-labelledby')).toBe(label.attributes('id'))
     expect(bar.attributes('aria-label')).toBeUndefined()
     expect(wrapper.find('.bl-meter-field__value').exists()).toBe(false)
@@ -323,12 +412,6 @@ describe('BlMeter label and value', () => {
     expect(percent.attributes('aria-hidden')).toBe('true')
     const text = field({ showValue: true, valueText: '2.1 of 4 GB' })
     expect(text.find('.bl-meter-field__value').text()).toBe('2.1 of 4 GB')
-  })
-
-  it('shows no value while indeterminate', () => {
-    const wrapper = field({ value: null, label: 'Download', ariaLabel: undefined, showValue: true })
-    expect(wrapper.find('.bl-meter-field__label').exists()).toBe(true)
-    expect(wrapper.find('.bl-meter-field__value').exists()).toBe(false)
   })
 
   it('renders no visible label for ariaLabel alone, and a visible one for label', () => {
@@ -361,7 +444,7 @@ describe('BlMeter label and value', () => {
     warn.mockRestore()
   })
 
-  it('sets aria-valuetext on the progressbar', () => {
+  it('sets aria-valuetext on the meter', () => {
     expect(field({ valueText: '2.1 of 4 GB' }).attributes('aria-valuetext')).toBe('2.1 of 4 GB')
     const wrapped = field({ valueText: '2.1 of 4 GB', showValue: true })
     expect(wrapped.find('.bl-meter').attributes('aria-valuetext')).toBe('2.1 of 4 GB')

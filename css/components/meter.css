@@ -42,7 +42,7 @@
     background: var(--bl-trace);
     transition: width var(--bl-duration-fast) var(--bl-ease-out);
   }
-  .bl-meter[data-indeterminate] .bl-meter__fill {
+  .bl-meter--indeterminate .bl-meter__fill {
     width: 30%;
     animation: bl-meter-slide 1.2s var(--bl-ease-out) infinite;
   }
@@ -64,7 +64,7 @@
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .bl-meter[data-indeterminate] .bl-meter__fill {
+    .bl-meter--indeterminate .bl-meter__fill {
       width: 100%;
       opacity: 0.4;
       animation: none;

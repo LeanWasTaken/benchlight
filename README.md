@@ -147,7 +147,7 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
   is styled). The `data-*` attributes below are script-set, so do not set them yourself (apart from
   the CSS-only cases in the table notes). `data-lifted` (site bar, `js/appearance.js`),
   `data-overflowing` (BlMarquee), `data-fit`, `data-stacked` and `data-measuring` (BlTable),
-  `data-ready` (BlAppearanceSwitch), `data-indeterminate` (BlMeter), `data-action`, `data-dir`,
+  `data-ready` (BlAppearanceSwitch), `data-action`, `data-dir`,
   `data-label` and `data-empty` (BlTable), `data-bl-appearance` (on `<html>`) and `data-bl-lift`
   (you set it; `js/appearance.js` reads it).
 - Appearance: `data-bl-appearance="light|dark"` on `<html>` (absent = auto), stored as
@@ -253,13 +253,19 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
   inset ring as well as a colour change. `variant="ghost"` is transparent until hovered. The dev
   warnings run after mount and again whenever the props, attributes or slot content change. With raw
   CSS, add `bl-btn--icon`, `bl-btn--ghost` or `aria-pressed` yourself.
-- **BlMeter:** `:value="null"` renders an indeterminate meter. `valueText` sets `aria-valuetext`
-  ("2.1 of 4 GB"). `label` renders visible text above the bar (and names it); with no visible text use `ariaLabel`. `showValue` renders the value visibly (the value is
-  `valueText` or a percentage, hidden while indeterminate and `aria-hidden`). A dev warning fires
-  when neither `label` nor `ariaLabel` is set. CSS-only: wrap the bar,
-  `<div class="bl-meter-field"><div class="bl-meter-field__head"><span class="bl-meter-field__label">…</span><span class="bl-meter-field__value">…</span></div><div class="bl-meter" role="progressbar" …></div></div>`;
-  the wrapper owns the block margin. `class` and `style` go on the outer element (the wrapper when
-  wrapped, otherwise the bar); every other attribute goes on the progressbar.
+- **BlMeter and BlProgress:** BlMeter is a gauge (`role="meter"`, a disk or battery level) and
+  BlProgress is a task (`role="progressbar"`, an upload). Both take `value` 0 to 1 and emit
+  `aria-valuemin="0"`, `aria-valuemax="100"` and `aria-valuenow` as a whole percentage. BlMeter's
+  `value` is a plain `number`: above 1 it dev-warns and renders full, and it has no indeterminate
+  state. BlProgress takes `:value="null"` for indeterminate (no `aria-valuenow`, `bl-meter--indeterminate`,
+  and no visible value). `valueText` sets `aria-valuetext` ("2.1 of 4 GB"). `label` renders visible
+  text above the bar (and names it); with no visible text use `ariaLabel`. `showValue` renders the
+  value visibly (`valueText` or a percentage, `aria-hidden`). A dev warning fires when neither
+  `label` nor `ariaLabel` is set. BlProgress uses the `meter` CSS module. CSS-only: wrap the bar,
+  `<div class="bl-meter-field"><div class="bl-meter-field__head"><span class="bl-meter-field__label">…</span><span class="bl-meter-field__value">…</span></div><div class="bl-meter" role="meter" …></div></div>`
+  (`role="progressbar"` for a task; add `bl-meter--indeterminate` and drop `aria-valuenow` for an
+  unknown one); the wrapper owns the block margin. `class` and `style` go on the outer element (the
+  wrapper when wrapped, otherwise the bar); every other attribute goes on the bar.
 - **BlTelemetry:** `--bl-telemetry-columns` now applies at every width (it used to apply only from
   640px). The default is auto-fit with 12rem cells; with no custom columns, six cells lay out 3x2 when
   there is room.
@@ -747,6 +753,7 @@ places. `tokens` always comes first; `base`, `type`, `motion`, `layout` and `tin
 | BlMarquee                                       | `marquee`                  |
 | BlReadout                                       | `readout`                  |
 | BlMeter                                         | `meter`                    |
+| BlProgress                                      | `meter`                    |
 | BlMsg                                           | `msg`                      |
 | BlLog                                           | `log`                      |
 | BlSectionHead                                   | `section-head`             |

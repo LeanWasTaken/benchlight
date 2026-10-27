@@ -138,7 +138,7 @@ const REQUIRED: Record<string, string[]> = {
   readout: ['.bl-readout__value'],
   meter: [
     'calc(var(--bl-meter-value, 0) * 100%)',
-    '.bl-meter[data-indeterminate] .bl-meter__fill',
+    '.bl-meter--indeterminate .bl-meter__fill',
     '@keyframes bl-meter-slide',
     '.bl-meter-field__head',
     '.bl-meter-field__value',

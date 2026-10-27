@@ -21,6 +21,7 @@ const COMPONENTS = [
   'BlPagination',
   'BlNavLink',
   'BlPrevNext',
+  'BlProgress',
   'BlProse',
   'BlRadio',
   'BlRadioGroup',

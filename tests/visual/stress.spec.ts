@@ -515,6 +515,7 @@ const cases: Case[] = [
   { id: 'readout-long', checks: generic() },
   { id: 'button-long', checks: generic() },
   { id: 'meter-long', checks: generic() },
+  { id: 'progress-long', checks: generic() },
   { id: 'toggle-long', checks: generic() },
   { id: 'disclosure-long', checks: generic() },
   {

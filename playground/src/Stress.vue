@@ -79,6 +79,19 @@
       </div>
     </section>
 
+    <section v-if="show('progress-long')" data-case="progress-long">
+      <h2 class="st-label">progress-long</h2>
+      <div data-box>
+        <BlProgress
+          :value="0.62"
+          :label="german + ' ' + german"
+          :value-text="hash + ' of ' + hash"
+          show-value
+        />
+        <BlProgress :value="null" :label="german" show-value />
+      </div>
+    </section>
+
     <section v-if="show('field-hint-url')" data-case="field-hint-url">
       <h2 class="st-label">field-hint-url</h2>
       <div data-box>
@@ -791,6 +804,7 @@
     BlMedia,
     BlMeta,
     BlMeter,
+    BlProgress,
     BlMsg,
     BlNavLink,
     BlPrevNext,
