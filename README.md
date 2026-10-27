@@ -9,7 +9,7 @@ classes.
 ## Install
 
 ```json
-"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.8.0"
+"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.8.1"
 ```
 
 The repo is private and the URL uses SSH on purpose: bun turns GitHub https URLs into API tarball

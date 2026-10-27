@@ -1,8 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.8.1 - 2026-10-27
 
-Non-breaking fixes from an audit of 0.8.0.
+Non-breaking fixes from an audit of 0.8.0. Two behaviours change for the host app: under reduced
+motion Benchlight no longer shortens the host's own animations, and it no longer forces
+`scroll-behavior: auto` on `html`.
 
 - Fix: `vite` peer range now includes `^8.0.0`; npm failed with ERESOLVE in a fresh Nuxt 4.6 app.
 - Fix: `dist` no longer lowers `:dir(rtl)` to a `:lang(ar|he|...)` list, which put the toggle thumb and
