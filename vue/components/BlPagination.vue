@@ -49,6 +49,7 @@
   import { computed, ref, watch } from 'vue'
   import { warn } from '../internal/dev'
   import { mergeLabels } from '../internal/labels'
+  import { useClampedPage } from '../internal/pageClamp'
   import { clampPage, pageCount, pageRange } from '../internal/table'
   import type { LabelOverrides, PaginationLabels } from '../types'
 
@@ -95,6 +96,11 @@
     const to = Math.min(props.total, current.value * props.pageSize)
     return text.value.range(from, to, props.total)
   })
+  useClampedPage(
+    page,
+    () => props.total,
+    () => props.pageSize
+  )
   const announcement = ref('')
   watch(current, () => {
     announcement.value = rangeText.value

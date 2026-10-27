@@ -191,6 +191,25 @@ describe('BlTable pagination', () => {
     expect(w.findAll('tbody tr')).toHaveLength(2)
   })
 
+  it('does not reset the page while rows are empty, then clamps once loaded', async () => {
+    const w = mount(BlTable, {
+      props: {
+        caption: 'C',
+        columns,
+        rows: [] as typeof many,
+        rowKey: 'mac',
+        pageSize: 10,
+        page: 3
+      }
+    })
+    expect(w.emitted('update:page')).toBeUndefined()
+    await w.setProps({ rows: many.concat(many).map((r, i) => ({ ...r, mac: `m${i}` })) })
+    expect(w.emitted('update:page')).toBeUndefined()
+    expect(w.find('nav.bl-pagination [aria-current="page"]').text()).toBe('3')
+    await w.setProps({ rows: many.slice(0, 5) })
+    expect(w.emitted('update:page')).toEqual([[1]])
+  })
+
   it('uses rows as given in manual mode with totalRows', () => {
     const w = mount(BlTable, {
       props: {

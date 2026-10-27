@@ -59,4 +59,28 @@ describe('BlPagination', () => {
     expect(w.find('.bl-pagination__prev').text()).toBe('Previous')
     w.unmount()
   })
+
+  it('emits a clamped page when total shrinks, and only while total > 0', async () => {
+    const w = make({ page: 8, total: 100, pageSize: 10 })
+    await w.setProps({ total: 20 })
+    expect(w.emitted('update:page')).toEqual([[2]])
+    await w.setProps({ page: 2, total: 0 })
+    expect(w.emitted('update:page')).toHaveLength(1)
+    await w.setProps({ total: 100 })
+    expect(w.emitted('update:page')).toHaveLength(1)
+    w.unmount()
+  })
+
+  it('clamps on mount only when total > 0, and when pageSize puts the page out of range', async () => {
+    const a = make({ page: 8, total: 20, pageSize: 10 })
+    expect(a.emitted('update:page')).toEqual([[2]])
+    a.unmount()
+    const b = make({ page: 8, total: 0, pageSize: 10 })
+    expect(b.emitted('update:page')).toBeUndefined()
+    b.unmount()
+    const c = make({ page: 5, total: 100, pageSize: 10 })
+    await c.setProps({ pageSize: 50 })
+    expect(c.emitted('update:page')).toEqual([[2]])
+    c.unmount()
+  })
 })

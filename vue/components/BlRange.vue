@@ -1,7 +1,7 @@
 <template>
   <div class="bl-range" :class="attrs.class" :style="attrs.style as StyleValue">
     <input
-      v-model.number="model"
+      :value="current"
       class="bl-range__input"
       type="range"
       :min="min"
@@ -9,6 +9,7 @@
       :step="step"
       :aria-valuetext="text"
       v-bind="inputAttrs()"
+      @input="model = Number(($event.target as HTMLInputElement).value)"
     />
     <span class="bl-range__value" aria-hidden="true">{{ text }}</span>
   </div>
@@ -48,7 +49,16 @@
       'aria-describedby': mergeDescribedBy(field?.describedBy.value, attrs['aria-describedby'])
     }
   }
-  const model = defineModel<number>({ default: 0 })
+  const model = defineModel<number>()
   const field = inject(FIELD_CONTEXT, null)
-  const text = computed(() => (props.format ? props.format(model.value) : String(model.value)))
+  // Display only: an unset or out-of-range model is shown clamped and snapped, never written back.
+  const current = computed(() => {
+    const { min, max, step } = props
+    const raw = Math.min(max, Math.max(min, model.value ?? min))
+    const round = (n: number) => Number(n.toFixed(10))
+    const snapped = round(step > 0 ? min + Math.round((raw - min) / step) * step : raw)
+    // Past an off-step max the native thumb sits on the last step below it, not on max.
+    return snapped > max ? round(snapped - step) : snapped
+  })
+  const text = computed(() => (props.format ? props.format(current.value) : String(current.value)))
 </script>

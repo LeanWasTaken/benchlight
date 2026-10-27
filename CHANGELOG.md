@@ -21,6 +21,9 @@ Migration (working list):
 - `computeTotals` and BlTable footer values were numbers → strings (`String()` or `formatTotal`)
 - sort order following the runtime's locale → pass `locale` (for example `locale="lv"`); default is `'en'`
 - `<BlTable :columns="[{ key: 'x', label }]">` with untyped columns → type them `TableColumn<Row>[]`
+- `BlTable` relied on resetting `page` to 1 while `rows` were empty → it now leaves `page` alone until rows load
+- `BlRange` with no `v-model` showed `0` → it shows `min`; an out-of-range or off-step value is shown clamped and snapped, never emitted
+- `BlDialog` `open` is now a required `v-model:open`; `BlDisclosure` `open` works unbound (local state)
 
 ## 0.8.1 - 2026-10-27
 

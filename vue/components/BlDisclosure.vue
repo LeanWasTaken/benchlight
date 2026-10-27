@@ -14,16 +14,16 @@
   import { onMounted, ref, useSlots } from 'vue'
   import { warn } from '../internal/dev'
 
-  const props = defineProps<{ summary?: string; open?: boolean; name?: string }>()
-  const emit = defineEmits<{ 'update:open': [open: boolean] }>()
+  const props = defineProps<{ summary?: string; name?: string }>()
+  const open = defineModel<boolean>('open', { default: false })
   const slots = useSlots()
   const el = ref<HTMLDetailsElement>()
 
   // Reads el.open, not event.newState (happy-dom omits it). A prop-driven change also fires
   // `toggle`; it matches the prop, so nothing is echoed back.
   function onToggle(): void {
-    const open = el.value?.open ?? false
-    if (open !== props.open) emit('update:open', open)
+    const next = el.value?.open ?? false
+    if (next !== open.value) open.value = next
   }
 
   onMounted(() => {

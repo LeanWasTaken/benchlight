@@ -57,4 +57,15 @@ describe('BlDisclosure', () => {
     expect(w.get('.bl-disclosure__title em').text()).toBe('Rich')
     expect(spy).not.toHaveBeenCalled()
   })
+
+  it('opens from its own state when open is not bound', async () => {
+    const w = mount(BlDisclosure, { props: { summary: 'A' }, attachTo: document.body })
+    const el = w.element as HTMLDetailsElement
+    el.open = true
+    el.dispatchEvent(new Event('toggle'))
+    await w.setProps({ summary: 'B' })
+    expect(el.open).toBe(true)
+    expect(w.emitted('update:open')?.at(-1)).toEqual([true])
+    w.unmount()
+  })
 })

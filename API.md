@@ -561,7 +561,7 @@ Exposed: none
 | prop | type | required | default |
 | --- | --- | --- | --- |
 | `name` | `string \| undefined` | no |  |
-| `open` | `boolean \| undefined` | no |  |
+| `open` | `boolean \| undefined` | no | `false` |
 | `summary` | `string \| undefined` | no |  |
 
 Slots: `default`, `summary`
@@ -820,7 +820,7 @@ Exposed: none
 | `format` | `((value: number) => string) \| undefined` | no |  |
 | `max` | `number \| undefined` | no | `100` |
 | `min` | `number \| undefined` | no | `0` |
-| `modelValue` | `number \| undefined` | no | `0` |
+| `modelValue` | `number \| undefined` | no |  |
 | `step` | `number \| undefined` | no | `1` |
 
 Slots: none

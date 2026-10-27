@@ -185,7 +185,7 @@
 </template>
 
 <script setup lang="ts" generic="Row extends object, C extends TableColumn<Row> = TableColumn<Row>">
-  import { computed, ref, useAttrs, useId, watch } from 'vue'
+  import { computed, ref, useAttrs, useId } from 'vue'
   import BlPagination from './BlPagination.vue'
   import { useTableFit } from '../internal/useTableFit'
   import { warn } from '../internal/dev'
@@ -199,6 +199,7 @@
     pageSlice,
     sortRows
   } from '../internal/table'
+  import { useClampedPage } from '../internal/pageClamp'
   import { mergeLabels } from '../internal/labels'
   import type {
     LabelOverrides,
@@ -297,12 +298,10 @@
       page.value = value
     }
   })
-  watch(
-    () => [totalCount.value, props.pageSize, page.value] as const,
-    () => {
-      if (props.pageSize && currentPage.value !== page.value) page.value = currentPage.value
-    },
-    { immediate: true }
+  useClampedPage(
+    page,
+    () => totalCount.value,
+    () => props.pageSize ?? 0
   )
   const visibleRows = computed<Row[]>(() =>
     props.pageSize && !props.manual

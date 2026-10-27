@@ -822,4 +822,38 @@ describe('form controls', () => {
     expect(input.attributes('aria-describedby')).toBe('d')
     expect(wrapper.attributes('id')).toBeUndefined()
   })
+
+  it('BlRange without a model shows min and does not emit', () => {
+    const wrapper = mount(BlRange, { props: { min: 10, max: 20 } })
+    expect(wrapper.find('.bl-range__value').text()).toBe('10')
+    expect(wrapper.find('input').attributes('aria-valuetext')).toBe('10')
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+  })
+
+  it('BlRange binds the slider to the corrected value and emits on input', async () => {
+    const none = mount(BlRange, { props: { min: 10, max: 20 } })
+    expect(none.find('input').element.value).toBe('10')
+    const over = mount(BlRange, { props: { modelValue: 150, max: 100 } })
+    expect(over.find('input').element.value).toBe('100')
+    const input = none.find('input')
+    input.element.value = '15'
+    await input.trigger('input')
+    expect(none.emitted('update:modelValue')).toEqual([[15]])
+  })
+
+  it('BlRange clamps and snaps the shown value without emitting', () => {
+    const over = mount(BlRange, { props: { modelValue: 150, max: 100 } })
+    expect(over.find('.bl-range__value').text()).toBe('100')
+    expect(over.emitted('update:modelValue')).toBeUndefined()
+    const stepped = mount(BlRange, { props: { modelValue: 12, step: 5 } })
+    expect(stepped.find('.bl-range__value').text()).toBe('10')
+  })
+
+  it('BlRange snaps below an off-step max, as the native thumb does', () => {
+    const wrapper = mount(BlRange, { props: { modelValue: 10, min: 0, max: 10, step: 4 } })
+    expect(wrapper.find('.bl-range__value').text()).toBe('8')
+    expect((wrapper.get('input').element as HTMLInputElement).value).toBe('8')
+    const fine = mount(BlRange, { props: { modelValue: 1, min: 0, max: 1, step: 0.1 } })
+    expect(fine.find('.bl-range__value').text()).toBe('1')
+  })
 })

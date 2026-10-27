@@ -48,7 +48,6 @@
 
   const props = withDefaults(
     defineProps<{
-      open: boolean
       title: string
       description?: string
       dismissible?: boolean
@@ -57,8 +56,8 @@
     { dismissible: true }
   )
   defineSlots<{ default?: () => VNode[]; footer?: () => VNode[] }>()
+  const open = defineModel<boolean>('open', { required: true })
   const emit = defineEmits<{
-    'update:open': [open: boolean]
     close: [payload: DialogCloseEvent]
   }>()
   const el = ref<HTMLDialogElement>()
@@ -135,7 +134,7 @@
     pendingReason = null
     if (toasts.value) removeToastHost(toasts.value)
     unlockPage()
-    if (sync && props.open) emit('update:open', false)
+    if (sync && open.value) open.value = false
     emit('close', { reason, returnValue: el.value?.returnValue ?? '' })
     restoreFocus()
   }
@@ -166,15 +165,12 @@
     if (backdrop && props.dismissible) closeWith('backdrop')
   }
 
-  watch(
-    () => props.open,
-    (open) => {
-      if (open) show()
-      else closeWith('program')
-    }
-  )
+  watch(open, (value) => {
+    if (value) show()
+    else closeWith('program')
+  })
   onMounted(() => {
-    if (props.open) show()
+    if (open.value) show()
   })
   onBeforeUnmount(() => {
     if (!isOpen) return
