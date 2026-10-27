@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   clampPage,
   computeTotals,
@@ -12,11 +12,8 @@ import {
 import type { TableColumn } from '../../vue/types'
 
 type R = Record<string, unknown>
-const col = (key: string, extra: Partial<TableColumn<R>> = {}): TableColumn<R> => ({
-  key,
-  label: key,
-  ...extra
-})
+type Extra = Omit<Extract<TableColumn<R>, { value?: never; slot?: never }>, 'key' | 'label'>
+const col = (key: string, extra: Extra = {}): TableColumn<R> => ({ key, label: key, ...extra })
 
 describe('sortRows', () => {
   const rows = [
@@ -76,6 +73,58 @@ describe('sortRows', () => {
   })
 })
 
+describe('sortRows locale and column kinds', () => {
+  const names = [{ n: 'Zariņš' }, { n: 'Čakste' }, { n: 'Cēsis' }]
+  it("sorts with a fixed 'en' collator by default, so server and client agree", () => {
+    const collator = vi.spyOn(Intl, 'Collator')
+    try {
+      const out = sortRows(names, [col('n')], { key: 'n', dir: 'asc' }).map((r) => r.n)
+      expect(out).toEqual(['Čakste', 'Cēsis', 'Zariņš'])
+      expect(collator.mock.calls[0]?.[0]).toBe('en')
+    } finally {
+      collator.mockRestore()
+    }
+  })
+  it('sorts with the given locale', () => {
+    const out = sortRows(names, [col('n')], { key: 'n', dir: 'asc' }, 'lv').map((r) => r.n)
+    expect(out).toEqual(['Cēsis', 'Čakste', 'Zariņš'])
+  })
+  it('sorts a derived column by value(row)', () => {
+    const rows = [
+      { id: 'a', b: 1 },
+      { id: 'b', b: 30 },
+      { id: 'c', b: 2 }
+    ]
+    const rate: TableColumn<(typeof rows)[number]> = {
+      key: 'rate',
+      label: 'Rate',
+      value: (row) => -row.b
+    }
+    const out = sortRows(rows, [rate], { key: 'rate', dir: 'asc' }).map((r) => r.id)
+    expect(out).toEqual(['b', 'c', 'a'])
+  })
+  it('never sorts a slot-only column', () => {
+    const rows = [{ id: 'b' }, { id: 'a' }]
+    const actions: TableColumn<R> = { key: 'id', label: '', slot: true }
+    const out = sortRows(rows, [actions], { key: 'id', dir: 'asc' })
+    expect(out).toEqual(rows)
+    expect(out).not.toBe(rows)
+  })
+  it('puts an empty optional field last in both directions', () => {
+    type Row = { id: string; note?: string | undefined }
+    const rows: Row[] = [
+      { id: 'a', note: undefined },
+      { id: 'b', note: 'y' },
+      { id: 'c', note: 'x' }
+    ]
+    const note: TableColumn<Row> = { key: 'note', label: 'Note' }
+    const asc = sortRows(rows, [note], { key: 'note', dir: 'asc' }).map((r) => r.id)
+    expect(asc).toEqual(['c', 'b', 'a'])
+    const desc = sortRows(rows, [note], { key: 'note', dir: 'desc' }).map((r) => r.id)
+    expect(desc).toEqual(['b', 'c', 'a'])
+  })
+})
+
 describe('nextSort', () => {
   it('cycles asc → desc → off, and a new key starts asc', () => {
     expect(nextSort(null, 'a')).toEqual({ key: 'a', dir: 'asc' })
@@ -128,22 +177,47 @@ describe('totals and formatting', () => {
     { a: null, b: 'y' },
     { a: 'n/a', b: null }
   ]
-  it('sums, averages and counts non-empty values', () => {
+  it('sums, averages and counts non-empty values, rendered with String()', () => {
     const totals = computeTotals(rows, [col('a', { total: 'sum' }), col('b', { total: 'count' })])
-    expect(totals).toEqual({ a: 5, b: 2 })
-    expect(computeTotals(rows, [col('a', { total: 'avg' })])).toEqual({ a: 2.5 })
+    expect(totals).toEqual({ a: '5', b: '2' })
+    expect(computeTotals(rows, [col('a', { total: 'avg' })])).toEqual({ a: '2.5' })
     expect(computeTotals([], [col('a', { total: 'avg' })])).toEqual({ a: '' })
+    expect(computeTotals(rows, [col('a', { total: (all) => all.length * 2 })])).toEqual({ a: '8' })
   })
-  it('formats sum/avg with format(value) and passes custom totals through', () => {
+  it('passes every total kind through formatTotal(value, rows) and never format()', () => {
+    const format = vi.fn(() => 'cell')
+    const formatTotal = (v: number, all: R[]) => `${v} of ${all.length}`
     const totals = computeTotals(rows, [
-      col('a', { total: 'sum', format: (v) => `${v} dB` }),
-      col('b', { total: (all) => `${all.length} rows` })
+      col('a', { total: 'sum', format, formatTotal }),
+      col('b', { total: 'count', format, formatTotal }),
+      col('c', { total: (all) => all.length * 2, format, formatTotal })
     ])
-    expect(totals).toEqual({ a: '5 dB', b: '4 rows' })
+    expect(totals).toEqual({ a: '5 of 4', b: '2 of 4', c: '8 of 4' })
+    expect(format).not.toHaveBeenCalled()
+  })
+  it('totals a derived column from value(row) and never a slot-only column', () => {
+    const doubled: TableColumn<R> = {
+      key: 'double',
+      label: 'Double',
+      value: (row) => (typeof row['a'] === 'number' ? row['a'] * 2 : null),
+      total: 'sum'
+    }
+    const actions = { key: 'x', label: '', slot: true, total: 'count' } as unknown as TableColumn<R>
+    expect(computeTotals(rows, [doubled, actions])).toEqual({ double: '4' })
   })
   it('formats cells', () => {
     expect(formatCell({ a: null }, col('a'))).toBe('')
     expect(formatCell({ a: 3 }, col('a'))).toBe('3')
-    expect(formatCell({ a: 3 }, col('a', { format: (v, r) => `${v}/${r?.['a']}` }))).toBe('3/3')
+    expect(formatCell({ a: 3 }, col('a', { format: (v, r) => `${v}/${r['a']}` }))).toBe('3/3')
+  })
+  it('formats a derived cell from value(row) and leaves a slot-only cell empty', () => {
+    const rate: TableColumn<R> = {
+      key: 'rate',
+      label: 'Rate',
+      value: (row) => Number(row['b']) / 1024,
+      format: (v: unknown) => (v as number).toFixed(1)
+    }
+    expect(formatCell({ b: 2048 }, rate)).toBe('2.0')
+    expect(formatCell({ x: 1 }, { key: 'x', label: '', slot: true })).toBe('')
   })
 })

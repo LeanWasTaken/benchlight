@@ -33,13 +33,19 @@
 
 <script setup lang="ts">
   import { NuxtLink } from '#components'
+  import type { TableColumn } from 'benchlight/vue'
+
+  interface Row {
+    name: string
+    value: number
+  }
 
   const sort = ref<{ key: string; dir: 'asc' | 'desc' } | null>(null)
-  const columns = [
+  const columns: TableColumn<Row>[] = [
     { key: 'name', label: 'Name', sortable: true },
     { key: 'value', label: 'Value', numeric: true, sortable: true }
   ]
-  const rows = [
+  const rows: Row[] = [
     { name: 'alpha', value: 3 },
     { name: 'beta', value: 1 },
     { name: 'gamma', value: 2 }

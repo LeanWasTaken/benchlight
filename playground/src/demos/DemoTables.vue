@@ -118,7 +118,13 @@
   const totalColumns: TableColumn<(typeof bands)[number]>[] = [
     { key: 'band', label: 'Band', primary: true },
     { key: 'clients', label: 'Clients', numeric: true, total: 'sum' },
-    { key: 'share', label: 'Share', numeric: true, total: (rows) => `${rows.length} bands` }
+    {
+      key: 'share',
+      label: 'Share',
+      numeric: true,
+      total: (rows) => rows.length,
+      formatTotal: (n) => `${n} bands`
+    }
   ]
 
   // Manual mode: the page owns the data, so it sorts and slices here.

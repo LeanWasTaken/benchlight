@@ -851,7 +851,7 @@
     )
   )
   const primaryColumns = wideColumns.map((c, i) => ({ ...c, primary: i === 3 }))
-  const urlColumns = [
+  const urlColumns: TableColumn<(typeof urlRows)[number]>[] = [
     { key: 'id', label: 'ID' },
     { key: 'url', label: 'URL' }
   ]
@@ -859,7 +859,7 @@
     { id: 'a', url: 'https://example.com/' + 'x'.repeat(180) },
     { id: 'b', url: 'short' }
   ]
-  const logColumns = [
+  const logColumns: TableColumn<(typeof logRows)[number]>[] = [
     { key: 'id', label: 'ID' },
     { key: 'level', label: 'Level' },
     { key: 'message', label: 'Message' }

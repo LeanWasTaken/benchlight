@@ -299,9 +299,19 @@ modules and `pagination` needs `layout` (the bundle CLI warns otherwise).
 - **Grid and flex hosts.** A BlTable inside a CSS grid or flex item needs `min-width: 0` (or
   `min-inline-size: 0`) on that item; otherwise the item grows to the table's width and it never stacks.
 - **Scroll mode:** `scroll` never stacks; the table scrolls horizontally and the first column is sticky.
-- **Columns** are `{ key, label, align?, numeric?, sortable?, sortBy?, format?, width?, primary?, total? }`.
-  The primary column (the first unless one sets `primary`) is the row header. `v-model:sort` and
-  `v-model:page` are optional; set `rowKey` when sorting, paging or using row actions.
+- **Columns** (`TableColumn<Row>`) come in three kinds, all with `label`, `align?`, `numeric?`,
+  `width?` and `primary?`. A **key column** `{ key, format?, sortable?, sortBy?, total?, formatTotal? }`
+  shows a field: `key` must be a key of `Row` and `format(value, row)` gets `Row[key]`. A **derived
+  column** `{ key, value(row), format?, ... }` shows a computed value; `format` gets what `value`
+  returns. Inside a `TableColumn<Row>[]` array, annotate a derived column's `format` parameter or
+  type the column as `DerivedColumn<Row, V>`. A **slot-only column** `{ key, slot: true }` renders
+  only through its `cell-<key>` slot and is never sorted or totalled. With literal columns
+  (`[...] as const satisfies readonly TableColumn<Row>[]`) each `cell-<key>` slot's `value` follows
+  its column: `Row[key]`, what `value` returns, or `undefined` for a slot-only column, and an unknown
+  slot name fails type-checking. Columns typed `TableColumn<Row>[]` have `string` keys, so there
+  every cell slot's `value` is `unknown`. The primary column (the first unless one sets `primary`)
+  is the row header. `v-model:sort` and `v-model:page` are optional; set `rowKey` when sorting,
+  paging or using row actions.
 - **Attrs:** the naming, description and structure attributes (`aria-label`, `aria-labelledby`,
   `aria-describedby`, `aria-description`, `aria-details`, `aria-roledescription`, `aria-rowcount`,
   `aria-colcount`) go on the `<table>`, so a note on units or a totals row can describe it. Every
@@ -317,11 +327,13 @@ modules and `pagination` needs `layout` (the bundle CLI warns otherwise).
   Clicking anywhere on the row forwards to it, except on other controls and while text is selected.
   Modifier-clicks work only on the link itself.
 - **Totals:** a column `total` of `'sum'`, `'avg'`, `'count'` or a function over all rows (not just the
-  page). `format(value)` formats the result. The footer renders the cells; the `footer` slot replaces
-  them.
+  page); a function returns a number. `formatTotal(value, rows)` formats every kind (else `String()`);
+  `format` never applies to totals, and `manual` mode's `totals` render as given. The footer renders
+  the cells; the `footer` slot replaces them.
 - **i18n:** `labels` (`total`, `empty`, `sortStrip`, `sortAscending`, `sortDescending`, and
   `pages: (caption) => string` for the pagination's name) and `paginationLabels` (`nav`, `prev`,
-  `next`, `page`, `pageOf`, `range`); `locale` sets the sort collation. Every `labels` prop in the
+  `next`, `page`, `pageOf`, `range`); `locale` sets the sort collation (default `'en'`, so a
+  server-rendered sort hydrates unchanged; for example `locale="lv"`). Every `labels` prop in the
   library (BlAppearanceSwitch, BlPrevNext, BlDialog, BlToaster, BlPagination, BlTable) treats an
   `undefined` value as "use the default", so an i18n lookup that finds nothing never blanks a
   string. BlAppearanceSwitch also takes `labels.marks` (`{ auto, light, dark }`, default A / L / D).

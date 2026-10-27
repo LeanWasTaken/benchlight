@@ -71,9 +71,10 @@ const DYNAMIC_SLOTS: Record<string, { pattern: string; props: string }[]> = {
   BlTable: [
     {
       pattern: 'cell-<key>',
-      props: '{ row: Row; value: unknown; column: TableColumn<Row> }'
+      props:
+        '{ row: Row; value: by column kind, Row[key] (key), value() result (derived), undefined (slot-only), unknown if keys are string; column: C }'
     },
-    { pattern: 'head-<key>', props: '{ column: TableColumn<Row> }' }
+    { pattern: 'head-<key>', props: '{ column: C }' }
   ]
 }
 
@@ -109,6 +110,10 @@ function componentSection(root: string): string {
               p.default === undefined ? '' : `\`${cell(p.default.replace(/ as never$/, ''))}\``
             } |`
         )
+      const notes = meta.props
+        .filter((p) => !p.global && p.description)
+        .sort((a, b) => byCodeUnit(a.name, b.name))
+        .map((p) => `- \`${p.name}\`: ${scrub(root, p.description)}`)
       const slots = sorted(meta.slots.map((s) => s.name))
       const slotProps = meta.slots
         .filter((s) => !['{}', 'any'].includes(s.type))
@@ -131,6 +136,7 @@ function componentSection(root: string): string {
             )
           : 'No props.',
         '',
+        ...(notes.length ? ['Prop notes:', '', ...notes, ''] : []),
         `Slots: ${inline(slots)}`,
         ...(dynamic.length ? [`Dynamic slots: ${inline(dynamic.map((d) => d.pattern))}`] : []),
         ...(slotProps.length || dynamic.length

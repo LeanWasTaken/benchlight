@@ -73,8 +73,12 @@ describe('API.md dynamic slots and slot props', () => {
   it('lists the BlTable dynamic slot patterns and slot props', () => {
     const table = /### BlTable\n[\s\S]*?(?=\n### |\n## )/.exec(api())?.[0] ?? ''
     expect(table).toContain('Dynamic slots: `cell-<key>`, `head-<key>`')
-    expect(table).toContain('`cell-<key>` `{ row: Row; value: unknown; column: TableColumn<Row> }`')
-    expect(table).toContain('`head-<key>` `{ column: TableColumn<Row> }`')
+    expect(table).toContain(
+      '`cell-<key>` `{ row: Row; value: by column kind, Row[key] (key), value() result (derived), undefined (slot-only), unknown if keys are string; column: C }`'
+    )
+    expect(table).toContain("- `locale`: Sort collation locale, e.g. `'lv'`. Defaults to `'en'`")
+    expect(table).toContain('- `onRowActivate`: What `@row-activate` compiles to.')
+    expect(table).toContain('`head-<key>` `{ column: C }`')
     expect(table).toContain('`footer` `{ rows: Row[]; }`')
   })
   it('lists the BlField slot props', () => {

@@ -175,6 +175,33 @@ type AppearanceMode = 'auto' | 'light' | 'dark';
 type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
 ```
 
+### `ColumnBase`
+
+```ts
+interface ColumnBase<Row extends object> {
+    label: string;
+    align?: 'start' | 'end' | 'center';
+    numeric?: boolean;
+    width?: string;
+    primary?: boolean;
+}
+```
+
+### `DerivedColumn`
+
+```ts
+interface DerivedColumn<Row extends object, V = unknown> extends ColumnBase<Row> {
+    key: string;
+    value: (row: Row) => V;
+    slot?: never;
+    format?(value: V, row: Row): string;
+    sortable?: boolean;
+    sortBy?: (row: Row) => string | number | null | undefined;
+    total?: TableTotal<Row>;
+    formatTotal?: (value: number, rows: Row[]) => string;
+}
+```
+
 ### `DialogCloseEvent`
 
 ```ts
@@ -215,6 +242,23 @@ interface FollowScrollOptions {
     enabled?: MaybeRefOrGetter<boolean>;
     threshold?: number;
 }
+```
+
+### `KeyColumn`
+
+```ts
+type KeyColumn<Row extends object> = {
+    [K in Extract<keyof Row, string>]-?: ColumnBase<Row> & {
+        key: K;
+        value?: never;
+        slot?: never;
+        format?: (value: Row[K], row: Row) => string;
+        sortable?: boolean;
+        sortBy?: (row: Row) => string | number | null | undefined;
+        total?: TableTotal<Row>;
+        formatTotal?: (value: number, rows: Row[]) => string;
+    };
+}[Extract<keyof Row, string>];
 ```
 
 ### `LabelOverrides`
@@ -339,6 +383,21 @@ interface SelectOption<T> {
 }
 ```
 
+### `SlotColumn`
+
+```ts
+interface SlotColumn<Row extends object> extends ColumnBase<Row> {
+    key: string;
+    slot: true;
+    value?: never;
+    format?: never;
+    sortable?: false;
+    sortBy?: never;
+    total?: never;
+    formatTotal?: never;
+}
+```
+
 ### `SpecRowData`
 
 ```ts
@@ -358,18 +417,7 @@ type StatusTone = 'neutral' | 'success' | 'danger';
 ### `TableColumn`
 
 ```ts
-interface TableColumn<Row = Record<string, unknown>> {
-    key: string;
-    label: string;
-    align?: 'start' | 'end' | 'center';
-    numeric?: boolean;
-    sortable?: boolean;
-    sortBy?: (row: Row) => string | number | null | undefined;
-    format?: (value: unknown, row?: Row) => string;
-    width?: string;
-    primary?: boolean;
-    total?: 'sum' | 'avg' | 'count' | ((rows: Row[]) => string | number);
-}
+type TableColumn<Row extends object = Record<string, unknown>> = KeyColumn<Row> | DerivedColumn<Row> | SlotColumn<Row>;
 ```
 
 ### `TableLabels`
@@ -392,6 +440,12 @@ interface TableSort {
     key: string;
     dir: 'asc' | 'desc';
 }
+```
+
+### `TableTotal`
+
+```ts
+type TableTotal<Row> = 'sum' | 'avg' | 'count' | ((rows: Row[]) => number);
 ```
 
 ### `ToastAction`
@@ -608,6 +662,10 @@ Exposed: none
 | `lines` | `string[]` | yes |  |
 | `offset` | `number \| undefined` | no | `0` |
 
+Prop notes:
+
+- `offset`: Absolute index of `lines[0]`, default 0. When a capped buffer drops its oldest line, advance this by one so surviving rows keep their DOM nodes instead of every row being re-patched (which makes screen readers re-announce the log).
+
 Slots: none
 Events: none
 Exposed: none
@@ -694,6 +752,10 @@ Exposed: none
 | `pageSize` | `number` | yes |  |
 | `siblings` | `number \| undefined` | no | `1` |
 | `total` | `number` | yes |  |
+
+Prop notes:
+
+- `label`: Accessible name of the nav; falls back to `labels.nav`.
 
 Slots: none
 Events: `update:page`
@@ -890,7 +952,7 @@ Exposed: none
 | --- | --- | --- | --- |
 | `caption` | `string` | yes |  |
 | `captionHidden` | `boolean \| undefined` | no |  |
-| `columns` | `TableColumn<Row>[]` | yes |  |
+| `columns` | `readonly C[]` | yes |  |
 | `compact` | `boolean \| undefined` | no |  |
 | `labels` | `Partial<LabelOverrides<TableLabels>> \| undefined` | no |  |
 | `locale` | `string \| undefined` | no |  |
@@ -899,7 +961,7 @@ Exposed: none
 | `page` | `number \| undefined` | no | `1` |
 | `pageSize` | `number \| undefined` | no |  |
 | `paginationLabels` | `Partial<LabelOverrides<PaginationLabels>> \| undefined` | no |  |
-| `rowKey` | `string \| ((row: Row) => string \| number) \| undefined` | no |  |
+| `rowKey` | `Extract<keyof Row, string> \| ((row: Row) => string \| number) \| undefined` | no |  |
 | `rowLink` | `((row: Row) => { as?: LinkAs \| undefined; to?: LinkTo \| undefined; href?: string \| undefined; }) \| undefined` | no |  |
 | `rows` | `Row[]` | yes |  |
 | `scroll` | `boolean \| undefined` | no |  |
@@ -907,9 +969,14 @@ Exposed: none
 | `totalRows` | `number \| undefined` | no |  |
 | `totals` | `Record<string, string \| number> \| undefined` | no |  |
 
+Prop notes:
+
+- `locale`: Sort collation locale, e.g. `'lv'`. Defaults to `'en'`, so server and client agree.
+- `onRowActivate`: What `@row-activate` compiles to. Its presence makes rows interactive (a primary-cell button).
+
 Slots: `caption`, `empty`, `footer`
 Dynamic slots: `cell-<key>`, `head-<key>`
-Slot props: `footer` `{ rows: Row[]; }`, `cell-<key>` `{ row: Row; value: unknown; column: TableColumn<Row> }`, `head-<key>` `{ column: TableColumn<Row> }`
+Slot props: `footer` `{ rows: Row[]; }`, `cell-<key>` `{ row: Row; value: by column kind, Row[key] (key), value() result (derived), undefined (slot-only), unknown if keys are string; column: C }`, `head-<key>` `{ column: C }`
 Events: `update:page`, `update:sort`
 Exposed: none
 

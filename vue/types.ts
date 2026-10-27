@@ -73,18 +73,64 @@ export interface FieldContext {
 // Provided by BlField; form controls (Benchlight's or your own) inject it for id and hint wiring.
 export const FIELD_CONTEXT: InjectionKey<FieldContext> = Symbol('bl-field')
 
-export interface TableColumn<Row = Record<string, unknown>> {
-  key: string
+/** What every column kind shares. `Row` is reserved so a later member can take the row. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export interface ColumnBase<Row extends object> {
   label: string
   align?: 'start' | 'end' | 'center'
   numeric?: boolean
-  sortable?: boolean
-  sortBy?: (row: Row) => string | number | null | undefined
-  format?: (value: unknown, row?: Row) => string
   width?: string
   primary?: boolean
-  total?: 'sum' | 'avg' | 'count' | ((rows: Row[]) => string | number)
 }
+
+/** A footer total over all rows: a built-in reduction, or a function returning a number. */
+export type TableTotal<Row> = 'sum' | 'avg' | 'count' | ((rows: Row[]) => number)
+
+/** A column showing a row field: `key` must be a string key of `Row`; `format` gets `Row[key]`. */
+export type KeyColumn<Row extends object> = {
+  [K in Extract<keyof Row, string>]-?: ColumnBase<Row> & {
+    key: K
+    value?: never
+    slot?: never
+    format?: (value: Row[K], row: Row) => string
+    sortable?: boolean
+    sortBy?: (row: Row) => string | number | null | undefined
+    total?: TableTotal<Row>
+    formatTotal?: (value: number, rows: Row[]) => string
+  }
+}[Extract<keyof Row, string>]
+
+/**
+ * A computed column: `value(row)` supplies the cell, the sort and the total. `format` gets what
+ * `value` returns; inline in a `TableColumn<Row>[]` annotate its parameter, or type the column as
+ * `DerivedColumn<Row, V>`.
+ */
+export interface DerivedColumn<Row extends object, V = unknown> extends ColumnBase<Row> {
+  key: string
+  value: (row: Row) => V
+  slot?: never
+  // Method syntax: a DerivedColumn<Row, number> still fits the TableColumn<Row> union.
+  format?(value: V, row: Row): string
+  sortable?: boolean
+  sortBy?: (row: Row) => string | number | null | undefined
+  total?: TableTotal<Row>
+  formatTotal?: (value: number, rows: Row[]) => string
+}
+
+/** A column rendered only by its `cell-<key>` slot (actions, buttons): never sorted or totalled. */
+export interface SlotColumn<Row extends object> extends ColumnBase<Row> {
+  key: string
+  slot: true
+  value?: never
+  format?: never
+  sortable?: false
+  sortBy?: never
+  total?: never
+  formatTotal?: never
+}
+
+export type TableColumn<Row extends object = Record<string, unknown>> =
+  KeyColumn<Row> | DerivedColumn<Row> | SlotColumn<Row>
 
 export interface TableSort {
   key: string

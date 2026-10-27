@@ -27,7 +27,8 @@ export const clientColumns: TableColumn<Client>[] = [
     numeric: true,
     sortable: true,
     total: 'avg',
-    format: (v) => `${v} dBm`
+    format: (v) => `${v} dBm`,
+    formatTotal: (v) => `${v} dBm`
   },
   { key: 'address', label: 'Address' },
   { key: 'uptime', label: 'Uptime', numeric: true }

@@ -3,9 +3,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import BlIndexRow from '../../vue/components/BlIndexRow.vue'
 import BlNavLink from '../../vue/components/BlNavLink.vue'
-import BlTable from '../../vue/components/BlTable.vue'
+import BlTableOf from '../../vue/components/BlTable.vue'
 import BlToaster from '../../vue/components/BlToaster.vue'
 import { resetToastStore } from '../../vue/internal/toastStore'
+
+// Loose rows: these tests mount with ad hoc keys, which the inferred row type would reject.
+const BlTable = BlTableOf<Record<string, unknown>>
 
 const forwarded = {
   target: '_blank',

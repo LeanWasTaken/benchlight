@@ -5,11 +5,14 @@ import BlAppearanceSwitch from '../../vue/components/BlAppearanceSwitch.vue'
 import BlDialog from '../../vue/components/BlDialog.vue'
 import BlPagination from '../../vue/components/BlPagination.vue'
 import BlPrevNext from '../../vue/components/BlPrevNext.vue'
-import BlTable from '../../vue/components/BlTable.vue'
+import BlTableOf from '../../vue/components/BlTable.vue'
 import BlToaster from '../../vue/components/BlToaster.vue'
 import { mergeLabels } from '../../vue/internal/labels'
 import { resetToastStore } from '../../vue/internal/toastStore'
 import { useToast } from '../../vue/composables/useToast'
+
+// Loose rows: these tests mount with ad hoc keys, which the inferred row type would reject.
+const BlTable = BlTableOf<Record<string, unknown>>
 
 const fitState = vi.hoisted(() => ({ stacked: null as null | { value: boolean } }))
 vi.mock('../../vue/internal/useTableFit', async () => {

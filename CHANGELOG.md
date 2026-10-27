@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased
+
+- Breaking: BlTable columns are typed from the row (generics `Row extends object` and
+  `C extends TableColumn<Row>`, so interface rows compile). A column is a key column (`key` is a
+  row key), a derived column (`value(row)`) or a slot-only column (`slot: true`). With literal
+  columns, each `cell-<key>` slot's `value` follows its column's kind and unknown slot names fail
+  type-checking.
+- Breaking: totals render through the new `formatTotal(value, rows)` (else `String()`), never
+  `format`; a custom `total` function returns a number.
+- Breaking: the default sort collator is `'en'`, not the runtime locale, so server and client agree.
+
+Migration (working list):
+
+- `{ key: 'actions', label: '' }` plus a `#cell-actions` slot → `{ key: 'actions', label: '', slot: true }`
+- a column whose `key` is not a row key, read via `sortBy`/`format(_, row)` → `{ key, value: (row) => … }`
+- `format` relied on to format a `total` → add `formatTotal: (value, rows) => …`
+- `total: (rows) => '3 bands'` (string) → `total: (rows) => rows.length, formatTotal: (n) => n + ' bands'`
+- `format: (value: unknown, row?: Row) => …` → `format: (value: Row[K], row: Row) => …`
+- `computeTotals` and BlTable footer values were numbers → strings (`String()` or `formatTotal`)
+- sort order following the runtime's locale → pass `locale` (for example `locale="lv"`); default is `'en'`
+- `<BlTable :columns="[{ key: 'x', label }]">` with untyped columns → type them `TableColumn<Row>[]`
+
 ## 0.8.1 - 2026-10-27
 
 Non-breaking fixes from an audit of 0.8.0. Two behaviours change for the host app: under reduced

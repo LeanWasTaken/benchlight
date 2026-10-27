@@ -22,7 +22,10 @@ vi.mock('../../vue/internal/useTableFit', async () => {
     }
   }
 })
-import BlTable from '../../vue/components/BlTable.vue'
+import BlTableOf from '../../vue/components/BlTable.vue'
+
+// Loose rows: these tests mount with ad hoc keys, which the inferred row type would reject.
+const BlTable = BlTableOf<Record<string, unknown>>
 
 const columns = [
   { key: 'name', label: 'Device', sortable: true },
@@ -348,7 +351,7 @@ describe('BlTable totals', () => {
       label: 'Signal',
       numeric: true,
       total: 'avg' as const,
-      format: (v: unknown) => `${v} dBm`
+      formatTotal: (v: number) => `${v} dBm`
     },
     { key: 'ip', label: 'Address', total: 'count' as const }
   ]
@@ -384,6 +387,20 @@ describe('BlTable totals', () => {
     const last = partial.find('tfoot tr').findAll('td').at(-1)!
     expect(last.attributes('data-empty')).toBe('')
   })
+  it('renders manual totals as given, without formatTotal', () => {
+    const w = mount(BlTable, {
+      props: {
+        caption: 'C',
+        columns: totalled,
+        rows,
+        rowKey: 'mac',
+        manual: true,
+        totals: { rssi: -50 }
+      }
+    })
+    expect(w.find('tfoot').findAll('td')[0]!.text()).toContain('-50')
+    expect(w.find('tfoot').text()).not.toContain('dBm')
+  })
   it('uses totals in manual mode and the footer slot override', () => {
     const manual = mount(BlTable, {
       props: {
@@ -401,5 +418,38 @@ describe('BlTable totals', () => {
       slots: { footer: () => h('td', { colspan: 3 }, 'custom') }
     })
     expect(slotted.find('tfoot td').text()).toBe('custom')
+  })
+})
+
+describe('BlTable column kinds', () => {
+  it('renders a derived column from value(row) and hands its slot that value', () => {
+    const derived = [
+      { key: 'name', label: 'Device' },
+      { key: 'kib', label: 'KiB', value: (r: Record<string, unknown>) => Number(r['rssi']) * -2 }
+    ]
+    const w = mount(BlTable, { props: { caption: 'C', columns: derived, rows, rowKey: 'mac' } })
+    expect(w.findAll('tbody td')[0]!.text()).toContain('120')
+    const slotted = mount(BlTable, {
+      props: { caption: 'C', columns: derived, rows, rowKey: 'mac' },
+      slots: { 'cell-kib': (p: { value: unknown }) => `v=${String(p.value)}` }
+    })
+    expect(slotted.findAll('tbody td')[0]!.text()).toContain('v=120')
+  })
+  it('renders a slot-only column through its slot, with no value', () => {
+    const cols = [
+      { key: 'name', label: 'Device' },
+      { key: 'actions', label: 'Actions', slot: true as const }
+    ]
+    const w = mount(BlTable, {
+      props: { caption: 'C', columns: cols, rows, rowKey: 'mac' },
+      slots: {
+        'cell-actions': (p: { row: Record<string, unknown>; value: unknown }) =>
+          `${String(p.row['mac'])}:${String(p.value)}`
+      }
+    })
+    expect(w.findAll('tbody td').map((td) => td.text())).toEqual([
+      'Actionsa:undefined',
+      'Actionsb:undefined'
+    ])
   })
 })
