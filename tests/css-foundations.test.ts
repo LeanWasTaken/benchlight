@@ -27,7 +27,9 @@ describe('foundation CSS', () => {
   })
 
   it('switches motion off for reduced-motion users', () => {
-    const body = ruleBody(read('css/base.css'), '*', ['@media (prefers-reduced-motion: reduce)'])
+    const body = ruleBody(read('css/base.css'), ":where([class^='bl-'], [class*=' bl-'])", [
+      '@media (prefers-reduced-motion: reduce)'
+    ])
     expect(body['animation-duration']).toBe('0.01ms !important')
     expect(body['animation-iteration-count']).toBe('1 !important')
     expect(body['transition-duration']).toBe('0.01ms !important')
@@ -77,7 +79,18 @@ describe('foundation CSS', () => {
     expect(ring['outline-offset']).toBe('2px')
   })
 
-  it('draws no ring on programmatic focus targets', () => {
-    expect(ruleBody(read('css/base.css'), "[tabindex='-1']:focus-visible")['outline']).toBe('none')
+  it('does not restyle host elements on focus', () => {
+    const css = read('css/base.css')
+    expect(ruleBody(css, ':focus-visible:focus-visible')['border-radius']).toBeUndefined()
+    expect(css).not.toContain("[tabindex='-1']")
+  })
+
+  it('keeps the reduced-motion reset off the host app', () => {
+    const css = read('css/base.css')
+    const reduced = css.slice(css.indexOf('prefers-reduced-motion'))
+    expect(reduced).not.toMatch(/^\s*\*/m)
+    for (const pseudo of ['::before', '::after']) {
+      expect(reduced).toContain(`:where([class^='bl-'], [class*=' bl-'])${pseudo}`)
+    }
   })
 })

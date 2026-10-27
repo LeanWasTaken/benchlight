@@ -18,6 +18,12 @@
     scrollbar-width: thin;
     scrollbar-color: var(--bl-control-border) transparent;
   }
+  /* .bl-table clips with overflow, so an outside ring (base.css: 2px solid, 2px offset) is cut off:
+     draw it inside the box instead, at the same 2px width. */
+  .bl-table__scroller:focus-visible,
+  .bl-table :is(.bl-table__sort, .bl-table__action):focus-visible {
+    outline-offset: -2px;
+  }
   .bl-table__table {
     inline-size: 100%;
     border-collapse: collapse;

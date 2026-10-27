@@ -59,12 +59,8 @@
   :focus-visible:focus-visible {
     outline: 2px solid var(--bl-trace);
     outline-offset: 2px;
-    border-radius: 3px;
   }
   :focus:not(:focus-visible) {
-    outline: none;
-  }
-  [tabindex='-1']:focus-visible {
     outline: none;
   }
   /* The appearance switch swaps themes inside a View Transition (see useAppearance): one
@@ -73,10 +69,12 @@
   ::view-transition-new(root) {
     animation-duration: var(--bl-duration-base);
   }
+  /* Scoped to Benchlight's own elements: this is `!important` in an early layer, so on the host's
+     elements it would beat even the host's own `!important` animations. */
   @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
+    :where([class^='bl-'], [class*=' bl-']),
+    :where([class^='bl-'], [class*=' bl-'])::before,
+    :where([class^='bl-'], [class*=' bl-'])::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;

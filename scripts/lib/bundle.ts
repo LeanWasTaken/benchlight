@@ -16,7 +16,8 @@ export function minifyCss(code: string, filename: string): string {
     minify: true,
     targets: TARGETS,
     // light-dark() is never used, so its --lightningcss-* fallback helpers would be dead weight.
-    exclude: Features.VendorPrefixes | Features.LightDark
+    // :dir() stays as written: lowering it to a :lang() list keys on language, not direction.
+    exclude: Features.VendorPrefixes | Features.LightDark | Features.DirSelector
   })
   return Buffer.from(result.code).toString('utf8')
 }

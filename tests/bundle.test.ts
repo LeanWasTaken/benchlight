@@ -64,6 +64,12 @@ describe('buildDist', () => {
     }
   })
 
+  it('keeps :dir() instead of lowering it to a :lang() list', () => {
+    expect(dist.bundle).not.toContain(':lang(')
+    for (const css of Object.values(dist.modules)) expect(css).not.toContain(':lang(')
+    expect(dist.bundle).toContain(':dir(rtl)')
+  })
+
   it('emits one file per module', () => {
     expect(Object.keys(dist.modules)).toEqual(Object.keys(MODULES))
   })

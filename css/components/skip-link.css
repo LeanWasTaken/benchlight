@@ -24,4 +24,9 @@
     font-weight: 500;
     text-decoration: none;
   }
+  /* The skip target takes focus from a script or a click on the link, not to be operated: no ring
+     on the landmark itself (base.css no longer hides every tabindex="-1" ring). */
+  :where(main, [role='main'], #main-content)[tabindex='-1']:focus-visible {
+    outline: none;
+  }
 }

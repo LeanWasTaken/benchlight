@@ -1060,7 +1060,10 @@ describe('theme transitions', () => {
 
   it('crossfades a theme change as one View Transition, not per-element transitions', () => {
     const base = file('css/base.css')
-    expect(base).not.toContain(":where([class^='bl-']")
+    // only the reduced-motion reset may select every bl- element; no per-element theme transitions
+    expect(base.slice(0, base.indexOf('prefers-reduced-motion'))).not.toContain(
+      ":where([class^='bl-']"
+    )
     const rules = parseRules(base)
     const fade = rules.find((r) => r.selectors.includes('::view-transition-old(root)'))
     expect(fade!.selectors).toContain('::view-transition-new(root)')
@@ -1149,6 +1152,24 @@ describe('eased state changes', () => {
       r.selectors.includes('.bl-table[data-measuring] .bl-table__sort-icon')
     )
     expect(exempt!.declarations['transition-property']).toBe('transform, opacity !important')
+  })
+
+  it('draws no ring on the skip link target landmark', () => {
+    const rule = inLayer(
+      read('skip-link'),
+      ":where(main, [role='main'], #main-content)[tabindex='-1']:focus-visible"
+    )
+    expect(rule['outline']).toBe('none')
+  })
+
+  it('draws the scroller, sort and action focus rings inside the clipping .bl-table', () => {
+    const css = read('table')
+    const ring = inLayer(
+      css,
+      '.bl-table__scroller:focus-visible, .bl-table :is(.bl-table__sort, .bl-table__action):focus-visible'
+    )
+    expect(ring['outline-offset']).toBe('-2px')
+    expect(inLayer(css, '.bl-table')['overflow-x']).toBe('auto')
   })
 
   it('eases pagination buttons', () => {
