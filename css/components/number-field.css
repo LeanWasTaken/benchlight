@@ -1,0 +1,8 @@
+@layer components {
+  /* BlNumberField is a .bl-input (field.css) of type number. Its native spinner is not restyled:
+     `textfield` drops it on Gecko and gives WebKit the plain text-field look; Chromium keeps its
+     own spinner, which it only partly lets authors style. */
+  .bl-input[type='number'] {
+    appearance: textfield;
+  }
+}

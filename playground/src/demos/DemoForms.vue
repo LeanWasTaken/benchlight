@@ -19,6 +19,20 @@
     </BlField>
   </div>
 
+  <BlSectionHead :level="3" eyebrow="Number field" heading="Typed numbers" />
+  <div class="pg-stack" data-demo="number-field">
+    <BlField label="Channel" hint="1 to 13; clamped when you leave the field.">
+      <BlNumberField v-model="channel" :min="1" :max="13" />
+    </BlField>
+    <BlField label="Offset" hint="Zero or more, step 0.5.">
+      <BlNumberField v-model="offset" :min="0" :step="0.5" />
+    </BlField>
+    <span data-demo="number-field-state" aria-hidden="true" class="bl-sr-only">{{
+      offset === null ? 'null' : offset
+    }}</span>
+    <BlField label="Retries (locked)"><BlNumberField :model-value="3" disabled /></BlField>
+  </div>
+
   <BlSectionHead :level="3" eyebrow="Toggle" heading="Switches" />
   <div data-demo="toggle">
     <BlToggle v-model="wifi" label="Wi-Fi" hint="Joins known networks automatically" />
@@ -111,6 +125,7 @@
     BlCheckbox,
     BlField,
     BlInput,
+    BlNumberField,
     BlRadio,
     BlRadioGroup,
     BlRange,
@@ -135,6 +150,8 @@
   ]
   const volume = ref(-12)
   const brightness = ref(40)
+  const channel = ref<number | null>(6)
+  const offset = ref<number | null>(2)
 
   const notes = ref('First line.\nSecond line.')
   const allChannels = ref(false)

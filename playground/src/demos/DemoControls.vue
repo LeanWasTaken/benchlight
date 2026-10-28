@@ -77,16 +77,75 @@
       <template #icon><span aria-hidden="true">+</span></template>
     </BlLinkArrow>
   </div>
+  <BlSectionHead :level="3" eyebrow="Popover" heading="Anchored panels" />
+  <div class="pg-row" data-demo="popover">
+    <BlPopover v-model:open="detailsOpen">
+      <template #trigger="{ bind }">
+        <BlButton variant="secondary" v-bind="bind">Details</BlButton>
+      </template>
+      Firmware 2.4.1, built from a clean tree.
+    </BlPopover>
+    <BlPopover align="start" aria-label="Filters">
+      <template #trigger="{ bind }">
+        <BlButton variant="secondary" v-bind="bind">Filters</BlButton>
+      </template>
+      <BlTooltip text="Shows every item again.">
+        <template #trigger="{ bind }">
+          <BlButton variant="ghost" v-bind="bind">Clear filters</BlButton>
+        </template>
+      </BlTooltip>
+    </BlPopover>
+  </div>
+  <BlSectionHead :level="3" eyebrow="Tooltip" heading="Described controls" />
+  <div class="pg-row" data-demo="tooltip">
+    <BlTooltip text="Copies the build hash to the clipboard.">
+      <template #trigger="{ bind }">
+        <BlButton variant="secondary" v-bind="bind">Copy hash</BlButton>
+      </template>
+    </BlTooltip>
+    <BlTooltip text="Runs on the next boot." side="bottom" align="start">
+      <template #trigger="{ bind }">
+        <BlButton variant="secondary" v-bind="bind">Schedule</BlButton>
+      </template>
+    </BlTooltip>
+  </div>
+  <BlSectionHead :level="3" eyebrow="Tabs" heading="Switching panels" />
+  <div data-demo="tabs">
+    <BlTabs v-model="tab" :items="tabItems" aria-label="Device">
+      <template #panel-status>
+        <p>Uptime 14 d, firmware 2.4.1, last sync 09:12.</p>
+      </template>
+      <template #[bootLogSlot]>
+        <BlButton variant="secondary">Download log</BlButton>
+      </template>
+      <template #panel-radio>
+        <p>The radio is off.</p>
+      </template>
+      <template #panel-settings>
+        <p>Wi-Fi channel 36, 80 MHz.</p>
+      </template>
+    </BlTabs>
+  </div>
 </template>
 
 <script setup lang="ts">
   import { ref } from 'vue'
-  import type { SegmentedOption } from '../../../vue'
-  import { BlButton, BlLinkArrow, BlSectionHead, BlSegmented, BlSegmentedNav } from '../../../vue'
+  import type { SegmentedOption, TabItem } from '../../../vue'
+  import {
+    BlButton,
+    BlLinkArrow,
+    BlPopover,
+    BlSectionHead,
+    BlSegmented,
+    BlSegmentedNav,
+    BlTabs,
+    BlTooltip
+  } from '../../../vue'
 
   const muted = ref(false)
   const bold = ref(false)
   const ghostOn = ref(false)
+  const detailsOpen = ref(false)
   const filter = ref<string | null>(null)
   const sizeChoice = ref('M')
   const sizes = ['S', 'M', 'L'].map((size) => ({ value: size, label: size }))
@@ -95,6 +154,15 @@
     { value: 'software', label: 'Software' },
     { value: 'hardware', label: 'Hardware' },
     { value: 'experiment', label: 'Experiments' }
+  ]
+  const tab = ref('status')
+  // A value with a space: its slot name needs the dynamic form.
+  const bootLogSlot = 'panel-boot log'
+  const tabItems: TabItem<string>[] = [
+    { value: 'status', label: 'Status' },
+    { value: 'boot log', label: 'Boot log' },
+    { value: 'radio', label: 'Radio', disabled: true },
+    { value: 'settings', label: 'Settings' }
   ]
   const locales = [
     { value: 'en', label: 'en', href: '#top', current: true },

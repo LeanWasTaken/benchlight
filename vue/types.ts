@@ -201,3 +201,35 @@ export interface ToasterLabels {
   dismiss: string
   actionHint: (label: string) => string
 }
+
+/** Which edge of the anchor a panel sits on; `start`/`end` follow the writing mode. */
+export type PopoverSide = 'top' | 'bottom' | 'start' | 'end'
+
+/** How a panel lines up along the anchor's edge. */
+export type PopoverAlign = 'start' | 'center' | 'end'
+
+/** What BlPopover's `trigger` slot hands over as `bind`, for `v-bind` on the consumer's button. */
+export interface PopoverTriggerBind {
+  id: string
+  type: 'button'
+  'aria-expanded': 'true' | 'false'
+  'aria-controls': string
+  popovertarget: string
+  style: { anchorName: string }
+}
+
+/** What BlTooltip's `trigger` slot hands over as `bind`, for `v-bind` on the described control. */
+export interface TooltipTriggerBind {
+  'aria-describedby': string
+  style: { anchorName: string }
+  onPointerenter: (e: PointerEvent) => void
+  onPointerleave: (e: PointerEvent) => void
+  onFocus: (e: FocusEvent) => void
+  onBlur: (e: FocusEvent) => void
+}
+
+export interface TabItem<T extends string | number = string | number> {
+  value: T
+  label: string
+  disabled?: boolean
+}

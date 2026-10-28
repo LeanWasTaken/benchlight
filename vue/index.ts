@@ -25,6 +25,7 @@ export { default as BlReadout } from './components/BlReadout.vue'
 export { default as BlMeter } from './components/BlMeter.vue'
 export { default as BlProgress } from './components/BlProgress.vue'
 export { default as BlMsg } from './components/BlMsg.vue'
+export { default as BlNumberField } from './components/BlNumberField.vue'
 export { default as BlLog } from './components/BlLog.vue'
 export { default as BlSectionHead } from './components/BlSectionHead.vue'
 export { default as BlMeta } from './components/BlMeta.vue'
@@ -42,6 +43,9 @@ export { default as BlMedia } from './components/BlMedia.vue'
 export { default as BlDisclosure } from './components/BlDisclosure.vue'
 export { default as BlDialog } from './components/BlDialog.vue'
 export { default as BlToaster } from './components/BlToaster.vue'
+export { default as BlPopover } from './components/BlPopover.vue'
+export { default as BlTooltip } from './components/BlTooltip.vue'
+export { default as BlTabs } from './components/BlTabs.vue'
 
 export {
   APPEARANCE_ATTRIBUTE,

@@ -18,6 +18,7 @@ const COMPONENTS = [
   'BlMeta',
   'BlMeter',
   'BlMsg',
+  'BlNumberField',
   'BlPagination',
   'BlPrevNext',
   'BlProgress',
@@ -44,6 +45,9 @@ const COMPONENTS = [
   'BlDisclosure',
   'BlDialog',
   'BlToaster',
+  'BlPopover',
+  'BlTooltip',
+  'BlTabs',
   'BlTelemetry',
   'BlTelemetryCell'
 ]

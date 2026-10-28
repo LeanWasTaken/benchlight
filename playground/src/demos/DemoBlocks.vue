@@ -28,7 +28,11 @@
       @close="lastClose = $event.reason"
     >
       <BlField label="Name"><BlInput v-model="itemName" /></BlField>
-      <BlButton variant="ghost" @click="toast('Copied')">Copy name</BlButton>
+      <BlTooltip text="Copies the name to the clipboard.">
+        <template #trigger="{ bind }">
+          <BlButton variant="ghost" v-bind="bind" @click="toast('Copied')">Copy name</BlButton>
+        </template>
+      </BlTooltip>
       <template #footer>
         <BlButton variant="secondary" @click="dialogOpen = false">Cancel</BlButton>
         <BlButton @click="dialogOpen = false">Save</BlButton>
@@ -81,7 +85,15 @@
 
 <script setup lang="ts">
   import { ref } from 'vue'
-  import { BlButton, BlDialog, BlDisclosure, BlField, BlInput, useToast } from '../../../vue'
+  import {
+    BlButton,
+    BlDialog,
+    BlDisclosure,
+    BlField,
+    BlInput,
+    BlTooltip,
+    useToast
+  } from '../../../vue'
 
   const faqA = ref(true)
   const faqB = ref(false)

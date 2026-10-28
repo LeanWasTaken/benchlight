@@ -31,6 +31,7 @@
 - `dist/appearance.min.js`
 - `dist/benchlight.min.css`
 - `dist/fonts.min.css`
+- `dist/modules/anchored.min.css`
 - `dist/modules/appearance.min.css`
 - `dist/modules/base.min.css`
 - `dist/modules/btn.min.css`
@@ -52,7 +53,9 @@
 - `dist/modules/meter.min.css`
 - `dist/modules/motion.min.css`
 - `dist/modules/msg.min.css`
+- `dist/modules/number-field.min.css`
 - `dist/modules/pagination.min.css`
+- `dist/modules/popover.min.css`
 - `dist/modules/prev-next.min.css`
 - `dist/modules/prose.min.css`
 - `dist/modules/radio.min.css`
@@ -64,11 +67,13 @@
 - `dist/modules/spec-panel.min.css`
 - `dist/modules/tab-bar.min.css`
 - `dist/modules/table.min.css`
+- `dist/modules/tabs.min.css`
 - `dist/modules/telemetry.min.css`
 - `dist/modules/tints.min.css`
 - `dist/modules/toast.min.css`
 - `dist/modules/toggle.min.css`
 - `dist/modules/tokens.min.css`
+- `dist/modules/tooltip.min.css`
 - `dist/modules/type.min.css`
 
 ## benchlight/vue exports
@@ -93,7 +98,9 @@
 - `BlMeta`
 - `BlMeter`
 - `BlMsg`
+- `BlNumberField`
 - `BlPagination`
+- `BlPopover`
 - `BlPrevNext`
 - `BlProgress`
 - `BlProse`
@@ -113,11 +120,13 @@
 - `BlTabBar`
 - `BlTabBarItem`
 - `BlTable`
+- `BlTabs`
 - `BlTelemetry`
 - `BlTelemetryCell`
 - `BlTextarea`
 - `BlToaster`
 - `BlToggle`
+- `BlTooltip`
 - `FIELD_CONTEXT`
 - `ansiToSegments`
 - `riseDelay`
@@ -339,6 +348,33 @@ interface PaginationLabels {
 }
 ```
 
+### `PopoverAlign`
+
+```ts
+type PopoverAlign = 'start' | 'center' | 'end';
+```
+
+### `PopoverSide`
+
+```ts
+type PopoverSide = 'top' | 'bottom' | 'start' | 'end';
+```
+
+### `PopoverTriggerBind`
+
+```ts
+interface PopoverTriggerBind {
+    id: string;
+    type: 'button';
+    'aria-expanded': 'true' | 'false';
+    'aria-controls': string;
+    popovertarget: string;
+    style: {
+        anchorName: string;
+    };
+}
+```
+
 ### `PrevNextItem`
 
 ```ts
@@ -431,6 +467,16 @@ interface SpecRowData extends LinkProps {
 type StatusTone = 'neutral' | 'success' | 'danger';
 ```
 
+### `TabItem`
+
+```ts
+interface TabItem<T extends string | number = string | number> {
+    value: T;
+    label: string;
+    disabled?: boolean;
+}
+```
+
 ### `TableColumn`
 
 ```ts
@@ -498,6 +544,21 @@ type ToastTone = StatusTone;
 interface ToasterLabels {
     dismiss: string;
     actionHint: (label: string) => string;
+}
+```
+
+### `TooltipTriggerBind`
+
+```ts
+interface TooltipTriggerBind {
+    'aria-describedby': string;
+    style: {
+        anchorName: string;
+    };
+    onPointerenter: (e: PointerEvent) => void;
+    onPointerleave: (e: PointerEvent) => void;
+    onFocus: (e: FocusEvent) => void;
+    onBlur: (e: FocusEvent) => void;
 }
 ```
 
@@ -751,6 +812,20 @@ Slots: `default`
 Events: none
 Exposed: none
 
+### BlNumberField
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `disabled` | `boolean \| undefined` | no |  |
+| `max` | `number \| undefined` | no |  |
+| `min` | `number \| undefined` | no |  |
+| `modelValue` | `number \| null \| undefined` | no | `null` |
+| `step` | `number \| undefined` | no |  |
+
+Slots: none
+Events: `update:modelValue`
+Exposed: none
+
 ### BlPagination
 
 | prop | type | required | default |
@@ -768,6 +843,20 @@ Prop notes:
 
 Slots: none
 Events: `update:page`
+Exposed: none
+
+### BlPopover
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `align` | `PopoverAlign \| undefined` | no |  |
+| `ariaLabel` | `string \| undefined` | no |  |
+| `open` | `boolean \| undefined` | no | `false` |
+| `side` | `PopoverSide \| undefined` | no |  |
+
+Slots: `default`, `trigger`
+Slot props: `trigger` `{ bind: { id: string; type: "button"; 'aria-expanded': "true" | "false"; 'aria-controls': string; popovertarget: string; style: { anchorName: string; }; }; }`
+Events: `update:open`
 Exposed: none
 
 ### BlPrevNext
@@ -1037,6 +1126,21 @@ Slot props: `footer` `{ rows: Row[]; }`, `cell-<key>` `{ row: Row; value: by col
 Events: `update:page`, `update:sort`
 Exposed: none
 
+### BlTabs
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `activation` | `"auto" \| "manual" \| undefined` | no | `"auto"` |
+| `ariaLabel` | `string \| undefined` | no |  |
+| `items` | `TabItem<T>[]` | yes |  |
+| `modelValue` | `T \| undefined` | no |  |
+
+Slots: none
+Dynamic slots: `panel-<value>`
+Slot props: `panel-<value>` `{}`
+Events: `update:modelValue`
+Exposed: none
+
 ### BlTelemetry
 
 | prop | type | required | default |
@@ -1095,6 +1199,20 @@ Exposed: none
 
 Slots: none
 Events: `update:modelValue`
+Exposed: none
+
+### BlTooltip
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `align` | `PopoverAlign \| undefined` | no |  |
+| `delay` | `number \| undefined` | no |  |
+| `side` | `PopoverSide \| undefined` | no |  |
+| `text` | `string` | yes |  |
+
+Slots: `trigger`
+Slot props: `trigger` `{ bind: { 'aria-describedby': string; style: { anchorName: string; }; onPointerenter: (e: PointerEvent) => void; onPointerleave: (e: PointerEvent) => void; onFocus: (e: FocusEvent) => void; onBlur: (e: FocusEvent) => void; }; }`
+Events: none
 Exposed: none
 
 ## CSS classes
@@ -1218,6 +1336,7 @@ Exposed: none
 - `bl-pagination__list`
 - `bl-pagination__page`
 - `bl-pagination__range`
+- `bl-popover`
 - `bl-prev-next`
 - `bl-prev-next__icon`
 - `bl-prev-next__label`
@@ -1285,6 +1404,10 @@ Exposed: none
 - `bl-table__sort-strip-label`
 - `bl-table__table`
 - `bl-table__total`
+- `bl-tabs`
+- `bl-tabs__list`
+- `bl-tabs__panel`
+- `bl-tabs__tab`
 - `bl-telemetry`
 - `bl-telemetry__cell`
 - `bl-telemetry__cells`
@@ -1317,6 +1440,7 @@ Exposed: none
 - `bl-toggle__label`
 - `bl-toggle__thumb`
 - `bl-toggle__track`
+- `bl-tooltip`
 
 ## Hook-only classes
 - `bl-field--invalid`
@@ -1327,6 +1451,7 @@ Exposed: none
 
 ## Script-set data attributes
 - `data-action`
+- `data-align`
 - `data-bl-appearance`
 - `data-bl-lift`
 - `data-dir`
@@ -1337,6 +1462,7 @@ Exposed: none
 - `data-measuring`
 - `data-overflowing`
 - `data-ready`
+- `data-side`
 - `data-stacked`
 
 ## Tokens
@@ -1395,11 +1521,13 @@ Exposed: none
 - `--bl-tracking-silkscreen`
 
 ## CSS hooks (custom properties a consumer may set)
+- `--bl-anchored-gap`
 - `--bl-chevron-mask`
 - `--bl-dialog-width`
 - `--bl-log-height`
 - `--bl-media-size`
 - `--bl-meter-value`
+- `--bl-popover-width`
 - `--bl-range-value-width`
 - `--bl-rise-delay`
 - `--bl-scroll-offset-bottom`
@@ -1407,6 +1535,7 @@ Exposed: none
 - `--bl-table-col-min`
 - `--bl-table-min-col`
 - `--bl-telemetry-columns`
+- `--bl-tooltip-width`
 
 ## Tailwind theme variables
 - `--color-canvas`

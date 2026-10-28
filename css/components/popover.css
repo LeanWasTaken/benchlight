@@ -1,0 +1,59 @@
+@layer components {
+  /* The panel's look. Placement comes from anchored.css ([popover][data-side][data-align]); the
+     UA popover rules (border, padding, colours) are replaced here. */
+  .bl-popover {
+    box-sizing: border-box;
+    max-inline-size: min(var(--bl-popover-width, 20rem), 100vw - 16px);
+    padding: 12px 16px;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--bl-color-control-border) transparent;
+    color: var(--bl-color-ink-1);
+    background: var(--bl-color-surface);
+    border: 1px solid var(--bl-color-separator);
+    border-radius: var(--bl-radius-card);
+    box-shadow: var(--bl-shadow-float);
+    overflow-wrap: anywhere;
+    opacity: 0;
+    scale: 0.98;
+    transition:
+      opacity var(--bl-duration-base) ease,
+      scale var(--bl-duration-base) var(--bl-ease-out);
+  }
+  .bl-popover:popover-open {
+    opacity: 1;
+    scale: none;
+  }
+  @starting-style {
+    .bl-popover:popover-open {
+      opacity: 0;
+      scale: 0.98;
+    }
+  }
+  /* Exit animations need `overlay` (Chromium only); elsewhere the panel closes instantly. */
+  @supports (overlay: auto) {
+    .bl-popover {
+      transition:
+        opacity var(--bl-duration-base) ease,
+        scale var(--bl-duration-base) var(--bl-ease-out),
+        display var(--bl-duration-base) allow-discrete,
+        overlay var(--bl-duration-base) allow-discrete;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bl-popover {
+      scale: none;
+    }
+    @starting-style {
+      .bl-popover:popover-open {
+        scale: none;
+      }
+    }
+  }
+  @media (forced-colors: active) {
+    .bl-popover {
+      border-color: CanvasText;
+    }
+  }
+}

@@ -731,6 +731,108 @@ const id = toast({ message: 'Item deleted', action: { label: 'Undo', onClick: re
   A toaster outside an open modal dialog is inert, so place it inside the dialog while one is
   open.
 
+## BlPopover
+
+A disclosure panel on the native popover API, anchored to its trigger. Full prop list is in
+[API.md](API.md). `popover` needs the `anchored` module (the bundle CLI warns otherwise).
+
+```vue
+<BlPopover v-model:open="open" side="bottom" align="start" aria-label="Filters">
+  <template #trigger="{ bind }"><BlButton v-bind="bind">Filters</BlButton></template>
+  <p>Anything interactive goes here.</p>
+</BlPopover>
+```
+
+- Props: `side` (`PopoverSide`), `align` (`PopoverAlign`), `ariaLabel`; `v-model:open`. The
+  `trigger` slot's `bind` carries `id`, `type="button"` (so a trigger inside a form does not submit
+  it), `aria-expanded`, `aria-controls`, `popovertarget` and the anchor name; spread it on one
+  button.
+- It is the disclosure pattern: the panel has no role unless `ariaLabel` is set, then
+  `role="group"`. Esc and outside click close it (native light dismiss).
+- A controlled-only `open` that ignores `update:open` still sees Esc and outside click close the
+  native popover.
+- One button can trigger a popover and carry a tooltip. `mergeProps` keeps only one
+  `style.anchorName`, so one panel would lose its anchor; `anchor-name` takes a comma-separated
+  list, so set both names after the merge:
+
+  ```vue
+  <BlPopover>
+    <template #trigger="{ bind: pop }">
+      <BlTooltip text="Narrow the list">
+        <template #trigger="{ bind: tip }">
+          <BlButton
+            v-bind="mergeProps(pop, tip)"
+            :style="{ anchorName: `${pop.style.anchorName}, ${tip.style.anchorName}` }"
+          >
+            Filters
+          </BlButton>
+        </template>
+      </BlTooltip>
+    </template>
+    <p>Anything interactive goes here.</p>
+  </BlPopover>
+  ```
+
+  `mergeProps` comes from `vue`.
+
+- Placement needs CSS anchor positioning with `position-area` (Chromium 129, Safari 26, Firefox
+  147); without it the panel stays centred in the viewport. Exit animations run in Chromium only;
+  Safari and Firefox close instantly.
+
+## BlTooltip
+
+A plain-text hint on a native popover, shown on hover and focus. Full prop list is in
+[API.md](API.md). Needs the `anchored` module.
+
+```vue
+<BlTooltip text="Copy link" side="top">
+  <template #trigger="{ bind }"><BlButton v-bind="bind">Copy</BlButton></template>
+</BlTooltip>
+```
+
+- Props: `text`, `side`, `align`, `delay` (ms). The trigger's `bind` sets `aria-describedby`.
+- Hover and focus only; hover is ignored for touch. Esc dismisses; inside a dialog or a popover
+  the first Esc hides only the tooltip and the next one closes the container. Text only, no
+  interactive content (use BlPopover for that).
+- On a button that also triggers a BlPopover, set both anchor names (see BlPopover).
+- Same browser requirements as BlPopover.
+
+## BlTabs
+
+A tablist with panels, in the WAI-ARIA tabs pattern. Full prop list is in [API.md](API.md).
+
+```vue
+<BlTabs
+  v-model="tab"
+  aria-label="Sections"
+  :items="[
+    { value: 'a', label: 'A' },
+    { value: 'b', label: 'B' }
+  ]"
+>
+  <template #panel-a>First</template>
+  <template #panel-b>Second</template>
+</BlTabs>
+```
+
+- Props: `items` (`TabItem[]`: `value`, `label`, optional `disabled`), `ariaLabel`, `activation`
+  (`auto` or `manual`); `v-model` is the selected value. Panel slots are `panel-<value>`.
+- Arrow keys, Home and End move between enabled tabs; Tab moves into the panel.
+
+## BlNumberField
+
+A numeric input with a `number | null` model, inside BlField. Needs the `field` module.
+
+```vue
+<BlField label="Quantity"><BlNumberField v-model="qty" :min="0" :max="10" /></BlField>
+```
+
+- Props: `min`, `max`, `step`, `disabled`; other attributes go to the `<input>`. `null` is empty.
+- The value is clamped to `[min, max]` on commit (blur or Enter), not while typing and not for
+  values set from outside.
+- It does not block the mouse wheel (a focused field blurs on wheel) and does not handle
+  `form.reset()`.
+
 ## CSS hooks
 
 Custom properties a consumer may set. API.md lists them under "CSS hooks".
@@ -756,42 +858,47 @@ Custom properties a consumer may set. API.md lists them under "CSS hooks".
 `dist/modules/<module>.min.css` takes the module name, which differs from the component name in
 places. `tokens` always comes first; `base`, `type`, `motion`, `layout` and `tints` are shared.
 
-| Component                                       | Module                     |
-| ----------------------------------------------- | -------------------------- |
-| BlSiteBar, BlSiteBarLink                        | `site-bar`                 |
-| BlTabBar, BlTabBarItem                          | `tab-bar`                  |
-| BlColophon                                      | `colophon`                 |
-| BlSkipLink                                      | `skip-link`                |
-| BlAppearanceSwitch                              | `appearance`               |
-| BlSegmented, BlSegmentedNav                     | `segmented`                |
-| BlButton                                        | `btn`                      |
-| BlField, BlInput, BlTextarea, BlSelect, BlRange | `field`                    |
-| `.bl-fieldset` (CSS only)                       | `fieldset`                 |
-| BlLinkArrow                                     | `link-arrow`               |
-| BlSpecPanel, BlSpecRow                          | `spec-panel`               |
-| BlTelemetry, BlTelemetryCell                    | `telemetry`                |
-| BlLed                                           | `led`                      |
-| BlEqBars                                        | `eq`                       |
-| BlMarquee                                       | `marquee`                  |
-| BlReadout                                       | `readout`                  |
-| BlMeter                                         | `meter`                    |
-| BlProgress                                      | `meter`                    |
-| BlMsg                                           | `msg`                      |
-| BlLog                                           | `log`                      |
-| BlSectionHead                                   | `section-head`             |
-| BlMeta                                          | `meta`                     |
-| BlIndex, BlIndexRow                             | `index-row`                |
-| BlPrevNext                                      | `prev-next`                |
-| BlProse                                         | `prose`                    |
-| BlTable                                         | `table`                    |
-| BlPagination                                    | `pagination`               |
-| BlToggle                                        | `toggle`                   |
-| BlCheckbox                                      | `checkbox`                 |
-| BlRadioGroup, BlRadio                           | `radio` (needs `fieldset`) |
-| BlMedia                                         | `media`                    |
-| BlDisclosure                                    | `disclosure`               |
-| BlDialog                                        | `dialog`                   |
-| BlToaster                                       | `toast`                    |
+| Component                                       | Module                         |
+| ----------------------------------------------- | ------------------------------ |
+| BlSiteBar, BlSiteBarLink                        | `site-bar`                     |
+| BlTabBar, BlTabBarItem                          | `tab-bar`                      |
+| BlColophon                                      | `colophon`                     |
+| BlSkipLink                                      | `skip-link`                    |
+| BlAppearanceSwitch                              | `appearance`                   |
+| BlSegmented, BlSegmentedNav                     | `segmented`                    |
+| BlButton                                        | `btn`                          |
+| BlField, BlInput, BlTextarea, BlSelect, BlRange | `field`                        |
+| `.bl-fieldset` (CSS only)                       | `fieldset`                     |
+| BlLinkArrow                                     | `link-arrow`                   |
+| BlSpecPanel, BlSpecRow                          | `spec-panel`                   |
+| BlTelemetry, BlTelemetryCell                    | `telemetry`                    |
+| BlLed                                           | `led`                          |
+| BlEqBars                                        | `eq`                           |
+| BlMarquee                                       | `marquee`                      |
+| BlReadout                                       | `readout`                      |
+| BlMeter                                         | `meter`                        |
+| BlProgress                                      | `meter`                        |
+| BlMsg                                           | `msg`                          |
+| BlLog                                           | `log`                          |
+| BlSectionHead                                   | `section-head`                 |
+| BlMeta                                          | `meta`                         |
+| BlIndex, BlIndexRow                             | `index-row`                    |
+| BlPrevNext                                      | `prev-next`                    |
+| BlProse                                         | `prose`                        |
+| BlTable                                         | `table`                        |
+| BlPagination                                    | `pagination`                   |
+| BlToggle                                        | `toggle`                       |
+| BlCheckbox                                      | `checkbox`                     |
+| BlRadioGroup, BlRadio                           | `radio` (needs `fieldset`)     |
+| BlMedia                                         | `media`                        |
+| BlDisclosure                                    | `disclosure`                   |
+| BlDialog                                        | `dialog`                       |
+| BlToaster                                       | `toast`                        |
+| (shared placement for popovers)                 | `anchored`                     |
+| BlPopover                                       | `popover` (needs `anchored`)   |
+| BlTooltip                                       | `tooltip` (needs `anchored`)   |
+| BlTabs                                          | `tabs`                         |
+| BlNumberField                                   | `number-field` (needs `field`) |
 
 ## Supported entry points
 

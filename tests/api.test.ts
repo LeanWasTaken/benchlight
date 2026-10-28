@@ -70,6 +70,11 @@ describe('API.md tokens', () => {
 })
 
 describe('API.md dynamic slots and slot props', () => {
+  it('lists the BlTabs panel slot pattern', () => {
+    const tabs = /### BlTabs\n[\s\S]*?(?=\n### |\n## )/.exec(api())?.[0] ?? ''
+    expect(tabs).toContain('Dynamic slots: `panel-<value>`')
+  })
+
   it('lists the BlTable dynamic slot patterns and slot props', () => {
     const table = /### BlTable\n[\s\S]*?(?=\n### |\n## )/.exec(api())?.[0] ?? ''
     expect(table).toContain('Dynamic slots: `cell-<key>`, `head-<key>`')

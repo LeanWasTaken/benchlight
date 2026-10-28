@@ -11,6 +11,21 @@
 - `vue/` and `nuxt/` are no longer in the package. `dist/vue` and `dist/nuxt` are not committed:
   `prepack` builds them, so the npm tarball and the release tree always carry fresh copies. After a
   clone, run `bun run build:js` before the Nuxt tests or the fixtures.
+- v0.10 adds four components and a shared placement vocabulary, all additive (no breaking change):
+  BlPopover (disclosure panel on the native popover, trigger gets `aria-expanded` and
+  `aria-controls`, panel has no role unless `ariaLabel` is set, then `role="group"`), BlTooltip
+  (plain-text hint on hover and focus, Esc dismisses it before an enclosing dialog or popover,
+  hover ignored for touch), BlTabs (WAI-ARIA tabs, panel slots are `panel-<value>`, `TabItem`
+  describes an item) and BlNumberField
+  (model is `number | null`, clamps to `[min, max]` on commit, not while typing or for externally
+  set values; it does not block the mouse wheel, a focused field blurs on wheel, and it does not
+  handle `form.reset()`).
+  Popover and Tooltip share the `side` and `align` props (`PopoverSide`, `PopoverAlign`) and the
+  `anchored` CSS module. A controlled-only `open` that ignores `update:open` still sees Esc and
+  outside click close the native popover.
+- Anchored placement needs CSS anchor positioning with `position-area`: Chromium 129, Safari 26,
+  Firefox 147. Without it the Popover and Tooltip panel stays centred in the viewport and remains
+  usable. Exit animations run in Chromium only; Safari and Firefox close instantly.
 
 ## 0.9.0 - 2026-10-27
 

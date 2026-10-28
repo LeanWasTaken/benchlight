@@ -76,14 +76,15 @@ const DYNAMIC_SLOTS: Record<string, { pattern: string; props: string }[]> = {
         '{ row: Row; value: by column kind, Row[key] (key), value() result (derived), undefined (slot-only), unknown if keys are string; column: C }'
     },
     { pattern: 'head-<key>', props: '{ column: C }' }
-  ]
+  ],
+  BlTabs: [{ pattern: 'panel-<value>', props: '{}' }]
 }
 
 function dynamicSlots(root: string, name: string, file: string) {
   const declared = DYNAMIC_SLOTS[name] ?? []
   const source = readFileSync(file, 'utf8')
   for (const { pattern } of declared) {
-    if (!source.includes(`\`${pattern.replace('<key>', '${')}`)) {
+    if (!source.includes(`\`${pattern.replace(/<\w+>/, '${')}`)) {
       throw new Error(`${name}: dynamic slot ${pattern} is not rendered; update DYNAMIC_SLOTS`)
     }
   }
