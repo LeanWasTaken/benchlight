@@ -4,6 +4,7 @@
     <BlAppearanceSwitch />
     <BlButton variant="secondary">Back</BlButton>
     <BlLed state="on" />
+    <BlMeter label="Load" :value="0.5" />
     <BlTable
       v-model:sort="sort"
       caption="Items"
@@ -18,7 +19,7 @@
 
 <script setup>
   import { ref } from 'vue'
-  import { BlAppearanceSwitch, BlButton, BlLed, BlTable } from 'benchlight/vue'
+  import { BlAppearanceSwitch, BlButton, BlLed, BlMeter, BlTable } from 'benchlight/vue'
 
   const sort = ref(null)
   const columns = [

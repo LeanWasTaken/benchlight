@@ -21,8 +21,6 @@
     "tailwind",
     "js",
     "fonts",
-    "vue",
-    "nuxt",
     "vite",
     "dist",
     "API.md",
@@ -34,8 +32,14 @@
       "types": "./dist/tokens.d.ts",
       "default": "./dist/tokens.js"
     },
-    "./vue": "./vue/index.ts",
-    "./nuxt": "./nuxt/module.ts",
+    "./vue": {
+      "types": "./dist/vue/index.d.ts",
+      "default": "./dist/vue/index.js"
+    },
+    "./nuxt": {
+      "types": "./dist/nuxt/module.d.mts",
+      "default": "./dist/nuxt/module.mjs"
+    },
     "./vite": {
       "types": "./vite/index.d.ts",
       "default": "./vite/index.js"
@@ -74,15 +78,19 @@
     "test:watch": "vitest",
     "typecheck": "vue-tsc --noEmit && tsc --noEmit -p scripts/tsconfig.json",
     "lint": "eslint .",
-    "lint:package": "publint && attw --pack . --profile esm-only --entrypoints ./tokens ./vite ./js/prepaint-script.mjs ./nuxt",
+    "lint:package": "publint && attw --pack . --profile esm-only --entrypoints ./tokens ./vue ./vite ./js/prepaint-script.mjs ./nuxt",
     "lint:workflows": "docker run --rm -v \"$PWD\":/repo --workdir /repo rhysd/actionlint:1.7.12 -color",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "bun run lint && bun run format:check && bun run typecheck && bun run test",
+    "check": "bun run build:js && bun run lint && bun run format:check && bun run typecheck && bun run test",
     "gen": "bun scripts/gen-tokens.ts && bun scripts/gen-prepaint.ts && bun run gen:js",
     "gen:js": "bun build ./tokens/index.ts --outfile dist/tokens.js --format esm --minify && bun build ./js/appearance.js --outfile dist/appearance.min.js --minify",
     "bundle": "bun scripts/bundle.ts",
-    "build": "bun run gen && bun run bundle && bun run gen:api",
+    "build": "bun run gen && bun run bundle && bun run build:js && bun run gen:api",
+    "build:vue": "bun scripts/build-vue.ts",
+    "build:nuxt": "bun scripts/build-nuxt.ts",
+    "build:js": "bun run build:vue && bun run build:nuxt",
+    "prepack": "bun run build:js",
     "gen:api": "bun scripts/gen-api.ts",
     "fixtures": "bun scripts/fixtures.ts",
     "playground": "vite playground",

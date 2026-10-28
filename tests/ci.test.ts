@@ -28,8 +28,8 @@ const jobs = (() => {
 })()
 
 describe('CI hardening', () => {
-  it('parses the three expected jobs', () => {
-    expect(Object.keys(jobs)).toEqual(['check', 'browser', 'git-install'])
+  it('parses the two expected jobs', () => {
+    expect(Object.keys(jobs)).toEqual(['check', 'browser'])
   })
 
   it('grants the token read-only contents at the top level', () => {
@@ -42,7 +42,7 @@ describe('CI hardening', () => {
     expect(workflow).toContain("cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}")
   })
 
-  it.each(['check', 'browser', 'git-install'])('%s has a timeout of at most 15 minutes', (name) => {
+  it.each(['check', 'browser'])('%s has a timeout of at most 15 minutes', (name) => {
     const minutes = /^ {4}timeout-minutes: (\d+)$/m.exec(jobs[name]!)?.[1]
     expect(Number(minutes)).toBeGreaterThan(0)
     expect(Number(minutes)).toBeLessThanOrEqual(15)
@@ -50,7 +50,7 @@ describe('CI hardening', () => {
 
   it('pins every action by full commit SHA with a version comment', () => {
     const uses = workflow.split('\n').filter((line) => /^\s*(- )?uses:/.test(line))
-    expect(uses.length).toBeGreaterThanOrEqual(5)
+    expect(uses.length).toBeGreaterThanOrEqual(4)
     for (const line of uses) {
       expect(line).toMatch(/uses: [\w.-]+\/[\w.-]+@[0-9a-f]{40} # v\d+/)
     }
@@ -60,26 +60,10 @@ describe('CI hardening', () => {
     const { packageManager } = JSON.parse(read('package.json')) as { packageManager?: string }
     expect(packageManager).toMatch(/^bun@\d+\.\d+\.\d+$/)
     expect(workflow).not.toMatch(/(?<![-\w])bun@\d/)
-    for (const name of ['check', 'git-install']) {
-      expect(jobs[name]).toMatch(
-        /setup-bun@[0-9a-f]{40} # v2\n\s+with:\n\s+bun-version-file: package\.json/
-      )
-    }
-    expect(jobs['browser']).toContain("require('./package.json').packageManager.split('@')[1]")
-  })
-
-  it('scopes the deploy key to the git-install step and removes it afterwards', () => {
-    const job = jobs['git-install']!
-    expect(workflow).not.toContain('~/.ssh')
-    expect(job).toContain('key="$RUNNER_TEMP/benchlight_deploy_key"')
-    expect(job).toContain('echo "DEPLOY_KEY_FILE=$key" >> "$GITHUB_ENV"')
-    expect(job).toMatch(/GIT_SSH_COMMAND="ssh -i \$DEPLOY_KEY_FILE -o IdentitiesOnly=yes /)
-    expect(job).toContain('StrictHostKeyChecking=yes')
-    expect(job).toMatch(
-      /- name: Remove the deploy key\n\s+if: always\(\)\n\s+run: rm -f "\$DEPLOY_KEY_FILE"/
+    expect(jobs['check']).toMatch(
+      /setup-bun@[0-9a-f]{40} # v2\n\s+with:\n\s+bun-version-file: package\.json/
     )
-    // The key is only exported where the install runs, not for the whole job.
-    expect(job.split('GIT_SSH_COMMAND=').length - 1).toBe(1)
+    expect(jobs['browser']).toContain("require('./package.json').packageManager.split('@')[1]")
   })
 
   it('never reads the runner context in job-level env (not allowed there)', () => {

@@ -82,7 +82,7 @@ export const VITE_EXPECTATIONS = {
     'Bricolage Grotesque',
     '.bl-btn--secondary'
   ],
-  js: ['bl-led', 'bl-btn', 'bl-appearance__track', 'bl-table', 'bl-pagination']
+  js: ['bl-led', 'bl-meter', 'bl-btn', 'bl-appearance__track', 'bl-table', 'bl-pagination']
 }
 
 export const NUXT_EXPECTATIONS = {
@@ -113,6 +113,20 @@ export function verifyVite(dir: string): void {
   expectAll(readAll(join(dist, 'assets'), '.js'), VITE_EXPECTATIONS.js, 'vite js')
 }
 
+// The library's development warnings hang off `process.env.NODE_ENV`, which the consumer's bundler
+// has to replace; a production build then drops them. (tests/dist-vue.test.ts covers the dev side.)
+export const DEV_WARNING_MARKER = '[benchlight] '
+
+export function viteScripts(dir: string): string {
+  return readAll(join(dir, 'dist', 'assets'), '.js')
+}
+
+export function verifyViteProduction(dir: string): void {
+  if (viteScripts(dir).includes(DEV_WARNING_MARKER)) {
+    throw new Error('vite production build still contains the library dev warnings')
+  }
+}
+
 async function waitFor(url: string, timeoutMs = 20_000): Promise<string> {
   const started = Date.now()
   while (Date.now() - started < timeoutMs) {
@@ -140,6 +154,9 @@ export async function verifyNuxt(dir: string): Promise<void> {
     const api = (await (await fetch(`${base}/api/tokens`)).json()) as { canvas?: string }
     if (api.canvas !== '#101214') throw new Error(`nuxt /api/tokens: ${JSON.stringify(api)}`)
     expectAll(readAll(join(dir, '.output/public/_nuxt'), '.css'), NUXT_EXPECTATIONS.css, 'nuxt css')
+    if (readAll(join(dir, '.output'), '.mjs').includes(DEV_WARNING_MARKER)) {
+      throw new Error('nuxt production build still contains the library dev warnings')
+    }
   } finally {
     server.kill()
   }
@@ -152,6 +169,7 @@ if (import.meta.main) {
   try {
     await install(vite)
     verifyVite(vite)
+    verifyViteProduction(vite)
     console.log('vite fixture OK')
     await install(nuxt)
     await verifyNuxt(nuxt)

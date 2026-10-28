@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- `benchlight/vue` now ships compiled JavaScript and `.d.ts` files (`dist/vue/`, one module per
+  component, `vue` external) instead of raw `.vue` and `.ts` source. Consumers no longer need
+  `@vitejs/plugin-vue` or a TypeScript-aware bundler to import it, and it has a `types` condition.
+- `benchlight/nuxt` is compiled too (`dist/nuxt/module.mjs` and `module.d.mts`), so a consumer's
+  `nuxt typecheck` no longer type-checks Benchlight source. The module registers the compiled
+  components and auto-imports from `dist/vue`.
+- `vue/` and `nuxt/` are no longer in the package. `dist/vue` and `dist/nuxt` are not committed:
+  `prepack` builds them, so the npm tarball and the release tree always carry fresh copies. After a
+  clone, run `bun run build:js` before the Nuxt tests or the fixtures.
+
 ## 0.9.0 - 2026-10-27
 
 The v1 API freeze: one prop vocabulary, typed BlTable columns, one controlled-model rule and

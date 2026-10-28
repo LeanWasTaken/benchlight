@@ -9,6 +9,8 @@ const forksOnly = ['tests/render-tokens.test.ts']
 export default defineConfig({
   plugins: [vue()],
   test: {
+    // dist/vue and dist/nuxt are built, not committed; the Nuxt module test reads the component list.
+    globalSetup: ['tests/global-setup.ts'],
     environment: 'happy-dom',
     projects: [
       {

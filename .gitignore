@@ -14,3 +14,5 @@ playwright-report
 .superpowers
 docs/
 .playwright-mcp/
+dist/vue
+dist/nuxt

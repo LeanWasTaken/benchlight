@@ -1,4 +1,5 @@
-import { addComponentsDir, addImports, createResolver, defineNuxtModule } from '@nuxt/kit'
+import { addComponent, addImports, createResolver, defineNuxtModule } from '@nuxt/kit'
+import COMPONENTS from '../dist/vue/components.json'
 import { PREPAINT } from '../js/prepaint-script.mjs'
 
 export interface ModuleOptions {
@@ -40,9 +41,11 @@ export default defineNuxtModule<ModuleOptions>({
   defaults: { fonts: true, autoImports: true },
   setup(options, nuxt) {
     const { resolve } = createResolver(import.meta.url)
+    // This file runs from nuxt/ in the repo and, compiled, from dist/nuxt/ in the package.
+    const root = import.meta.url.includes('/dist/nuxt/') ? '../..' : '..'
 
-    const css = [resolve('../css/index.css')]
-    if (options.fonts) css.unshift(resolve('../css/fonts.css'))
+    const css = [resolve(`${root}/css/index.css`)]
+    if (options.fonts) css.unshift(resolve(`${root}/css/fonts.css`))
     nuxt.options.css.unshift(...css)
 
     nuxt.options.app.head.script = [
@@ -50,11 +53,14 @@ export default defineNuxtModule<ModuleOptions>({
       ...(nuxt.options.app.head.script ?? [])
     ]
 
-    addComponentsDir({ path: resolve('../vue/components'), pathPrefix: false })
+    // Registered one by one: Nuxt's directory scan would name `BlButton.vue.js` `BlButtonVue`.
+    for (const name of COMPONENTS) {
+      addComponent({ name, filePath: resolve(`${root}/dist/vue/components/${name}.vue.js`) })
+    }
     if (options.autoImports) {
       const prefix =
         typeof options.autoImports === 'object' ? (options.autoImports.prefix ?? 'Bl') : 'Bl'
-      const from = resolve('../vue/index')
+      const from = resolve(`${root}/dist/vue/index.js`)
       addImports(AUTO_IMPORTS.map((name) => ({ name, as: prefixedName(name, prefix), from })))
     }
 
