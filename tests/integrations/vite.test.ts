@@ -20,4 +20,9 @@ describe('vite plugin', () => {
     expect(tags).toEqual([{ tag: 'script', children: PREPAINT, injectTo: 'head-prepend' }])
     expect(PREPAINT.length).toBeGreaterThan(0)
   })
+
+  it('injects nothing with prepaint: false', () => {
+    const tags = (benchlight({ prepaint: false }).transformIndexHtml as () => unknown[])()
+    expect(tags).toEqual([])
+  })
 })

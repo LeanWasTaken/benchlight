@@ -11,6 +11,11 @@ export interface ModuleOptions {
    * (default `'Bl'`; `''` keeps the bare names)
    */
   autoImports: boolean | { prefix?: string }
+  /**
+   * inject the inline no-flash appearance script into `<head>` (default `true`). Turn it off under
+   * a nonce-based CSP and inline `PREPAINT` (from `benchlight/js/prepaint-script.mjs`) yourself
+   */
+  prepaint?: boolean
 }
 
 const AUTO_IMPORTS = [
@@ -38,7 +43,7 @@ export function prefixedName(name: string, prefix: string): string {
 
 export default defineNuxtModule<ModuleOptions>({
   meta: { name: 'benchlight', configKey: 'benchlight', compatibility: { nuxt: '>=4.0.0' } },
-  defaults: { fonts: true, autoImports: true },
+  defaults: { fonts: true, autoImports: true, prepaint: true },
   setup(options, nuxt) {
     const { resolve } = createResolver(import.meta.url)
     // This file runs from nuxt/ in the repo and, compiled, from dist/nuxt/ in the package.
@@ -48,10 +53,12 @@ export default defineNuxtModule<ModuleOptions>({
     if (options.fonts) css.unshift(resolve(`${root}/css/fonts.css`))
     nuxt.options.css.unshift(...css)
 
-    nuxt.options.app.head.script = [
-      { innerHTML: PREPAINT, tagPosition: 'head' },
-      ...(nuxt.options.app.head.script ?? [])
-    ]
+    if (options.prepaint !== false) {
+      nuxt.options.app.head.script = [
+        { innerHTML: PREPAINT, tagPosition: 'head' },
+        ...(nuxt.options.app.head.script ?? [])
+      ]
+    }
 
     // Registered one by one: Nuxt's directory scan would name `BlButton.vue.js` `BlButtonVue`.
     for (const name of COMPONENTS) {

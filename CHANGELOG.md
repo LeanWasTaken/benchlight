@@ -45,6 +45,11 @@
   pixels: hairlines, focus offsets, 44px hit areas, optical nudges, the control paddings of
   segmented items, tabs, the skip link and the tab bar (6px, 6px 12px), the field input padding
   (10px 12px) and the prose heading top margin (28px).
+- A `prepaint` option on the Nuxt module (`benchlight: { prepaint: false }`) and the Vite plugin
+  (`benchlight({ prepaint: false })`) turns off the inline no-flash appearance script, for a
+  nonce-based Content Security Policy. The README has a CSP section: a hash-based CSP works as
+  shipped with `PREPAINT_CSP_HASH`; under a nonce-based CSP, inline `PREPAINT` yourself with a
+  per-request nonce (Nuxt and Vite examples).
 
 ### Changed
 

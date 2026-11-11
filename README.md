@@ -179,6 +179,78 @@ degrade where missing:
 
 RTL is explicitly supported for BlToggle and BlCheckbox and otherwise partial.
 
+## Content Security Policy
+
+The Nuxt module and the Vite plugin inline the no-flash appearance script (`PREPAINT`) in `<head>`.
+
+- Hash-based CSP works as shipped: add `PREPAINT_CSP_HASH` (the `'sha256-…'` source expression) to
+  `script-src`. Both are exported from `benchlight/js/prepaint-script.mjs`.
+- Nonce-based CSP (including `strict-dynamic`) blocks that inline script. Set `prepaint: false` and
+  inline `PREPAINT` yourself with a fresh nonce on every response, the same one your
+  `Content-Security-Policy` header carries. A nonce fixed in config or in a build is reused across
+  responses and gives no protection.
+
+Nuxt: turn the module's script off and add it from a Nitro plugin, which runs on every server
+render. A prerendered or cached page would freeze one nonce, so do not prerender or cache
+(`routeRules` `swr`, `isr` or `cache`) these routes.
+
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  modules: ['benchlight/nuxt'],
+  benchlight: { prepaint: false }
+})
+```
+
+```ts
+// server/plugins/prepaint.ts
+import { randomBytes } from 'node:crypto'
+import { PREPAINT } from 'benchlight/js/prepaint-script.mjs'
+
+export default defineNitroPlugin((nitroApp) => {
+  nitroApp.hooks.hook('render:html', (html, { event }) => {
+    const nonce = randomBytes(16).toString('base64')
+    // Your other scripts need this nonce too, or let your CSP module supply it.
+    setResponseHeader(
+      event,
+      'Content-Security-Policy',
+      `script-src 'nonce-${nonce}' 'strict-dynamic'`
+    )
+    html.head.unshift(`<script nonce="${nonce}">${PREPAINT}</script>`)
+  })
+})
+```
+
+Vite: turn the plugin's script off and add it where your server sends the HTML. Set
+`html.cspNonce` to a placeholder so Vite puts it on its own `<script type="module">`, modulepreload
+and stylesheet tags, then replace the placeholder with the request's nonce.
+
+```ts
+// vite.config.ts
+import { benchlight } from 'benchlight/vite'
+export default {
+  html: { cspNonce: 'BL_NONCE' },
+  plugins: [benchlight({ prepaint: false })]
+}
+```
+
+```ts
+// server.ts: the handler that sends the built index.html (`template`), here Express-style
+import { randomBytes } from 'node:crypto'
+import { PREPAINT } from 'benchlight/js/prepaint-script.mjs'
+
+app.use((req, res) => {
+  const nonce = randomBytes(16).toString('base64')
+  // Every other inline or external script needs this nonce too; BL_NONCE covers Vite's own.
+  res.setHeader('Content-Security-Policy', `script-src 'nonce-${nonce}' 'strict-dynamic'`)
+  const html = template.replaceAll('BL_NONCE', nonce)
+  res.send(html.replace('<head>', `<head><script nonce="${nonce}">${PREPAINT}</script>`))
+})
+```
+
+With `html.cspNonce` set, `vite build` also puts the placeholder on the plugin's own prepaint
+script, so you can keep `prepaint` on and only do the `replaceAll`.
+
 ## Static pages (no build step)
 
 - Inline `js/prepaint.js` in `<head>` and `js/appearance.js` (or `dist/appearance.min.js`) before `</body>`.

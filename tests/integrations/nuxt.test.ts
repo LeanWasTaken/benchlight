@@ -27,9 +27,9 @@ interface TestNuxt {
 
 type Definition = {
   meta: { name: string; configKey: string }
-  defaults: { fonts: boolean; autoImports: boolean | { prefix?: string } }
+  defaults: { fonts: boolean; autoImports: boolean | { prefix?: string }; prepaint?: boolean }
   setup: (
-    options: { fonts: boolean; autoImports?: boolean | { prefix?: string } },
+    options: { fonts: boolean; autoImports?: boolean | { prefix?: string }; prepaint?: boolean },
     nuxt: TestNuxt
   ) => void
 }
@@ -55,7 +55,7 @@ describe('nuxt module', () => {
     const module = await load()
     expect(module.meta.name).toBe('benchlight')
     expect(module.meta.configKey).toBe('benchlight')
-    expect(module.defaults).toEqual({ fonts: true, autoImports: true })
+    expect(module.defaults).toEqual({ fonts: true, autoImports: true, prepaint: true })
   })
 
   it('puts fonts then the library css ahead of the app css', async () => {
@@ -81,6 +81,12 @@ describe('nuxt module', () => {
       { innerHTML: PREPAINT, tagPosition: 'head' },
       { src: '/existing.js' }
     ])
+  })
+
+  it('leaves the head scripts alone with prepaint: false', async () => {
+    const nuxt = makeNuxt()
+    ;(await load()).setup({ fonts: true, autoImports: true, prepaint: false }, nuxt)
+    expect(nuxt.options.app.head.script).toEqual([{ src: '/existing.js' }])
   })
 
   it('registers every compiled component by its Bl name', async () => {
