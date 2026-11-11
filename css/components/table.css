@@ -13,6 +13,9 @@
   .bl-table[data-fit]:not(.bl-table--scroll) {
     overflow-x: visible;
   }
+  .bl-table--scroll {
+    isolation: isolate;
+  }
   .bl-table--scroll .bl-table__scroller {
     overflow-x: auto;
     scrollbar-width: thin;
@@ -126,7 +129,19 @@
   /* No transitions while measuring: reduced motion gives every property a 0.01ms transition, and a
      layout read in the same task would return the pre-change values, flipping the decision. */
   .bl-table[data-measuring],
-  .bl-table[data-measuring] * {
+  .bl-table[data-measuring]
+    :where(
+      .bl-table__table,
+      caption,
+      thead,
+      tbody,
+      tfoot,
+      tr,
+      th,
+      td,
+      [class^='bl-'],
+      [class*=' bl-']
+    ) {
     transition-property: none !important;
   }
   /* Sorting re-renders the rows and measures in the same task. The icon changes only transform

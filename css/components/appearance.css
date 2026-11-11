@@ -17,11 +17,12 @@
     border: 1px solid var(--bl-color-separator);
     border-radius: 8px;
     box-shadow: var(--bl-shadow-well);
+    isolation: isolate;
   }
   .bl-appearance__track::before {
     position: absolute;
     top: 2px;
-    left: 2px;
+    inset-inline-start: 2px;
     z-index: 0;
     width: 40px;
     height: 26px;
@@ -38,6 +39,12 @@
   .bl-appearance__track:has(input[value='dark']:checked)::before {
     transform: translateX(88px);
   }
+  .bl-appearance__track:dir(rtl):has(input[value='light']:checked)::before {
+    transform: translateX(-44px);
+  }
+  .bl-appearance__track:dir(rtl):has(input[value='dark']:checked)::before {
+    transform: translateX(-88px);
+  }
   /* Before the component mounts the radios may not match the saved choice yet (server markup is
      "auto"), so the thumb and active label follow the root attribute until it is ready. */
   :root[data-bl-appearance='light'] .bl-appearance:not([data-ready]) .bl-appearance__track::before {
@@ -45,6 +52,16 @@
   }
   :root[data-bl-appearance='dark'] .bl-appearance:not([data-ready]) .bl-appearance__track::before {
     transform: translateX(88px);
+  }
+  :root[data-bl-appearance='light']
+    .bl-appearance:dir(rtl):not([data-ready])
+    .bl-appearance__track::before {
+    transform: translateX(-44px);
+  }
+  :root[data-bl-appearance='dark']
+    .bl-appearance:dir(rtl):not([data-ready])
+    .bl-appearance__track::before {
+    transform: translateX(-88px);
   }
   :root[data-bl-appearance] .bl-appearance:not([data-ready]) .bl-appearance__option {
     color: var(--bl-color-ink-3);

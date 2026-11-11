@@ -27,7 +27,7 @@ describe('anchored module', () => {
   it('keeps anchor positioning through minification', () => {
     expect(css).toContain('position-area')
     expect(css).toContain('position-try-fallbacks')
-    expect(css).toMatch(/@supports\s*\(anchor-name:\s*--a\)/)
+    expect(css).toMatch(/@supports\s*\(position-area:\s*top\)/)
   })
 
   it('has no position-area outside the @supports block', () => {

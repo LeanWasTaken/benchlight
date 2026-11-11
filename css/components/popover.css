@@ -21,6 +21,11 @@
       opacity var(--bl-duration-base) ease,
       scale var(--bl-duration-base) var(--bl-ease-out);
   }
+  @supports not selector(:popover-open) {
+    :where(.bl-popover) {
+      display: none;
+    }
+  }
   .bl-popover:popover-open {
     opacity: 1;
     scale: none;

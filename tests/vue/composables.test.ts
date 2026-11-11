@@ -291,6 +291,18 @@ describe('useMarquee', () => {
     expect(animate).toHaveBeenCalledTimes(2)
   })
 
+  it.each([
+    ['ltr', 'translateX(-214px)'],
+    ['rtl', 'translateX(214px)']
+  ])('scrolls toward the inline end under %s', (dir, expected) => {
+    const { box, text, animate } = elements(300, 100)
+    box.style.direction = dir
+    document.body.append(box)
+    withSetup(() => useMarquee(ref(box), ref(text)))
+    const frames = (animate.mock.calls[0] as unknown as [Array<{ transform: string }>])[0]
+    expect(frames[2]?.transform).toBe(expected)
+  })
+
   it('glides the text home when the overflow ends, instead of snapping', () => {
     const { box, animate } = elements(300, 100)
     const text = document.createElement('div')

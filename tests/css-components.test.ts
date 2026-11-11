@@ -166,7 +166,7 @@ const REQUIRED: Record<string, string[]> = {
     '.bl-table[data-fit]:not(.bl-table--scroll)',
     '.bl-table--scroll .bl-table__scroller',
     '.bl-table[data-measuring] .bl-table__table',
-    '.bl-table[data-measuring] *',
+    '.bl-table[data-measuring]',
     '.bl-table[data-stacked] thead',
     '.bl-table tbody tr[data-action]:focus-within',
     '.bl-table__action',
@@ -535,7 +535,7 @@ describe('intrinsic wrapping (long tokens never widen the page)', () => {
     expect(table['overflow-x']).toBe('auto')
     expect(ruleBody(css, '.bl-prose hr')['border-top']).toContain('var(--bl-color-separator)')
     expect(ruleBody(css, '.bl-prose :not(pre) > code')['overflow-wrap']).toBe('anywhere')
-    expect(ruleBody(css, '.bl-prose ol')['padding-left']).toBe('1.75em')
+    expect(ruleBody(css, '.bl-prose ol')['padding-inline-start']).toBe('1.75em')
     expect(ruleBody(type, '.bl-lede')['max-width']).toBe('min(var(--bl-layout-prose), 68ch)')
   })
 
@@ -569,7 +569,7 @@ describe('intrinsic wrapping (long tokens never widen the page)', () => {
     const reduced = marquee.slice(marquee.indexOf('prefers-reduced-motion'))
     expect(reduced).toMatch(/\.bl-marquee\s*\{[^}]*overflow:\s*visible/)
     expect(reduced).toMatch(/\.bl-marquee__content\s*\{[^}]*overflow-wrap:\s*anywhere/)
-    expect(marquee).toMatch(/\.bl-marquee\[data-overflowing\]\s*\{[^}]*mask:\s*none/)
+    expect(marquee).toMatch(/\.bl-marquee\[data-overflowing\][^{]*\{[^}]*mask:\s*none/)
   })
 
   it('site bar controls never scroll the window on focus while the bar is sticky', () => {
@@ -1114,7 +1114,7 @@ describe('theme transitions', () => {
 
   it('keeps BlTable measuring free of transitions', () => {
     const rule = parseRules(read('table')).find((r) =>
-      r.selectors.includes('.bl-table[data-measuring] *')
+      r.selectors.includes('.bl-table[data-measuring]')
     )
     expect(rule!.declarations['transition-property']).toBe('none !important')
   })
@@ -1158,9 +1158,7 @@ describe('eased state changes', () => {
     expect(props(icon)).toEqual(expect.arrayContaining(['transform', 'opacity']))
     expect(icon).toContain('var(--bl-duration-fast)')
     // the measuring pass still wins over every transition above
-    const measuring = parseRules(css).find((r) =>
-      r.selectors.includes('.bl-table[data-measuring] *')
-    )
+    const measuring = parseRules(css).find((r) => r.selectors.includes('.bl-table[data-measuring]'))
     expect(measuring!.declarations['transition-property']).toBe('none !important')
     // only the icon is exempt: it cannot change what the measuring pass reads
     const exempt = parseRules(css).find((r) =>
@@ -1236,7 +1234,7 @@ describe('eased state changes', () => {
     const nudges = parseRules(read('prev-next')).filter((r) =>
       r.selectors.some((s) => s.endsWith('__icon') && s.includes(':hover'))
     )
-    expect(nudges.length).toBe(2)
+    expect(nudges.length).toBe(4)
     for (const rule of nudges)
       expect(rule.within.join(' ')).toContain('(prefers-reduced-motion: no-preference)')
   })

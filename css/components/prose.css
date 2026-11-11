@@ -17,7 +17,7 @@
     counter-increment: bl-section;
   }
   .bl-prose h2::before {
-    margin-right: 14px;
+    margin-inline-end: 14px;
     font-family: var(--bl-font-mono);
     font-size: var(--bl-text-annotation);
     font-weight: 500;
@@ -56,12 +56,12 @@
   }
   .bl-prose ul {
     margin: 0 0 16px;
-    padding-left: 20px;
+    padding-inline-start: 20px;
     list-style: disc;
   }
   .bl-prose ol {
     margin: 0 0 16px;
-    padding-left: 1.75em;
+    padding-inline-start: 1.75em;
     list-style: decimal;
   }
   .bl-prose li {
@@ -118,8 +118,8 @@
   }
   .bl-prose blockquote {
     margin: 16px 0;
-    padding-left: 16px;
-    border-left: 2px solid var(--bl-color-separator);
+    padding-inline-start: 16px;
+    border-inline-start: 2px solid var(--bl-color-separator);
     color: var(--bl-color-ink-2);
     font-style: italic;
   }
@@ -139,7 +139,7 @@
   .bl-prose :is(th, td) {
     padding: 8px 12px;
     border: 1px solid var(--bl-color-separator);
-    text-align: left;
+    text-align: start;
   }
   .bl-prose th {
     font-weight: 600;

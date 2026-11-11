@@ -13,7 +13,7 @@
   /* Each item after the first draws its own separator, so one never strands at a line end.
      The empty alt text keeps screen readers from announcing it. */
   .bl-meta--sep > * + *::before {
-    margin-right: 0.75em;
+    margin-inline-end: 0.75em;
     color: var(--bl-color-separator);
     content: '—';
     content: '—' / '';

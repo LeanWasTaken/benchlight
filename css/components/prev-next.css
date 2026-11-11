@@ -11,7 +11,7 @@
     max-width: max(min(100%, 24rem), 50%);
   }
   .bl-prev-next__link--next:only-child {
-    margin-left: auto;
+    margin-inline-start: auto;
   }
   .bl-prev-next__link {
     display: block;
@@ -29,7 +29,7 @@
     }
   }
   .bl-prev-next__link--next {
-    text-align: right;
+    text-align: end;
   }
   .bl-prev-next__label {
     display: flex;
@@ -56,6 +56,12 @@
     }
     .bl-prev-next__link--next:hover .bl-prev-next__icon {
       transform: translateX(2px);
+    }
+    .bl-prev-next__link--prev:dir(rtl):hover .bl-prev-next__icon {
+      transform: translateX(2px);
+    }
+    .bl-prev-next__link--next:dir(rtl):hover .bl-prev-next__icon {
+      transform: translateX(-2px);
     }
   }
   .bl-prev-next__title {

@@ -91,7 +91,9 @@ export function useMarquee(
         easing: 'ease'
       })
     if (!overflowing.value || reduced.value) return
-    const distance = -(overflow + overshoot)
+    // Text starts at the inline-start edge, so under rtl it travels the other way.
+    const rtl = getComputedStyle(box).direction === 'rtl'
+    const distance = (rtl ? 1 : -1) * (overflow + overshoot)
     const timing: KeyframeAnimationOptions = {
       duration: Math.max(5, (overflow + overshoot) / speed) * 1000,
       iterations: Infinity,

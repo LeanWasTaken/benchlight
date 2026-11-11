@@ -4,7 +4,7 @@
      keywords are self-relative: a top-layer panel's containing block is the viewport, whose
      writing mode comes from the root, so plain logical keywords would ignore a dir="rtl" set
      on an ancestor of the trigger. */
-  @supports (anchor-name: --a) {
+  @supports (position-area: top) {
     :where([popover][data-side][data-align]) {
       position: fixed;
       inset: auto;

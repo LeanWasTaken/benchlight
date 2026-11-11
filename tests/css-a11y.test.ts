@@ -117,7 +117,7 @@ describe('.bl-prose under a CSS reset', () => {
   const css = read('css/components/prose.css')
   it('restores ordered lists', () => {
     const rule = body(css, '.bl-prose ol')
-    expect(rule).toContain('padding-left: 1.75em;')
+    expect(rule).toContain('padding-inline-start: 1.75em;')
     expect(rule).toContain('list-style: decimal;')
   })
   it('sizes and weights h4-h6 and strong explicitly', () => {
@@ -147,6 +147,102 @@ describe('link hover keeps contrast', () => {
     expect(hover.length).toBeGreaterThan(0)
     for (const rule of hover) expect(rule).not.toContain('opacity')
     expect(css).toContain('text-decoration-thickness: 2px;')
+  })
+})
+
+describe('current-page cue beyond colour', () => {
+  const current =
+    ":is(.bl-site-bar__link, .bl-tab-bar__item, .bl-index-row)[aria-current]:not([aria-current='false'])"
+  it.each([
+    [
+      'site-bar',
+      ".bl-site-bar__link[aria-current]:not([aria-current='false'])",
+      'text-decoration: underline;'
+    ],
+    [
+      'tab-bar',
+      ".bl-tab-bar__item[aria-current]:not([aria-current='false'])",
+      'box-shadow: inset 0 2px 0'
+    ],
+    [
+      'index-row',
+      ".bl-index-row[aria-current]:not([aria-current='false'])",
+      'box-shadow: inset 2px 0 0'
+    ]
+  ])(
+    '%s marks the current item with a non-colour cue and a forced-colors fallback',
+    (name, selector, cue) => {
+      const css = read(`css/components/${name}.css`)
+      expect(current).toContain('aria-current')
+      expect(body(css, selector)).toContain(cue)
+      const fallback = forced(css)
+      expect(fallback).toContain(selector)
+      expect(fallback).toContain('Highlight')
+    }
+  )
+})
+
+describe('plain content fallbacks', () => {
+  it.each(['field', 'toggle', 'checkbox', 'fieldset'])(
+    '%s error mark declares plain content before the alt-text form',
+    (name) => {
+      const css = read(`css/components/${name}.css`)
+      expect(css).toMatch(/content: '!';\s*content: '!' \/ '';/)
+    }
+  )
+})
+
+describe('logical properties for rtl', () => {
+  it.each([
+    'prose',
+    'prev-next',
+    'index-row',
+    'section-head',
+    'meta',
+    'field',
+    'site-bar',
+    'skip-link',
+    'appearance'
+  ])('%s uses no physical left/right', (name) => {
+    const css = read(`css/components/${name}.css`)
+    expect(css).not.toMatch(/(margin|padding|border)-(left|right)\s*:/)
+    expect(css).not.toMatch(/text-align:\s*(left|right)/)
+    expect(css).not.toMatch(/^\s*(left|right):/m)
+  })
+  it('mirrors the appearance thumb under rtl, including before mount', () => {
+    const css = read('css/components/appearance.css')
+    expect(css).toContain('inset-inline-start: 2px;')
+    expect(css.match(/:dir\(rtl\)[^{]*\{\s*transform: translateX\(-(44|88)px\)/g)).toHaveLength(4)
+  })
+  it('flips the marquee mask under rtl', () => {
+    expect(read('css/components/marquee.css')).toMatch(/:dir\(rtl\)\s*\{[^}]*to left/)
+  })
+})
+
+describe('robustness guards', () => {
+  it('hides closed popover panels where :popover-open is unsupported', () => {
+    expect(read('css/components/popover.css')).toMatch(
+      /@supports not selector\(:popover-open\)\s*\{\s*:where\(\.bl-popover\)\s*\{\s*display: none/
+    )
+    expect(read('css/components/tooltip.css')).toMatch(
+      /@supports not selector\(:popover-open\)\s*\{\s*:where\(\.bl-tooltip\)\s*\{\s*display: none/
+    )
+  })
+  it('isolates the scroll table and the appearance track', () => {
+    expect(body(read('css/components/table.css'), '.bl-table--scroll')).toContain(
+      'isolation: isolate;'
+    )
+    expect(body(read('css/components/appearance.css'), '.bl-appearance__track')).toContain(
+      'isolation: isolate;'
+    )
+  })
+  it('scopes the table measuring reset to Benchlight parts, not host content', () => {
+    const css = read('css/components/table.css')
+    expect(css).not.toMatch(/\[data-measuring\] \*/)
+    expect(css).toContain('[data-measuring]\n    :where(')
+  })
+  it('resets reduced-motion on the dialog backdrop', () => {
+    expect(read('css/base.css')).toMatch(/\)::backdrop\s*\{\s*animation-duration: 0\.01ms/)
   })
 })
 

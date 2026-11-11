@@ -1,6 +1,11 @@
 @layer components {
   /* The tooltip's look. Placement comes from anchored.css ([popover][data-side][data-align]);
      the UA popover rules (border, padding, colours, overflow) are replaced here. No arrow. */
+  @supports not selector(:popover-open) {
+    :where(.bl-tooltip) {
+      display: none;
+    }
+  }
   .bl-tooltip {
     box-sizing: border-box;
     max-inline-size: min(var(--bl-tooltip-width, 16rem), 100vw - 16px);
