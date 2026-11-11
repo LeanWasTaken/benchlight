@@ -27,6 +27,19 @@
   Firefox 147. Without it the Popover and Tooltip panel stays centred in the viewport and remains
   usable. Exit animations run in Chromium only; Safari and Firefox close instantly.
 
+### Fixed
+
+- Docs: README, the Vite plugin JSDoc and a test comment no longer say components ship as `.vue` and
+  `.ts` source needing a compiler; the Vite and Nuxt notes match the compiled package.
+- Docs: removed `paginationLabels.nav` (gone since 0.9); corrected the BlRadio attribute split, the
+  BlTooltip `delay` default, the Tailwind breakpoint claim, and the CSS hooks table (added
+  `--bl-anchored-gap`, `--bl-popover-width`, `--bl-tooltip-width`; `--bl-meter-value` is also set by
+  BlProgress; scroll-offset defaults are literals).
+- Docs: listed `data-side` and `data-align`, BlNumberField field wiring and `@row-activate`; added a
+  browser-support section, a form-reset note and a note that link `href`/`to` are passed unchanged.
+- The package `license` field is now `MIT AND OFL-1.1`, since the tarball ships OFL-1.1 fonts; LICENSE
+  and README point at `fonts/OFL-*.txt`.
+
 ## 0.9.0 - 2026-10-27
 
 The v1 API freeze: one prop vocabulary, typed BlTable columns, one controlled-model rule and

@@ -3,7 +3,7 @@
   "version": "0.10.0",
   "packageManager": "bun@1.4.2",
   "description": "Token-driven CSS, a Tailwind v4 theme and thin Vue/Nuxt components",
-  "license": "MIT",
+  "license": "MIT AND OFL-1.1",
   "author": "LeanWasTaken <me@krists.lol>",
   "repository": {
     "type": "git",
