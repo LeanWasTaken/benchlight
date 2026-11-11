@@ -42,7 +42,7 @@ export function inlineStaticTokens(css: string, vars: Array<[string, string]>): 
 
 const LAYER_ORDER = '@layer theme,base,components,utilities;'
 
-// lightningcss collapses the layer-order statement; restore it ahead of the tokens.
+// lightningcss collapses the layer-order statement; restore it at the very start. Idempotent.
 function withLayerOrder(css: string): string {
   return LAYER_ORDER + css.replace(/^@layer [\w-]+(?:,[\w-]+)*;/, '')
 }
@@ -58,12 +58,10 @@ export function buildModules(
     return [name, inlineStaticTokens(css, vars)] as const
   })
   const modules: Record<string, string> = {}
-  for (const [name, css] of sources) modules[name] = minifyCss(css, `${name}.css`)
+  // Every module opens with the order statement, so loading any one first cannot invert the layers.
+  for (const [name, css] of sources) modules[name] = withLayerOrder(minifyCss(css, `${name}.css`))
   let bundle = minifyCss(sources.map(([, css]) => css).join('\n'), 'bundle.css')
-  if (names.includes('tokens')) {
-    bundle = withLayerOrder(bundle)
-    modules['tokens'] = withLayerOrder(modules['tokens']!)
-  }
+  if (names.includes('tokens')) bundle = withLayerOrder(bundle)
   return { bundle, modules }
 }
 

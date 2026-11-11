@@ -1,1 +1,1 @@
-@layer components{.bl-input[type=number]{appearance:textfield}}
+@layer theme,base,components,utilities;@layer components{.bl-input[type=number]{appearance:textfield}}

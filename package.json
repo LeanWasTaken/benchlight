@@ -74,7 +74,7 @@
     "./dist/appearance.min.js"
   ],
   "scripts": {
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "vue-tsc --noEmit && tsc --noEmit -p scripts/tsconfig.json",
     "lint": "eslint .",

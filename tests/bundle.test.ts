@@ -94,6 +94,13 @@ describe('buildDist', () => {
     expect(dist.modules['tokens']!.startsWith(LAYERS)).toBe(true)
   })
 
+  it('declares the layer order first in every module, exactly once', () => {
+    for (const [name, css] of Object.entries(dist.modules)) {
+      expect(css.startsWith(LAYERS), name).toBe(true)
+      expect(css.split(LAYERS), name).toHaveLength(2)
+    }
+  })
+
   it('keeps every token as a variable, so it is interchangeable with the source CSS', () => {
     expect(dist.bundle).toContain('--bl-text-micro:')
     expect(dist.bundle).toContain('var(--bl-text-micro)')

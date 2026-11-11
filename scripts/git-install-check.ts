@@ -31,9 +31,11 @@ try {
       const { extra, missing } = diffFileLists(installed, files)
       if (extra.length > 0 || missing.length > 0) {
         console.error(`not slim: extra [${extra.join(' ')}], missing [${missing.join(' ')}]`)
-        process.exit(1)
+        // exitCode, not exit(): the finally blocks must still remove the temp directories.
+        process.exitCode = 1
+      } else {
+        console.log('slim install OK: installed files equal the pack list')
       }
-      console.log('slim install OK: installed files equal the pack list')
     } finally {
       rmSync(scratch, { recursive: true, force: true })
     }
