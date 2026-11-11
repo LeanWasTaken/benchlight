@@ -80,3 +80,54 @@ describe('CI hardening', () => {
     expect(jobs['check']).toContain('run: bun run lint:workflows')
   })
 })
+
+describe('release workflow credentials', () => {
+  const release = read('.github/workflows/release.yml')
+
+  it.each([
+    ['ci.yml', workflow],
+    ['release.yml', release]
+  ])('%s checks out without persisting the token', (_name, text) => {
+    const checkouts = text.split('\n').filter((line) => /uses: actions\/checkout@/.test(line))
+    expect(checkouts.length).toBeGreaterThan(0)
+    expect(text.match(/persist-credentials: false/g)).toHaveLength(checkouts.length)
+    expect(text).not.toMatch(/persist-credentials: true/)
+  })
+
+  it('hands the write token to git per command, never through the checkout', () => {
+    expect(release).toContain('GH_TOKEN: ${{ github.token }}')
+    expect(release).toContain('"${remote[@]}" push --atomic origin')
+    expect(release).not.toMatch(/^\s+(?!"\$\{remote)git push/m)
+  })
+})
+
+describe('bun install cache', () => {
+  it.each(['ci.yml', 'release.yml'])(
+    '%s caches the bun install cache keyed on bun.lock',
+    (name) => {
+      const text = read(`.github/workflows/${name}`)
+      expect(text).toContain('path: ~/.bun/install/cache')
+      expect(text).toContain("hashFiles('bun.lock')")
+    }
+  )
+})
+
+describe('image digests', () => {
+  const digest = (text: string, image: RegExp) => image.exec(text)?.[1]
+
+  it('pins the Playwright image by digest, the same in CI and visual-linux.sh', () => {
+    const ci = digest(workflow, /playwright:v[\d.]+-noble@(sha256:[0-9a-f]{64})/)
+    const local = digest(
+      read('scripts/visual-linux.sh'),
+      /playwright:v\$version-noble@(sha256:[0-9a-f]{64})/
+    )
+    expect(ci).toBeDefined()
+    expect(local).toBe(ci)
+  })
+
+  it('pins the actionlint image by digest', () => {
+    const script = (JSON.parse(read('package.json')) as { scripts: Record<string, string> })
+      .scripts['lint:workflows']!
+    expect(script).toMatch(/rhysd\/actionlint:\d+\.\d+\.\d+@sha256:[0-9a-f]{64}/)
+  })
+})

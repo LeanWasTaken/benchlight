@@ -12,7 +12,7 @@ bun_version=$(bun --version)
 docker run --rm --platform linux/amd64 --ipc=host \
   -v "$PWD":/src:ro -v "$PWD/tests/visual/__screenshots__":/shots \
   -e CI=1 -e BUN_VERSION="$bun_version" \
-  "mcr.microsoft.com/playwright:v$version-noble" bash -c '
+  "mcr.microsoft.com/playwright:v$version-noble@sha256:eff16c30e6f3f4af0a03fa4b706120d5e9b0891c344a27d64559aff5900a4a27" bash -c '
     set -euo pipefail
     mkdir /work
     tar -C /src --exclude=./node_modules --exclude=./.git --exclude=./showcase \

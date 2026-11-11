@@ -99,7 +99,7 @@ describe('release workflow', () => {
 
   it('pins every action by full SHA, with the same SHAs as ci.yml, and bun from package.json', () => {
     const uses = workflow.split('\n').filter((line) => /^\s*(- )?uses:/.test(line))
-    expect(uses).toHaveLength(4)
+    expect(uses).toHaveLength(6)
     for (const line of uses) {
       expect(line).toMatch(/uses: [\w.-]+\/[\w.-]+@[0-9a-f]{40} # v\d+/)
       expect(ci).toContain(line.trim())
@@ -115,17 +115,23 @@ describe('release workflow', () => {
     expect(at('run: bun run check')).toBeGreaterThan(0)
     expect(at('run: bun run check')).toBeLessThan(at('scripts/release-tree.ts'))
     expect(at('run: bun run fixtures')).toBeLessThan(at('scripts/release-tree.ts'))
-    expect(at('scripts/release-tree.ts')).toBeLessThan(at('git push'))
+    expect(at('scripts/release-tree.ts')).toBeLessThan(at('push --atomic'))
   })
 
   it('refuses an existing tag and pushes branch and tag atomically without force', () => {
-    expect(workflow).toContain('existing="$(git ls-remote --tags origin "refs/tags/${tag}")"')
-    expect(workflow).toContain('heads="$(git ls-remote --heads origin refs/heads/release)"')
-    expect(workflow.indexOf('if [ -n "$existing" ]')).toBeLessThan(workflow.indexOf('git push'))
+    expect(workflow).toContain(
+      'existing="$("${remote[@]}" ls-remote --tags origin "refs/tags/${tag}")"'
+    )
+    expect(workflow).toContain(
+      'heads="$("${remote[@]}" ls-remote --heads origin refs/heads/release)"'
+    )
+    expect(workflow.indexOf('if [ -n "$existing" ]')).toBeLessThan(
+      workflow.indexOf('push --atomic')
+    )
     expect(workflow).toContain('rm -f "$GIT_INDEX_FILE"')
     expect(workflow).toContain('-m "${tag} (source ${GITHUB_REF_NAME} ${GITHUB_SHA})"')
     expect(workflow).toContain(
-      'git push --atomic origin "${commit}:refs/heads/release" "refs/tags/${tag}"'
+      '"${remote[@]}" push --atomic origin "${commit}:refs/heads/release" "refs/tags/${tag}"'
     )
     expect(workflow).not.toMatch(/--force|push -f|\+refs\/heads\/release"? *$/m)
   })
