@@ -1,0 +1,11 @@
+function mergeDescribedBy(...ids) {
+  const seen = /* @__PURE__ */ new Set();
+  for (const value of ids) {
+    if (typeof value !== "string") continue;
+    for (const id of value.split(/\s+/)) if (id) seen.add(id);
+  }
+  return seen.size ? [...seen].join(" ") : void 0;
+}
+export {
+  mergeDescribedBy
+};

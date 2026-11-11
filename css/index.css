@@ -37,3 +37,8 @@
 @import './components/disclosure.css';
 @import './components/dialog.css';
 @import './components/toast.css';
+@import './components/anchored.css';
+@import './components/popover.css';
+@import './components/tooltip.css';
+@import './components/tabs.css';
+@import './components/number-field.css';

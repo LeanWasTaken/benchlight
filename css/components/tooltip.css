@@ -1,0 +1,49 @@
+@layer components {
+  /* The tooltip's look. Placement comes from anchored.css ([popover][data-side][data-align]);
+     the UA popover rules (border, padding, colours, overflow) are replaced here. No arrow. */
+  @supports not selector(:popover-open) {
+    :where(.bl-tooltip) {
+      display: none;
+    }
+  }
+  .bl-tooltip {
+    box-sizing: border-box;
+    max-inline-size: min(var(--bl-tooltip-width, 16rem), 100vw - 16px);
+    padding: 4px 8px;
+    overflow: visible;
+    font-family: var(--bl-font-mono);
+    font-size: var(--bl-text-annotation);
+    letter-spacing: var(--bl-tracking-annotation);
+    line-height: 1.4;
+    color: var(--bl-color-ink-1);
+    background: var(--bl-color-raised);
+    border: 1px solid var(--bl-color-separator);
+    border-radius: var(--bl-radius-chip);
+    box-shadow: var(--bl-shadow-float);
+    overflow-wrap: anywhere;
+    opacity: 0;
+    transition: opacity var(--bl-duration-fast) ease;
+  }
+  .bl-tooltip:popover-open {
+    opacity: 1;
+  }
+  @starting-style {
+    .bl-tooltip:popover-open {
+      opacity: 0;
+    }
+  }
+  /* Exit animations need `overlay` (Chromium only); elsewhere the tooltip hides instantly. */
+  @supports (overlay: auto) {
+    .bl-tooltip {
+      transition:
+        opacity var(--bl-duration-fast) ease,
+        display var(--bl-duration-fast) allow-discrete,
+        overlay var(--bl-duration-fast) allow-discrete;
+    }
+  }
+  @media (forced-colors: active) {
+    .bl-tooltip {
+      border-color: CanvasText;
+    }
+  }
+}

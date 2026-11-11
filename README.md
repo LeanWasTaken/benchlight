@@ -9,7 +9,7 @@ classes.
 ## Install
 
 ```json
-"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.9.0"
+"benchlight": "git+ssh://git@github.com/LeanWasTaken/benchlight.git#v0.10.0"
 ```
 
 The repo is private and the URL uses SSH on purpose: bun turns GitHub https URLs into API tarball
@@ -41,8 +41,9 @@ key is used only by that step:
   run: rm -f "$DEPLOY_KEY_FILE" "$DEPLOY_KNOWN_HOSTS"
 ```
 
-Benchlight is not on npm yet (the name is reserved). The components ship as `.vue` and `.ts` source, not
-built JavaScript, so the consuming app needs Vite or Nuxt to compile them.
+Benchlight is not on npm yet (the name is reserved). `benchlight/vue` ships as compiled
+JavaScript with `.d.ts` files (`dist/vue/`, `vue` external), so importing it needs no Vue compiler plugin or
+TypeScript-aware bundler. The Vite and Nuxt helpers below are optional conveniences.
 
 ## Nuxt
 
@@ -115,8 +116,9 @@ import 'benchlight/css/index.css'
 import { BlButton } from 'benchlight/vue'
 ```
 
-`benchlight()` inlines the no-flash appearance script and keeps the shipped `.vue` source out of
-dependency pre-bundling. Tailwind is optional: only if the app uses it, add
+`benchlight()` inlines the no-flash appearance script and keeps `benchlight` out of Vite's
+dependency pre-bundling (the components are already compiled, so this is a precaution, not a
+requirement). `@vitejs/plugin-vue` is only for your own `.vue` files. Tailwind is optional: only if the app uses it, add
 `@import 'benchlight/tailwind/theme.css';` after `@import 'tailwindcss';`. The theme maps the
 `--bl-color-control-border` token to the `border-control-border` utility.
 
@@ -135,6 +137,20 @@ Every colour is a `--bl-color-*` custom property (`canvas`, `surface`, `raised`,
   their fill in both themes, so re-theme `trace` and `danger` together with their on-colour.
 
 Tailwind's own `ease-out` is no longer overridden; the Benchlight curve is the `ease-bl` utility.
+
+## Browser support
+
+Build targets (`scripts/lib/bundle.ts`): Chrome 111, Safari 16.2 and Firefox 121. Newer features
+degrade where missing:
+
+| Feature                                    | Floor                                | Without it                  |
+| ------------------------------------------ | ------------------------------------ | --------------------------- |
+| Anchored placement (BlPopover, BlTooltip)  | Chromium 129, Safari 26, Firefox 147 | panel stays centred, usable |
+| Native popover                             | Chrome 114, Safari 17, Firefox 125   |                             |
+| `:dir()` (RTL toggle thumb, checkbox tick) | Chrome 120, Safari 16.4              |                             |
+| Alt-text `content: '!' / ''` (error marks) | Firefox 128, Safari 17.4             | plain mark                  |
+
+RTL is explicitly supported for BlToggle and BlCheckbox and otherwise partial.
 
 ## Static pages (no build step)
 
@@ -170,8 +186,10 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
   the CSS-only cases in the table notes). `data-lifted` (site bar, `js/appearance.js`),
   `data-overflowing` (BlMarquee), `data-fit`, `data-stacked` and `data-measuring` (BlTable),
   `data-ready` (BlAppearanceSwitch), `data-action`, `data-dir`,
-  `data-label` and `data-empty` (BlTable), `data-bl-appearance` (on `<html>`) and `data-bl-lift`
-  (you set it; `js/appearance.js` reads it).
+  `data-label` and `data-empty` (BlTable), `data-side` and `data-align` (BlPopover, BlTooltip),
+  `data-bl-appearance` (on `<html>`) and `data-bl-lift`
+  (you set it; `js/appearance.js` reads it). Props are not mirrored as attributes in general: BlMedia
+  `align="center"` becomes the class `.bl-media--center`, not a `data-align`.
 - Appearance: `data-bl-appearance="light|dark"` on `<html>` (absent = auto), stored as
   `localStorage['bl-appearance']`.
   A user's theme change crossfades the whole page with a View Transition (`--bl-duration-base`)
@@ -190,8 +208,8 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
    If it needs another module's CSS, declare that in `REQUIRES` in the same file (the bundle CLI
    warns when a requirement is missing).
 3. Import it in `css/index.css`, in the same order.
-4. `vue/components/BlX.vue`, with an inline literal `defineProps` type (consumers may lack
-   TypeScript; `tests/vue/sfc-props.test.ts` enforces it). Export it from `vue/index.ts` and cover it in
+4. `vue/components/BlX.vue`, with an inline literal `defineProps` type (the SFC compiler can only
+   expand an imported props type when TypeScript is installed; `tests/vue/sfc-props.test.ts` enforces it). Export it from `vue/index.ts` and cover it in
    `tests/vue/barrel.test.ts`.
 5. A new composable also goes into `AUTO_IMPORTS` in `nuxt/module.ts`.
 6. Add it to the playground (`playground/src/App.vue`).
@@ -204,7 +222,7 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
 ## Responsive rules
 
 - Breakpoints are `em`, so they follow the user's font size: `sm` 40em (640px) and `xs` 30em (480px).
-  The `md`, `lg` and `xl` tokens exist for Tailwind and consumers; the library CSS does not use them.
+  The `md`, `lg` and `xl` breakpoints exist only in `tokens/tokens.ts` (the JS `tokens` export); there are no CSS custom properties or Tailwind theme entries for them, and the library CSS does not use them.
 - Components size by the space they are given, through intrinsic grids and wrapping rather than
   viewport width, so they also work in a narrow card on a wide screen.
 - Long unbroken content (URLs, hashes, compound words) wraps instead of widening the page.
@@ -233,8 +251,9 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
   reader is at the bottom. An enabled follower starts at the bottom on mount.
   `useScrollLifted(threshold)` takes a number, `false`, a ref or a getter. Both it and
   `useReducedMotion()` return a ref that is `false` on the server and until mounted.
-- **Fields:** BlField passes its `id` and hint id to BlInput, BlTextarea, BlSelect and BlRange
-  automatically. Your own `id` on the control wins. Your own `aria-describedby` is merged: the
+- **Fields:** BlField passes its `id` and hint id to BlInput, BlTextarea, BlSelect, BlRange and BlNumberField
+  automatically, and that id always wins inside a BlField (a different `id` on the control is
+  ignored with a development warning, so the label keeps targeting it). Your own `aria-describedby` is merged: the
   hint id comes first, then the error id, then yours, without duplicates. BlRange forwards fallthrough attrs (`id`, `aria-label`,
   `name`, listeners; `disabled` is a prop on BlInput, BlSelect, BlTextarea and BlRange) to the slider, which carries the class `bl-range__input`; `class`
   and `style` stay on the wrapper. To override the id, set `id` on BlField instead of on the
@@ -257,13 +276,17 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
 - **BlInput:** renders a bare `<input>` with no wrapper, so `class`, `style` and every attribute
   land on the input. `type` is `'text' | 'email' | 'password' | 'search' | 'tel' | 'url'`
   (default `'text'`); `number` is left out because the model is a string.
+- **Form reset:** BlInput, BlTextarea, BlSelect, BlRange and BlNumberField do not listen for a native
+  form reset, so their `v-model` keeps the old value after `form.reset()`; reset through the model.
+  BlToggle, BlCheckbox, BlRadioGroup and BlSegmented do restore their mount value.
 - **BlTextarea:** the multi-line sibling of BlInput, with the same contract: no wrapper, every
   attribute (including `class` and `style`) on the `<textarea>`, a string `v-model`, and the
   field wiring above. `rows` defaults to 4; it resizes vertically only and does not autosize.
 - **Links:** `LinkProps` precedence: `as` a component (e.g. RouterLink) receives `to` if set,
   otherwise `href`; `as` `'a'` (the default when `to` or `href` is set) receives `href`, else a
   string `to`; `as` any other tag receives neither. Misuse logs a `[benchlight]` warning in
-  development.
+  development. `href` and `to` values are passed to the anchor unchanged, so never feed them
+  untrusted `javascript:` URLs.
 - **BlLog:** text is in `rem` and the default height is 12.5rem (`--bl-log-height`). `offset` is
   the absolute index of `lines[0]`; set it when you trim a capped buffer so rows are reused. **BlMsg** is a live region: keep it mounted and change its text, since inserting
   it with `v-if` may not be announced.
@@ -363,13 +386,14 @@ modules and `pagination` needs `layout` (the bundle CLI warns otherwise).
 - **Row actions:** `rowLink(row)` (an `a`, RouterLink or similar, as with `LinkProps`) or
   `@row-activate`; `rowLink` wins if both are set. The primary cell holds the real link or button.
   Clicking anywhere on the row forwards to it, except on other controls and while text is selected.
-  Modifier-clicks work only on the link itself.
+  Modifier-clicks work only on the link itself. API.md lists the event as `onRowActivate`; in a
+  template you write `@row-activate`.
 - **Totals:** a column `total` of `'sum'`, `'avg'`, `'count'` or a function over all rows (not just the
   page); a function returns a number. `formatTotal(value, rows)` formats every kind (else `String()`);
   `format` never applies to totals, and `manual` mode's `totals` render as given. The footer renders
   the cells; the `footer` slot replaces them.
 - **i18n:** `labels` (`total`, `empty`, `sortStrip`, `sortAscending`, `sortDescending`, and
-  `pages: (caption) => string` for the pagination's name) and `paginationLabels` (`nav`, `prev`,
+  `pages: (caption) => string` for the pagination's name) and `paginationLabels` (`prev`,
   `next`, `page`, `pageOf`, `range`); `locale` sets the sort collation (default `'en'`, so a
   server-rendered sort hydrates unchanged; for example `locale="lv"`). Every `labels` prop in the
   library (BlAppearanceSwitch, BlPrevNext, BlDialog, BlToaster, BlPagination, BlTable) treats an
@@ -495,7 +519,7 @@ A `fieldset` with a `legend` that owns the model and the `name`; each BlRadio is
   a reset with nothing checked emits it), `legend`, `hint`, `error`, `disabled`, `required`,
   `name` (generated when omitted). All its attrs, `class` and `style` included, go on
   the fieldset. Add `bl-fieldset--inline` to lay the options out in a row.
-- BlRadio props: `label`, `value`, `hint`, `disabled`. Its attrs go on the `<input>`. It belongs
+- BlRadio props: `label`, `value`, `hint`, `disabled`. `class` and `style` go on the root `div.bl-radio`; other attrs go on the `<input>`, as on BlToggle and BlCheckbox. It belongs
   inside a BlRadioGroup; on its own it warns in development and renders a plain radio from its
   attrs.
 - Keyboard is the native one: Tab enters and leaves the group at the checked radio, and the arrow
@@ -731,23 +755,128 @@ const id = toast({ message: 'Item deleted', action: { label: 'Undo', onClick: re
   A toaster outside an open modal dialog is inert, so place it inside the dialog while one is
   open.
 
+## BlPopover
+
+A disclosure panel on the native popover API, anchored to its trigger. Full prop list is in
+[API.md](API.md). `popover` needs the `anchored` module (the bundle CLI warns otherwise).
+
+```vue
+<BlPopover v-model:open="open" side="bottom" align="start" aria-label="Filters">
+  <template #trigger="{ bind }"><BlButton v-bind="bind">Filters</BlButton></template>
+  <p>Anything interactive goes here.</p>
+</BlPopover>
+```
+
+- Props: `side` (`PopoverSide`), `align` (`PopoverAlign`), `ariaLabel`; `v-model:open`. The
+  `trigger` slot's `bind` carries `id`, `type="button"` (so a trigger inside a form does not submit
+  it), `aria-expanded`, `aria-controls`, `popovertarget` and the anchor name; spread it on one
+  button.
+- It is the disclosure pattern: the panel has no role unless `ariaLabel` is set, then
+  `role="group"`. Esc and outside click close it (native light dismiss).
+- A controlled-only `open` that ignores `update:open` still sees Esc and outside click close the
+  native popover.
+- One button can trigger a popover and carry a tooltip. `mergeProps` keeps only one
+  `style.anchorName`, so one panel would lose its anchor; `anchor-name` takes a comma-separated
+  list, so set both names after the merge:
+
+  ```vue
+  <BlPopover>
+    <template #trigger="{ bind: pop }">
+      <BlTooltip text="Narrow the list">
+        <template #trigger="{ bind: tip }">
+          <BlButton
+            v-bind="mergeProps(pop, tip)"
+            :style="{ anchorName: `${pop.style.anchorName}, ${tip.style.anchorName}` }"
+          >
+            Filters
+          </BlButton>
+        </template>
+      </BlTooltip>
+    </template>
+    <p>Anything interactive goes here.</p>
+  </BlPopover>
+  ```
+
+  `mergeProps` comes from `vue`.
+
+- Placement needs CSS anchor positioning with `position-area` (Chromium 129, Safari 26, Firefox
+  147); without it the panel stays centred in the viewport. Exit animations run in Chromium only;
+  Safari and Firefox close instantly.
+
+## BlTooltip
+
+A plain-text hint on a native popover, shown on hover and focus. Full prop list is in
+[API.md](API.md). Needs the `anchored` module.
+
+```vue
+<BlTooltip text="Copy link" side="top">
+  <template #trigger="{ bind }"><BlButton v-bind="bind">Copy</BlButton></template>
+</BlTooltip>
+```
+
+- Props: `text`, `side`, `align`, `delay` (ms, default 400). The trigger's `bind` sets `aria-describedby`.
+- Hover and focus only; hover is ignored for touch. Esc dismisses; inside a dialog or a popover
+  the first Esc hides only the tooltip and the next one closes the container. Text only, no
+  interactive content (use BlPopover for that).
+- On a button that also triggers a BlPopover, set both anchor names (see BlPopover).
+- Same browser requirements as BlPopover.
+
+## BlTabs
+
+A tablist with panels, in the WAI-ARIA tabs pattern. Full prop list is in [API.md](API.md).
+
+```vue
+<BlTabs
+  v-model="tab"
+  aria-label="Sections"
+  :items="[
+    { value: 'a', label: 'A' },
+    { value: 'b', label: 'B' }
+  ]"
+>
+  <template #panel-a>First</template>
+  <template #panel-b>Second</template>
+</BlTabs>
+```
+
+- Props: `items` (`TabItem[]`: `value`, `label`, optional `disabled`), `ariaLabel`, `activation`
+  (`auto` or `manual`); `v-model` is the selected value. Panel slots are `panel-<value>`.
+- Arrow keys, Home and End move between enabled tabs; Tab moves into the panel.
+
+## BlNumberField
+
+A numeric input with a `number | null` model, inside BlField. Needs the `field` module.
+
+```vue
+<BlField label="Quantity"><BlNumberField v-model="qty" :min="0" :max="10" /></BlField>
+```
+
+- Props: `min`, `max`, `step`, `disabled`; other attributes go to the `<input>`. `null` is empty.
+- The value is clamped to `[min, max]` on commit (blur or Enter), not while typing and not for
+  values set from outside.
+- It does not block the mouse wheel (a focused field blurs on wheel) and does not handle
+  `form.reset()`.
+
 ## CSS hooks
 
 Custom properties a consumer may set. API.md lists them under "CSS hooks".
 
-| Hook                                                  | Sets                                                                         | Default              |
-| ----------------------------------------------------- | ---------------------------------------------------------------------------- | -------------------- |
-| `--bl-scroll-offset-top`, `--bl-scroll-offset-bottom` | clearance for focused elements under fixed chrome (site bar, mobile tab bar) | token-derived        |
-| `--bl-dialog-width`                                   | width of a centred BlDialog, never wider than the viewport less 32px         | `32rem`              |
-| `--bl-media-size`                                     | size of a BlMedia figure                                                     | `64px`               |
-| `--bl-chevron-mask`                                   | chevron shape of both the select and the disclosure                          | built-in chevron     |
-| `--bl-meter-value`                                    | fill fraction of a BlMeter bar (0 to 1; BlMeter sets it)                     | `0`                  |
-| `--bl-rise-delay`                                     | page-enter animation delay of one element (`riseDelay()` sets it)            | `0ms`                |
-| `--bl-telemetry-columns`                              | column count of a BlTelemetry grid                                           | auto-fit             |
-| `--bl-log-height`                                     | max height of a BlLog                                                        | `12.5rem`            |
-| `--bl-range-value-width`                              | room reserved for the BlRange value, so the track length stays fixed         | `56px`               |
-| `--bl-table-min-col`                                  | narrowest BlTable column before the table stacks                             | `8rem`               |
-| `--bl-table-col-min`                                  | narrowest width of one column (BlTable sets it from `TableColumn.width`)     | `--bl-table-min-col` |
+| Hook                                                  | Sets                                                                         | Default                  |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------ |
+| `--bl-scroll-offset-top`, `--bl-scroll-offset-bottom` | clearance for focused elements under fixed chrome (site bar, mobile tab bar) | `72px`, `0px` (literals) |
+| `--bl-anchored-gap`                                   | gap between a BlPopover or BlTooltip panel and its trigger                   | `6px`                    |
+| `--bl-popover-width`                                  | max width of a BlPopover panel, never wider than the viewport less 16px      | `20rem`                  |
+| `--bl-tooltip-width`                                  | max width of a BlTooltip panel, never wider than the viewport less 16px      | `16rem`                  |
+| `--bl-dialog-width`                                   | width of a centred BlDialog, never wider than the viewport less 32px         | `32rem`                  |
+| `--bl-media-size`                                     | size of a BlMedia figure                                                     | `64px`                   |
+| `--bl-chevron-mask`                                   | chevron shape of both the select and the disclosure                          | built-in chevron         |
+| `--bl-meter-value`                                    | fill fraction of a BlMeter bar (0 to 1; BlMeter and BlProgress set it)       | `0`                      |
+| `--bl-rise-delay`                                     | page-enter animation delay of one element (`riseDelay()` sets it)            | `0ms`                    |
+| `--bl-telemetry-columns`                              | column count of a BlTelemetry grid                                           | auto-fit                 |
+| `--bl-log-height`                                     | max height of a BlLog                                                        | `12.5rem`                |
+| `--bl-range-value-width`                              | room reserved for the BlRange value, so the track length stays fixed         | `56px`                   |
+| `--bl-table-min-col`                                  | narrowest BlTable column before the table stacks                             | `8rem`                   |
+| `--bl-table-col-min`                                  | narrowest width of one column (BlTable sets it from `TableColumn.width`)     | `--bl-table-min-col`     |
 
 `--bl-dialog-gutter` is internal: BlDialog sets it on `html` while open.
 
@@ -756,42 +885,47 @@ Custom properties a consumer may set. API.md lists them under "CSS hooks".
 `dist/modules/<module>.min.css` takes the module name, which differs from the component name in
 places. `tokens` always comes first; `base`, `type`, `motion`, `layout` and `tints` are shared.
 
-| Component                                       | Module                     |
-| ----------------------------------------------- | -------------------------- |
-| BlSiteBar, BlSiteBarLink                        | `site-bar`                 |
-| BlTabBar, BlTabBarItem                          | `tab-bar`                  |
-| BlColophon                                      | `colophon`                 |
-| BlSkipLink                                      | `skip-link`                |
-| BlAppearanceSwitch                              | `appearance`               |
-| BlSegmented, BlSegmentedNav                     | `segmented`                |
-| BlButton                                        | `btn`                      |
-| BlField, BlInput, BlTextarea, BlSelect, BlRange | `field`                    |
-| `.bl-fieldset` (CSS only)                       | `fieldset`                 |
-| BlLinkArrow                                     | `link-arrow`               |
-| BlSpecPanel, BlSpecRow                          | `spec-panel`               |
-| BlTelemetry, BlTelemetryCell                    | `telemetry`                |
-| BlLed                                           | `led`                      |
-| BlEqBars                                        | `eq`                       |
-| BlMarquee                                       | `marquee`                  |
-| BlReadout                                       | `readout`                  |
-| BlMeter                                         | `meter`                    |
-| BlProgress                                      | `meter`                    |
-| BlMsg                                           | `msg`                      |
-| BlLog                                           | `log`                      |
-| BlSectionHead                                   | `section-head`             |
-| BlMeta                                          | `meta`                     |
-| BlIndex, BlIndexRow                             | `index-row`                |
-| BlPrevNext                                      | `prev-next`                |
-| BlProse                                         | `prose`                    |
-| BlTable                                         | `table`                    |
-| BlPagination                                    | `pagination`               |
-| BlToggle                                        | `toggle`                   |
-| BlCheckbox                                      | `checkbox`                 |
-| BlRadioGroup, BlRadio                           | `radio` (needs `fieldset`) |
-| BlMedia                                         | `media`                    |
-| BlDisclosure                                    | `disclosure`               |
-| BlDialog                                        | `dialog`                   |
-| BlToaster                                       | `toast`                    |
+| Component                                       | Module                         |
+| ----------------------------------------------- | ------------------------------ |
+| BlSiteBar, BlSiteBarLink                        | `site-bar`                     |
+| BlTabBar, BlTabBarItem                          | `tab-bar`                      |
+| BlColophon                                      | `colophon`                     |
+| BlSkipLink                                      | `skip-link`                    |
+| BlAppearanceSwitch                              | `appearance`                   |
+| BlSegmented, BlSegmentedNav                     | `segmented`                    |
+| BlButton                                        | `btn`                          |
+| BlField, BlInput, BlTextarea, BlSelect, BlRange | `field`                        |
+| `.bl-fieldset` (CSS only)                       | `fieldset`                     |
+| BlLinkArrow                                     | `link-arrow`                   |
+| BlSpecPanel, BlSpecRow                          | `spec-panel`                   |
+| BlTelemetry, BlTelemetryCell                    | `telemetry`                    |
+| BlLed                                           | `led`                          |
+| BlEqBars                                        | `eq`                           |
+| BlMarquee                                       | `marquee`                      |
+| BlReadout                                       | `readout`                      |
+| BlMeter                                         | `meter`                        |
+| BlProgress                                      | `meter`                        |
+| BlMsg                                           | `msg`                          |
+| BlLog                                           | `log`                          |
+| BlSectionHead                                   | `section-head`                 |
+| BlMeta                                          | `meta`                         |
+| BlIndex, BlIndexRow                             | `index-row`                    |
+| BlPrevNext                                      | `prev-next`                    |
+| BlProse                                         | `prose`                        |
+| BlTable                                         | `table`                        |
+| BlPagination                                    | `pagination`                   |
+| BlToggle                                        | `toggle`                       |
+| BlCheckbox                                      | `checkbox`                     |
+| BlRadioGroup, BlRadio                           | `radio` (needs `fieldset`)     |
+| BlMedia                                         | `media`                        |
+| BlDisclosure                                    | `disclosure`                   |
+| BlDialog                                        | `dialog`                       |
+| BlToaster                                       | `toast`                        |
+| (shared placement for popovers)                 | `anchored`                     |
+| BlPopover                                       | `popover` (needs `anchored`)   |
+| BlTooltip                                       | `tooltip` (needs `anchored`)   |
+| BlTabs                                          | `tabs`                         |
+| BlNumberField                                   | `number-field` (needs `field`) |
 
 ## Supported entry points
 
@@ -865,3 +999,8 @@ branch.
 
 Renaming or removing a token, class, prop, custom property or the appearance attribute/key is a
 breaking change (`BREAKING CHANGE:` footer; minor bump while 0.x).
+
+## License
+
+MIT (see `LICENSE`). The bundled fonts are separate works under the SIL Open Font License 1.1:
+`fonts/OFL-geist.txt` (Geist, Geist Mono) and `fonts/OFL-bricolage.txt` (Bricolage Grotesque).

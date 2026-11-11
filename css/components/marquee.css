@@ -44,6 +44,22 @@
       )
       center / 100% 100% no-repeat;
   }
+  .bl-marquee[data-overflowing]:dir(rtl) {
+    -webkit-mask-image: linear-gradient(
+      to left,
+      transparent 0,
+      #000 var(--bl-mask-l),
+      #000 var(--bl-mask-r),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to left,
+      transparent 0,
+      #000 var(--bl-mask-l),
+      #000 var(--bl-mask-r),
+      transparent 100%
+    );
+  }
   .bl-marquee[data-overflowing] .bl-marquee__content {
     will-change: transform;
   }
@@ -57,7 +73,8 @@
       white-space: normal;
       overflow-wrap: anywhere;
     }
-    .bl-marquee[data-overflowing] {
+    .bl-marquee[data-overflowing],
+    .bl-marquee[data-overflowing]:dir(rtl) {
       -webkit-mask: none;
       mask: none;
     }

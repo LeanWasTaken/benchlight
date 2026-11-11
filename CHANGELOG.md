@@ -1,5 +1,75 @@
 # Changelog
 
+## 0.10.0 - 2026-11-11
+
+- `benchlight/vue` now ships compiled JavaScript and `.d.ts` files (`dist/vue/`, one module per
+  component, `vue` external) instead of raw `.vue` and `.ts` source. Consumers no longer need
+  `@vitejs/plugin-vue` or a TypeScript-aware bundler to import it, and it has a `types` condition.
+- `benchlight/nuxt` is compiled too (`dist/nuxt/module.mjs` and `module.d.mts`), so a consumer's
+  `nuxt typecheck` no longer type-checks Benchlight source. The module registers the compiled
+  components and auto-imports from `dist/vue`.
+- `vue/` and `nuxt/` are no longer in the package. `dist/vue` and `dist/nuxt` are not committed:
+  `prepack` builds them, so the npm tarball and the release tree always carry fresh copies. After a
+  clone, run `bun run build:js` before the Nuxt tests or the fixtures.
+- v0.10 adds four components and a shared placement vocabulary, all additive (no breaking change):
+  BlPopover (disclosure panel on the native popover, trigger gets `aria-expanded` and
+  `aria-controls`, panel has no role unless `ariaLabel` is set, then `role="group"`), BlTooltip
+  (plain-text hint on hover and focus, Esc dismisses it before an enclosing dialog or popover,
+  hover ignored for touch), BlTabs (WAI-ARIA tabs, panel slots are `panel-<value>`, `TabItem`
+  describes an item) and BlNumberField
+  (model is `number | null`, clamps to `[min, max]` on commit, not while typing or for externally
+  set values; it does not block the mouse wheel, a focused field blurs on wheel, and it does not
+  handle `form.reset()`).
+  Popover and Tooltip share the `side` and `align` props (`PopoverSide`, `PopoverAlign`) and the
+  `anchored` CSS module. A controlled-only `open` that ignores `update:open` still sees Esc and
+  outside click close the native popover.
+- Anchored placement needs CSS anchor positioning with `position-area`: Chromium 129, Safari 26,
+  Firefox 147. Without it the Popover and Tooltip panel stays centred in the viewport and remains
+  usable. Exit animations run in Chromium only; Safari and Firefox close instantly.
+
+### Fixed
+
+- Docs: README, the Vite plugin JSDoc and a test comment no longer say components ship as `.vue` and
+  `.ts` source needing a compiler; the Vite and Nuxt notes match the compiled package.
+- Docs: removed `paginationLabels.nav` (gone since 0.9); corrected the BlRadio attribute split, the
+  BlTooltip `delay` default, the Tailwind breakpoint claim, and the CSS hooks table (added
+  `--bl-anchored-gap`, `--bl-popover-width`, `--bl-tooltip-width`; `--bl-meter-value` is also set by
+  BlProgress; scroll-offset defaults are literals).
+- Docs: listed `data-side` and `data-align`, BlNumberField field wiring and `@row-activate`; added a
+  browser-support section, a form-reset note and a note that link `href`/`to` are passed unchanged.
+- The package `license` field is now `MIT AND OFL-1.1`, since the tarball ships OFL-1.1 fonts; LICENSE
+  and README point at `fonts/OFL-*.txt`.
+- The current item of BlSiteBarLink, BlTabBarItem and BlIndexRow now has a cue besides colour (an
+  underline, or an inset bar) and a forced-colors fallback, so it no longer rests on hue alone.
+- RTL: physical margins, padding, borders, `text-align` and `left`/`right` in prose, prev-next,
+  index-row, section-head, meta, field, site-bar, skip-link and the appearance switch are logical
+  now, and the appearance thumb and prev/next nudge mirror under `:dir(rtl)`. BlMarquee scrolls and
+  masks the right way in RTL.
+- The "!" error marks fall back to a plain `content` where alt text is unsupported. Anchored
+  placement is gated on `position-area` support (Chrome 125 to 128 misplaced the panel), closed
+  Popover and Tooltip panels stay hidden without `:popover-open`, and `BlTable` measuring no longer
+  disables transitions on host cell content. `.bl-table--scroll` and the appearance track isolate
+  their stacking, and the reduced-motion reset covers `.bl-dialog::backdrop`.
+- BlDialog and BlPopover release their toast host, page lock and open state when a `KeepAlive`
+  deactivates them, and BlDialog shows again on activation while `open` is still true.
+- A toast `duration` of `Infinity`, `NaN`, zero or less now persists until dismissed, and values
+  above 2^31-1 are clamped. BlPagination's range text agrees with its page count for a fractional or
+  zero `pageSize`, and the ANSI parser drops cursor and erase sequences instead of printing them.
+- Inside a BlField, BlInput, BlNumberField, BlSelect, BlRange and BlTextarea always use the field's
+  id, so the label targets them; a different `id` on the control is ignored with a development
+  warning. Set `id` on BlField instead. An unnamed BlSegmented or BlSegmentedNav warns in
+  development, `isDev` no longer throws where `process` is undefined, and `rows`, `options` and
+  `items` accept readonly arrays.
+- Inline defaults of BlPopover, BlTooltip and BlSegmentedNav moved into `withDefaults`, so API.md
+  lists them.
+- Every `dist/modules/*.min.css` opens with `@layer theme, base, components, utilities;`, so loading
+  any one module first no longer inverts the layer order. `bun run test` fails when it finds no
+  tests and rebuilds a stale `dist/vue` and `dist/nuxt`.
+- The release workflow no longer persists its write token in the checkout: it reaches only the git
+  steps, per command, and never the install, check or fixtures steps. CI caches the bun install,
+  pins the Playwright and actionlint images by digest and has weekly grouped Dependabot updates.
+  happy-dom and vite are bumped for advisories (dev only).
+
 ## 0.9.0 - 2026-10-27
 
 The v1 API freeze: one prop vocabulary, typed BlTable columns, one controlled-model rule and

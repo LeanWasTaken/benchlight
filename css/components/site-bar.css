@@ -48,7 +48,7 @@
     flex: 0 100 auto;
     min-width: 0;
     margin-block: -4px;
-    margin-left: auto;
+    margin-inline-start: auto;
     padding: 4px 12px;
     overflow-x: auto;
     scroll-padding-inline: 16px;
@@ -103,16 +103,25 @@
   }
   .bl-site-bar__link[aria-current]:not([aria-current='false']) {
     color: var(--bl-color-trace);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 6px;
+  }
+  @media (forced-colors: active) {
+    .bl-site-bar__link[aria-current]:not([aria-current='false']) {
+      color: Highlight;
+      text-decoration-color: Highlight;
+    }
   }
   .bl-site-bar__actions {
     display: flex;
     align-items: center;
     flex-shrink: 0;
     gap: 4px;
-    margin-left: auto;
+    margin-inline-start: auto;
   }
   .bl-site-bar__navwrap + .bl-site-bar__actions {
-    margin-left: 0;
+    margin-inline-start: 0;
   }
   /* Focus must not scroll the window: the sticky bar sits inside the root's scroll-padding, so
      the browser would scroll the page to "clear" a focused bar control. A negative margin takes
@@ -130,7 +139,7 @@
       display: none;
     }
     html:has(.bl-tab-bar) .bl-site-bar__navwrap + .bl-site-bar__actions {
-      margin-left: auto;
+      margin-inline-start: auto;
     }
   }
   /* Short landscape screens: the bar scrolls away instead of eating the viewport. */

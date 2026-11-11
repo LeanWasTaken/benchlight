@@ -1,8 +1,8 @@
 import { PREPAINT } from '../js/prepaint-script.mjs'
 
 /**
- * Benchlight integration for plain Vite apps: keeps the shipped .vue source out of
- * esbuild dependency pre-bundling and inlines the no-flash appearance script.
+ * Benchlight integration for plain Vite apps: keeps `benchlight` out of Vite's
+ * dependency pre-bundling (the compiled components need no plugin) and inlines the no-flash appearance script.
  * @returns {import('vite').Plugin}
  */
 export function benchlight() {

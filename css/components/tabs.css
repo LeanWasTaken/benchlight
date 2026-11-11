@@ -1,0 +1,79 @@
+@layer components {
+  /* Underline tabs: a row of mono labels over a hairline, the selected one marked by a 2px bar.
+     BlSegmented's pill stays the "choose a value" control; these switch panels. */
+  .bl-tabs {
+    min-inline-size: 0;
+  }
+  .bl-tabs__list {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 4px;
+    border-block-end: 1px solid var(--bl-color-separator);
+  }
+  .bl-tabs__tab {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: 44px;
+    min-block-size: 44px;
+    padding: 6px 12px;
+    overflow-wrap: anywhere;
+    background: transparent;
+    border: 0;
+    border-radius: var(--bl-radius-chip) var(--bl-radius-chip) 0 0;
+    font-family: var(--bl-font-mono);
+    font-size: var(--bl-text-annotation);
+    line-height: normal;
+    color: var(--bl-color-ink-2);
+    cursor: pointer;
+    transition: color var(--bl-duration-fast) ease;
+  }
+  /* The bar is a background, not a border: forced colors would paint a transparent border on
+     every tab, but drops backgrounds, so the selected cue is restated below. It sits over the
+     list's hairline. */
+  .bl-tabs__tab::after {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: -1px;
+    block-size: 2px;
+    background: transparent;
+    content: '';
+    transition: background-color var(--bl-duration-fast) ease;
+  }
+  @media (hover: hover) {
+    .bl-tabs__tab:not(:disabled):hover {
+      color: var(--bl-color-ink-1);
+    }
+  }
+  .bl-tabs__tab[aria-selected='true'] {
+    color: var(--bl-color-ink-1);
+  }
+  .bl-tabs__tab[aria-selected='true']::after {
+    background: var(--bl-color-trace);
+  }
+  .bl-tabs__tab:focus-visible {
+    outline: 2px solid var(--bl-color-trace);
+    outline-offset: -2px;
+  }
+  .bl-tabs__tab:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .bl-tabs__panel {
+    padding-block-start: 16px;
+  }
+  .bl-tabs__panel:focus-visible {
+    outline: 2px solid var(--bl-color-trace);
+    outline-offset: 2px;
+  }
+  @media (forced-colors: active) {
+    .bl-tabs__tab[aria-selected='true']::after {
+      forced-color-adjust: none;
+      background: Highlight;
+    }
+    .bl-tabs__tab:disabled {
+      color: GrayText;
+    }
+  }
+}
