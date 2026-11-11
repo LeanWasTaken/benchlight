@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.10.0 - 2026-11-11
 
 - `benchlight/vue` now ships compiled JavaScript and `.d.ts` files (`dist/vue/`, one module per
   component, `vue` external) instead of raw `.vue` and `.ts` source. Consumers no longer need
