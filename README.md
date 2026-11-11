@@ -859,6 +859,8 @@ A tablist with panels, in the WAI-ARIA tabs pattern. Full prop list is in [API.m
 
 - Props: `items` (`TabItem[]`: `value`, `label`, optional `disabled`), `ariaLabel`, `activation`
   (`auto` or `manual`); `v-model` is the selected value. Panel slots are `panel-<value>`.
+- A model that names no enabled tab shows the first enabled one and emits nothing until the user
+  picks.
 - Arrow keys, Home and End move between enabled tabs; Tab moves into the panel.
 
 ## BlNumberField

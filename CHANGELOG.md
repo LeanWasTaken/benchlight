@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Breaking
+
+- BlTabs no longer writes the resolved tab into `v-model`. It used to emit `update:modelValue` with
+  the first enabled tab on mount and whenever `items` changed; it now only shows that tab and emits
+  on user selection. A model naming no enabled tab stays as set.
+
+### Migration
+
+<!-- prettier-ignore -->
+| Before | After |
+| --- | --- |
+| BlTabs `v-model` filled in with the first enabled tab on mount or when `items` change | the model stays as set (for example `undefined` or a removed value) until the user picks a tab; the first enabled tab is shown meanwhile. Initialise the model to a tab value if code reads it before a pick |
+
 ### Fixed
 
 - BlPopover no longer writes its `open` model when a `KeepAlive` deactivates it. The panel is hidden

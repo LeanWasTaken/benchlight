@@ -71,19 +71,12 @@
   const list = ref<HTMLElement>()
 
   // The model when it names an enabled item, else the first enabled item (none when all are
-  // disabled). Written back to the model so a bound v-model agrees with what is shown.
+  // disabled). Shown only: the model is never written here, it changes on a user selection.
   const current = computed<T | undefined>(() => {
     const value = model.value
     if (props.items.some((item) => item.value === value && !item.disabled)) return value
     return props.items.find((item) => !item.disabled)?.value
   })
-  watch(
-    () => [current.value, model.value] as const,
-    ([resolved, value]) => {
-      if (resolved !== undefined && resolved !== value) model.value = resolved
-    },
-    { immediate: true }
-  )
 
   function select(item: TabItem<T>): void {
     if (!item.disabled) model.value = item.value

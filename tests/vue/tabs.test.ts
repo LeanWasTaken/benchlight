@@ -130,22 +130,31 @@ describe('BlTabs', () => {
     ])
   })
 
-  it('selects the first enabled item when the model is unset and emits it', () => {
+  it('shows the first enabled item when the model is unset, without emitting', () => {
     const w = setup({ 'onUpdate:modelValue': () => {} })
     expect(selected(w)).toEqual(['true', 'false', 'false', 'false'])
-    expect(w.emitted('update:modelValue')?.at(-1)).toEqual(['over view'])
+    expect(tabs(w).map((t) => t.attributes('tabindex'))).toEqual(['0', '-1', '-1', '-1'])
+    expect(w.emitted('update:modelValue')).toBeUndefined()
   })
 
-  it('selects the first enabled item when the model points at a missing or disabled item', () => {
+  it('shows the first enabled item when the model names a missing or disabled item, without emitting', () => {
     const missing = setup({ modelValue: 'nope' })
     expect(selected(missing)).toEqual(['true', 'false', 'false', 'false'])
-    expect(missing.emitted('update:modelValue')?.at(-1)).toEqual(['over view'])
+    expect(missing.emitted('update:modelValue')).toBeUndefined()
     const disabled = setup({
       modelValue: 'off',
       items: [{ value: 'z', label: 'Z', disabled: true }, ...items]
     })
     expect(selected(disabled)).toEqual(['false', 'true', 'false', 'false', 'false'])
-    expect(disabled.emitted('update:modelValue')?.at(-1)).toEqual(['over view'])
+    expect(disabled.emitted('update:modelValue')).toBeUndefined()
+  })
+
+  it('follows the model when it names an enabled item', async () => {
+    const w = setup({ modelValue: 'logs' })
+    expect(selected(w)).toEqual(['false', 'true', 'false', 'false'])
+    await w.setProps({ modelValue: 'settings' })
+    expect(selected(w)).toEqual(['false', 'false', 'false', 'true'])
+    expect(w.emitted('update:modelValue')).toBeUndefined()
   })
 
   it('keeps a valid model without emitting', () => {
@@ -154,7 +163,7 @@ describe('BlTabs', () => {
     expect(w.emitted('update:modelValue')).toBeUndefined()
   })
 
-  it('re-selects the first enabled item when items change and the selected tab disappears', async () => {
+  it('shows the first enabled item when items change and the selected tab disappears, without emitting', async () => {
     const Host = defineComponent({
       setup() {
         const model = ref<string | number>('settings')
@@ -186,8 +195,8 @@ describe('BlTabs', () => {
     ]
     await nextTick()
     await nextTick()
-    expect(w.get('output').text()).toBe('logs')
-    expect(w.findComponent(BlTabs as Component).emitted('update:modelValue')).toEqual([['logs']])
+    expect(w.get('output').text()).toBe('settings')
+    expect(w.findComponent(BlTabs as Component).emitted('update:modelValue')).toBeUndefined()
     expect(w.findAll('[role=tab]').map((t) => t.attributes('aria-selected'))).toEqual([
       'false',
       'true'
