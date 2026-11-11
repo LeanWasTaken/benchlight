@@ -11,7 +11,6 @@ import type {
   ButtonVariant,
   DialogCloseEvent,
   DialogCloseReason,
-  LedState,
   LinkCurrent,
   StatusTone,
   ToastTone
@@ -33,7 +32,7 @@ type Props<C extends abstract new (...args: never) => unknown> =
 
 assertType<Equal<NonNullable<Props<typeof BlMsg>['tone']>, StatusTone>>()
 assertType<Equal<NonNullable<Props<typeof BlButton>['variant']>, ButtonVariant>>()
-assertType<Equal<NonNullable<Props<typeof BlLed>['state']>, LedState>>()
+assertType<Equal<NonNullable<Props<typeof BlLed>['tone']>, StatusTone>>()
 assertType<Equal<ToastTone, StatusTone>>()
 assertType<Equal<StatusTone, 'neutral' | 'success' | 'danger'>>()
 assertType<Equal<DialogCloseEvent, { reason: DialogCloseReason; returnValue: string }>>()

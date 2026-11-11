@@ -282,12 +282,6 @@ type LabelOverrides<T> = {
 };
 ```
 
-### `LedState`
-
-```ts
-type LedState = 'on' | 'off' | 'danger';
-```
-
 ### `LinkAs`
 
 ```ts
@@ -711,7 +705,7 @@ Exposed: none
 | prop | type | required | default |
 | --- | --- | --- | --- |
 | `ariaLabel` | `string \| undefined` | no |  |
-| `state` | `"danger" \| "off" \| "on" \| undefined` | no | `"off"` |
+| `tone` | `StatusTone \| undefined` | no | `"neutral"` |
 
 Slots: none
 Events: none

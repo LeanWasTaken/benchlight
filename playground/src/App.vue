@@ -40,7 +40,7 @@
           </BlMarquee>
         </BlTelemetryCell>
         <BlTelemetryCell label="Local time">UTC 21:04</BlTelemetryCell>
-        <BlTelemetryCell label="Status"><BlLed state="on" /> Available</BlTelemetryCell>
+        <BlTelemetryCell label="Status"><BlLed tone="success" /> Available</BlTelemetryCell>
       </BlTelemetry>
     </section>
 

@@ -7,6 +7,9 @@
 - BlTabs no longer writes the resolved tab into `v-model`. It used to emit `update:modelValue` with
   the first enabled tab on mount and whenever `items` changed; it now only shows that tab and emits
   on user selection. A model naming no enabled tab stays as set.
+- BlLed takes `tone` (`StatusTone`, shared with BlMsg and toasts) instead of `state`, and `LedState`
+  is removed. `neutral` (the default) is unlit, `success` is lit and `danger` is red; the CSS classes
+  are unchanged. There is no alias for `state`.
 
 ### Migration
 
@@ -14,6 +17,10 @@
 | Before | After |
 | --- | --- |
 | BlTabs `v-model` filled in with the first enabled tab on mount or when `items` change | the model stays as set (for example `undefined` or a removed value) until the user picks a tab; the first enabled tab is shown meanwhile. Initialise the model to a tab value if code reads it before a pick |
+| `<BlLed state="on">` | `<BlLed tone="success">` |
+| `<BlLed state="off">` (or no `state`) | `<BlLed tone="neutral">` (or no `tone`) |
+| `<BlLed state="danger">` | `<BlLed tone="danger">` |
+| `import type { LedState }` | `StatusTone` |
 
 ### Fixed
 

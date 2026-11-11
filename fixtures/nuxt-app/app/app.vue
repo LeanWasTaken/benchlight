@@ -15,7 +15,7 @@
     <main id="main-content" class="bl-col">
       <h1 class="bl-display bl-display--lg bl-rise" :style="blRiseDelay(1)">Fixture</h1>
       <p class="bg-surface text-ink-2 font-display">tailwind utilities</p>
-      <BlLed state="on" />
+      <BlLed tone="success" />
       <BlSpecPanel :rows="[{ label: 'Refdes', value: 'SW-01' }]" />
       <BlTable
         v-model:sort="sort"

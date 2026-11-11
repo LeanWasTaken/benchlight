@@ -97,7 +97,7 @@ describe('small readouts', () => {
     expect(hidden.attributes('aria-hidden')).toBe('true')
     expect(hidden.attributes('role')).toBeUndefined()
     expect(hidden.attributes('aria-label')).toBeUndefined()
-    const named = mount(BlLed, { props: { state: 'danger', ariaLabel: 'Link down' } })
+    const named = mount(BlLed, { props: { tone: 'danger', ariaLabel: 'Link down' } })
     expect(named.attributes('role')).toBe('img')
     expect(named.attributes('aria-label')).toBe('Link down')
     expect(named.attributes('aria-hidden')).toBeUndefined()
@@ -122,10 +122,11 @@ describe('small readouts', () => {
     expect(panel.find('a[data-router]').attributes('href')).toBe('/z')
   })
 
-  it('BlLed maps state to modifiers', () => {
+  it('BlLed maps tone to modifiers', () => {
     expect(mount(BlLed).classes()).toEqual(['bl-led'])
-    expect(mount(BlLed, { props: { state: 'on' } }).classes()).toContain('bl-led--on')
-    expect(mount(BlLed, { props: { state: 'danger' } }).classes()).toContain('bl-led--danger')
+    expect(mount(BlLed, { props: { tone: 'neutral' } }).classes()).toEqual(['bl-led'])
+    expect(mount(BlLed, { props: { tone: 'success' } }).classes()).toContain('bl-led--on')
+    expect(mount(BlLed, { props: { tone: 'danger' } }).classes()).toContain('bl-led--danger')
   })
 
   it('BlEqBars renders four bars and an active modifier', () => {

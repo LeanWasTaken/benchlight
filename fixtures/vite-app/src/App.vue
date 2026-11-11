@@ -3,7 +3,7 @@
     <h1 class="bl-display bl-display--lg">Benchlight vite fixture</h1>
     <BlAppearanceSwitch />
     <BlButton variant="secondary">Back</BlButton>
-    <BlLed state="on" />
+    <BlLed tone="success" />
     <BlMeter label="Load" :value="0.5" />
     <BlTable
       v-model:sort="sort"

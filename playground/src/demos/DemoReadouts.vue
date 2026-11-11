@@ -30,9 +30,9 @@
     <BlMsg>Default tone is neutral.</BlMsg>
   </div>
   <div class="pg-row">
-    <BlLed state="on" /><span class="bl-annotation">on</span> <BlLed />
+    <BlLed tone="success" /><span class="bl-annotation">on</span> <BlLed />
     <span class="bl-annotation">off</span>
-    <BlLed state="danger" /><span class="bl-annotation">danger</span> <BlEqBars active /><span
+    <BlLed tone="danger" /><span class="bl-annotation">danger</span> <BlEqBars active /><span
       class="bl-annotation"
       >active</span
     >
