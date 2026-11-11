@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Fixed
+
+- BlPopover no longer writes its `open` model when a `KeepAlive` deactivates it. The panel is hidden
+  and the trigger reports `aria-expanded="false"` while deactivated, but `open` stays as it was, and
+  the popover shows again on activation if `open` is still true. Before, deactivation set `open` to
+  `false`.
+
 ### Tests/CI
 
 - A manual `publish` workflow (`.github/workflows/publish.yml`) publishes `benchlight` to npm with

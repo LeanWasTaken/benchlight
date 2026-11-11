@@ -84,42 +84,71 @@ describe('KeepAlive', () => {
     w.unmount()
   })
 
-  it('hides an open popover on deactivation', async () => {
-    const hide = vi.fn()
-    proto['showPopover'] = vi.fn()
-    proto['hidePopover'] = hide
-    const shown = ref(true)
-    const open = ref(false)
-    const Pop = defineComponent({
-      setup: () => () =>
-        h(
-          BlPopover,
-          { open: open.value, 'onUpdate:open': (v: boolean) => (open.value = v) },
-          { trigger: ({ bind }: { bind: Record<string, unknown> }) => h('button', bind, 'x') }
-        )
-    })
-    const w = mount(
-      defineComponent({
-        setup: () => () => h(KeepAlive, null, () => (shown.value ? h(Pop) : null))
-      }),
-      { attachTo: document.body }
-    )
-    const panel = document.querySelector('.bl-popover')!
-    const e = new Event('beforetoggle')
-    Object.assign(e, { newState: 'open', oldState: 'closed' })
-    panel.dispatchEvent(e)
-    await nextTick()
-    expect(open.value).toBe(true)
-    expect(document.querySelector('button')!.getAttribute('aria-expanded')).toBe('true')
+  describe('popover', () => {
+    async function setup() {
+      const hide = vi.fn()
+      const show = vi.fn()
+      proto['showPopover'] = show
+      proto['hidePopover'] = hide
+      const shown = ref(true)
+      const open = ref(false)
+      const onUpdate = vi.fn((v: boolean) => (open.value = v))
+      const Pop = defineComponent({
+        setup: () => () =>
+          h(
+            BlPopover,
+            { open: open.value, 'onUpdate:open': onUpdate },
+            { trigger: ({ bind }: { bind: Record<string, unknown> }) => h('button', bind, 'x') }
+          )
+      })
+      const w = mount(
+        defineComponent({
+          setup: () => () => h(KeepAlive, null, () => (shown.value ? h(Pop) : null))
+        }),
+        { attachTo: document.body }
+      )
+      const panel = document.querySelector('.bl-popover')!
+      const e = new Event('beforetoggle')
+      Object.assign(e, { newState: 'open', oldState: 'closed' })
+      panel.dispatchEvent(e)
+      await nextTick()
+      expect(open.value).toBe(true)
+      onUpdate.mockClear()
+      // A deactivated branch is detached from the document, so keep the element.
+      const button = document.querySelector('button')!
+      const expanded = () => button.getAttribute('aria-expanded')
+      return { w, shown, open, onUpdate, hide, show, expanded }
+    }
 
-    shown.value = false
-    await nextTick()
-    expect(hide).toHaveBeenCalled()
-    expect(open.value).toBe(false)
-    shown.value = true
-    await nextTick()
-    expect(document.querySelector('button')!.getAttribute('aria-expanded')).toBe('false')
-    w.unmount()
+    it('hides on deactivation without writing the open model, reopens on activation', async () => {
+      const { w, shown, open, onUpdate, hide, show, expanded } = await setup()
+      expect(expanded()).toBe('true')
+      shown.value = false
+      await nextTick()
+      expect(hide).toHaveBeenCalled()
+      expect(onUpdate).not.toHaveBeenCalled()
+      expect(open.value).toBe(true)
+      expect(expanded()).toBe('false')
+      shown.value = true
+      await nextTick()
+      expect(show).toHaveBeenCalled()
+      expect(expanded()).toBe('true')
+      expect(onUpdate).not.toHaveBeenCalled()
+      w.unmount()
+    })
+
+    it('stays closed when the model went false while deactivated', async () => {
+      const { w, shown, open, show, expanded } = await setup()
+      shown.value = false
+      await nextTick()
+      open.value = false
+      await nextTick()
+      shown.value = true
+      await nextTick()
+      expect(show).not.toHaveBeenCalled()
+      expect(expanded()).toBe('false')
+      w.unmount()
+    })
   })
 })
 

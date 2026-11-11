@@ -51,11 +51,14 @@
   const panelId = `${uid}-popover`
   const panel = ref<HTMLElement>()
 
+  // True while a KeepAlive has the component deactivated: the panel is hidden, `open` is untouched.
+  const suspended = ref(false)
+
   const bind = computed(() => ({
     id: `${uid}-trigger`,
     // A <button> in a <form> defaults to submit: the click would submit instead of opening.
     type: 'button' as const,
-    'aria-expanded': open.value ? ('true' as const) : ('false' as const),
+    'aria-expanded': open.value && !suspended.value ? ('true' as const) : ('false' as const),
     'aria-controls': panelId,
     popovertarget: panelId,
     style: triggerAnchorStyle(uid)
@@ -72,12 +75,13 @@
   function onBeforeToggle(event: Event): void {
     const next = (event as ToggleEvent).newState === 'open'
     shown = next
+    if (suspended.value) return
     if (open.value !== next) open.value = next
   }
 
   function sync(): void {
     const el = panel.value
-    if (!el || clicking || typeof el.showPopover !== 'function') return
+    if (!el || clicking || suspended.value || typeof el.showPopover !== 'function') return
     const want = open.value
     if (want === shown) return
     try {
@@ -118,9 +122,11 @@
     }
     sync()
   })
-  // KeepAlive: hide a deactivated popover so `shown` and aria-expanded agree with the page.
+  // KeepAlive: hide a deactivated popover so `shown` and aria-expanded agree with the page, but
+  // leave the `open` model alone (the user did not choose this) and reopen if it is still true.
   onDeactivated(() => {
     clicking = false
+    suspended.value = true
     if (!shown) return
     shown = false
     try {
@@ -128,9 +134,11 @@
     } catch {
       // Already hidden.
     }
-    if (open.value) open.value = false
   })
-  onActivated(sync)
+  onActivated(() => {
+    suspended.value = false
+    sync()
+  })
   onBeforeUnmount(() => {
     panel.value?.ownerDocument.removeEventListener('click', onClickCapture, true)
   })
