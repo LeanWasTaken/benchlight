@@ -37,7 +37,18 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, h, onBeforeUnmount, onMounted, ref, useId, watch, type VNode } from 'vue'
+  import {
+    computed,
+    h,
+    onActivated,
+    onBeforeUnmount,
+    onDeactivated,
+    onMounted,
+    ref,
+    useId,
+    watch,
+    type VNode
+  } from 'vue'
   import { warn } from '../internal/dev'
   import { lockPage, unlockPage } from '../internal/pageLock'
   import { hasContent } from '../internal/slots'
@@ -170,6 +181,24 @@
     else closeWith('program')
   })
   onMounted(() => {
+    if (open.value) show()
+  })
+  // KeepAlive: a deactivated open dialog releases the toast host and page lock, and closes
+  // without a user-close event; activation shows it again while `open` still asks for it.
+  let suspended = false
+  onDeactivated(() => {
+    if (!isOpen) return
+    suspended = true
+    isOpen = false
+    pendingReason = null
+    if (toasts.value) removeToastHost(toasts.value)
+    unlockPage()
+    el.value?.close()
+    opener = fallback = null
+  })
+  onActivated(() => {
+    if (!suspended) return
+    suspended = false
     if (open.value) show()
   })
   onBeforeUnmount(() => {

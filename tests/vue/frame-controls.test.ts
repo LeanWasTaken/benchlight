@@ -596,7 +596,7 @@ describe('form controls', () => {
     expect(select.attributes('style')).toBeUndefined()
   })
 
-  it('BlSelect wires to a BlField, and an own id wins and aria-describedby merges', async () => {
+  it('BlSelect wires to a BlField, and the field id wins over an own id and aria-describedby merges', async () => {
     const own = ref<Record<string, unknown>>({})
     const Host = defineComponent({
       setup: () => () =>
@@ -610,7 +610,7 @@ describe('form controls', () => {
     expect(wrapper.find('select').attributes('aria-describedby')).toBe(`${id}-hint`)
     own.value = { id: 'mine', 'aria-describedby': 'other' }
     await nextTick()
-    expect(wrapper.find('select').attributes('id')).toBe('mine')
+    expect(wrapper.find('select').attributes('id')).toBe(id)
     expect(wrapper.find('select').attributes('aria-describedby')).toBe(`${id}-hint other`)
   })
 
@@ -684,13 +684,13 @@ describe('form controls', () => {
     expect(wrapper.find('input').attributes('aria-describedby')).toBeUndefined()
   })
 
-  it('explicit id wins and aria-describedby merges with the hint id', () => {
+  it('the field id wins over an explicit id and aria-describedby merges with the hint id', () => {
     const wrapper = mount(BlField, {
       props: { label: 'SSID', hint: 'Network name' },
       slots: { default: () => h(BlInput, { id: 'own', 'aria-describedby': 'mine' }) }
     })
     const input = wrapper.find('input')
-    expect(input.attributes('id')).toBe('own')
+    expect(input.attributes('id')).toBe(wrapper.find('label').attributes('for'))
     expect(input.attributes('aria-describedby')).toBe(
       `${wrapper.find('label').attributes('for')}-hint mine`
     )
@@ -752,13 +752,13 @@ describe('form controls', () => {
     expect(mount(BlInput).find('input').attributes('id')).toBeUndefined()
   })
 
-  it('BlRange id attr wins and aria-describedby merges with the hint id', () => {
+  it('BlRange keeps the field id over an id attr and aria-describedby merges with the hint id', () => {
     const wrapper = mount(BlField, {
       props: { label: 'Volume', hint: 'h', id: 'f' },
       slots: { default: () => h(BlRange, { id: 'own', 'aria-describedby': 'mine f-hint' }) }
     })
     const input = wrapper.find('input[type="range"]')
-    expect(input.attributes('id')).toBe('own')
+    expect(input.attributes('id')).toBe('f')
     expect(input.attributes('aria-describedby')).toBe('f-hint mine')
   })
 

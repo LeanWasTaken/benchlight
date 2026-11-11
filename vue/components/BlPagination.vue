@@ -50,7 +50,7 @@
   import { warn } from '../internal/dev'
   import { mergeLabels } from '../internal/labels'
   import { useClampedPage } from '../internal/pageClamp'
-  import { clampPage, pageCount, pageRange } from '../internal/table'
+  import { clampPage, normSize, pageCount, pageRange } from '../internal/table'
   import type { LabelOverrides, PaginationLabels } from '../types'
 
   /** Page navigation. Renders nothing when there is a single page. See README. */
@@ -61,7 +61,7 @@
       /** Accessible name of the nav. */
       ariaLabel?: string
       siblings?: number
-      labels?: Partial<LabelOverrides<PaginationLabels>>
+      labels?: Partial<LabelOverrides<PaginationLabels>> | undefined
     }>(),
     { siblings: 1 }
   )
@@ -91,8 +91,9 @@
   const current = computed(() => clampPage(page.value, props.total, props.pageSize))
   const items = computed(() => pageRange(current.value, pages.value, props.siblings))
   const rangeText = computed(() => {
-    const from = (current.value - 1) * props.pageSize + 1
-    const to = Math.min(props.total, current.value * props.pageSize)
+    const size = normSize(props.pageSize)
+    const from = (current.value - 1) * size + 1
+    const to = Math.min(props.total, current.value * size)
     return text.value.range(from, to, props.total)
   })
   useClampedPage(

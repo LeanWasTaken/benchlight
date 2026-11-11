@@ -92,7 +92,7 @@ export function nextSort(current: TableSort | null, key: string): TableSort | nu
   return current.dir === 'asc' ? { key, dir: 'desc' } : null
 }
 
-function normSize(pageSize: number): number {
+export function normSize(pageSize: number): number {
   return Number.isFinite(pageSize) && pageSize >= 1 ? Math.floor(pageSize) : 1
 }
 

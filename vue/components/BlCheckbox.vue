@@ -1,5 +1,5 @@
 <template>
-  <div class="bl-checkbox" :class="attrs.class" :style="attrs.style as any">
+  <div class="bl-checkbox" :class="attrs.class" :style="attrs.style as StyleValue">
     <label class="bl-checkbox__control">
       <input
         ref="input"
@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-  import { onBeforeUnmount, onMounted, ref, useAttrs, useId, watch } from 'vue'
+  import { onBeforeUnmount, onMounted, ref, useAttrs, useId, watch, type StyleValue } from 'vue'
   import { mergeDescribedBy } from '../internal/describedBy'
 
   const props = defineProps<{

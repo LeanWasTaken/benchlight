@@ -192,7 +192,8 @@ export interface ToastOptions {
   message: string
   tone?: ToastTone
   action?: ToastAction
-  // ms; default 5000, or 0 (stays until dismissed) when `action` is set
+  // ms; default 5000, or 0 (stays until dismissed) when `action` is set. Zero, negative and
+  // non-finite values (Infinity, NaN) also stay until dismissed; values above 2**31-1 are clamped.
   duration?: number
   id?: string
 }

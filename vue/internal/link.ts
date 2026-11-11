@@ -1,5 +1,5 @@
 import type { LinkAs, LinkCurrent, LinkTo } from '../types'
-import { warn } from './dev'
+import { warnOnce } from './dev'
 
 // The rendered tag: an explicit `as`, else an anchor when there is a link target, else the fallback.
 export function resolveTag(
@@ -16,17 +16,17 @@ export function linkBindings(as: LinkAs, to?: LinkTo, href?: string): Record<str
   if (typeof as === 'string') {
     if (as === 'a') {
       if (href === undefined && to !== undefined && typeof to !== 'string') {
-        warn('an object `to` needs a router component in `as`; this <a> renders without href.')
+        warnOnce('an object `to` needs a router component in `as`; this <a> renders without href.')
       }
       return { href: href ?? (typeof to === 'string' ? to : undefined) }
     }
     if (to !== undefined || href !== undefined) {
-      warn(`<${as}> is not a link, so its \`to\`/\`href\` are ignored.`)
+      warnOnce(`<${as}> is not a link, so its \`to\`/\`href\` are ignored.`)
     }
     return {}
   }
   if (to === undefined && href !== undefined) {
-    warn('a router component in `as` expects `to`; it received `href` instead.')
+    warnOnce('a router component in `as` expects `to`; it received `href` instead.')
   }
   return to !== undefined ? { to } : { href }
 }

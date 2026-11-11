@@ -30,7 +30,7 @@ export function useFollowScroll(
     bound?.removeEventListener('scroll', measure)
     bound = null
   }
-  // post-flush watchers never run on the server, so this stays SSR-safe
+  // on the server the immediate run sees no element and returns early, so this stays SSR-safe
   watch(
     el,
     (node) => {

@@ -7,8 +7,8 @@
     class="bl-tooltip"
     popover="manual"
     role="tooltip"
-    :data-side="side ?? 'top'"
-    :data-align="align ?? 'center'"
+    :data-side="side"
+    :data-align="align"
     :style="panelAnchorStyle(uid)"
     @pointerenter="onTipEnter"
     @pointerleave="onLeave"
@@ -26,26 +26,20 @@
   import { onBeforeUnmount, onDeactivated, onMounted, ref, useId, type VNode } from 'vue'
   import { panelAnchorStyle, triggerAnchorStyle } from '../internal/anchor'
   import { warn } from '../internal/dev'
-  import type { PopoverAlign, PopoverSide } from '../types'
+  import type { PopoverAlign, PopoverSide, TooltipTriggerBind } from '../types'
 
   defineOptions({ inheritAttrs: false })
-  const props = defineProps<{
-    text: string
-    side?: PopoverSide
-    align?: PopoverAlign
-    delay?: number
-  }>()
+  const props = withDefaults(
+    defineProps<{
+      text: string
+      side?: PopoverSide
+      align?: PopoverAlign
+      delay?: number
+    }>(),
+    { side: 'top', align: 'center', delay: 400 }
+  )
   defineSlots<{
-    trigger?: (props: {
-      bind: {
-        'aria-describedby': string
-        style: { anchorName: string }
-        onPointerenter: (e: PointerEvent) => void
-        onPointerleave: (e: PointerEvent) => void
-        onFocus: (e: FocusEvent) => void
-        onBlur: (e: FocusEvent) => void
-      }
-    }) => VNode[]
+    trigger?: (props: { bind: TooltipTriggerBind }) => VNode[]
   }>()
 
   // ms the pointer may spend between the trigger and the tooltip before it hides.
@@ -108,7 +102,7 @@
     clearTimeout(hideTimer)
     hideTimer = undefined
     if (open || showTimer !== undefined) return
-    showTimer = setTimeout(show, props.delay ?? 400)
+    showTimer = setTimeout(show, props.delay)
   }
 
   function onTipEnter(event: PointerEvent): void {

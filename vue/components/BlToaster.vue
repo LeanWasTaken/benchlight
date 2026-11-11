@@ -65,7 +65,7 @@
   } from 'vue'
   import { warn } from '../internal/dev'
   import { toastFocus, toastHosts } from '../internal/toastHosts'
-  import { dismissToast, toastState, type ToastRecord } from '../internal/toastStore'
+  import { dismissToast, normDuration, toastState, type ToastRecord } from '../internal/toastStore'
   import { mergeLabels } from '../internal/labels'
   import type { LabelOverrides, ToasterLabels } from '../types'
   import BlButton from './BlButton.vue'
@@ -164,8 +164,9 @@
   }
   function arm(t: ToastRecord): void {
     stop(t.id)
-    if (t.duration <= 0) return
-    timers.set(t.id, { remaining: t.duration, start: 0 })
+    const duration = normDuration(t.duration)
+    if (duration <= 0) return
+    timers.set(t.id, { remaining: duration, start: 0 })
     if (!paused()) run(t.id)
   }
   function stop(id: string): void {

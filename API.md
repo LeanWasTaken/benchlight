@@ -849,13 +849,13 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `align` | `PopoverAlign \| undefined` | no |  |
+| `align` | `PopoverAlign \| undefined` | no | `"center"` |
 | `ariaLabel` | `string \| undefined` | no |  |
 | `open` | `boolean \| undefined` | no | `false` |
-| `side` | `PopoverSide \| undefined` | no |  |
+| `side` | `PopoverSide \| undefined` | no | `"bottom"` |
 
 Slots: `default`, `trigger`
-Slot props: `trigger` `{ bind: { id: string; type: "button"; 'aria-expanded': "true" | "false"; 'aria-controls': string; popovertarget: string; style: { anchorName: string; }; }; }`
+Slot props: `trigger` `{ bind: PopoverTriggerBind; }`
 Events: `update:open`
 Exposed: none
 
@@ -979,7 +979,7 @@ Exposed: none
 | `compact` | `boolean \| undefined` | no |  |
 | `modelValue` | `T \| undefined` | no |  |
 | `name` | `string \| undefined` | no |  |
-| `options` | `SegmentedOption<T>[]` | yes |  |
+| `options` | `readonly SegmentedOption<T>[]` | yes |  |
 
 Slots: none
 Events: `update:modelValue`
@@ -992,7 +992,7 @@ Exposed: none
 | `ariaLabel` | `string \| undefined` | no |  |
 | `compact` | `boolean \| undefined` | no |  |
 | `items` | `SegmentedNavItem[]` | yes |  |
-| `linkAs` | `LinkAs \| undefined` | no |  |
+| `linkAs` | `LinkAs \| undefined` | no | `"a"` |
 
 Slots: none
 Events: none
@@ -1004,7 +1004,7 @@ Exposed: none
 | --- | --- | --- | --- |
 | `disabled` | `boolean \| undefined` | no |  |
 | `modelValue` | `T \| undefined` | no |  |
-| `options` | `SelectOption<T>[]` | yes |  |
+| `options` | `readonly SelectOption<T>[]` | yes |  |
 
 Slots: none
 Events: `update:modelValue`
@@ -1109,7 +1109,7 @@ Exposed: none
 | `paginationLabels` | `Partial<LabelOverrides<PaginationLabels>> \| undefined` | no |  |
 | `rowKey` | `Extract<keyof Row, string> \| ((row: Row) => string \| number) \| undefined` | no |  |
 | `rowLink` | `((row: Row) => { as?: LinkAs \| undefined; to?: LinkTo \| undefined; href?: string \| undefined; }) \| undefined` | no |  |
-| `rows` | `Row[]` | yes |  |
+| `rows` | `readonly Row[]` | yes |  |
 | `scroll` | `boolean \| undefined` | no |  |
 | `sort` | `{ key: string; dir: "asc" \| "desc"; } \| null \| undefined` | no | `null` |
 | `totalRows` | `number \| undefined` | no |  |
@@ -1132,7 +1132,7 @@ Exposed: none
 | --- | --- | --- | --- |
 | `activation` | `"auto" \| "manual" \| undefined` | no | `"auto"` |
 | `ariaLabel` | `string \| undefined` | no |  |
-| `items` | `TabItem<T>[]` | yes |  |
+| `items` | `readonly TabItem<T>[]` | yes |  |
 | `modelValue` | `T \| undefined` | no |  |
 
 Slots: none
@@ -1205,13 +1205,13 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `align` | `PopoverAlign \| undefined` | no |  |
-| `delay` | `number \| undefined` | no |  |
-| `side` | `PopoverSide \| undefined` | no |  |
+| `align` | `PopoverAlign \| undefined` | no | `"center"` |
+| `delay` | `number \| undefined` | no | `400` |
+| `side` | `PopoverSide \| undefined` | no | `"top"` |
 | `text` | `string` | yes |  |
 
 Slots: `trigger`
-Slot props: `trigger` `{ bind: { 'aria-describedby': string; style: { anchorName: string; }; onPointerenter: (e: PointerEvent) => void; onPointerleave: (e: PointerEvent) => void; onFocus: (e: FocusEvent) => void; onBlur: (e: FocusEvent) => void; }; }`
+Slot props: `trigger` `{ bind: TooltipTriggerBind; }`
 Events: none
 Exposed: none
 

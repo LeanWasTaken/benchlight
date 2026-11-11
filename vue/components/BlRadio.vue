@@ -1,5 +1,5 @@
 <template>
-  <div class="bl-radio" :class="attrs.class" :style="attrs.style as any">
+  <div class="bl-radio" :class="attrs.class" :style="attrs.style as StyleValue">
     <label class="bl-radio__control">
       <input
         ref="input"
@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-  import { inject, onBeforeUnmount, onMounted, ref, useAttrs, useId } from 'vue'
+  import { inject, onBeforeUnmount, onMounted, ref, useAttrs, useId, type StyleValue } from 'vue'
   import { mergeDescribedBy } from '../internal/describedBy'
   import { warnOnce } from '../internal/dev'
   import { RADIO_GROUP_CONTEXT } from '../internal/radioGroup'
@@ -35,7 +35,7 @@
 
   if (!group) {
     warnOnce(
-      'BlRadio must be used inside a BlRadioGroup, which owns its name and model. ' +
+      'BlRadio: must be used inside a BlRadioGroup, which owns its name and model. ' +
         'It renders a plain radio from its attrs.'
     )
   }

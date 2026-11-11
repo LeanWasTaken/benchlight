@@ -18,6 +18,13 @@ export const toastState = reactive({ items: [] as ToastRecord[], cleared: 0, toa
 let counter = 0
 let keys = 0
 
+const MAX_DELAY = 2 ** 31 - 1
+
+// Non-finite or non-positive durations are persistent (0); huge ones are clamped to the timer limit.
+export function normDuration(value: number): number {
+  return Number.isFinite(value) && value > 0 ? Math.min(value, MAX_DELAY) : 0
+}
+
 export function addToast(input: string | ToastOptions): string {
   if (typeof window === 'undefined') return ''
   const o: ToastOptions = typeof input === 'string' ? { message: input } : input
@@ -27,7 +34,7 @@ export function addToast(input: string | ToastOptions): string {
     message: o.message,
     tone: o.tone ?? 'neutral',
     action: o.action,
-    duration: o.duration ?? (o.action ? 0 : 5000),
+    duration: normDuration(o.duration ?? (o.action ? 0 : 5000)),
     version: 0
   }
   const i = toastState.items.findIndex((t) => t.id === record.id)

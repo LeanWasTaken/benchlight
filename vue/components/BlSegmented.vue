@@ -21,15 +21,19 @@
 </template>
 
 <script setup lang="ts" generic="T extends string | number | null">
-  import { computed, onBeforeUnmount, onMounted, ref, useId } from 'vue'
+  import { computed, onBeforeUnmount, onMounted, ref, useAttrs, useId } from 'vue'
+  import { warnOnce } from '../internal/dev'
   import type { SegmentedOption } from '../types'
 
   const props = defineProps<{
-    options: SegmentedOption<T>[]
+    options: readonly SegmentedOption<T>[]
     ariaLabel?: string
     compact?: boolean
     name?: string
   }>()
+  const attrs = useAttrs()
+  if (!props.ariaLabel && !attrs['aria-labelledby'])
+    warnOnce('BlSegmented: set `ariaLabel` (`aria-label`) to name the group.')
   const model = defineModel<T>()
   const generatedName = useId()
   const groupName = computed(() => props.name || generatedName)

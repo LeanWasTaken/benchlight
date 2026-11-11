@@ -49,7 +49,7 @@
    */
   const props = withDefaults(
     defineProps<{
-      items: TabItem<T>[]
+      items: readonly TabItem<T>[]
       ariaLabel?: string
       activation?: 'auto' | 'manual'
     }>(),

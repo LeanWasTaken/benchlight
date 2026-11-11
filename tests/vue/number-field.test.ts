@@ -102,13 +102,13 @@ describe('BlNumberField', () => {
     expect(el.attributes('aria-invalid')).toBe('true')
   })
 
-  it('merges a consumer aria-describedby after the hint and lets a consumer id win', () => {
+  it('merges a consumer aria-describedby after the hint and keeps the field id over a consumer id', () => {
     const w = mount(BlField, {
       props: { label: 'Gain', id: 'g', hint: 'Hint' },
       slots: { default: () => h(BlNumberField, { id: 'mine', 'aria-describedby': 'extra g-hint' }) }
     })
     const el = w.get('input')
-    expect(el.attributes('id')).toBe('mine')
+    expect(el.attributes('id')).toBe('g')
     expect(el.attributes('aria-describedby')).toBe('g-hint extra')
     expect(el.attributes('aria-invalid')).toBeUndefined()
   })

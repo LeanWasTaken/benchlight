@@ -20,6 +20,7 @@
   import { computed, inject, useAttrs, type StyleValue } from 'vue'
   import { FIELD_CONTEXT } from '../types'
   import { mergeDescribedBy } from '../internal/describedBy'
+  import { controlId } from '../internal/fieldId'
 
   // CSS: the track keeps at least 96px; set `--bl-range-value-width` to reserve room for the longest
   // value (default 56px) so the track does not change length while dragging.
@@ -38,16 +39,16 @@
   defineOptions({ inheritAttrs: false })
   const attrs = useAttrs()
   // A function, not a computed: the attrs proxy is not reactive to keys added after setup.
-  // The field context supplies `id` and the hint id; consumer attrs bind after it, so an `id`
-  // wins and an `aria-describedby` is merged after the hint id.
+  // The field context supplies `id` and the hint id; consumer attrs bind after it, so the field's `id`
+  // and an `aria-describedby` is merged after the hint id.
   function inputAttrs(): Record<string, unknown> {
     const rest = Object.fromEntries(
       Object.entries(attrs).filter(([key]) => key !== 'class' && key !== 'style')
     )
     return {
-      id: field?.id.value,
       'aria-invalid': field?.invalid?.value === true ? 'true' : undefined,
       ...rest,
+      id: controlId('BlRange', field, attrs['id']),
       'aria-describedby': mergeDescribedBy(field?.describedBy.value, attrs['aria-describedby'])
     }
   }

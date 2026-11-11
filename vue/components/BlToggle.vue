@@ -1,5 +1,5 @@
 <template>
-  <div class="bl-toggle" :class="attrs.class" :style="attrs.style as any">
+  <div class="bl-toggle" :class="attrs.class" :style="attrs.style as StyleValue">
     <label class="bl-toggle__control">
       <input
         ref="input"
@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-  import { onBeforeUnmount, onMounted, ref, useAttrs, useId } from 'vue'
+  import { onBeforeUnmount, onMounted, ref, useAttrs, useId, type StyleValue } from 'vue'
   import { mergeDescribedBy } from '../internal/describedBy'
 
   const props = defineProps<{

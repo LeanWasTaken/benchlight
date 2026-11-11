@@ -1,5 +1,10 @@
 <template>
-  <div v-if="wrapped" class="bl-meter-field" :class="attrs.class" :style="attrs.style as any">
+  <div
+    v-if="wrapped"
+    class="bl-meter-field"
+    :class="attrs.class"
+    :style="attrs.style as StyleValue"
+  >
     <div v-if="label || visibleValue !== undefined" class="bl-meter-field__head">
       <span v-if="label" :id="labelId" class="bl-meter-field__label">{{ label }}</span>
       <span v-if="visibleValue !== undefined" class="bl-meter-field__value" aria-hidden="true">{{
@@ -10,13 +15,13 @@
       <div class="bl-meter__fill" :style="{ '--bl-meter-value': fraction }" />
     </div>
   </div>
-  <div v-else :class="attrs.class" :style="attrs.style as any" v-bind="barAttrs()">
+  <div v-else :class="attrs.class" :style="attrs.style as StyleValue" v-bind="barAttrs()">
     <div class="bl-meter__fill" :style="{ '--bl-meter-value': fraction }" />
   </div>
 </template>
 
 <script setup lang="ts">
-  import { watch } from 'vue'
+  import { watch, type StyleValue } from 'vue'
   import { warnOnce } from '../internal/dev'
   import { useMeterBar } from '../internal/meterBar'
 

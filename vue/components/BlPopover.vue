@@ -6,8 +6,8 @@
     ref="panel"
     class="bl-popover"
     popover="auto"
-    :data-side="side ?? 'bottom'"
-    :data-align="align ?? 'center'"
+    :data-side="side"
+    :data-align="align"
     :role="ariaLabel ? 'group' : undefined"
     :aria-label="ariaLabel || undefined"
     :style="panelAnchorStyle(uid)"
@@ -21,24 +21,28 @@
   // The trigger check behind the dev warnings runs once, at mount: a trigger swapped in later is
   // not re-checked. A controlled-only `open` binding that ignores `update:open` still sees light
   // dismiss (Esc, outside click) close the native popover.
-  import { computed, onBeforeUnmount, onMounted, ref, useId, watch, type VNode } from 'vue'
+  import {
+    computed,
+    onActivated,
+    onBeforeUnmount,
+    onDeactivated,
+    onMounted,
+    ref,
+    useId,
+    watch,
+    type VNode
+  } from 'vue'
   import { panelAnchorStyle, triggerAnchorStyle } from '../internal/anchor'
   import { warn } from '../internal/dev'
-  import type { PopoverAlign, PopoverSide } from '../types'
+  import type { PopoverAlign, PopoverSide, PopoverTriggerBind } from '../types'
 
   defineOptions({ inheritAttrs: false })
-  defineProps<{ side?: PopoverSide; align?: PopoverAlign; ariaLabel?: string }>()
+  withDefaults(defineProps<{ side?: PopoverSide; align?: PopoverAlign; ariaLabel?: string }>(), {
+    side: 'bottom',
+    align: 'center'
+  })
   defineSlots<{
-    trigger?: (props: {
-      bind: {
-        id: string
-        type: 'button'
-        'aria-expanded': 'true' | 'false'
-        'aria-controls': string
-        popovertarget: string
-        style: { anchorName: string }
-      }
-    }) => VNode[]
+    trigger?: (props: { bind: PopoverTriggerBind }) => VNode[]
     default?: () => VNode[]
   }>()
   const open = defineModel<boolean>('open', { default: false })
@@ -114,6 +118,19 @@
     }
     sync()
   })
+  // KeepAlive: hide a deactivated popover so `shown` and aria-expanded agree with the page.
+  onDeactivated(() => {
+    clicking = false
+    if (!shown) return
+    shown = false
+    try {
+      panel.value?.hidePopover()
+    } catch {
+      // Already hidden.
+    }
+    if (open.value) open.value = false
+  })
+  onActivated(sync)
   onBeforeUnmount(() => {
     panel.value?.ownerDocument.removeEventListener('click', onClickCapture, true)
   })

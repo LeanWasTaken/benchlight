@@ -4,14 +4,15 @@ export interface AnsiSegment {
 }
 
 // eslint-disable-next-line no-control-regex
-const SGR = /\x1b\[([0-9;]*)m/g
+const CSI = /\x1b\[([0-?]*)[ -/]*([@-~])/g
 // eslint-disable-next-line no-control-regex
 const TRAILING_ESCAPE = /\x1b\[[0-9;]*$/
 // eslint-disable-next-line no-control-regex
 const STRAY_ESCAPE = /\x1b/g
 const COLOR = /^(3[0-7]|9[0-7])$/
 
-// Splits one log line into runs coloured by SGR foreground codes (bl-ansi-30…97).
+// Splits one log line into runs coloured by SGR foreground codes (bl-ansi-30…97); every other
+// CSI sequence is dropped.
 export function ansiToSegments(line: string): AnsiSegment[] {
   const segments: AnsiSegment[] = []
   let className: string | undefined
@@ -20,9 +21,10 @@ export function ansiToSegments(line: string): AnsiSegment[] {
     const text = raw.replace(TRAILING_ESCAPE, '').replace(STRAY_ESCAPE, '')
     if (text) segments.push(className ? { text, className } : { text })
   }
-  for (const match of line.matchAll(SGR)) {
+  for (const match of line.matchAll(CSI)) {
     push(line.slice(last, match.index))
     last = (match.index ?? 0) + match[0].length
+    if (match[2] !== 'm') continue // cursor and erase sequences carry no colour
     const params = (match[1] ?? '').split(';')
     for (let i = 0; i < params.length; i++) {
       const param = params[i] ?? ''

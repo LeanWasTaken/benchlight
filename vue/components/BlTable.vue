@@ -179,7 +179,7 @@
       :total="totalCount"
       :page-size="pageSize"
       :aria-label="text.pages(caption)"
-      :labels="paginationLabels!"
+      :labels="paginationLabels"
     />
   </div>
 </template>
@@ -218,7 +218,7 @@
     caption: string
     captionHidden?: boolean
     columns: readonly C[]
-    rows: Row[]
+    rows: readonly Row[]
     rowKey?: Extract<keyof Row, string> | ((row: Row) => string | number)
     scroll?: boolean
     compact?: boolean
