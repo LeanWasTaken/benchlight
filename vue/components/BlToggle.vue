@@ -17,7 +17,13 @@
       <span class="bl-toggle__label">{{ label }}</span>
     </label>
     <span v-if="hint" :id="hintId" class="bl-toggle__hint">{{ hint }}</span>
-    <span v-if="error" :id="errorId" class="bl-toggle__error">{{ error }}</span>
+    <span
+      v-if="error"
+      :id="errorId"
+      class="bl-toggle__error"
+      :role="announce ? 'alert' : undefined"
+      >{{ error }}</span
+    >
   </div>
 </template>
 
@@ -29,6 +35,7 @@
     label: string
     hint?: string
     error?: string
+    announce?: boolean
     disabled?: boolean
     name?: string
     value?: string

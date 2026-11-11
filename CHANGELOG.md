@@ -22,6 +22,13 @@
 | `<BlLed state="danger">` | `<BlLed tone="danger">` |
 | `import type { LedState }` | `StatusTone` |
 
+### Added
+
+- An opt-in `announce` prop on BlField, BlCheckbox, BlToggle and BlRadioGroup renders the
+  validation error with `role="alert"`, so screen readers announce it when it appears. Off by
+  default: the error stays a plain described-by text, as before. A live region announces only
+  errors that appear after mount, so set and clear `error` as validation runs.
+
 ### Fixed
 
 - BlPopover no longer writes its `open` model when a `KeepAlive` deactivates it. The panel is hidden

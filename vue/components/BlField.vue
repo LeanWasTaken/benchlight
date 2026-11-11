@@ -3,7 +3,9 @@
     <label class="bl-field__label" :for="fieldId">{{ label }}</label>
     <slot :id="fieldId" :described-by="describedBy" :invalid="invalid" />
     <p v-if="hint" :id="hintId" class="bl-field__hint">{{ hint }}</p>
-    <p v-if="error" :id="errorId" class="bl-field__error">{{ error }}</p>
+    <p v-if="error" :id="errorId" class="bl-field__error" :role="announce ? 'alert' : undefined">
+      {{ error }}
+    </p>
   </div>
 </template>
 
@@ -12,7 +14,13 @@
   import { FIELD_CONTEXT } from '../types'
   import { mergeDescribedBy } from '../internal/describedBy'
 
-  const props = defineProps<{ label: string; hint?: string; id?: string; error?: string }>()
+  const props = defineProps<{
+    label: string
+    hint?: string
+    id?: string
+    error?: string
+    announce?: boolean
+  }>()
   const generated = useId()
   const fieldId = computed(() => props.id ?? generated)
   const hintId = computed(() => `${fieldId.value}-hint`)

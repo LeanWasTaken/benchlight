@@ -8,7 +8,14 @@
   >
     <legend class="bl-fieldset__legend">{{ legend }}</legend>
     <p v-if="hint" :id="hintId" class="bl-fieldset__hint">{{ hint }}</p>
-    <p v-if="invalid" :id="errorId" class="bl-fieldset__error">{{ error }}</p>
+    <p
+      v-if="invalid"
+      :id="errorId"
+      class="bl-fieldset__error"
+      :role="announce ? 'alert' : undefined"
+    >
+      {{ error }}
+    </p>
     <slot />
   </fieldset>
 </template>
@@ -22,6 +29,7 @@
     legend: string
     hint?: string
     error?: string
+    announce?: boolean
     disabled?: boolean
     required?: boolean
     name?: string

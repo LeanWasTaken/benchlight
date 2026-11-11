@@ -590,6 +590,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `announce` | `boolean \| undefined` | no |  |
 | `disabled` | `boolean \| undefined` | no |  |
 | `error` | `string \| undefined` | no |  |
 | `hint` | `string \| undefined` | no |  |
@@ -653,6 +654,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `announce` | `boolean \| undefined` | no |  |
 | `error` | `string \| undefined` | no |  |
 | `hint` | `string \| undefined` | no |  |
 | `id` | `string \| undefined` | no |  |
@@ -913,6 +915,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `announce` | `boolean \| undefined` | no |  |
 | `disabled` | `boolean \| undefined` | no |  |
 | `error` | `string \| undefined` | no |  |
 | `hint` | `string \| undefined` | no |  |
@@ -1183,6 +1186,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `announce` | `boolean \| undefined` | no |  |
 | `disabled` | `boolean \| undefined` | no |  |
 | `error` | `string \| undefined` | no |  |
 | `hint` | `string \| undefined` | no |  |

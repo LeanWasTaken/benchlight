@@ -284,8 +284,8 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
   Benchlight only renders it. An empty string is not an error. BlField adds
   `.bl-field--invalid` and a `p.bl-field__error` (id `<id>-error`) after the hint; BlInput,
   BlTextarea, BlSelect and BlRange get `aria-invalid="true"` and the error id in
-  `aria-describedby`. Your own `aria-invalid` on the control wins. The error is not a live region,
-  so it is not announced as you type; add `role="alert"` yourself where you want an announcement. The error line starts
+  `aria-describedby`. Your own `aria-invalid` on the control wins. The error is not a live region
+  by default; set `announce` on BlField to render it with `role="alert"` so a screen reader hears it. The error line starts
   with a "!" mark and the control border thickens, so the state does not rest on colour. In plain
   HTML, `[aria-invalid='true']` on `.bl-input`, `.bl-textarea` or `.bl-select` gets the same
   styling. Native `required` passes through to the control; there is no built-in required marker.
@@ -564,8 +564,10 @@ There is no checkbox group component. Wrap BlCheckbox children (or the plain mar
 ```
 
 `bl-fieldset--invalid` and the error line are yours to add and remove. Like every error in
-Benchlight, `.bl-fieldset__error` is not a live region; add `role="alert"` where you want it
-announced.
+Benchlight, `.bl-fieldset__error` is not a live region; in plain HTML add `role="alert"` where you want it
+announced. BlRadioGroup, BlCheckbox, BlToggle and BlField take `announce` for the same. A live
+region announces only errors that appear after mount, so keep rendering the error conditionally
+through the `error` prop (set it when validation fails, clear it when it passes).
 
 ## BlMedia
 
