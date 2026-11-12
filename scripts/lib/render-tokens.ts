@@ -10,6 +10,7 @@ const STATIC_GROUPS = [
   'text',
   'leading',
   'tracking',
+  'space',
   'radius',
   'layout',
   'ease',

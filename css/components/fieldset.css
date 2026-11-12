@@ -2,16 +2,16 @@
   .bl-fieldset {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--bl-space-2);
     min-width: 0;
-    margin: 0 0 20px;
+    margin: 0 0 var(--bl-space-5);
     padding: 0;
     border: 0;
   }
   /* A legend is not a flex item in every engine, so it takes block flow and a margin of its own. */
   .bl-fieldset__legend {
     padding: 0;
-    margin-bottom: 8px;
+    margin-bottom: var(--bl-space-2);
     overflow-wrap: anywhere;
     font-size: var(--bl-text-small);
     color: var(--bl-color-ink-1);
@@ -26,7 +26,7 @@
   .bl-fieldset__error {
     display: flex;
     align-items: flex-start;
-    gap: 8px;
+    gap: var(--bl-space-2);
     margin: 0;
     overflow-wrap: anywhere;
     font-size: var(--bl-text-small);
@@ -50,14 +50,14 @@
   }
   /* A bar down the group's leading edge is a second cue beside the error line. */
   .bl-fieldset--invalid {
-    padding-inline-start: 10px;
+    padding-inline-start: var(--bl-space-3);
     border-inline-start: 2px solid var(--bl-color-danger);
   }
   .bl-fieldset--inline {
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
-    gap: 8px 20px;
+    gap: var(--bl-space-2) var(--bl-space-5);
   }
   /* The legend, hint and error each take a full row so only the options sit side by side. */
   .bl-fieldset--inline > .bl-fieldset__legend,

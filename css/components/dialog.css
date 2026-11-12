@@ -3,7 +3,7 @@
      position rule keys on .bl-dialog / [open], never :modal, which a closing dialog loses
      before its exit ends in Firefox and Safari. */
   .bl-dialog {
-    inline-size: min(var(--bl-dialog-width, 32rem), 100% - 32px);
+    inline-size: min(var(--bl-dialog-width, 32rem), 100% - var(--bl-space-7));
     max-inline-size: none;
     max-block-size: min(85dvh, 48rem);
     margin: auto;
@@ -78,15 +78,15 @@
   .bl-dialog__head {
     display: flex;
     align-items: flex-start;
-    gap: 8px;
-    padding-block: 12px 4px;
-    padding-inline: 20px 12px;
+    gap: var(--bl-space-2);
+    padding-block: var(--bl-space-3) var(--bl-space-1);
+    padding-inline: var(--bl-space-5) var(--bl-space-3);
   }
   .bl-dialog__title {
     flex: 1;
     min-inline-size: 0;
     margin: 0;
-    padding-block: 10px;
+    padding-block: var(--bl-space-3);
     font-size: var(--bl-text-heading);
     line-height: var(--bl-leading-heading);
     overflow-wrap: anywhere;
@@ -96,14 +96,14 @@
   }
   .bl-dialog__description {
     margin: 0;
-    padding-inline: 20px;
+    padding-inline: var(--bl-space-5);
     color: var(--bl-color-ink-2);
     overflow-wrap: anywhere;
   }
   .bl-dialog__body {
     flex: 1 1 auto;
     min-block-size: 0;
-    padding: 12px 20px 20px;
+    padding: var(--bl-space-3) var(--bl-space-5) var(--bl-space-5);
     overflow: auto;
     overscroll-behavior: contain;
     overflow-wrap: anywhere;
@@ -114,8 +114,8 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
-    gap: 8px;
-    padding: 12px 20px 20px;
+    gap: var(--bl-space-2);
+    padding: var(--bl-space-3) var(--bl-space-5) var(--bl-space-5);
     border-block-start: 1px solid var(--bl-color-separator);
   }
   /* Scroll lock: CSS only. BlDialog measures the scrollbar it removes into --bl-dialog-gutter. */
@@ -149,7 +149,7 @@
     }
     .bl-dialog__foot,
     .bl-dialog__body:not(:has(+ .bl-dialog__foot)) {
-      padding-block-end: calc(20px + env(safe-area-inset-bottom));
+      padding-block-end: calc(var(--bl-space-5) + env(safe-area-inset-bottom));
     }
   }
   @media (prefers-reduced-motion: reduce) {

@@ -9,7 +9,7 @@
     position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--bl-space-3);
     min-block-size: 44px;
     min-inline-size: 0;
     color: var(--bl-color-ink-1);
@@ -95,7 +95,7 @@
   .bl-checkbox__error {
     display: flex;
     align-items: flex-start;
-    gap: 8px;
+    gap: var(--bl-space-2);
     flex-basis: 100%;
     padding-inline-start: 34px;
     font-size: var(--bl-text-small);

@@ -40,6 +40,11 @@
   the new `labels.pause`) beside scrolling text, and `v-model:paused` / `update:paused` (WCAG
   2.2.2). The wrapper is not a button, so links in the slot stay valid. Focus moving inside the
   text holds the scroll and scrolls the focused element into view.
+- A `--bl-space-1` to `--bl-space-9` spacing scale (0.25rem to 3rem; also `tokens.space` in
+  `benchlight/tokens`). Most component gaps, padding and margins now use it. Some stay literal
+  pixels: hairlines, focus offsets, 44px hit areas, optical nudges, the control paddings of
+  segmented items, tabs, the skip link and the tab bar (6px, 6px 12px), the field input padding
+  (10px 12px) and the prose heading top margin (28px).
 
 ### Changed
 
@@ -48,6 +53,12 @@
 - BlMarquee's overflow clipping and fade mask moved from `.bl-marquee` to a new
   `.bl-marquee__viewport` child. Consumers who style `.bl-marquee` overflow or mask directly must
   target `.bl-marquee__viewport` now. `data-overflowing` stays on `.bl-marquee`.
+- Most component spacing moved from px to rem (the `--bl-space-*` steps). The values are identical
+  at a 16px root font size, but they now scale with the root font size and with zoom. Some off-scale
+  values were rounded up to the next step: 6px to 8px, 10px to 12px and 14px to 16px; the literal
+  pixels listed under Added keep their values. The visible effect
+  is small, except that the BlSiteBar nav links are wider (10px to 12px inline padding each), so
+  the site-bar nav needs about 30px more width before it stops scrolling.
 
 ### Fixed
 

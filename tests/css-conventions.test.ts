@@ -87,6 +87,25 @@ describe('media query units', () => {
   })
 })
 
+describe('spacing scale', () => {
+  const defined = new Set(Object.keys(tokens.space).map((step) => `--bl-space-${step}`))
+
+  it('defines --bl-space-1 to --bl-space-9 in rem', () => {
+    expect([...defined]).toEqual(Array.from({ length: 9 }, (_, i) => `--bl-space-${i + 1}`))
+    for (const value of Object.values(tokens.space)) expect(value).toMatch(/^[\d.]+rem$/)
+  })
+
+  it('references only defined --bl-space-* steps', () => {
+    for (const file of layered)
+      for (const [name] of read(file).matchAll(/--bl-space-[\w-]+/g))
+        expect(defined.has(name), `${file} references undefined ${name}`).toBe(true)
+  })
+
+  it('declares every --bl-space-* step on :root', () => {
+    for (const name of defined) expect(read('css/tokens.css')).toContain(`${name}: `)
+  })
+})
+
 describe('container queries', () => {
   it('never uses container queries (they collapse component roots in flex/inline hosts)', () => {
     for (const file of listCssFiles(ROOT)) {

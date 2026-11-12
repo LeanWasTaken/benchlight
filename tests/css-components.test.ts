@@ -249,7 +249,7 @@ describe('anchored behaviour', () => {
     const item = ruleBody(css, '.bl-tab-bar__item')
     expect(item['min-width']).toBe('0')
     expect(item['min-height']).toBe('44px')
-    expect(item['padding']).toBe('8px 4px')
+    expect(item['padding']).toBe('var(--bl-space-2) var(--bl-space-1)')
     const label = ruleBody(css, '.bl-tab-bar__label')
     expect(label['text-overflow']).toBe('ellipsis')
     expect(label['white-space']).toBe('nowrap')
@@ -261,12 +261,12 @@ describe('anchored behaviour', () => {
     const wrap = ruleBody(css, '.bl-site-bar__navwrap')
     expect(wrap['overflow-x']).toBe('auto')
     expect(wrap['min-width']).toBe('0')
-    expect(wrap['scroll-padding-inline']).toBe('16px')
+    expect(wrap['scroll-padding-inline']).toBe('var(--bl-space-4)')
     expect(wrap['scrollbar-width']).toBe('none')
     expect(wrap['mask-image']!.replace(/\s+/g, '')).toContain(
       'linear-gradient(toright,transparent,#00012px'
     )
-    expect(wrap['padding']).toBe('4px 12px')
+    expect(wrap['padding']).toBe('var(--bl-space-1) var(--bl-space-3)')
     expect(wrap['display']).toBe('block')
     expect(ruleBody(css, '.bl-site-bar__brand')['text-overflow']).toBe('ellipsis')
     expect(ruleBody(css, '.bl-site-bar__brand')['min-width']).toBe('min(max-content, 7rem)')
@@ -415,7 +415,7 @@ describe('anchored behaviour', () => {
 
   it('lets the meter field own the block margin and wrap its head', () => {
     const css = read('meter')
-    expect(ruleBody(css, '.bl-meter-field')['margin']).toBe('16px 0')
+    expect(ruleBody(css, '.bl-meter-field')['margin']).toBe('var(--bl-space-4) 0')
     expect(ruleBody(css, '.bl-meter-field > .bl-meter')['margin']).toBe('0')
     expect(ruleBody(css, '.bl-meter-field__head')['flex-wrap']).toBe('wrap')
     expect(ruleBody(css, '.bl-meter-field__value')['font-variant-numeric']).toBe('tabular-nums')
@@ -550,8 +550,8 @@ describe('intrinsic wrapping (long tokens never widen the page)', () => {
     expect(value['overflow-wrap']).toBe('anywhere')
     const seg = read('segmented')
     const segmented = ruleBody(seg, '.bl-segmented')
-    expect(segmented['row-gap']).toBe('16px')
-    expect(segmented['column-gap']).toBe('4px')
+    expect(segmented['row-gap']).toBe('var(--bl-space-4)')
+    expect(segmented['column-gap']).toBe('var(--bl-space-1)')
     expect(segmented['border-radius']).toBe('17px')
     expect(ruleBody(seg, '.bl-segmented__item')['min-width']).toBe('44px')
     expect(ruleBody(seg, '.bl-segmented__item::before')['inset']).toBe('-8px 0')
@@ -688,7 +688,7 @@ describe('select chevron', () => {
   it('drops the native arrow only for a single-line select inside the wrapper', () => {
     const rule = ruleBody(css, '.bl-select-wrap > .bl-select:not([multiple], [size])')
     expect(rule['appearance']).toBe('none')
-    expect(rule['padding-inline-end']).toBe('40px')
+    expect(rule['padding-inline-end']).toBe('var(--bl-space-8)')
     expect(ruleBody(css, '.bl-select')['appearance']).toBeUndefined()
   })
 
@@ -708,7 +708,7 @@ describe('select chevron', () => {
       )
     }
     expect(chevron['background']).toBe('var(--bl-color-ink-2)')
-    expect(chevron['inset-inline-end']).toBe('16px')
+    expect(chevron['inset-inline-end']).toBe('var(--bl-space-4)')
     expect(chevron['pointer-events']).toBe('none')
     expect(chevron).not.toHaveProperty('right')
   })
@@ -1013,7 +1013,7 @@ describe('toast', () => {
   })
   it('anchors a toaster inside a bottom sheet to the top, clear of its footer', () => {
     const sheet = ruleBody(css, '.bl-dialog__toasts > .bl-toaster', ['@media (max-width: 39.99em)'])
-    expect(sheet['inset-block']).toBe('max(16px, env(safe-area-inset-top)) auto')
+    expect(sheet['inset-block']).toBe('max(var(--bl-space-4), env(safe-area-inset-top)) auto')
   })
   it('keeps toasts still when a dialog hides the scrollbar', () => {
     expect(

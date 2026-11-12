@@ -39,6 +39,15 @@
     --bl-tracking-silkscreen: 0.12em;
     --bl-tracking-heading: -0.025em;
     --bl-tracking-display: -0.01em;
+    --bl-space-1: 0.25rem;
+    --bl-space-2: 0.5rem;
+    --bl-space-3: 0.75rem;
+    --bl-space-4: 1rem;
+    --bl-space-5: 1.25rem;
+    --bl-space-6: 1.5rem;
+    --bl-space-7: 2rem;
+    --bl-space-8: 2.5rem;
+    --bl-space-9: 3rem;
     --bl-radius-chip: 6px;
     --bl-radius-card: 12px;
     --bl-radius-pill: 9999px;

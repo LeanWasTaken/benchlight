@@ -42,9 +42,9 @@
   .bl-telemetry__cell {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: var(--bl-space-2);
     min-width: 0;
-    padding: 16px;
+    padding: var(--bl-space-4);
   }
   /* Dividers are shadows on the top-left edge of each cell; the grid clips the outer ones. */
   .bl-telemetry__cell {
@@ -54,7 +54,7 @@
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: var(--bl-space-3);
     min-width: 0;
     min-height: 28px;
     overflow-wrap: anywhere;

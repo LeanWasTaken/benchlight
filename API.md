@@ -1520,6 +1520,15 @@ Exposed: none
 - `--bl-shadow-glow`
 - `--bl-shadow-thumb`
 - `--bl-shadow-well`
+- `--bl-space-1`
+- `--bl-space-2`
+- `--bl-space-3`
+- `--bl-space-4`
+- `--bl-space-5`
+- `--bl-space-6`
+- `--bl-space-7`
+- `--bl-space-8`
+- `--bl-space-9`
 - `--bl-text-annotation`
 - `--bl-text-body`
 - `--bl-text-display-lg`

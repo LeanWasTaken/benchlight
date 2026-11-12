@@ -15,7 +15,7 @@
     position: relative;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--bl-space-1);
     min-width: 0;
   }
   .bl-marquee__viewport {
@@ -30,7 +30,7 @@
   .bl-marquee__content {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--bl-space-2);
     white-space: nowrap;
   }
   .bl-marquee[data-overflowing] .bl-marquee__viewport {

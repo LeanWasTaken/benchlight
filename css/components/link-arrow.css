@@ -3,7 +3,7 @@
     position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--bl-space-2);
     width: fit-content;
     min-width: 44px;
     max-width: 100%;

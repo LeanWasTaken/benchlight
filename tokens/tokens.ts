@@ -77,6 +77,17 @@ export const tokens = {
     heading: '-0.025em',
     display: '-0.01em'
   },
+  space: {
+    '1': '0.25rem',
+    '2': '0.5rem',
+    '3': '0.75rem',
+    '4': '1rem',
+    '5': '1.25rem',
+    '6': '1.5rem',
+    '7': '2rem',
+    '8': '2.5rem',
+    '9': '3rem'
+  },
   radius: { chip: '6px', card: '12px', pill: '9999px' },
   layout: { column: '1080px', prose: '720px', gutter: '24px', 'gutter-narrow': '16px' },
   breakpoint: { xs: '480px', sm: '640px', md: '768px', lg: '1024px', xl: '1280px' },

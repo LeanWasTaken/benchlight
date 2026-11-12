@@ -2,9 +2,9 @@
   .bl-field {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--bl-space-2);
     min-width: 0;
-    margin-bottom: 20px;
+    margin-bottom: var(--bl-space-5);
   }
   .bl-field__error,
   .bl-field__hint,
@@ -20,7 +20,7 @@
   .bl-field__error {
     display: flex;
     align-items: flex-start;
-    gap: 8px;
+    gap: var(--bl-space-2);
     margin: 0;
     font-size: var(--bl-text-small);
     color: var(--bl-color-danger);
@@ -113,12 +113,12 @@
   }
   .bl-select-wrap > .bl-select:not([multiple], [size]) {
     appearance: none;
-    padding-inline-end: 40px;
+    padding-inline-end: var(--bl-space-8);
   }
   .bl-select-wrap::after {
     content: '';
     position: absolute;
-    inset-inline-end: 16px;
+    inset-inline-end: var(--bl-space-4);
     inset-block-start: 50%;
     width: 10px;
     height: 6px;
@@ -181,7 +181,7 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0 12px;
+    gap: 0 var(--bl-space-3);
   }
   /* The input also carries .bl-range__input as a stable hook; this descendant rule styles it. */
   .bl-range input[type='range'] {

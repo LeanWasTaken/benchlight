@@ -156,6 +156,15 @@ Every colour is a `--bl-color-*` custom property (`canvas`, `surface`, `raised`,
 
 Tailwind's own `ease-out` is no longer overridden; the Benchlight curve is the `ease-bl` utility.
 
+## Spacing tokens
+
+Padding, margin, gap and inset use a nine-step scale of `--bl-space-1` to `--bl-space-9`, in `rem`
+so it follows the user's font size: `1` 0.25rem (4px), `2` 0.5rem (8px), `3` 0.75rem (12px), `4` 1rem
+(16px), `5` 1.25rem (20px), `6` 1.5rem (24px), `7` 2rem (32px), `8` 2.5rem (40px), `9` 3rem (48px).
+Use them in your own layout CSS to line up with the components. The scale is also in the JS `tokens`
+export (`tokens.space`); it has no Tailwind theme entries, so Tailwind's own spacing utilities are unchanged.
+Hairlines, focus offsets, 44px hit areas and optical nudges stay literal pixels.
+
 ## Browser support
 
 Build targets (`scripts/lib/bundle.ts`): Chrome 111, Safari 16.2 and Firefox 121. Newer features

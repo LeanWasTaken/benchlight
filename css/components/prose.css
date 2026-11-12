@@ -8,7 +8,7 @@
     counter-reset: bl-section;
   }
   .bl-prose h2 {
-    margin: 40px 0 12px;
+    margin: var(--bl-space-8) 0 var(--bl-space-3);
     font-size: 1.5rem;
     font-weight: 600;
     line-height: 2rem;
@@ -17,7 +17,7 @@
     counter-increment: bl-section;
   }
   .bl-prose h2::before {
-    margin-inline-end: 14px;
+    margin-inline-end: var(--bl-space-4);
     font-family: var(--bl-font-mono);
     font-size: var(--bl-text-annotation);
     font-weight: 500;
@@ -27,7 +27,7 @@
     content: '\00a7' counter(bl-section, decimal-leading-zero);
   }
   .bl-prose h3 {
-    margin: 28px 0 8px;
+    margin: 28px 0 var(--bl-space-2);
     font-size: 1.125rem;
     font-weight: 600;
     line-height: 1.75rem;
@@ -35,14 +35,14 @@
     color: var(--bl-color-ink-1);
   }
   .bl-prose h4 {
-    margin: 24px 0 8px;
+    margin: var(--bl-space-6) 0 var(--bl-space-2);
     font-size: 1rem;
     font-weight: 600;
     line-height: 1.5rem;
     color: var(--bl-color-ink-1);
   }
   .bl-prose :is(h5, h6) {
-    margin: 20px 0 8px;
+    margin: var(--bl-space-5) 0 var(--bl-space-2);
     font-size: var(--bl-text-small);
     font-weight: 600;
     line-height: 1.5rem;
@@ -52,20 +52,20 @@
     font-weight: 600;
   }
   .bl-prose p {
-    margin: 0 0 16px;
+    margin: 0 0 var(--bl-space-4);
   }
   .bl-prose ul {
-    margin: 0 0 16px;
-    padding-inline-start: 20px;
+    margin: 0 0 var(--bl-space-4);
+    padding-inline-start: var(--bl-space-5);
     list-style: disc;
   }
   .bl-prose ol {
-    margin: 0 0 16px;
+    margin: 0 0 var(--bl-space-4);
     padding-inline-start: 1.75em;
     list-style: decimal;
   }
   .bl-prose li {
-    margin-bottom: 6px;
+    margin-bottom: var(--bl-space-2);
   }
   .bl-prose a {
     color: var(--bl-color-trace);
@@ -92,7 +92,7 @@
     }
   }
   .bl-prose :not(pre) > code {
-    padding: 2px 4px;
+    padding: 2px var(--bl-space-1);
     overflow-wrap: anywhere;
     background: var(--bl-color-surface);
     border: 1px solid var(--bl-color-separator);
@@ -102,8 +102,8 @@
     color: var(--bl-color-ink-1);
   }
   .bl-prose pre {
-    margin: 16px 0;
-    padding: 16px;
+    margin: var(--bl-space-4) 0;
+    padding: var(--bl-space-4);
     overflow-x: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--bl-color-control-border) transparent;
@@ -117,8 +117,8 @@
     color: var(--bl-color-ink-1);
   }
   .bl-prose blockquote {
-    margin: 16px 0;
-    padding-inline-start: 16px;
+    margin: var(--bl-space-4) 0;
+    padding-inline-start: var(--bl-space-4);
     border-inline-start: 2px solid var(--bl-color-separator);
     color: var(--bl-color-ink-2);
     font-style: italic;
@@ -130,14 +130,14 @@
   .bl-prose table {
     display: block;
     max-width: 100%;
-    margin: 16px 0;
+    margin: var(--bl-space-4) 0;
     overflow-x: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--bl-color-control-border) transparent;
     border-collapse: collapse;
   }
   .bl-prose :is(th, td) {
-    padding: 8px 12px;
+    padding: var(--bl-space-2) var(--bl-space-3);
     border: 1px solid var(--bl-color-separator);
     text-align: start;
   }
@@ -146,7 +146,7 @@
     color: var(--bl-color-ink-1);
   }
   .bl-prose hr {
-    margin: 32px 0;
+    margin: var(--bl-space-7) 0;
     border: 0;
     border-top: 1px solid var(--bl-color-separator);
   }
