@@ -71,6 +71,13 @@
   and the trigger reports `aria-expanded="false"` while deactivated, but `open` stays as it was, and
   the popover shows again on activation if `open` is still true. Before, deactivation set `open` to
   `false`.
+- In Firefox, BlPopover and BlTooltip panels sit against their trigger when a `dir` attribute set
+  below the root (for example `dir="rtl"` on a section) differs from the page's. Firefox aligned
+  the panel in the inline axis by its parent's direction laid onto the viewport and placed it
+  hundreds of pixels off. In Firefox only, and only under such a nested `dir`, the inline axis now
+  uses logical insets with `anchor(self-*)` sides, so a centred panel there keeps to its trigger
+  instead of shifting to stay on screen. Direction set with CSS `direction` and no `dir` attribute
+  is not covered.
 
 ### Tests/CI
 

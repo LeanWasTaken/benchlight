@@ -88,26 +88,26 @@ test.describe('placement', () => {
   })
 
   for (const scope of ['page', 'section'] as const) {
-    test(`align=start follows the writing direction under a ${scope} dir=rtl`, async ({
-      page,
-      browserName
-    }) => {
-      test.fixme(
-        browserName === 'firefox' && scope === 'section',
-        "Firefox resolves self-* position-area keywords against the top-layer containing block's LTR writing mode when dir=rtl is set on an ancestor section (css/components/anchored.css:41-43); the panel lands ~920px off"
-      )
-      // The panel sits in the top layer, so only self-relative position-area keywords follow a
-      // dir set on an ancestor rather than on the root.
-      const host = scope === 'page' ? page.locator('html') : demo(page)
-      await host.evaluate((el) => el.setAttribute('dir', 'rtl'))
-      const t = trigger(page, 'Filters')
-      const panel = await panelOf(t)
-      await t.click()
-      await expect(panel).toBeVisible()
-      const [a, p] = [await box(t), await box(panel)]
-      expect(p.top - a.bottom).toBeCloseTo(GAP, 0)
-      expect(Math.abs(p.right - a.right)).toBeLessThanOrEqual(1)
-    })
+    for (const align of ['start', 'end'] as const) {
+      test(`align=${align} follows the writing direction under a ${scope} dir=rtl`, async ({
+        page
+      }) => {
+        // The panel sits in the top layer, so it follows a dir set on an ancestor rather than on
+        // the root only through its own direction (anchored.css).
+        const host = scope === 'page' ? page.locator('html') : demo(page)
+        await host.evaluate((el) => el.setAttribute('dir', 'rtl'))
+        const t = trigger(page, 'Filters')
+        const panel = await panelOf(t)
+        // The playground has no end-aligned popover; Vue leaves the unchanged binding alone.
+        await panel.evaluate((el, align) => el.setAttribute('data-align', align), align)
+        await t.click()
+        await expect(panel).toBeVisible()
+        const [a, p] = [await box(t), await box(panel)]
+        expect(p.top - a.bottom).toBeCloseTo(GAP, 0)
+        if (align === 'start') expect(Math.abs(p.right - a.right)).toBeLessThanOrEqual(1)
+        else expect(Math.abs(p.left - a.left)).toBeLessThanOrEqual(1)
+      })
+    }
   }
 
   test('flips above the trigger when there is no room below', async ({ page }) => {

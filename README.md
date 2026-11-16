@@ -917,6 +917,8 @@ A disclosure panel on the native popover API, anchored to its trigger. Full prop
 - Placement needs CSS anchor positioning with `position-area` (Chromium 129, Safari 26, Firefox
   147); without it the panel stays centred in the viewport. Exit animations run in Chromium only;
   Safari and Firefox close instantly.
+- Set the writing direction with the `dir` attribute, not CSS `direction`: Firefox places the
+  panel correctly under a nested `dir` only.
 
 ## BlTooltip
 

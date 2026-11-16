@@ -171,6 +171,65 @@ test('side=bottom align=start sits below, on the start edge', async ({ page }) =
   expect(Math.abs(p.left - a.left)).toBeLessThanOrEqual(1)
 })
 
+// The tooltip sits in the top layer, so it follows a dir set on an ancestor rather than on the
+// root only through its own direction (anchored.css).
+test.describe('under a section dir=rtl', () => {
+  test.beforeEach(async ({ page }) => {
+    await demo(page).evaluate((el) => el.setAttribute('dir', 'rtl'))
+  })
+
+  test('side=top align=center sits above, centred', async ({ page }) => {
+    const t = trigger(page, 'Copy hash')
+    const tip = await tipOf(t)
+    const a = await box(t)
+    await page.mouse.move(a.cx, a.cy)
+    await expect(tip).toBeVisible()
+    const p = await box(tip)
+    expect(a.top - p.bottom).toBeCloseTo(GAP, 0)
+    expect(Math.abs(p.cx - a.cx)).toBeLessThanOrEqual(1)
+  })
+
+  for (const edge of ['left', 'right'] as const) {
+    test(`a centred tooltip by the ${edge} viewport edge stays on screen`, async ({
+      page,
+      browserName
+    }) => {
+      test.skip(
+        browserName === 'firefox',
+        'documented trade-off: under a nested dir, Firefox keeps a centred panel on its trigger (anchored.css)'
+      )
+      await trigger(page, 'Schedule').evaluate((el) => (el.style.display = 'none'))
+      await demo(page).evaluate((el, edge) => {
+        el.style.position = 'fixed'
+        el.style.top = '300px'
+        el.style[edge] = '0'
+        el.style.margin = '0'
+        el.style.padding = '0'
+      }, edge)
+      const t = trigger(page, 'Copy hash')
+      const tip = await tipOf(t)
+      const a = await box(t)
+      await page.mouse.move(a.cx, a.cy)
+      await expect(tip).toBeVisible()
+      const p = await box(tip)
+      const width = await page.evaluate(() => document.documentElement.clientWidth)
+      expect(p.left).toBeGreaterThanOrEqual(0)
+      expect(p.right).toBeLessThanOrEqual(width)
+    })
+  }
+
+  test('side=bottom align=start sits below, on the right edge', async ({ page }) => {
+    const t = trigger(page, 'Schedule')
+    const tip = await tipOf(t)
+    const a = await box(t)
+    await page.mouse.move(a.cx, a.cy)
+    await expect(tip).toBeVisible()
+    const p = await box(tip)
+    expect(p.top - a.bottom).toBeCloseTo(GAP, 0)
+    expect(Math.abs(p.right - a.right)).toBeLessThanOrEqual(1)
+  })
+})
+
 // The tooltip's Esc calls preventDefault, so the browser's close request does not also reach the
 // enclosing dialog or auto popover: the first Esc hides only the tooltip, the second closes the
 // container.
