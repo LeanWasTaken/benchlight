@@ -1,0 +1,228 @@
+name: publish
+
+# Publishes `benchlight` to npm with provenance. Manual only: there is no tag or push trigger, so
+# nothing here runs by accident. The git+ssh `release` flow (release.yml) is unrelated and unchanged.
+#
+# One-time manual setup before the first run (none of it can be done from this repo):
+#   1. Make the repository public (npm provenance needs a public source repo).
+#   2. Create the npm package: publish a placeholder `benchlight` once from a maintainer login
+#      (passkey), so the name exists and a trusted publisher can be attached to it. Use a separate
+#      minimal package.json for it: this repo's publishConfig.provenance makes a local publish fail.
+#   3. On npmjs.com: package benchlight -> Settings -> Trusted Publisher -> GitHub Actions, with this
+#      repository, workflow file name `publish.yml` and environment `npm-publish`.
+#   4. On npmjs.com: restrict the package to "Require two-factor authentication and disallow tokens".
+#   5. Mandatory: environment `npm-publish` on GitHub with deployment branches and tags = Selected,
+#      only the tag rule `src-v*` and no branches, plus required reviewers.
+#   6. Mandatory: a tag ruleset on `src-v*` so only admins can create, update or delete those tags.
+#   7. Mandatory: a branch ruleset on `main` that blocks force-push and deletion and restricts who
+#      can push (or requires a pull request).
+# Why 5-7 are mandatory: on a tag run, workflow_dispatch uses the publish.yml from the tagged commit,
+# so anyone who can push a tag can bring their own copy of this file. The guards below stop mistakes,
+# not a compromised writer; the environment, tag and branch rules are what stop that.
+# Auth is OIDC only: no NPM_TOKEN secret exists or is needed.
+#
+# Two jobs on purpose: `build` runs dependency code (install, check, pack) with a read-only token and
+# no OIDC. `publish` holds `id-token: write` but never checks out or installs anything: it only
+# downloads the tarball `build` packed and hands it to npm with lifecycle scripts off.
+#
+# Run it on the source tag: "Run workflow" -> "Use workflow from" -> Tags -> src-vX.Y.Z, with `confirm`
+# ticked and `version` typed as X.Y.Z. The tag must be on main and match package.json.
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: Tick to really publish to npm
+        type: boolean
+        required: true
+      version:
+        description: Version to publish; must equal the src-v tag and package.json (for example 1.0.0)
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    env:
+      INPUT_CONFIRM: ${{ inputs.confirm }}
+      INPUT_VERSION: ${{ inputs.version }}
+    steps:
+      - name: Refuse anything but a confirmed run on a matching src-v tag
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF" != refs/tags/src-v* ]]; then
+            echo "::error::publish runs on a src-vX.Y.Z tag only, not ${GITHUB_REF}; pick the tag under 'Use workflow from'"
+            exit 1
+          fi
+          if [ "$INPUT_CONFIRM" != "true" ]; then
+            echo "::error::confirm is not ticked; nothing published"
+            exit 1
+          fi
+          # Plain X.Y.Z only: npm 11 refuses a prerelease without --tag, and this flow has none.
+          if ! [[ "$INPUT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::version input '${INPUT_VERSION}' is not a plain X.Y.Z (no prereleases)"
+            exit 1
+          fi
+          if [ "src-v${INPUT_VERSION}" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::version input '${INPUT_VERSION}' differs from the tag ${GITHUB_REF_NAME}"
+            exit 1
+          fi
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          # Trusted publishing needs npm 11.5.1 or newer; Node 24.5.0 or newer ships npm >= 11.5.1.
+          node-version: 24
+      - name: Fail fast unless npm has the package and not this version
+        # Runs before checkout, so no repository .npmrc or code can influence it.
+        run: |
+          set -euo pipefail
+          if ! versions="$(npm view benchlight versions --json 2>"$RUNNER_TEMP/npm-view.err")"; then
+            cat "$RUNNER_TEMP/npm-view.err"
+            if grep -q E404 "$RUNNER_TEMP/npm-view.err"; then
+              echo "::error::benchlight does not exist on npm; do the one-time placeholder publish and trusted publisher setup (see the top of publish.yml)"
+            else
+              echo "::error::could not reach the npm registry"
+            fi
+            exit 1
+          fi
+          if printf '%s' "$versions" | node -e '
+            const v = JSON.parse(require("fs").readFileSync(0, "utf8"))
+            process.exit([].concat(v).includes(process.argv[1]) ? 0 : 1)
+          ' "$INPUT_VERSION"; then
+            echo "::error::benchlight@${INPUT_VERSION} is already on npm; published versions are never replaced"
+            exit 1
+          fi
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          # Full history and every branch, so origin/main is there for the on-main guard below.
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require the tagged commit to be on main and match package.json
+        run: |
+          set -euo pipefail
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" refs/remotes/origin/main; then
+            echo "::error::${GITHUB_REF_NAME} (${GITHUB_SHA}) is not on main; releases are cut from main only"
+            exit 1
+          fi
+          pkg="$(node -p "require('./package.json').version")"
+          if [ "$INPUT_VERSION" != "$pkg" ]; then
+            echo "::error::${GITHUB_REF_NAME} carries package.json version '${pkg}', not '${INPUT_VERSION}'"
+            exit 1
+          fi
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - run: bun run check
+      - run: bun run lint:package
+      - name: Pack the tarball and check its entry points
+        run: |
+          set -euo pipefail
+          npm pack --ignore-scripts
+          contents="$(tar -tzf "benchlight-${INPUT_VERSION}.tgz")"
+          for entry in package/dist/vue/index.js package/dist/nuxt/module.mjs; do
+            if ! grep -qxF "$entry" <<<"$contents"; then
+              echo "::error::benchlight-${INPUT_VERSION}.tgz is missing ${entry}"
+              exit 1
+            fi
+          done
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: package-tarball
+          path: benchlight-${{ inputs.version }}.tgz
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      INPUT_CONFIRM: ${{ inputs.confirm }}
+      INPUT_VERSION: ${{ inputs.version }}
+    steps:
+      - name: Refuse anything but a confirmed run on a matching src-v tag
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF" != refs/tags/src-v* ]]; then
+            echo "::error::publish runs on a src-vX.Y.Z tag only, not ${GITHUB_REF}"
+            exit 1
+          fi
+          if [ "$INPUT_CONFIRM" != "true" ]; then
+            echo "::error::confirm is not ticked; nothing published"
+            exit 1
+          fi
+          if [ "src-v${INPUT_VERSION}" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::version input '${INPUT_VERSION}' differs from the tag ${GITHUB_REF_NAME}"
+            exit 1
+          fi
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: package-tarball
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - name: Require npm 11.5.1 or newer
+        run: |
+          set -euo pipefail
+          npm_version="$(npm --version)"
+          if ! node -e '
+            const [a, b, c] = process.argv[1].split(".").map(Number)
+            process.exit(a > 11 || (a === 11 && (b > 5 || (b === 5 && c >= 1))) ? 0 : 1)
+          ' "$npm_version"; then
+            echo "::error::npm ${npm_version} is too old for trusted publishing (need >= 11.5.1)"
+            exit 1
+          fi
+      - name: Fail fast unless npm trusts this workflow
+        # The same OIDC exchange `npm publish` does; a granted npm token is deleted unread.
+        run: |
+          set -euo pipefail
+          id_token="$(curl -fsS -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=npm:registry.npmjs.org" \
+            | node -p "JSON.parse(require('fs').readFileSync(0, 'utf8')).value")"
+          echo "::add-mask::${id_token}"
+          body="$RUNNER_TEMP/oidc-exchange.json"
+          status="$(curl -sS -o "$body" -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer ${id_token}" \
+            https://registry.npmjs.org/-/npm/v1/oidc/token/exchange/package/benchlight)"
+          if [[ "$status" != 2?? ]]; then
+            cat "$body"
+            rm -f "$body"
+            echo "::error::npm refused the OIDC exchange (HTTP ${status}); configure the trusted publisher for publish.yml and environment npm-publish (see the top of publish.yml)"
+            exit 1
+          fi
+          rm -f "$body"
+      - name: Check the tarball and publish with provenance
+        run: |
+          set -euo pipefail
+          tarball="benchlight-${INPUT_VERSION}.tgz"
+          manifest="$(tar -xOzf "$tarball" package/package.json)"
+          name="$(node -p "JSON.parse(process.argv[1]).name" "$manifest")"
+          packed="$(node -p "JSON.parse(process.argv[1]).version" "$manifest")"
+          if [ "$name" != "benchlight" ]; then
+            echo "::error::${tarball} holds package ${name}, not benchlight"
+            exit 1
+          fi
+          if [ "$packed" != "$INPUT_VERSION" ]; then
+            echo "::error::${tarball} holds version ${packed}, not ${INPUT_VERSION}"
+            exit 1
+          fi
+          # A here-string, not a pipe: grep -q exiting early would SIGPIPE tar and fail open.
+          contents="$(tar -tzf "$tarball")"
+          if grep -q '\.npmrc$' <<<"$contents"; then
+            echo "::error::${tarball} contains an .npmrc"
+            exit 1
+          fi
+          npm publish "./${tarball}" --provenance --access public --ignore-scripts

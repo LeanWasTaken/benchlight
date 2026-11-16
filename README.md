@@ -45,6 +45,24 @@ Benchlight is not on npm yet (the name is reserved). `benchlight/vue` ships as c
 JavaScript with `.d.ts` files (`dist/vue/`, `vue` external), so importing it needs no Vue compiler plugin or
 TypeScript-aware bundler. The Vite and Nuxt helpers below are optional conveniences.
 
+### Install from npm (from v1)
+
+Not available until the first npm release. From then on:
+
+```sh
+bun add benchlight
+npm i benchlight
+```
+
+No deploy key or SSH access is needed for the npm package.
+
+Maintainers publish with the manual `publish` workflow, run on a `src-vX.Y.Z` tag. Before the first
+run, the GitHub-side protections listed at the top of `.github/workflows/publish.yml` are mandatory:
+the `npm-publish` environment limited to `src-v*` tags with required reviewers, an admin-only tag
+ruleset on `src-v*` and a `main` ruleset that blocks force-push and deletion. A tag run uses the
+`publish.yml` from the tagged commit, so the checks inside the workflow catch mistakes, not a
+compromised writer; only these rules do that.
+
 ## Nuxt
 
 ```ts

@@ -15,6 +15,10 @@
     "node": ">=20"
   },
   "type": "module",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "files": [
     "tokens",
     "css",

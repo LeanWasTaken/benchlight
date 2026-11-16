@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Tests/CI
+
+- A manual `publish` workflow (`.github/workflows/publish.yml`) publishes `benchlight` to npm with
+  provenance through npm trusted publishing (OIDC, no token), on a `src-vX.Y.Z` tag. Before its
+  first run, the GitHub-side protections listed at the top of the workflow file are mandatory: the
+  `npm-publish` environment limited to `src-v*` tags with required reviewers, an admin-only
+  `src-v*` tag ruleset and a `main` ruleset. `package.json` gains `publishConfig` (public access,
+  provenance).
+
 ## 0.10.0 - 2026-11-11
 
 - `benchlight/vue` now ships compiled JavaScript and `.d.ts` files (`dist/vue/`, one module per

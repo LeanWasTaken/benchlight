@@ -101,6 +101,168 @@ describe('release workflow credentials', () => {
   })
 })
 
+describe('publish workflow', () => {
+  const publish = read('.github/workflows/publish.yml')
+  const code = publish
+    .split('\n')
+    .filter((line) => !/^\s*#/.test(line))
+    .join('\n')
+
+  it('runs only on manual dispatch, never on a tag or push', () => {
+    expect(code).toMatch(/^on:\n {2}workflow_dispatch:\n/m)
+    expect(code).not.toMatch(
+      /^ {2}(push|pull_request|pull_request_target|release|schedule|workflow_run):/m
+    )
+    expect(code).not.toMatch(/^\s+tags:/m)
+  })
+
+  // Job name -> raw block text, parsed by line like the ci.yml jobs above.
+  const pubJobs = (() => {
+    const body = code.slice(code.search(/^jobs:\s*$/m))
+    const heads = [...body.matchAll(/^ {2}([\w-]+):\s*$/gm)]
+    return Object.fromEntries(
+      heads.map((head, i) => [head[1]!, body.slice(head.index, heads[i + 1]?.index ?? body.length)])
+    )
+  })()
+  const build = pubJobs['build']!
+  const publishJob = pubJobs['publish']!
+
+  it('splits into a build job and a publish job that needs it', () => {
+    expect(Object.keys(pubJobs)).toEqual(['build', 'publish'])
+    expect(publishJob).toMatch(/^ {4}needs: build$/m)
+    expect(publishJob).toMatch(/^ {4}environment: npm-publish$/m)
+  })
+
+  it('requires the confirm and version inputs, on a matching src-v tag, in both jobs', () => {
+    expect(code).toMatch(/confirm:\n\s+description: .*\n\s+type: boolean\n\s+required: true/)
+    expect(code).toMatch(/version:\n\s+description: .*\n\s+type: string\n\s+required: true/)
+    expect(code).not.toContain('refs/heads/main"')
+    for (const [name, job] of Object.entries(pubJobs)) {
+      expect(job, name).toContain('"$GITHUB_REF" != refs/tags/src-v*')
+      expect(job, name).toContain('"$INPUT_CONFIRM" != "true"')
+      expect(job, name).toContain('"src-v${INPUT_VERSION}" != "$GITHUB_REF_NAME"')
+      expect(job, name).toContain('INPUT_VERSION: ${{ inputs.version }}')
+    }
+  })
+
+  it('requires the tagged commit on main and the same package.json version before installing', () => {
+    expect(build).toMatch(/fetch-depth: 0/)
+    expect(code).not.toMatch(/git (-c .* )?fetch|GH_TOKEN|github\.token/)
+    expect(build).toContain('git merge-base --is-ancestor "$GITHUB_SHA" refs/remotes/origin/main')
+    expect(build).toContain('"$INPUT_VERSION" != "$pkg"')
+    expect(build.indexOf('merge-base --is-ancestor')).toBeLessThan(build.indexOf('bun install'))
+  })
+
+  it('fails fast before checkout when npm lacks the package or already has the version', () => {
+    expect(build).toContain('npm view benchlight versions --json')
+    expect(build).toContain('E404')
+    expect(build).toContain('is already on npm')
+    expect(build.indexOf('npm view')).toBeLessThan(build.indexOf('actions/checkout'))
+  })
+
+  it('fails fast before publishing when npm does not trust the workflow', () => {
+    expect(publishJob).toContain('audience=npm:registry.npmjs.org')
+    expect(publishJob).toContain('/-/npm/v1/oidc/token/exchange/package/benchlight')
+    expect(publishJob).toContain('::add-mask::')
+    expect(publishJob.indexOf('oidc/token/exchange')).toBeLessThan(
+      publishJob.indexOf('npm publish')
+    )
+  })
+
+  it('grants id-token only on the publish job, read-only contents elsewhere', () => {
+    expect(code).toMatch(/^permissions:\n {2}contents: read\n/m)
+    expect(code.match(/id-token: write/g)).toHaveLength(1)
+    expect(build).toMatch(/^ {4}permissions:\n {6}contents: read\n {4}env:/m)
+    expect(build).not.toContain('id-token')
+    expect(publishJob).toMatch(/^ {4}permissions:\n {6}contents: read\n {6}id-token: write\n/m)
+  })
+
+  it('keeps the publish job free of checkout and install steps', () => {
+    expect(publishJob).not.toMatch(
+      /actions\/checkout|setup-bun|bun install|bun run|npm (ci|install)/
+    )
+    expect(publishJob).toContain('actions/download-artifact@')
+  })
+
+  it('checks out without persisting the token and installs only in the build job', () => {
+    expect(build).toContain('persist-credentials: false')
+    expect(code).not.toMatch(/persist-credentials: true/)
+    expect(build).toContain('run: bun install --frozen-lockfile')
+    expect(build).toContain('run: bun run check')
+  })
+
+  it('pins every action by full commit SHA, upload and download included', () => {
+    const uses = code.split('\n').filter((line) => /^\s*(- )?uses:/.test(line))
+    expect(uses.length).toBeGreaterThanOrEqual(6)
+    for (const line of uses) {
+      expect(line).toMatch(/uses: [\w.-]+\/[\w.-]+@[0-9a-f]{40} # v\d+/)
+    }
+    expect(build).toMatch(/uses: actions\/upload-artifact@[0-9a-f]{40} # v4/)
+    expect(publishJob).toMatch(/uses: actions\/download-artifact@[0-9a-f]{40} # v4/)
+    // Same upload-artifact pin as ci.yml.
+    const ciUpload = /actions\/upload-artifact@[0-9a-f]{40}/.exec(workflow)?.[0]
+    expect(build).toContain(ciUpload)
+  })
+
+  it('packs the tarball in build and publishes that exact tarball', () => {
+    expect(build).toContain('npm pack --ignore-scripts')
+    expect(build).toMatch(/path: benchlight-\$\{\{ inputs\.version \}\}\.tgz/)
+    expect(publishJob).toContain('name: package-tarball')
+    expect(publishJob).toContain(
+      'npm publish "./${tarball}" --provenance --access public --ignore-scripts'
+    )
+    expect(build).not.toContain('npm publish')
+  })
+
+  it('fails fast on an npm older than 11.5.1', () => {
+    expect(publishJob).toContain('npm --version')
+    expect(publishJob).toContain('need >= 11.5.1')
+    expect(publishJob.indexOf('setup-node')).toBeLessThan(publishJob.indexOf('npm --version'))
+  })
+
+  it('publishes through OIDC, with no npm token or secret', () => {
+    expect(code).not.toMatch(/NPM_TOKEN|NODE_AUTH_TOKEN|secrets\./)
+  })
+
+  it('never expands an expression inside a run script', () => {
+    const scripts = [...code.matchAll(/^( +)run: \|\n((?:\1 {2}.*\n|\s*\n)+)/gm)]
+    expect(scripts.length).toBeGreaterThanOrEqual(6)
+    for (const [, , body] of scripts) expect(body).not.toContain('${{')
+  })
+
+  it('never configures a registry-url (no .npmrc token plumbing)', () => {
+    expect(publish).not.toContain('registry-url:')
+  })
+
+  it('accepts only a plain X.Y.Z version', () => {
+    expect(build).toContain('"$INPUT_VERSION" =~ ^[0-9]+\\.[0-9]+\\.[0-9]+$ ]]')
+    expect(code).not.toMatch(/\(-\[0-9A-Za-z/)
+  })
+
+  it('lints the package after check and checks the packed entry points', () => {
+    const at = (text: string) => build.indexOf(text)
+    expect(at('run: bun run check')).toBeLessThan(at('run: bun run lint:package'))
+    expect(at('run: bun run lint:package')).toBeLessThan(at('npm pack --ignore-scripts'))
+    expect(build).toContain('tar -tzf "benchlight-${INPUT_VERSION}.tgz"')
+    expect(build).toContain('package/dist/vue/index.js package/dist/nuxt/module.mjs')
+    expect(build).toMatch(/^ {10}retention-days: 1$/m)
+  })
+
+  it('checks the tarball name and that it holds no .npmrc before publishing', () => {
+    expect(publishJob).toContain('"$name" != "benchlight"')
+    expect(publishJob).toContain('contents="$(tar -tzf "$tarball")"')
+    expect(publishJob).toContain('grep -q \'\\.npmrc$\' <<<"$contents"')
+    expect(code).not.toMatch(/tar -t\S* [^\n]*\| *grep/)
+    expect(publishJob.indexOf('.npmrc')).toBeLessThan(publishJob.indexOf('npm publish'))
+  })
+
+  it('keeps the OIDC exchange body in a temp file and removes it either way', () => {
+    expect(publishJob).toContain('body="$RUNNER_TEMP/oidc-exchange.json"')
+    expect(publishJob).toContain('-o "$body"')
+    expect(publishJob.match(/rm -f "\$body"/g)).toHaveLength(2)
+  })
+})
+
 describe('bun install cache', () => {
   it.each(['ci.yml', 'release.yml'])(
     '%s caches the bun install cache keyed on bun.lock',
