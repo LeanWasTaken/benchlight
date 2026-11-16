@@ -10,6 +10,16 @@
   `npm-publish` environment limited to `src-v*` tags with required reviewers, an admin-only
   `src-v*` tag ruleset and a `main` ruleset. `package.json` gains `publishConfig` (public access,
   provenance).
+- The behaviour specs (cross-browser, popover, tooltip, tabs, number-field) now also run in Firefox
+  and WebKit, as `firefox` and `webkit` Playwright projects. They take no screenshots, so there are
+  no new baselines; the visual specs stay Chromium-only. The CI Playwright image already ships both
+  engines. Seven WebKit focus tests and one number-field wheel test are `test.fixme` on macOS only
+  (macOS WebKit does not Tab-focus buttons and hit-tests the wheel against the element under the
+  input; all pass in the Linux CI image). One Firefox test (popover `align=start` under a section
+  `dir=rtl`) is `test.fixme` everywhere: Firefox resolves `self-*` position-area keywords against
+  the top-layer containing block's writing mode. `PW_PORT` overrides the preview port (default 4173)
+  so parallel worktrees can run Playwright side by side; the web server now has a 120s timeout and
+  is only reused outside CI.
 
 ## 0.10.0 - 2026-11-11
 

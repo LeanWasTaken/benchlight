@@ -57,7 +57,11 @@ test('the arrows swap under dir="rtl"', async ({ page }) => {
   expect(status!).toBeGreaterThan(boot!)
 })
 
-test('Tab moves from the tablist into the panel', async ({ page }) => {
+test('Tab moves from the tablist into the panel', async ({ page, browserName }) => {
+  test.fixme(
+    browserName === 'webkit' && process.platform === 'darwin',
+    'macOS WebKit does not Tab-focus buttons (system default); passes on Linux CI'
+  )
   // A panel of plain text takes focus itself.
   await tab(page, 'Status').focus()
   await page.keyboard.press('Tab')
