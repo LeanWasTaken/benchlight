@@ -10,6 +10,7 @@
       <input
         type="radio"
         :name="groupName"
+        :form="form"
         :value="String(option.value)"
         :checked="option.value === model"
         :disabled="option.disabled || undefined"
@@ -21,8 +22,9 @@
 </template>
 
 <script setup lang="ts" generic="T extends string | number | null">
-  import { computed, onBeforeUnmount, onMounted, ref, useAttrs, useId } from 'vue'
+  import { computed, onMounted, ref, useAttrs, useId } from 'vue'
   import { warnOnce } from '../internal/dev'
+  import { useFormReset } from '../internal/useFormReset'
   import type { SegmentedOption } from '../types'
 
   const props = defineProps<{
@@ -30,6 +32,8 @@
     ariaLabel?: string
     compact?: boolean
     name?: string
+    /** Id of a form outside the group; the radios belong to it, so its reset reaches them. */
+    form?: string
   }>()
   const attrs = useAttrs()
   if (!props.ariaLabel && !attrs['aria-labelledby'])
@@ -42,24 +46,23 @@
   // A native form reset flips `checked` without an input or change event. The reset event fires
   // before the controls reset, so restore each radio's `defaultChecked` from the mount value
   // synchronously, then read the result in a macrotask (as BlRadioGroup does).
-  let form: HTMLFormElement | null = null
   let initial: T | undefined
   function inputs(): HTMLInputElement[] {
     return [...(root.value?.querySelectorAll<HTMLInputElement>('input') ?? [])]
   }
-  function onReset(): void {
-    inputs().forEach((input, i) => {
-      input.defaultChecked = props.options[i]?.value === initial
-    })
-    setTimeout(() => {
+  useFormReset(
+    root,
+    () => {
       const index = inputs().findIndex((input) => input.checked)
       model.value = props.options[index]?.value
-    }, 0)
-  }
+    },
+    () => {
+      inputs().forEach((input, i) => {
+        input.defaultChecked = props.options[i]?.value === initial
+      })
+    }
+  )
   onMounted(() => {
     initial = model.value
-    form = root.value?.closest('form') ?? null
-    form?.addEventListener('reset', onReset)
   })
-  onBeforeUnmount(() => form?.removeEventListener('reset', onReset))
 </script>

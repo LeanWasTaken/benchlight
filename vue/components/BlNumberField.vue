@@ -21,6 +21,7 @@
   import { FIELD_CONTEXT } from '../types'
   import { mergeDescribedBy } from '../internal/describedBy'
   import { controlId } from '../internal/fieldId'
+  import { useFormReset } from '../internal/useFormReset'
 
   const props = defineProps<{
     min?: number
@@ -110,4 +111,24 @@
   })
 
   onMounted(() => write(model.value))
+
+  // A native form reset changes the element without an input event. The mount-time model, shown
+  // as the field shows it (`null` is empty), is the default, written just before the reset (see
+  // BlInput). Then parse the element as onInput does and drop the typing guard: it no longer
+  // shows what was typed.
+  let initial: number | null = null
+  onMounted(() => (initial = model.value))
+  useFormReset(
+    input,
+    () => {
+      if (!input.value) return
+      const n = input.value.valueAsNumber
+      const value = Number.isNaN(n) ? null : n
+      typed = undefined
+      if (!Object.is(value, model.value)) model.value = value
+    },
+    () => {
+      if (input.value) input.value.defaultValue = show(initial)
+    }
+  )
 </script>

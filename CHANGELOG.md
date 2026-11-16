@@ -28,6 +28,14 @@
   validation error with `role="alert"`, so screen readers announce it when it appears. Off by
   default: the error stays a plain described-by text, as before. A live region announces only
   errors that appear after mount, so set and clear `error` as validation runs.
+- BlInput, BlTextarea, BlSelect, BlRange and BlNumberField sync their `v-model` to a native
+  `form.reset()` (also with `form="id"` outside the form), and restore the value they had when they
+  mounted, as native `defaultValue` does: later model changes are not the default. A range with no
+  model restores the value it showed at mount. BlNumberField restores its mount-time number, or
+  `null` (empty) when it mounted empty. This supersedes the 0.10.0 note that BlNumberField does not
+  handle `form.reset()`.
+- BlSegmented has a `form` prop, and BlRadioGroup forwards its `form` attribute to its radios, so a
+  reset of a form named from outside the group reaches them and restores the mount-time option.
 
 ### Fixed
 

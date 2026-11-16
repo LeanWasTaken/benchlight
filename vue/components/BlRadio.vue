@@ -64,7 +64,8 @@
       name: group.name.value,
       checked: group.model.value === props.value,
       disabled: props.disabled || group.disabled.value || undefined,
-      required: group.required.value || rest['required']
+      required: group.required.value || rest['required'],
+      form: group.form ?? rest['form']
     }
   }
 

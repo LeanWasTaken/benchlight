@@ -294,9 +294,14 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
 - **BlInput:** renders a bare `<input>` with no wrapper, so `class`, `style` and every attribute
   land on the input. `type` is `'text' | 'email' | 'password' | 'search' | 'tel' | 'url'`
   (default `'text'`); `number` is left out because the model is a string.
-- **Form reset:** BlInput, BlTextarea, BlSelect, BlRange and BlNumberField do not listen for a native
-  form reset, so their `v-model` keeps the old value after `form.reset()`; reset through the model.
-  BlToggle, BlCheckbox, BlRadioGroup and BlSegmented do restore their mount value.
+- **Form reset:** every form control follows a native `form.reset()` (also for a control tied to its
+  form with `form="id"` from outside it), so the model never keeps a stale value. Every control
+  restores the model value it had at mount (this overrides a consumer `value` attribute; later
+  model changes do not become the default). BlNumberField restores its mount number, or empty
+  (`null`). The model is written after the reset has finished, only when it differs, and not when
+  another listener cancels the reset. The form is resolved once at mount. BlSegmented takes a
+  `form` prop and BlRadioGroup forwards its `form` attribute to its radios, for a form outside
+  the group.
 - **BlTextarea:** the multi-line sibling of BlInput, with the same contract: no wrapper, every
   attribute (including `class` and `style`) on the `<textarea>`, a string `v-model`, and the
   field wiring above. `rows` defaults to 4; it resizes vertically only and does not autosize.
@@ -876,8 +881,8 @@ A numeric input with a `number | null` model, inside BlField. Needs the `field` 
 - Props: `min`, `max`, `step`, `disabled`; other attributes go to the `<input>`. `null` is empty.
 - The value is clamped to `[min, max]` on commit (blur or Enter), not while typing and not for
   values set from outside.
-- It does not block the mouse wheel (a focused field blurs on wheel) and does not handle
-  `form.reset()`.
+- It does not block the mouse wheel (a focused field blurs on wheel). A native `form.reset()`
+  writes the reset element's number (or `null` when empty) to the model.
 
 ## CSS hooks
 

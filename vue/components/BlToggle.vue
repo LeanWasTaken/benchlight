@@ -28,8 +28,9 @@
 </template>
 
 <script setup lang="ts">
-  import { onBeforeUnmount, onMounted, ref, useAttrs, useId, type StyleValue } from 'vue'
+  import { onMounted, ref, useAttrs, useId, type StyleValue } from 'vue'
   import { mergeDescribedBy } from '../internal/describedBy'
+  import { useFormReset } from '../internal/useFormReset'
 
   const props = defineProps<{
     label: string
@@ -73,21 +74,20 @@
   // fires before the controls reset, and a microtask can run before the reset algorithm, so
   // read the value in a macrotask. `defaultChecked` is set on mount so a reset restores the
   // value the toggle had then, as a plain checkbox does.
-  let form: HTMLFormElement | null = null
   let initial = false
-  function onReset(): void {
+  useFormReset(
+    input,
+    () => {
+      if (input.value) model.value = input.value.checked
+    },
     // Vue's re-renders rewrite the `checked` attribute, so restore the mount value synchronously,
     // before the reset algorithm reads `defaultChecked`.
-    if (input.value) input.value.defaultChecked = initial
-    setTimeout(() => {
-      if (input.value) model.value = input.value.checked
-    }, 0)
-  }
+    () => {
+      if (input.value) input.value.defaultChecked = initial
+    }
+  )
   onMounted(() => {
     initial = model.value
     if (input.value) input.value.defaultChecked = initial
-    form = input.value?.form ?? null
-    form?.addEventListener('reset', onReset)
   })
-  onBeforeUnmount(() => form?.removeEventListener('reset', onReset))
 </script>

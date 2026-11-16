@@ -21,8 +21,9 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, onBeforeUnmount, onMounted, provide, ref, useAttrs, useId } from 'vue'
+  import { computed, onMounted, provide, ref, useAttrs, useId } from 'vue'
   import { mergeDescribedBy } from '../internal/describedBy'
+  import { useFormReset } from '../internal/useFormReset'
   import { RADIO_GROUP_CONTEXT } from '../internal/radioGroup'
 
   const props = defineProps<{
@@ -76,6 +77,9 @@
     model,
     disabled: computed(() => props.disabled),
     required: computed(() => props.required),
+    get form() {
+      return attrs['form'] as string | undefined
+    },
     register(input, value) {
       radios.set(input, value)
       if (mounted) input.defaultChecked = value() === initial
@@ -86,21 +90,18 @@
   // A native form reset flips `checked` without an input or change event. The reset event fires
   // before the controls reset, so restore each radio's `defaultChecked` from the mount value
   // synchronously (Vue's re-renders may have rewritten it), then read the result in a macrotask.
-  let form: HTMLFormElement | null = null
-  function onReset(): void {
-    syncDefaults()
-    setTimeout(() => {
+  useFormReset(
+    root,
+    () => {
       let checked: string | number | undefined
       for (const [input, value] of radios) if (input.checked) checked = value()
       model.value = checked
-    }, 0)
-  }
+    },
+    syncDefaults
+  )
   onMounted(() => {
     mounted = true
     initial = model.value
     syncDefaults()
-    form = root.value?.form ?? null
-    form?.addEventListener('reset', onReset)
   })
-  onBeforeUnmount(() => form?.removeEventListener('reset', onReset))
 </script>

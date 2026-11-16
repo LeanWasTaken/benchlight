@@ -974,9 +974,14 @@ Exposed: none
 | --- | --- | --- | --- |
 | `ariaLabel` | `string \| undefined` | no |  |
 | `compact` | `boolean \| undefined` | no |  |
+| `form` | `string \| undefined` | no |  |
 | `modelValue` | `T \| undefined` | no |  |
 | `name` | `string \| undefined` | no |  |
 | `options` | `readonly SegmentedOption<T>[]` | yes |  |
+
+Prop notes:
+
+- `form`: Id of a form outside the group; the radios belong to it, so its reset reaches them.
 
 Slots: none
 Events: `update:modelValue`

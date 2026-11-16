@@ -1,6 +1,7 @@
 <template>
   <div class="bl-range" :class="attrs.class" :style="attrs.style as StyleValue">
     <input
+      ref="el"
       :value="current"
       class="bl-range__input"
       type="range"
@@ -17,10 +18,11 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, inject, useAttrs, type StyleValue } from 'vue'
+  import { computed, inject, onMounted, ref, useAttrs, type StyleValue } from 'vue'
   import { FIELD_CONTEXT } from '../types'
   import { mergeDescribedBy } from '../internal/describedBy'
   import { controlId } from '../internal/fieldId'
+  import { useFormReset } from '../internal/useFormReset'
 
   // CSS: the track keeps at least 96px; set `--bl-range-value-width` to reserve room for the longest
   // value (default 56px) so the track does not change length while dragging.
@@ -53,6 +55,7 @@
     }
   }
   const model = defineModel<number>()
+  const el = ref<HTMLInputElement>()
   const field = inject(FIELD_CONTEXT, null)
   // Display only: an unset or out-of-range model is shown clamped and snapped, never written back.
   const current = computed(() => {
@@ -63,5 +66,21 @@
     // Past an off-step max the native thumb sits on the last step below it, not on max.
     return snapped > max ? round(snapped - step) : snapped
   })
+  // A native form reset moves the thumb without an input event. The mount-time model (or, with
+  // none, the value shown then) is the default, written just before the reset: a range input
+  // otherwise resets to the midpoint of min and max. The model is then synced to the element.
+  let initial = 0
+  onMounted(() => (initial = model.value ?? current.value))
+  useFormReset(
+    el,
+    () => {
+      if (!el.value) return
+      const value = Number(el.value.value)
+      if (value !== model.value) model.value = value
+    },
+    () => {
+      if (el.value) el.value.defaultValue = String(initial)
+    }
+  )
   const text = computed(() => (props.format ? props.format(current.value) : String(current.value)))
 </script>
