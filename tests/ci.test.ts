@@ -14,6 +14,12 @@ describe('CI browser job', () => {
       `image: mcr.microsoft.com/playwright:v${version}-noble`
     )
   })
+
+  it('runs Playwright with HOME=/root so Firefox launches as root in the container', () => {
+    expect(read('.github/workflows/ci.yml')).toMatch(
+      /- run: bunx playwright test\n(?: {8}#.*\n)* {8}env:\n {10}HOME: \/root\n/
+    )
+  })
 })
 
 const workflow = read('.github/workflows/ci.yml')

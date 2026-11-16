@@ -60,6 +60,9 @@ jobs:
           restore-keys: bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
       - run: bunx playwright test
+        # The container runs as root but GitHub mounts HOME owned by pwuser; Firefox refuses that.
+        env:
+          HOME: /root
       - if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
