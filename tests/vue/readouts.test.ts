@@ -575,7 +575,7 @@ describe('BlMarquee', () => {
   it('flags overflow and shows the full title', async () => {
     mockMatchMedia({ '(prefers-reduced-motion: reduce)': true })
     stubLayout('scrollWidth', (el) => (el.classList.contains('bl-marquee__content') ? 300 : 0))
-    stubLayout('clientWidth', (el) => (el.classList.contains('bl-marquee') ? 100 : 0))
+    stubLayout('clientWidth', (el) => (el.classList.contains('bl-marquee__viewport') ? 100 : 0))
     const wrapper = mount(BlMarquee, {
       props: { title: 'Xtal · Aphex Twin' },
       slots: { default: 'Xtal · Aphex Twin' }
@@ -591,5 +591,136 @@ describe('BlMarquee', () => {
     await nextTick()
     expect(wrapper.attributes('data-overflowing')).toBeUndefined()
     expect(wrapper.attributes('title')).toBeUndefined()
+  })
+
+  describe('pause control', () => {
+    function stubOverflow(reduced = false): void {
+      mockMatchMedia({ '(prefers-reduced-motion: reduce)': reduced })
+      stubLayout('scrollWidth', (el) => (el.classList.contains('bl-marquee__content') ? 300 : 0))
+      stubLayout('clientWidth', (el) => (el.classList.contains('bl-marquee__viewport') ? 100 : 0))
+    }
+    function overflowing(props: Record<string, unknown> = {}, slot = 'Long text') {
+      stubOverflow()
+      return mount(BlMarquee, { props, slots: { default: slot } })
+    }
+
+    it('has no control when the text fits', async () => {
+      const wrapper = mount(BlMarquee, { slots: { default: 'Short' } })
+      await nextTick()
+      expect(wrapper.find('button').exists()).toBe(false)
+    })
+
+    it('has no control under reduced motion, where the text wraps', async () => {
+      stubOverflow(true)
+      const wrapper = mount(BlMarquee, { slots: { default: 'Long text' } })
+      await nextTick()
+      expect(wrapper.find('button').exists()).toBe(false)
+    })
+
+    it('never turns the wrapper into a button', async () => {
+      const wrapper = overflowing()
+      await nextTick()
+      for (const attr of ['role', 'tabindex', 'aria-pressed'])
+        expect(wrapper.attributes(attr)).toBeUndefined()
+    })
+
+    it('renders a real labelled toggle button beside the text', async () => {
+      const wrapper = overflowing()
+      await nextTick()
+      const button = wrapper.find('button')
+      expect(button.attributes()).toMatchObject({
+        type: 'button',
+        'aria-label': 'Pause scrolling',
+        'aria-pressed': 'false'
+      })
+      expect(wrapper.find('.bl-marquee__viewport button').exists()).toBe(false)
+    })
+
+    it('takes a label override and falls back on undefined', async () => {
+      const wrapper = overflowing({ labels: { pause: 'Pausar' } })
+      await nextTick()
+      expect(wrapper.find('button').attributes('aria-label')).toBe('Pausar')
+      await wrapper.setProps({ labels: { pause: undefined } })
+      expect(wrapper.find('button').attributes('aria-label')).toBe('Pause scrolling')
+    })
+
+    it('toggles on tap and on the keyboard activation click', async () => {
+      const wrapper = overflowing()
+      await nextTick()
+      const button = wrapper.find('button')
+      // Enter and Space on a native button dispatch a click; that is the whole keyboard path.
+      await button.trigger('click')
+      expect(button.attributes('aria-pressed')).toBe('true')
+      await button.trigger('click')
+      expect(button.attributes('aria-pressed')).toBe('false')
+      expect(wrapper.emitted('update:paused')).toEqual([[true], [false]])
+    })
+
+    it('lets a controlled paused win and still emits the request', async () => {
+      const wrapper = overflowing({ paused: true, 'onUpdate:paused': () => {} })
+      await nextTick()
+      const button = wrapper.find('button')
+      expect(button.attributes('aria-pressed')).toBe('true')
+      await button.trigger('click')
+      expect(wrapper.emitted('update:paused')).toEqual([[false]])
+      expect(button.attributes('aria-pressed')).toBe('true')
+      await wrapper.setProps({ paused: false })
+      expect(button.attributes('aria-pressed')).toBe('false')
+    })
+
+    it('pauses and resumes the animation with the toggle', async () => {
+      const animation = { cancel: vi.fn(), pause: vi.fn(), play: vi.fn() }
+      const original = Element.prototype.animate
+      Element.prototype.animate = vi.fn(() => animation) as unknown as typeof original
+      try {
+        const wrapper = overflowing()
+        await nextTick()
+        await wrapper.find('button').trigger('click')
+        expect(animation.pause).toHaveBeenCalled()
+        await wrapper.find('button').trigger('click')
+        expect(animation.play).toHaveBeenCalled()
+      } finally {
+        Element.prototype.animate = original
+      }
+    })
+
+    it('keeps a link in the slot valid and clickable beside the control', async () => {
+      const wrapper = overflowing({}, '<a href="#x">Link</a>')
+      await nextTick()
+      expect(wrapper.find('button').exists()).toBe(true)
+      expect(wrapper.find('button a, a button').exists()).toBe(false)
+      await wrapper.find('a').trigger('click')
+      expect(wrapper.emitted('update:paused')).toBeUndefined()
+    })
+
+    it('holds the scroll and reveals the focused link, then lets go', async () => {
+      const animation = { cancel: vi.fn(), pause: vi.fn(), play: vi.fn() }
+      const original = Element.prototype.animate
+      Element.prototype.animate = vi.fn(() => animation) as unknown as typeof original
+      const reveal = vi.fn()
+      const link = { value: null as HTMLElement | null }
+      try {
+        const wrapper = mount(BlMarquee, {
+          slots: { default: '<a href="#x">Link</a>' },
+          attachTo: document.body
+        })
+        stubOverflow()
+        await wrapper.setProps({ contentKey: 1 })
+        await nextTick()
+        link.value = wrapper.find('a').element as HTMLElement
+        link.value.scrollIntoView = reveal
+        const viewport = wrapper.find('.bl-marquee__viewport').element as HTMLElement
+        link.value.dispatchEvent(new FocusEvent('focusin', { bubbles: true }))
+        expect(animation.pause).toHaveBeenCalled()
+        expect(reveal).toHaveBeenCalledWith({ block: 'nearest', inline: 'nearest' })
+        viewport.scrollLeft = 40
+        link.value.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }))
+        expect(viewport.scrollLeft).toBe(0)
+        expect(animation.play).toHaveBeenCalled()
+        wrapper.unmount()
+      } finally {
+        Element.prototype.animate = original
+      }
+    })
   })
 })

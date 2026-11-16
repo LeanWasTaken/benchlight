@@ -15,8 +15,17 @@
     position: relative;
     display: flex;
     align-items: center;
+    gap: 4px;
+    min-width: 0;
+  }
+  .bl-marquee__viewport {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
     min-width: 0;
     overflow: hidden;
+    /* Keeps a focused link clear of the fading edges when it is scrolled into view. */
+    scroll-padding-inline: 12%;
   }
   .bl-marquee__content {
     display: flex;
@@ -24,7 +33,7 @@
     gap: 8px;
     white-space: nowrap;
   }
-  .bl-marquee[data-overflowing] {
+  .bl-marquee[data-overflowing] .bl-marquee__viewport {
     --bl-mask-l: 0%;
     --bl-mask-r: 88%;
     -webkit-mask: linear-gradient(
@@ -44,7 +53,7 @@
       )
       center / 100% 100% no-repeat;
   }
-  .bl-marquee[data-overflowing]:dir(rtl) {
+  .bl-marquee[data-overflowing] .bl-marquee__viewport:dir(rtl) {
     -webkit-mask-image: linear-gradient(
       to left,
       transparent 0,
@@ -63,9 +72,41 @@
   .bl-marquee[data-overflowing] .bl-marquee__content {
     will-change: transform;
   }
+  /* A small real button: two bars while the text scrolls, a triangle once it is paused. */
+  .bl-marquee__toggle {
+    flex: none;
+    inline-size: 24px;
+    block-size: 24px;
+    padding: 0;
+    color: var(--bl-color-ink-2);
+    background: transparent;
+    border: 0;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .bl-marquee__toggle::before {
+    content: '';
+    display: block;
+    inline-size: 8px;
+    block-size: 10px;
+    margin: auto;
+    background: linear-gradient(
+      to right,
+      currentcolor 0 35%,
+      transparent 35% 65%,
+      currentcolor 65%
+    );
+  }
+  .bl-marquee__toggle[aria-pressed='true']::before {
+    background: currentcolor;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+  }
+  .bl-marquee__toggle:hover {
+    color: var(--bl-color-ink-1);
+  }
   /* No animation under reduced motion, so overflowing text wraps instead of hiding. */
   @media (prefers-reduced-motion: reduce) {
-    .bl-marquee {
+    .bl-marquee__viewport {
       overflow: visible;
     }
     .bl-marquee__content {
@@ -73,8 +114,8 @@
       white-space: normal;
       overflow-wrap: anywhere;
     }
-    .bl-marquee[data-overflowing],
-    .bl-marquee[data-overflowing]:dir(rtl) {
+    .bl-marquee[data-overflowing] .bl-marquee__viewport,
+    .bl-marquee[data-overflowing] .bl-marquee__viewport:dir(rtl) {
       -webkit-mask: none;
       mask: none;
     }

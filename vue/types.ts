@@ -66,6 +66,11 @@ export interface AppearanceLabels {
   marks?: LabelOverrides<{ auto: string; light: string; dark: string }>
 }
 
+export interface MarqueeLabels {
+  /** Name of the pause toggle; its state is `aria-pressed`, so keep the wording constant. */
+  pause: string
+}
+
 export interface PrevNextLabels {
   prev: string
   next: string

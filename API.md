@@ -310,6 +310,14 @@ interface LinkProps {
 type LinkTo = string | object;
 ```
 
+### `MarqueeLabels`
+
+```ts
+interface MarqueeLabels {
+    pause: string;
+}
+```
+
 ### `MarqueeOptions`
 
 ```ts
@@ -749,11 +757,12 @@ Exposed: none
 | prop | type | required | default |
 | --- | --- | --- | --- |
 | `contentKey` | `unknown` | no |  |
-| `paused` | `boolean \| undefined` | no |  |
+| `labels` | `Partial<LabelOverrides<MarqueeLabels>> \| undefined` | no |  |
+| `paused` | `boolean \| undefined` | no | `false` |
 | `title` | `string \| undefined` | no |  |
 
 Slots: `default`
-Events: none
+Events: `update:paused`
 Exposed: `refresh`
 
 ### BlMedia
@@ -1309,6 +1318,8 @@ Exposed: none
 - `bl-log`
 - `bl-marquee`
 - `bl-marquee__content`
+- `bl-marquee__toggle`
+- `bl-marquee__viewport`
 - `bl-media`
 - `bl-media--center`
 - `bl-media__aside`

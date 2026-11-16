@@ -880,7 +880,9 @@ test.describe('motion: state changes', () => {
     const frames = await page.evaluate(async () => {
       const box = document.querySelector<HTMLElement>('.bl-marquee')!
       const text = box.querySelector<HTMLElement>('.bl-marquee__content')!
-      document.querySelector<HTMLButtonElement>('button')!.click()
+      ;[...document.querySelectorAll<HTMLButtonElement>('button')]
+        .find((b) => b.textContent?.trim() === 'Shorten')!
+        .click()
       // transforms from the frame the loop has stopped (the overflow mark is gone) onwards
       const out: string[] = []
       for (let i = 0; i < 60; i++) {

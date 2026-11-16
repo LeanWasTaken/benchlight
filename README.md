@@ -346,8 +346,17 @@ KiB when legitimate work needs it, and every raise gets a CHANGELOG line.
 - **BlMeta:** `separator` draws dashes in CSS (`.bl-meta--sep`); the `.bl-meta__sep` element is gone.
 - **BlMarquee / `useMarquee`:** re-measures when the container, the content or the fonts change.
   Under reduced motion, overflowing text wraps instead. The scroll holds still while the pointer is
-  over it or focus is inside it, and while `paused` is true (`<BlMarquee :paused="…">`, or
-  `useMarquee(box, text, { paused })`), so a page can offer its own pause control (WCAG 2.2.2).
+  over it or focus is inside it, and while `paused` is true (`useMarquee(box, text, { paused })`).
+  `BlMarquee` also stops itself (WCAG 2.2.2): while text scrolls it renders a small `<button
+type="button" class="bl-marquee__toggle">` beside the text (`aria-pressed` is true while paused,
+  Space, Enter or a tap toggles). The marquee itself is never a button, so links and other
+  controls in the slot stay valid. Its name is `labels.pause` (default `Pause scrolling`; keep the
+  wording constant, the state is `aria-pressed`). When focus moves to something inside the text,
+  the scroll holds and that element is scrolled into view; leaving restores the loop. There is no
+  button when the text fits or under reduced motion. `paused` is a model (`v-model:paused`, or
+  `:paused` alone to control it from outside; it works uncontrolled too) and `update:paused` fires
+  only on user toggles. Attributes such as `aria-label` land on the wrapper, which has no role.
+  The mask and scrolling live on `.bl-marquee__viewport`.
 - **BlSegmented / BlSegmentedNav:** both wrap, with a 16px row gap. `BlSegmented` is a native radio
   group: `<BlSegmented v-model="size" :options="[{ value: 's', label: 'S', disabled: true }]"
 aria-label="Size" />` (`disabled` is optional per option; `name` optional, `compact`; works

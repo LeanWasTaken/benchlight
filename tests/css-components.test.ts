@@ -567,7 +567,7 @@ describe('intrinsic wrapping (long tokens never widen the page)', () => {
       /@media \(prefers-reduced-motion: reduce\)\s*\{[^@]*\.bl-marquee__content\s*\{[^}]*white-space:\s*normal/
     )
     const reduced = marquee.slice(marquee.indexOf('prefers-reduced-motion'))
-    expect(reduced).toMatch(/\.bl-marquee\s*\{[^}]*overflow:\s*visible/)
+    expect(reduced).toMatch(/\.bl-marquee__viewport\s*\{[^}]*overflow:\s*visible/)
     expect(reduced).toMatch(/\.bl-marquee__content\s*\{[^}]*overflow-wrap:\s*anywhere/)
     expect(marquee).toMatch(/\.bl-marquee\[data-overflowing\][^{]*\{[^}]*mask:\s*none/)
   })

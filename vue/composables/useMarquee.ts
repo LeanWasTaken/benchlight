@@ -56,13 +56,20 @@ export function useMarquee(
     hovered = false
     syncPlayState()
   }
-  const onFocusIn = (): void => {
+  const onFocusIn = (event: FocusEvent): void => {
     focused = true
     syncPlayState()
+    // The hold freezes the text wherever it is, so bring the focused element into view (the CSS
+    // scroll padding keeps it clear of the fading mask edges).
+    if (event.target instanceof Element)
+      event.target.scrollIntoView?.({ block: 'nearest', inline: 'nearest' })
   }
   const onFocusOut = (event: FocusEvent): void => {
     focused =
       event.relatedTarget instanceof Node && !!container.value?.contains(event.relatedTarget)
+    // Drop the reveal offset before the loop resumes from its own position; the content snaps
+    // back to that position on purpose (the mask edges hide most of it).
+    if (!focused && container.value) container.value.scrollLeft = 0
     syncPlayState()
   }
 

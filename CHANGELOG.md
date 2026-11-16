@@ -36,6 +36,18 @@
   handle `form.reset()`.
 - BlSegmented has a `form` prop, and BlRadioGroup forwards its `form` attribute to its radios, so a
   reset of a form named from outside the group reaches them and restores the mount-time option.
+- BlMarquee renders a real pause button (`.bl-marquee__toggle`, `aria-pressed`, named by
+  the new `labels.pause`) beside scrolling text, and `v-model:paused` / `update:paused` (WCAG
+  2.2.2). The wrapper is not a button, so links in the slot stay valid. Focus moving inside the
+  text holds the scroll and scrolls the focused element into view.
+
+### Changed
+
+- BlMarquee's `paused` is now a model (`v-model:paused` / `update:paused`) defaulting to
+  `false`; in v0.10.0 it was an optional boolean prop. `:paused` still works.
+- BlMarquee's overflow clipping and fade mask moved from `.bl-marquee` to a new
+  `.bl-marquee__viewport` child. Consumers who style `.bl-marquee` overflow or mask directly must
+  target `.bl-marquee__viewport` now. `data-overflowing` stays on `.bl-marquee`.
 
 ### Fixed
 
