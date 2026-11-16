@@ -61,11 +61,30 @@ test('hover shows it after the delay, above and centred', async ({ page }) => {
   const t = trigger(page, 'Copy hash')
   const tip = await tipOf(t)
   const a = await box(t)
+  // Timed in the page, from the trigger's pointerenter to the tooltip's open toggle, so the
+  // runner's round trips (slow in CI) cannot shrink or stretch the measured delay.
+  await t.evaluate(
+    (el, tipId) => {
+      const tipEl = document.getElementById(tipId!)!
+      ;(window as unknown as { tipDelay: Promise<number> }).tipDelay = new Promise((resolve) => {
+        let enteredAt = NaN
+        el.addEventListener('pointerenter', () => (enteredAt = performance.now()), { once: true })
+        tipEl.addEventListener('toggle', (e) => {
+          if ((e as Event & { newState?: string }).newState === 'open') {
+            resolve(performance.now() - enteredAt)
+          }
+        })
+      })
+    },
+    await t.getAttribute('aria-describedby')
+  )
   await page.mouse.move(a.cx, a.cy)
-  const hoveredAt = Date.now()
   await expect(tip).toBeVisible()
-  // Measured from the hover itself, so a slow machine only makes the gap larger.
-  expect(Date.now() - hoveredAt).toBeGreaterThanOrEqual(DELAY - 50)
+  const delay = await page.evaluate(
+    () => (window as unknown as { tipDelay: Promise<number> }).tipDelay
+  )
+  // A timer never fires early; the margin only absorbs timestamp granularity.
+  expect(delay).toBeGreaterThanOrEqual(DELAY - 10)
   const p = await box(tip)
   expect(a.top - p.bottom).toBeCloseTo(GAP, 0)
   expect(Math.abs(p.cx - a.cx)).toBeLessThanOrEqual(1)
