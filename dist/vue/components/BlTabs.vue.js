@@ -29,13 +29,6 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       if (props.items.some((item) => item.value === value && !item.disabled)) return value;
       return props.items.find((item) => !item.disabled)?.value;
     });
-    watch(
-      () => [current.value, model.value],
-      ([resolved, value]) => {
-        if (resolved !== void 0 && resolved !== value) model.value = resolved;
-      },
-      { immediate: true }
-    );
     function select(item) {
       if (!item.disabled) model.value = item.value;
     }

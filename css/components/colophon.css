@@ -1,6 +1,6 @@
 @layer components {
   .bl-colophon {
-    padding-block: 32px;
+    padding-block: var(--bl-space-7);
     border-top: 1px solid var(--bl-color-separator);
   }
   .bl-colophon__inner {
@@ -8,13 +8,13 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: var(--bl-space-4);
   }
   .bl-colophon__items {
     display: flex;
     flex: 1 1 20rem;
     flex-wrap: wrap;
-    gap: 4px 24px;
+    gap: var(--bl-space-1) var(--bl-space-6);
     min-width: 0;
     max-width: 100%;
     margin: 0;

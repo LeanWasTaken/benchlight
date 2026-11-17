@@ -1,7 +1,8 @@
-import { defineComponent, useAttrs, useModel, inject, computed, openBlock, createElementBlock, normalizeStyle, unref, normalizeClass, createElementVNode, mergeProps, toDisplayString, mergeModels } from "vue";
+import { defineComponent, useAttrs, useModel, ref, inject, computed, onMounted, openBlock, createElementBlock, normalizeStyle, unref, normalizeClass, createElementVNode, mergeProps, toDisplayString, mergeModels } from "vue";
 import { FIELD_CONTEXT } from "../types.js";
 import { mergeDescribedBy } from "../internal/describedBy.js";
 import { controlId } from "../internal/fieldId.js";
+import { useFormReset } from "../internal/useFormReset.js";
 const _hoisted_1 = ["value", "min", "max", "step", "aria-valuetext", "disabled"];
 const _hoisted_2 = {
   class: "bl-range__value",
@@ -36,6 +37,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       };
     }
     const model = useModel(__props, "modelValue");
+    const el = ref();
     const field = inject(FIELD_CONTEXT, null);
     const current = computed(() => {
       const { min, max, step } = props;
@@ -44,6 +46,19 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       const snapped = round(step > 0 ? min + Math.round((raw - min) / step) * step : raw);
       return snapped > max ? round(snapped - step) : snapped;
     });
+    let initial = 0;
+    onMounted(() => initial = model.value ?? current.value);
+    useFormReset(
+      el,
+      () => {
+        if (!el.value) return;
+        const value = Number(el.value.value);
+        if (value !== model.value) model.value = value;
+      },
+      () => {
+        if (el.value) el.value.defaultValue = String(initial);
+      }
+    );
     const text = computed(() => props.format ? props.format(current.value) : String(current.value));
     return (_ctx, _cache) => {
       return openBlock(), createElementBlock(
@@ -54,6 +69,8 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
         },
         [
           createElementVNode("input", mergeProps({
+            ref_key: "el",
+            ref: el,
             value: current.value,
             class: "bl-range__input",
             type: "range",

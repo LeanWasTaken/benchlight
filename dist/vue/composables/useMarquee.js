@@ -27,12 +27,15 @@ function useMarquee(container, content, { speed = 22, pause = 0.18, overshoot = 
     hovered = false;
     syncPlayState();
   };
-  const onFocusIn = () => {
+  const onFocusIn = (event) => {
     focused = true;
     syncPlayState();
+    if (event.target instanceof Element)
+      event.target.scrollIntoView?.({ block: "nearest", inline: "nearest" });
   };
   const onFocusOut = (event) => {
     focused = event.relatedTarget instanceof Node && !!container.value?.contains(event.relatedTarget);
+    if (!focused && container.value) container.value.scrollLeft = 0;
     syncPlayState();
   };
   function stop() {

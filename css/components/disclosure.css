@@ -8,9 +8,9 @@
   .bl-disclosure__summary {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--bl-space-3);
     min-block-size: 44px;
-    padding-block: 10px;
+    padding-block: var(--bl-space-3);
     list-style: none;
     font-weight: 500;
     color: var(--bl-color-ink-1);
@@ -46,7 +46,7 @@
     rotate: 180deg;
   }
   .bl-disclosure__body {
-    padding-block-end: 16px;
+    padding-block-end: var(--bl-space-4);
     overflow-wrap: anywhere;
   }
   @media (hover: hover) {

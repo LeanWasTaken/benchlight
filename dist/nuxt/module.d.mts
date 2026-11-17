@@ -9,6 +9,11 @@ export interface ModuleOptions {
     autoImports: boolean | {
         prefix?: string;
     };
+    /**
+     * inject the inline no-flash appearance script into `<head>` (default `true`). Turn it off under
+     * a nonce-based CSP and inline `PREPAINT` (from `benchlight/js/prepaint-script.mjs`) yourself
+     */
+    prepaint?: boolean;
 }
 /**
  * `use*` names take the prefix after `use` (`useToast` -> `useBlToast`); other names get it

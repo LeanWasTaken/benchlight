@@ -5,6 +5,8 @@ declare const __VLS_export: <T extends string | number | null>(__VLS_props: NonN
         ariaLabel?: string;
         compact?: boolean;
         name?: string;
+        /** Id of a form outside the group; the radios belong to it, so its reset reaches them. */
+        form?: string;
     } & {
         modelValue?: T;
     }) & {

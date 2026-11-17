@@ -5,9 +5,9 @@
   .bl-msg {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin: 12px 0 0;
-    padding: 10px 12px;
+    gap: var(--bl-space-3);
+    margin: var(--bl-space-3) 0 0;
+    padding: var(--bl-space-3) var(--bl-space-3);
     border-radius: var(--bl-radius-chip);
     background: color-mix(in srgb, var(--bl-color-trace) 10%, transparent);
     font-family: var(--bl-font-mono);

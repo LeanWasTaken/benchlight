@@ -3,14 +3,15 @@ import { FIELD_CONTEXT } from "../types.js";
 import { mergeDescribedBy } from "../internal/describedBy.js";
 const _hoisted_1 = ["for"];
 const _hoisted_2 = ["id"];
-const _hoisted_3 = ["id"];
+const _hoisted_3 = ["id", "role"];
 const _sfc_main = /* @__PURE__ */ defineComponent({
   __name: "BlField",
   props: {
     label: {},
     hint: {},
     id: {},
-    error: {}
+    error: {},
+    announce: { type: Boolean }
   },
   setup(__props) {
     const props = __props;
@@ -50,7 +51,8 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           __props.error ? (openBlock(), createElementBlock("p", {
             key: 1,
             id: errorId.value,
-            class: "bl-field__error"
+            class: "bl-field__error",
+            role: __props.announce ? "alert" : void 0
           }, toDisplayString(__props.error), 9, _hoisted_3)) : createCommentVNode("v-if", true)
         ],
         2

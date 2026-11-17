@@ -3,11 +3,11 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: var(--bl-space-2);
     min-height: 44px;
     min-width: 0;
     max-width: 100%;
-    padding: 8px 16px;
+    padding: var(--bl-space-2) var(--bl-space-4);
     background: var(--bl-color-ink-1);
     border: 1px solid transparent;
     border-radius: var(--bl-radius-chip);
@@ -94,7 +94,7 @@
     }
   }
   .bl-btn--pill {
-    padding-inline: 12px 16px;
+    padding-inline: var(--bl-space-3) var(--bl-space-4);
     border-radius: var(--bl-radius-pill);
   }
   .bl-btn--icon {

@@ -282,12 +282,6 @@ type LabelOverrides<T> = {
 };
 ```
 
-### `LedState`
-
-```ts
-type LedState = 'on' | 'off' | 'danger';
-```
-
 ### `LinkAs`
 
 ```ts
@@ -314,6 +308,14 @@ interface LinkProps {
 
 ```ts
 type LinkTo = string | object;
+```
+
+### `MarqueeLabels`
+
+```ts
+interface MarqueeLabels {
+    pause: string;
+}
 ```
 
 ### `MarqueeOptions`
@@ -596,6 +598,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `announce` | `boolean \| undefined` | no |  |
 | `disabled` | `boolean \| undefined` | no |  |
 | `error` | `string \| undefined` | no |  |
 | `hint` | `string \| undefined` | no |  |
@@ -659,6 +662,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `announce` | `boolean \| undefined` | no |  |
 | `error` | `string \| undefined` | no |  |
 | `hint` | `string \| undefined` | no |  |
 | `id` | `string \| undefined` | no |  |
@@ -711,7 +715,7 @@ Exposed: none
 | prop | type | required | default |
 | --- | --- | --- | --- |
 | `ariaLabel` | `string \| undefined` | no |  |
-| `state` | `"danger" \| "off" \| "on" \| undefined` | no | `"off"` |
+| `tone` | `StatusTone \| undefined` | no | `"neutral"` |
 
 Slots: none
 Events: none
@@ -753,11 +757,12 @@ Exposed: none
 | prop | type | required | default |
 | --- | --- | --- | --- |
 | `contentKey` | `unknown` | no |  |
-| `paused` | `boolean \| undefined` | no |  |
+| `labels` | `Partial<LabelOverrides<MarqueeLabels>> \| undefined` | no |  |
+| `paused` | `boolean \| undefined` | no | `false` |
 | `title` | `string \| undefined` | no |  |
 
 Slots: `default`
-Events: none
+Events: `update:paused`
 Exposed: `refresh`
 
 ### BlMedia
@@ -919,6 +924,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `announce` | `boolean \| undefined` | no |  |
 | `disabled` | `boolean \| undefined` | no |  |
 | `error` | `string \| undefined` | no |  |
 | `hint` | `string \| undefined` | no |  |
@@ -977,9 +983,14 @@ Exposed: none
 | --- | --- | --- | --- |
 | `ariaLabel` | `string \| undefined` | no |  |
 | `compact` | `boolean \| undefined` | no |  |
+| `form` | `string \| undefined` | no |  |
 | `modelValue` | `T \| undefined` | no |  |
 | `name` | `string \| undefined` | no |  |
 | `options` | `readonly SegmentedOption<T>[]` | yes |  |
+
+Prop notes:
+
+- `form`: Id of a form outside the group; the radios belong to it, so its reset reaches them.
 
 Slots: none
 Events: `update:modelValue`
@@ -1189,6 +1200,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `announce` | `boolean \| undefined` | no |  |
 | `disabled` | `boolean \| undefined` | no |  |
 | `error` | `string \| undefined` | no |  |
 | `hint` | `string \| undefined` | no |  |
@@ -1306,6 +1318,8 @@ Exposed: none
 - `bl-log`
 - `bl-marquee`
 - `bl-marquee__content`
+- `bl-marquee__toggle`
+- `bl-marquee__viewport`
 - `bl-media`
 - `bl-media--center`
 - `bl-media__aside`
@@ -1506,6 +1520,15 @@ Exposed: none
 - `--bl-shadow-glow`
 - `--bl-shadow-thumb`
 - `--bl-shadow-well`
+- `--bl-space-1`
+- `--bl-space-2`
+- `--bl-space-3`
+- `--bl-space-4`
+- `--bl-space-5`
+- `--bl-space-6`
+- `--bl-space-7`
+- `--bl-space-8`
+- `--bl-space-9`
 - `--bl-text-annotation`
 - `--bl-text-body`
 - `--bl-text-display-lg`

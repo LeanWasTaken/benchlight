@@ -2,6 +2,7 @@ import { defineComponent, useModel, inject, useAttrs, ref, watch, onMounted, wit
 import { FIELD_CONTEXT } from "../types.js";
 import { mergeDescribedBy } from "../internal/describedBy.js";
 import { controlId } from "../internal/fieldId.js";
+import { useFormReset } from "../internal/useFormReset.js";
 const _hoisted_1 = ["min", "max", "step", "disabled"];
 const _sfc_main = /* @__PURE__ */ defineComponent({
   ...{ inheritAttrs: false },
@@ -70,6 +71,21 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       write(value);
     });
     onMounted(() => write(model.value));
+    let initial = null;
+    onMounted(() => initial = model.value);
+    useFormReset(
+      input,
+      () => {
+        if (!input.value) return;
+        const n = input.value.valueAsNumber;
+        const value = Number.isNaN(n) ? null : n;
+        typed = void 0;
+        if (!Object.is(value, model.value)) model.value = value;
+      },
+      () => {
+        if (input.value) input.value.defaultValue = show(initial);
+      }
+    );
     return (_ctx, _cache) => {
       return withDirectives((openBlock(), createElementBlock("input", mergeProps({
         ref_key: "input",

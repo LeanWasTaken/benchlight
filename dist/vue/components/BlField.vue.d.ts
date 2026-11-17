@@ -3,6 +3,7 @@ type __VLS_Props = {
     hint?: string;
     id?: string;
     error?: string;
+    announce?: boolean;
 };
 declare var __VLS_1: {
     id: string;

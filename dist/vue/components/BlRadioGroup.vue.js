@@ -1,9 +1,10 @@
-import { defineComponent, useModel, useAttrs, useId, ref, computed, provide, onMounted, onBeforeUnmount, openBlock, createElementBlock, mergeProps, createElementVNode, toDisplayString, unref, createCommentVNode, renderSlot, mergeModels } from "vue";
+import { defineComponent, useModel, useAttrs, useId, ref, computed, provide, onMounted, openBlock, createElementBlock, mergeProps, createElementVNode, toDisplayString, unref, createCommentVNode, renderSlot, mergeModels } from "vue";
 import { mergeDescribedBy } from "../internal/describedBy.js";
+import { useFormReset } from "../internal/useFormReset.js";
 import { RADIO_GROUP_CONTEXT } from "../internal/radioGroup.js";
 const _hoisted_1 = { class: "bl-fieldset__legend" };
 const _hoisted_2 = ["id"];
-const _hoisted_3 = ["id"];
+const _hoisted_3 = ["id", "role"];
 const _sfc_main = /* @__PURE__ */ defineComponent({
   ...{ inheritAttrs: false },
   __name: "BlRadioGroup",
@@ -11,6 +12,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     legend: {},
     hint: {},
     error: {},
+    announce: { type: Boolean },
     disabled: { type: Boolean },
     required: { type: Boolean },
     name: {}
@@ -51,29 +53,29 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       model,
       disabled: computed(() => props.disabled),
       required: computed(() => props.required),
+      get form() {
+        return attrs["form"];
+      },
       register(input, value) {
         radios.set(input, value);
         if (mounted) input.defaultChecked = value() === initial;
         return () => radios.delete(input);
       }
     });
-    let form = null;
-    function onReset() {
-      syncDefaults();
-      setTimeout(() => {
+    useFormReset(
+      root,
+      () => {
         let checked;
         for (const [input, value] of radios) if (input.checked) checked = value();
         model.value = checked;
-      }, 0);
-    }
+      },
+      syncDefaults
+    );
     onMounted(() => {
       mounted = true;
       initial = model.value;
       syncDefaults();
-      form = root.value?.form ?? null;
-      form?.addEventListener("reset", onReset);
     });
-    onBeforeUnmount(() => form?.removeEventListener("reset", onReset));
     return (_ctx, _cache) => {
       return openBlock(), createElementBlock(
         "fieldset",
@@ -98,7 +100,8 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           invalid.value ? (openBlock(), createElementBlock("p", {
             key: 1,
             id: unref(errorId),
-            class: "bl-fieldset__error"
+            class: "bl-fieldset__error",
+            role: __props.announce ? "alert" : void 0
           }, toDisplayString(__props.error), 9, _hoisted_3)) : createCommentVNode("v-if", true),
           renderSlot(_ctx.$slots, "default")
         ],

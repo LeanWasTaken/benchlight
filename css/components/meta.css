@@ -2,7 +2,7 @@
   .bl-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px 16px;
+    gap: var(--bl-space-1) var(--bl-space-4);
     margin: 0;
     text-transform: uppercase;
   }

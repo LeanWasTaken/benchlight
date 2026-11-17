@@ -1,14 +1,16 @@
-import { defineComponent, useAttrs, useModel, useId, computed, ref, onMounted, onBeforeUnmount, openBlock, createElementBlock, normalizeClass, Fragment, renderList, createElementVNode, createTextVNode, toDisplayString, mergeModels } from "vue";
+import { defineComponent, useAttrs, useModel, useId, computed, ref, onMounted, openBlock, createElementBlock, normalizeClass, Fragment, renderList, createElementVNode, createTextVNode, toDisplayString, mergeModels } from "vue";
 import { warnOnce } from "../internal/dev.js";
+import { useFormReset } from "../internal/useFormReset.js";
 const _hoisted_1 = ["aria-label"];
-const _hoisted_2 = ["name", "value", "checked", "disabled", "onChange"];
+const _hoisted_2 = ["name", "form", "value", "checked", "disabled", "onChange"];
 const _sfc_main = /* @__PURE__ */ defineComponent({
   __name: "BlSegmented",
   props: /* @__PURE__ */ mergeModels({
     options: {},
     ariaLabel: {},
     compact: { type: Boolean },
-    name: {}
+    name: {},
+    form: {}
   }, {
     "modelValue": {},
     "modelModifiers": {}
@@ -23,26 +25,25 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     const generatedName = useId();
     const groupName = computed(() => props.name || generatedName);
     const root = ref();
-    let form = null;
     let initial;
     function inputs() {
       return [...root.value?.querySelectorAll("input") ?? []];
     }
-    function onReset() {
-      inputs().forEach((input, i) => {
-        input.defaultChecked = props.options[i]?.value === initial;
-      });
-      setTimeout(() => {
+    useFormReset(
+      root,
+      () => {
         const index = inputs().findIndex((input) => input.checked);
         model.value = props.options[index]?.value;
-      }, 0);
-    }
+      },
+      () => {
+        inputs().forEach((input, i) => {
+          input.defaultChecked = props.options[i]?.value === initial;
+        });
+      }
+    );
     onMounted(() => {
       initial = model.value;
-      form = root.value?.closest("form") ?? null;
-      form?.addEventListener("reset", onReset);
     });
-    onBeforeUnmount(() => form?.removeEventListener("reset", onReset));
     return (_ctx, _cache) => {
       return openBlock(), createElementBlock("div", {
         ref_key: "root",
@@ -62,6 +63,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               createElementVNode("input", {
                 type: "radio",
                 name: groupName.value,
+                form: __props.form,
                 value: String(option.value),
                 checked: option.value === model.value,
                 disabled: option.disabled || void 0,

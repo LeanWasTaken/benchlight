@@ -12,7 +12,7 @@
   .bl-appearance__track {
     position: relative;
     display: flex;
-    margin-block: 6px;
+    margin-block: var(--bl-space-2);
     background: var(--bl-color-surface);
     border: 1px solid var(--bl-color-separator);
     border-radius: 8px;

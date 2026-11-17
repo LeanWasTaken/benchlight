@@ -1,8 +1,18 @@
 {
   "name": "benchlight",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "packageManager": "bun@1.4.2",
   "description": "Token-driven CSS, a Tailwind v4 theme and thin Vue/Nuxt components",
+  "keywords": [
+    "design-system",
+    "css",
+    "tailwindcss",
+    "vue",
+    "nuxt",
+    "components",
+    "design-tokens",
+    "accessibility"
+  ],
   "license": "MIT AND OFL-1.1",
   "author": "LeanWasTaken <me@krists.lol>",
   "repository": {
@@ -15,6 +25,10 @@
     "node": ">=20"
   },
   "type": "module",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "files": [
     "tokens",
     "css",
@@ -24,6 +38,7 @@
     "vite",
     "dist",
     "API.md",
+    "GUIDE.md",
     "CHANGELOG.md",
     "LICENSE"
   ],

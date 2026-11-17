@@ -7,7 +7,7 @@
   .bl-tabs__list {
     display: flex;
     flex-wrap: wrap;
-    column-gap: 4px;
+    column-gap: var(--bl-space-1);
     border-block-end: 1px solid var(--bl-color-separator);
   }
   .bl-tabs__tab {
@@ -61,7 +61,7 @@
     cursor: not-allowed;
   }
   .bl-tabs__panel {
-    padding-block-start: 16px;
+    padding-block-start: var(--bl-space-4);
   }
   .bl-tabs__panel:focus-visible {
     outline: 2px solid var(--bl-color-trace);

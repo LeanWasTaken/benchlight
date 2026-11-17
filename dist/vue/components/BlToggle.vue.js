@@ -1,10 +1,11 @@
-import { defineComponent, useModel, useAttrs, useId, ref, onMounted, onBeforeUnmount, openBlock, createElementBlock, normalizeStyle, unref, normalizeClass, createElementVNode, mergeProps, toDisplayString, createCommentVNode, mergeModels } from "vue";
+import { defineComponent, useModel, useAttrs, useId, ref, onMounted, openBlock, createElementBlock, normalizeStyle, unref, normalizeClass, createElementVNode, mergeProps, toDisplayString, createCommentVNode, mergeModels } from "vue";
 import { mergeDescribedBy } from "../internal/describedBy.js";
+import { useFormReset } from "../internal/useFormReset.js";
 const _hoisted_1 = { class: "bl-toggle__control" };
 const _hoisted_2 = ["checked", "disabled", "name", "value"];
 const _hoisted_3 = { class: "bl-toggle__label" };
 const _hoisted_4 = ["id"];
-const _hoisted_5 = ["id"];
+const _hoisted_5 = ["id", "role"];
 const _sfc_main = /* @__PURE__ */ defineComponent({
   ...{ inheritAttrs: false },
   __name: "BlToggle",
@@ -12,6 +13,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     label: {},
     hint: {},
     error: {},
+    announce: { type: Boolean },
     disabled: { type: Boolean },
     name: {},
     value: {}
@@ -44,21 +46,22 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     function onChange(event) {
       model.value = event.target.checked;
     }
-    let form = null;
     let initial = false;
-    function onReset() {
-      if (input.value) input.value.defaultChecked = initial;
-      setTimeout(() => {
+    useFormReset(
+      input,
+      () => {
         if (input.value) model.value = input.value.checked;
-      }, 0);
-    }
+      },
+      // Vue's re-renders rewrite the `checked` attribute, so restore the mount value synchronously,
+      // before the reset algorithm reads `defaultChecked`.
+      () => {
+        if (input.value) input.value.defaultChecked = initial;
+      }
+    );
     onMounted(() => {
       initial = model.value;
       if (input.value) input.value.defaultChecked = initial;
-      form = input.value?.form ?? null;
-      form?.addEventListener("reset", onReset);
     });
-    onBeforeUnmount(() => form?.removeEventListener("reset", onReset));
     return (_ctx, _cache) => {
       return openBlock(), createElementBlock(
         "div",
@@ -107,7 +110,8 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           __props.error ? (openBlock(), createElementBlock("span", {
             key: 1,
             id: unref(errorId),
-            class: "bl-toggle__error"
+            class: "bl-toggle__error",
+            role: __props.announce ? "alert" : void 0
           }, toDisplayString(__props.error), 9, _hoisted_5)) : createCommentVNode("v-if", true)
         ],
         6

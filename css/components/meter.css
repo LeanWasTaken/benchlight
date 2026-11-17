@@ -1,14 +1,14 @@
 @layer components {
   .bl-meter-field {
-    margin: 16px 0;
+    margin: var(--bl-space-4) 0;
   }
   .bl-meter-field__head {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: baseline;
-    gap: 4px 16px;
-    margin-bottom: 8px;
+    gap: var(--bl-space-1) var(--bl-space-4);
+    margin-bottom: var(--bl-space-2);
     font-family: var(--bl-font-mono);
     font-size: var(--bl-text-micro);
     letter-spacing: var(--bl-tracking-annotation);
@@ -27,7 +27,7 @@
   }
   .bl-meter {
     height: 4px;
-    margin: 16px 0;
+    margin: var(--bl-space-4) 0;
     overflow: hidden;
     border-radius: 2px;
     background: var(--bl-color-separator);

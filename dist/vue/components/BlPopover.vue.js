@@ -19,11 +19,12 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     const uid = useId();
     const panelId = `${uid}-popover`;
     const panel = ref();
+    const suspended = ref(false);
     const bind = computed(() => ({
       id: `${uid}-trigger`,
       // A <button> in a <form> defaults to submit: the click would submit instead of opening.
       type: "button",
-      "aria-expanded": open.value ? "true" : "false",
+      "aria-expanded": open.value && !suspended.value ? "true" : "false",
       "aria-controls": panelId,
       popovertarget: panelId,
       style: triggerAnchorStyle(uid)
@@ -33,11 +34,12 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     function onBeforeToggle(event) {
       const next = event.newState === "open";
       shown = next;
+      if (suspended.value) return;
       if (open.value !== next) open.value = next;
     }
     function sync() {
       const el = panel.value;
-      if (!el || clicking || typeof el.showPopover !== "function") return;
+      if (!el || clicking || suspended.value || typeof el.showPopover !== "function") return;
       const want = open.value;
       if (want === shown) return;
       try {
@@ -75,15 +77,18 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     });
     onDeactivated(() => {
       clicking = false;
+      suspended.value = true;
       if (!shown) return;
       shown = false;
       try {
         panel.value?.hidePopover();
       } catch {
       }
-      if (open.value) open.value = false;
     });
-    onActivated(sync);
+    onActivated(() => {
+      suspended.value = false;
+      sync();
+    });
     onBeforeUnmount(() => {
       panel.value?.ownerDocument.removeEventListener("click", onClickCapture, true);
     });

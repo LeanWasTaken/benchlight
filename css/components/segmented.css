@@ -3,8 +3,8 @@
     display: inline-flex;
     flex-wrap: wrap;
     align-items: center;
-    column-gap: 4px;
-    row-gap: 16px;
+    column-gap: var(--bl-space-1);
+    row-gap: var(--bl-space-4);
     max-width: 100%;
     padding: 2px;
     background: var(--bl-color-surface);

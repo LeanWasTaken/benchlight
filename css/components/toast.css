@@ -3,9 +3,10 @@
     position: fixed;
     z-index: 45;
     inset-block-end: calc(
-      max(var(--bl-scroll-offset-bottom, 0px), env(safe-area-inset-bottom, 0px)) + 16px
+      max(var(--bl-scroll-offset-bottom, 0px), env(safe-area-inset-bottom, 0px)) + var(--bl-space-4)
     );
-    inset-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
+    inset-inline: max(var(--bl-space-4), env(safe-area-inset-left))
+      max(var(--bl-space-4), env(safe-area-inset-right));
     max-inline-size: 24rem;
     margin-inline: auto;
     pointer-events: none;
@@ -27,22 +28,24 @@
     .bl-toaster {
       inset-inline-start: auto;
       /* --bl-dialog-gutter: the scrollbar a modal hides, so visible toasts do not jump sideways. */
-      inset-inline-end: calc(max(24px, env(safe-area-inset-right)) + var(--bl-dialog-gutter, 0px));
-      inline-size: min(24rem, 100% - 48px);
+      inset-inline-end: calc(
+        max(var(--bl-space-6), env(safe-area-inset-right)) + var(--bl-dialog-gutter, 0px)
+      );
+      inline-size: min(24rem, 100% - var(--bl-space-9));
       margin-inline: 0;
     }
   }
   /* Below 40em a dialog is a bottom sheet; a toast at the bottom would cover its footer actions. */
   @media (max-width: 39.99em) {
     .bl-dialog__toasts > .bl-toaster {
-      inset-block: max(16px, env(safe-area-inset-top)) auto;
+      inset-block: max(var(--bl-space-4), env(safe-area-inset-top)) auto;
     }
   }
   .bl-toaster__list {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--bl-space-2);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -51,10 +54,10 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0 8px;
+    gap: 0 var(--bl-space-2);
     min-block-size: 44px;
-    padding-block: 4px;
-    padding-inline: 16px 4px;
+    padding-block: var(--bl-space-1);
+    padding-inline: var(--bl-space-4) var(--bl-space-1);
     color: var(--bl-color-ink-1);
     background: var(--bl-color-raised);
     border: 1px solid var(--bl-color-separator);
@@ -85,7 +88,7 @@
     flex: 1 1 10rem;
     min-inline-size: 0;
     margin: 0;
-    padding-block: 8px;
+    padding-block: var(--bl-space-2);
     font-size: var(--bl-text-small);
     overflow-wrap: anywhere;
   }

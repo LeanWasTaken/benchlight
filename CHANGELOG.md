@@ -1,5 +1,111 @@
 # Changelog
 
+## 0.11.0 - 2026-11-17
+
+### Breaking
+
+- BlTabs no longer writes the resolved tab into `v-model`. It used to emit `update:modelValue` with
+  the first enabled tab on mount and whenever `items` changed; it now only shows that tab and emits
+  on user selection. A model naming no enabled tab stays as set.
+- BlLed takes `tone` (`StatusTone`, shared with BlMsg and toasts) instead of `state`, and `LedState`
+  is removed. `neutral` (the default) is unlit, `success` is lit and `danger` is red; the CSS classes
+  are unchanged. There is no alias for `state`.
+- BlMarquee's overflow clipping and fade mask moved from `.bl-marquee` to a new
+  `.bl-marquee__viewport` child, so CSS-only markup needs the extra wrapper. Consumers who style
+  `.bl-marquee` overflow or mask directly must target `.bl-marquee__viewport`. `data-overflowing`
+  stays on `.bl-marquee`. The Vue component renders the new markup itself.
+
+### Migration
+
+<!-- prettier-ignore -->
+| Before | After |
+| --- | --- |
+| BlTabs `v-model` filled in with the first enabled tab on mount or when `items` change | the model stays as set (for example `undefined` or a removed value) until the user picks a tab; the first enabled tab is shown meanwhile. Initialise the model to a tab value if code reads it before a pick |
+| `<BlLed state="on">` | `<BlLed tone="success">` |
+| `<BlLed state="off">` (or no `state`) | `<BlLed tone="neutral">` (or no `tone`) |
+| `<BlLed state="danger">` | `<BlLed tone="danger">` |
+| `import type { LedState }` | `StatusTone` |
+| CSS-only `<div class="bl-marquee"><div class="bl-marquee__content">…</div></div>` | wrap the content: `<div class="bl-marquee"><div class="bl-marquee__viewport"><div class="bl-marquee__content">…</div></div></div>` |
+
+### Added
+
+- An opt-in `announce` prop on BlField, BlCheckbox, BlToggle and BlRadioGroup renders the
+  validation error with `role="alert"`, so screen readers announce it when it appears. Off by
+  default: the error stays a plain described-by text, as before. A live region announces only
+  errors that appear after mount, so set and clear `error` as validation runs.
+- BlInput, BlTextarea, BlSelect, BlRange and BlNumberField sync their `v-model` to a native
+  `form.reset()` (also with `form="id"` outside the form), and restore the value they had when they
+  mounted, as native `defaultValue` does: later model changes are not the default. A range with no
+  model restores the value it showed at mount. BlNumberField restores its mount-time number, or
+  `null` (empty) when it mounted empty. This supersedes the 0.10.0 note that BlNumberField does not
+  handle `form.reset()`.
+- BlSegmented has a `form` prop, and BlRadioGroup forwards its `form` attribute to its radios, so a
+  reset of a form named from outside the group reaches them and restores the mount-time option.
+- BlMarquee renders a real pause button (`.bl-marquee__toggle`, `aria-pressed`, named by
+  the new `labels.pause`) beside scrolling text, and `v-model:paused` / `update:paused` (WCAG
+  2.2.2). The wrapper is not a button, so links in the slot stay valid. Focus moving inside the
+  text holds the scroll and scrolls the focused element into view.
+- A `--bl-space-1` to `--bl-space-9` spacing scale (0.25rem to 3rem; also `tokens.space` in
+  `benchlight/tokens`). Most component gaps, padding and margins now use it. Some stay literal
+  pixels: hairlines, focus offsets, 44px hit areas, optical nudges, the control paddings of
+  segmented items, tabs, the skip link and the tab bar (6px, 6px 12px), the field input padding
+  (10px 12px) and the prose heading top margin (28px).
+- A `prepaint` option on the Nuxt module (`benchlight: { prepaint: false }`) and the Vite plugin
+  (`benchlight({ prepaint: false })`) turns off the inline no-flash appearance script, for a
+  nonce-based Content Security Policy. GUIDE.md has a CSP section: a hash-based CSP works as
+  shipped with `PREPAINT_CSP_HASH`; under a nonce-based CSP, inline `PREPAINT` yourself with a
+  per-request nonce (Nuxt and Vite examples).
+
+### Changed
+
+- BlMarquee's `paused` was an optional boolean prop in 0.10.0 and is now the model described
+  under Added, defaulting to `false`. `:paused` still works.
+- Most component spacing moved from px to rem (the `--bl-space-*` steps). The values are identical
+  at a 16px root font size, but they now scale with the root font size and with zoom. Some off-scale
+  values were rounded up to the next step: 6px to 8px, 10px to 12px and 14px to 16px; the literal
+  pixels listed under Added keep their values. The visible effect
+  is small, except that the BlSiteBar nav links are wider (10px to 12px inline padding each), so
+  the site-bar nav needs about 30px more width before it stops scrolling.
+
+### Fixed
+
+- BlPopover no longer writes its `open` model when a `KeepAlive` deactivates it. The panel is hidden
+  and the trigger reports `aria-expanded="false"` while deactivated, but `open` stays as it was, and
+  the popover shows again on activation if `open` is still true. Before, deactivation set `open` to
+  `false`.
+- In Firefox, BlPopover and BlTooltip panels sit against their trigger when a `dir` attribute set
+  below the root (for example `dir="rtl"` on a section) differs from the page's. Firefox aligned
+  the panel in the inline axis by its parent's direction laid onto the viewport and placed it
+  hundreds of pixels off. In Firefox only, and only under such a nested `dir`, the inline axis now
+  uses logical insets with `anchor(self-*)` sides, so a centred panel there keeps to its trigger
+  instead of shifting to stay on screen. Direction set with CSS `direction` and no `dir` attribute
+  is not covered.
+
+### Docs
+
+- First release on npm: `npm install benchlight`. The repository is public from this release.
+- The README is now a short overview: install from npm, quick start for Nuxt, Vite, Tailwind and plain HTML,
+  and links. Setup options, tokens, CSP, static pages, conventions and the per-component notes
+  moved to GUIDE.md; development, generated files and releasing moved to CONTRIBUTING.md. The
+  private-repo git+ssh install and deploy-key steps are gone.
+
+### Tests/CI
+
+- A manual `publish` workflow (`.github/workflows/publish.yml`) publishes `benchlight` to npm with
+  provenance through npm trusted publishing (OIDC, no token), on a `src-vX.Y.Z` tag. Before its
+  first run, the GitHub-side protections listed at the top of the workflow file are mandatory: the
+  `npm-publish` environment limited to `src-v*` tags with required reviewers, an admin-only
+  `src-v*` tag ruleset and a `main` ruleset. `package.json` gains `publishConfig` (public access,
+  provenance).
+- The behaviour specs (cross-browser, popover, tooltip, tabs, number-field) now also run in Firefox
+  and WebKit, as `firefox` and `webkit` Playwright projects. They take no screenshots, so there are
+  no new baselines; the visual specs stay Chromium-only. The CI Playwright image already ships both
+  engines. Seven WebKit focus tests and one number-field wheel test are `test.fixme` on macOS only
+  (macOS WebKit does not Tab-focus buttons and hit-tests the wheel against the element under the
+  input; all pass in the Linux CI image). `PW_PORT` overrides the preview port (default 4173)
+  so parallel worktrees can run Playwright side by side; the web server now has a 120s timeout and
+  is only reused outside CI.
+
 ## 0.10.0 - 2026-11-11
 
 - `benchlight/vue` now ships compiled JavaScript and `.d.ts` files (`dist/vue/`, one module per

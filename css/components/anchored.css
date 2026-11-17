@@ -65,5 +65,56 @@
     [popover][data-side='end'][data-align='end'] {
       position-area: self-inline-end span-self-block-start;
     }
+
+    @supports (-moz-appearance: none) or (-moz-orient: inline) {
+      /* Firefox (155) aligns a position-area in the inline axis by the panel's parent direction
+         laid onto the viewport, so where that differs from the root's (dir="rtl" on a section) the
+         panel lands hundreds of pixels off, whatever the keywords. There Firefox places the inline
+         axis with logical insets and anchor(self-*) sides, which resolve against the panel's own
+         direction. This runs in Firefox only: a centred panel then keeps to the anchor instead of
+         shifting to stay on screen, so the other engines keep the position-area rules above. The
+         direction must come from a dir attribute: :dir() cannot see CSS `direction: rtl`, so
+         Firefox still misplaces panels under that. */
+      :is(:root:dir(ltr) :dir(rtl), :root:dir(rtl) :dir(ltr)) > [popover][data-side][data-align] {
+        position-area: none;
+      }
+      :is(:root:dir(ltr) :dir(rtl), :root:dir(rtl) :dir(ltr)) > [popover][data-side='top'] {
+        inset-block-end: anchor(self-start);
+      }
+      :is(:root:dir(ltr) :dir(rtl), :root:dir(rtl) :dir(ltr)) > [popover][data-side='bottom'] {
+        inset-block-start: anchor(self-end);
+      }
+      :is(:root:dir(ltr) :dir(rtl), :root:dir(rtl) :dir(ltr)) > [popover][data-side='start'] {
+        inset-inline-end: anchor(self-start);
+      }
+      :is(:root:dir(ltr) :dir(rtl), :root:dir(rtl) :dir(ltr)) > [popover][data-side='end'] {
+        inset-inline-start: anchor(self-end);
+      }
+      :is(:root:dir(ltr) :dir(rtl), :root:dir(rtl) :dir(ltr))
+        > [popover]:is([data-side='top'], [data-side='bottom'])[data-align='start'] {
+        inset-inline-start: anchor(self-start);
+      }
+      :is(:root:dir(ltr) :dir(rtl), :root:dir(rtl) :dir(ltr))
+        > [popover]:is([data-side='top'], [data-side='bottom'])[data-align='center'] {
+        left: anchor(center);
+        translate: -50% 0;
+      }
+      :is(:root:dir(ltr) :dir(rtl), :root:dir(rtl) :dir(ltr))
+        > [popover]:is([data-side='top'], [data-side='bottom'])[data-align='end'] {
+        inset-inline-end: anchor(self-end);
+      }
+      :is(:root:dir(ltr) :dir(rtl), :root:dir(rtl) :dir(ltr))
+        > [popover]:is([data-side='start'], [data-side='end'])[data-align='start'] {
+        inset-block-start: anchor(self-start);
+      }
+      :is(:root:dir(ltr) :dir(rtl), :root:dir(rtl) :dir(ltr))
+        > [popover]:is([data-side='start'], [data-side='end'])[data-align='center'] {
+        align-self: anchor-center;
+      }
+      :is(:root:dir(ltr) :dir(rtl), :root:dir(rtl) :dir(ltr))
+        > [popover]:is([data-side='start'], [data-side='end'])[data-align='end'] {
+        inset-block-end: anchor(self-end);
+      }
+    }
   }
 }

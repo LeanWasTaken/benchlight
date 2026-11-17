@@ -77,7 +77,7 @@ function prefixedName(name, prefix) {
 }
 var module_default = defineNuxtModule({
   meta: { name: "benchlight", configKey: "benchlight", compatibility: { nuxt: ">=4.0.0" } },
-  defaults: { fonts: true, autoImports: true },
+  defaults: { fonts: true, autoImports: true, prepaint: true },
   setup(options, nuxt) {
     const { resolve } = createResolver(import.meta.url);
     const root = import.meta.url.includes("/dist/nuxt/") ? "../.." : "..";
@@ -85,10 +85,12 @@ var module_default = defineNuxtModule({
     if (options.fonts)
       css.unshift(resolve(`${root}/css/fonts.css`));
     nuxt.options.css.unshift(...css);
-    nuxt.options.app.head.script = [
-      { innerHTML: PREPAINT, tagPosition: "head" },
-      ...nuxt.options.app.head.script ?? []
-    ];
+    if (options.prepaint !== false) {
+      nuxt.options.app.head.script = [
+        { innerHTML: PREPAINT, tagPosition: "head" },
+        ...nuxt.options.app.head.script ?? []
+      ];
+    }
     for (const name of components_default) {
       addComponent({ name, filePath: resolve(`${root}/dist/vue/components/${name}.vue.js`) });
     }

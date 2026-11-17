@@ -62,6 +62,10 @@ export interface AppearanceLabels {
         dark: string;
     }>;
 }
+export interface MarqueeLabels {
+    /** Name of the pause toggle; its state is `aria-pressed`, so keep the wording constant. */
+    pause: string;
+}
 export interface PrevNextLabels {
     prev: string;
     next: string;
@@ -146,11 +150,10 @@ export interface DialogLabels {
     close: string;
 }
 export type DialogCloseReason = 'button' | 'backdrop' | 'escape' | 'program' | 'native';
-/** Status vocabulary shared by BlMsg and toasts. Neutral is the unmarked base. */
+/** Status vocabulary shared by BlMsg, BlLed and toasts. Neutral is the unmarked base (an unlit BlLed). */
 export type StatusTone = 'neutral' | 'success' | 'danger';
 export type ToastTone = StatusTone;
 export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
-export type LedState = 'on' | 'off' | 'danger';
 /** Payload of BlDialog's `close` event. */
 export interface DialogCloseEvent {
     reason: DialogCloseReason;

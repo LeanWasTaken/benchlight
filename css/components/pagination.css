@@ -4,14 +4,14 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 8px 16px;
-    margin-top: 16px;
+    gap: var(--bl-space-2) var(--bl-space-4);
+    margin-top: var(--bl-space-4);
   }
   .bl-pagination__list {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 4px;
+    gap: var(--bl-space-1);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -19,7 +19,7 @@
   .bl-pagination button {
     min-inline-size: 44px;
     min-block-size: 44px;
-    padding: 0 12px;
+    padding: 0 var(--bl-space-3);
     border: 1px solid transparent;
     border-radius: var(--bl-radius-chip);
     background: none;
@@ -48,7 +48,7 @@
     }
   }
   .bl-pagination__gap {
-    padding: 0 4px;
+    padding: 0 var(--bl-space-1);
     color: var(--bl-color-ink-3);
   }
   .bl-pagination__range {
@@ -63,7 +63,7 @@
     }
     .bl-pagination__compact {
       display: block;
-      padding: 0 8px;
+      padding: 0 var(--bl-space-2);
     }
   }
   @media (forced-colors: active) {

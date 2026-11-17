@@ -2,6 +2,7 @@ type __VLS_Props = {
     legend: string;
     hint?: string;
     error?: string;
+    announce?: boolean;
     disabled?: boolean;
     required?: boolean;
     name?: string;
