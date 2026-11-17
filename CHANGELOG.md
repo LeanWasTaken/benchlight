@@ -10,6 +10,10 @@
 - BlLed takes `tone` (`StatusTone`, shared with BlMsg and toasts) instead of `state`, and `LedState`
   is removed. `neutral` (the default) is unlit, `success` is lit and `danger` is red; the CSS classes
   are unchanged. There is no alias for `state`.
+- BlMarquee's overflow clipping and fade mask moved from `.bl-marquee` to a new
+  `.bl-marquee__viewport` child, so CSS-only markup needs the extra wrapper. Consumers who style
+  `.bl-marquee` overflow or mask directly must target `.bl-marquee__viewport`. `data-overflowing`
+  stays on `.bl-marquee`. The Vue component renders the new markup itself.
 
 ### Migration
 
@@ -21,6 +25,7 @@
 | `<BlLed state="off">` (or no `state`) | `<BlLed tone="neutral">` (or no `tone`) |
 | `<BlLed state="danger">` | `<BlLed tone="danger">` |
 | `import type { LedState }` | `StatusTone` |
+| CSS-only `<div class="bl-marquee"><div class="bl-marquee__content">…</div></div>` | wrap the content: `<div class="bl-marquee"><div class="bl-marquee__viewport"><div class="bl-marquee__content">…</div></div></div>` |
 
 ### Added
 
@@ -53,11 +58,8 @@
 
 ### Changed
 
-- BlMarquee's `paused` is now a model (`v-model:paused` / `update:paused`) defaulting to
-  `false`; in v0.10.0 it was an optional boolean prop. `:paused` still works.
-- BlMarquee's overflow clipping and fade mask moved from `.bl-marquee` to a new
-  `.bl-marquee__viewport` child. Consumers who style `.bl-marquee` overflow or mask directly must
-  target `.bl-marquee__viewport` now. `data-overflowing` stays on `.bl-marquee`.
+- BlMarquee's `paused` was an optional boolean prop in 0.10.0 and is now the model described
+  under Added, defaulting to `false`. `:paused` still works.
 - Most component spacing moved from px to rem (the `--bl-space-*` steps). The values are identical
   at a 16px root font size, but they now scale with the root font size and with zoom. Some off-scale
   values were rounded up to the next step: 6px to 8px, 10px to 12px and 14px to 16px; the literal
@@ -82,7 +84,7 @@
 ### Docs
 
 - First release on npm: `npm install benchlight`. The repository is public from this release.
-- The README is now a short overview: install from npm, quick start for Nuxt, Vite and plain HTML,
+- The README is now a short overview: install from npm, quick start for Nuxt, Vite, Tailwind and plain HTML,
   and links. Setup options, tokens, CSP, static pages, conventions and the per-component notes
   moved to GUIDE.md; development, generated files and releasing moved to CONTRIBUTING.md. The
   private-repo git+ssh install and deploy-key steps are gone.

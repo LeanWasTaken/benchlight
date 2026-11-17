@@ -30,8 +30,7 @@ spacing utilities are left alone.
 
 ## Browser support
 
-Build targets: Chrome 111, Safari 16.2 and Firefox 121. Newer features
-degrade where missing:
+Build targets: Chrome 111, Safari 16.2 and Firefox 121. Newer features degrade where missing:
 
 | Feature                                    | Floor                                | Without it                  |
 | ------------------------------------------ | ------------------------------------ | --------------------------- |
@@ -151,7 +150,7 @@ script, so you can keep `prepaint` on and only do the `replaceAll`.
   (short non-colour tokens become literals; the output is self-contained). The CLI warns when the
   selected modules need `base` or `type` and they are missing.
 - Compact font subsets are listed in `fonts/subset/manifest.json`.
-- [`playground/src/App.vue`](playground/src/App.vue) is the markup reference.
+- [`playground/src/App.vue`](playground/src/App.vue) in the repository is the markup reference.
 
 ## Conventions
 
@@ -185,11 +184,11 @@ script, so you can keep `prepaint` on and only do the `replaceAll`.
 ## Responsive rules
 
 - Breakpoints are `em`, so they follow the user's font size: `sm` 40em (640px) and `xs` 30em (480px).
-  The `md`, `lg` and `xl` breakpoints exist only in `tokens/tokens.ts` (the JS `tokens` export); there are no CSS custom properties or Tailwind theme entries for them, and the library CSS does not use them.
+  The JS `tokens` export holds the px equivalents (`tokens.breakpoint`). The `md`, `lg` and `xl` breakpoints exist only there; there are no CSS custom properties or Tailwind theme entries for them, and the library CSS does not use them.
 - Components size by the space they are given, through intrinsic grids and wrapping rather than
   viewport width, so they also work in a narrow card on a wide screen.
 - Long unbroken content (URLs, hashes, compound words) wraps instead of widening the page.
-- The stress suite is the contract: `/stress.html` renders every component with hostile content and
+- The repository's stress suite is the contract: `/stress.html` renders every component with hostile content and
   `tests/visual/stress.spec.ts` checks it (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 - **Link attrs.** `BlSiteBarLink` and `BlIndexRow` render an `li` around the link: `class` and `style`
   go on the `li`; `target`, `rel`, `aria-label`, `data-*` and listeners such as `@click` go on the

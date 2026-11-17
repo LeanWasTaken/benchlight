@@ -34,7 +34,7 @@ export default defineNuxtConfig({
 ```
 
 The module adds the fonts, the component CSS, the no-flash appearance script and auto-imports for
-every `Bl*` component and composable.
+every `Bl*` component and composable (composables take a `Bl` prefix, such as `useBlToast`).
 
 ```vue
 <!-- layouts/default.vue -->
@@ -86,8 +86,8 @@ The colour tokens become utilities such as `bg-surface`, `text-ink-1` and `borde
 
 ### Plain HTML
 
-Link `dist/benchlight.min.css` and `dist/fonts.min.css`, or only the `dist/modules/*.min.css` files
-a page uses. See [Static pages](GUIDE.md#static-pages-no-build-step) for the appearance scripts.
+Link `dist/benchlight.min.css` and `dist/fonts.min.css` from the installed package (or a CDN that
+serves npm packages), or only the `dist/modules/*.min.css` files a page uses. See [Static pages](GUIDE.md#static-pages-no-build-step) for the appearance scripts.
 
 ## Components
 
