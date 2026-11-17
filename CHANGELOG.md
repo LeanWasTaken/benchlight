@@ -47,7 +47,7 @@
   (10px 12px) and the prose heading top margin (28px).
 - A `prepaint` option on the Nuxt module (`benchlight: { prepaint: false }`) and the Vite plugin
   (`benchlight({ prepaint: false })`) turns off the inline no-flash appearance script, for a
-  nonce-based Content Security Policy. The README has a CSP section: a hash-based CSP works as
+  nonce-based Content Security Policy. GUIDE.md has a CSP section: a hash-based CSP works as
   shipped with `PREPAINT_CSP_HASH`; under a nonce-based CSP, inline `PREPAINT` yourself with a
   per-request nonce (Nuxt and Vite examples).
 
@@ -79,6 +79,14 @@
   instead of shifting to stay on screen. Direction set with CSS `direction` and no `dir` attribute
   is not covered.
 
+### Docs
+
+- First release on npm: `npm install benchlight`. The repository is public from this release.
+- The README is now a short overview: install from npm, quick start for Nuxt, Vite and plain HTML,
+  and links. Setup options, tokens, CSP, static pages, conventions and the per-component notes
+  moved to GUIDE.md; development, generated files and releasing moved to CONTRIBUTING.md. The
+  private-repo git+ssh install and deploy-key steps are gone.
+
 ### Tests/CI
 
 - A manual `publish` workflow (`.github/workflows/publish.yml`) publishes `benchlight` to npm with
@@ -92,9 +100,7 @@
   no new baselines; the visual specs stay Chromium-only. The CI Playwright image already ships both
   engines. Seven WebKit focus tests and one number-field wheel test are `test.fixme` on macOS only
   (macOS WebKit does not Tab-focus buttons and hit-tests the wheel against the element under the
-  input; all pass in the Linux CI image). One Firefox test (popover `align=start` under a section
-  `dir=rtl`) is `test.fixme` everywhere: Firefox resolves `self-*` position-area keywords against
-  the top-layer containing block's writing mode. `PW_PORT` overrides the preview port (default 4173)
+  input; all pass in the Linux CI image). `PW_PORT` overrides the preview port (default 4173)
   so parallel worktrees can run Playwright side by side; the web server now has a 120s timeout and
   is only reused outside CI.
 

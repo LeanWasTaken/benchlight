@@ -127,7 +127,7 @@ test.describe('placement', () => {
 })
 
 // One button that is both a popover trigger and a tooltip trigger: mergeProps keeps only one
-// style.anchorName, so the README has the consumer set both names as a comma-separated list. Here
+// style.anchorName, so the guide has the consumer set both names as a comma-separated list. Here
 // the Details trigger takes the Copy hash tooltip's anchor name as well (Copy hash is hidden, so it
 // anchors nothing) and both panels must sit against the one button. The list is set after the
 // panel opens: opening re-renders the trigger (aria-expanded), and Vue would patch a style set
