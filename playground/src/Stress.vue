@@ -19,8 +19,7 @@
     <p v-if="!only" class="bl-annotation">
       Regression page for responsive behaviour. Open a chrome case alone with ?case=&lt;id&gt;:
       <template v-for="id in chromeCases" :key="id">
-        <a :href="`?case=${id}`">{{ id }}</a
-        >{{ ' ' }}
+        <a :href="`?case=${id}`">{{ id }}</a>{{ ' ' }}
       </template>
     </p>
 
@@ -153,8 +152,7 @@
         <BlProse>
           <h2>Informationssicherheitsmanagementsystemdokumentation</h2>
           <p>
-            Inline hash <code>{{ hash }}</code> and link <a href="#">{{ url }}</a
-            >.
+            Inline hash <code>{{ hash }}</code> and link <a href="#">{{ url }}</a>.
           </p>
           <p>
             <img :src="wideImage" width="1200" height="60" alt="" />

@@ -704,7 +704,7 @@ Exposed: none
 | --- | --- | --- | --- |
 | `disabled` | `boolean \| undefined` | no |  |
 | `modelValue` | `string \| undefined` | no | `""` |
-| `type` | `"search" \| "text" \| "email" \| "password" \| "tel" \| "url" \| undefined` | no | `"text"` |
+| `type` | `"text" \| "email" \| "password" \| "search" \| "tel" \| "url" \| undefined` | no | `"text"` |
 
 Slots: none
 Events: `update:modelValue`
@@ -1141,7 +1141,7 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
-| `activation` | `"auto" \| "manual" \| undefined` | no | `"auto"` |
+| `activation` | `"manual" \| "auto" \| undefined` | no | `"auto"` |
 | `ariaLabel` | `string \| undefined` | no |  |
 | `items` | `readonly TabItem<T>[]` | yes |  |
 | `modelValue` | `T \| undefined` | no |  |
