@@ -226,6 +226,12 @@ describe('publish workflow', () => {
     expect(publishJob.indexOf('setup-node')).toBeLessThan(publishJob.indexOf('npm --version'))
   })
 
+  it('keeps setup-node from restoring a dependency cache in either job', () => {
+    // setup-node v5+ caches automatically when it detects a package manager.
+    expect(build).toContain('package-manager-cache: false')
+    expect(publishJob).toContain('package-manager-cache: false')
+  })
+
   it('publishes through OIDC, with no npm token or secret', () => {
     expect(code).not.toMatch(/NPM_TOKEN|NODE_AUTH_TOKEN|secrets\./)
   })
