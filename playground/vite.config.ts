@@ -6,6 +6,8 @@ import { benchlight } from '../vite/index.js'
 export default defineConfig({
   plugins: [vue(), benchlight()],
   build: {
+    // Vite 8's default CSS target lowers `:dir(rtl)` to a `:lang(...)` list, which ignores `dir="rtl"`.
+    cssTarget: ['chrome120', 'firefox121', 'safari17'],
     rollupOptions: {
       input: {
         index: resolve(__dirname, 'index.html'),
