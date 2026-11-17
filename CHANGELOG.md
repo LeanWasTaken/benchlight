@@ -4,6 +4,10 @@
 
 ### Fixed
 
+- Vite 8 builds with the default CSS target no longer lose RTL styling. lightningcss rewrote
+  `:dir(rtl)` into `:lang()` lists, which ignore `dir="rtl"`. The `benchlight()` Vite plugin and the
+  Nuxt module now add `Features.DirSelector` to `css.lightningcss.exclude`, keeping any value you
+  set. Setups that import the CSS without either need that exclude themselves.
 - Production builds with Vite 8 no longer keep the `[benchlight]` development warnings as dead
   code. The development check now folds to `false` once `process.env.NODE_ENV` is replaced, so
   rolldown removes the warnings as esbuild already did.

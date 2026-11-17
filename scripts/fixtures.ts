@@ -73,6 +73,12 @@ function expectAll(haystack: string, needles: readonly string[], where: string):
   }
 }
 
+function expectNone(haystack: string, needles: readonly string[], where: string): void {
+  for (const needle of needles) {
+    if (haystack.includes(needle)) throw new Error(`${where}: unexpected ${JSON.stringify(needle)}`)
+  }
+}
+
 export const VITE_EXPECTATIONS = {
   html: ['bl-appearance'],
   css: [
@@ -80,8 +86,10 @@ export const VITE_EXPECTATIONS = {
     '.bl-display',
     '@font-face',
     'Bricolage Grotesque',
-    '.bl-btn--secondary'
+    '.bl-btn--secondary',
+    ':dir(rtl)'
   ],
+  cssAbsent: [':lang(ae)'],
   js: ['bl-led', 'bl-meter', 'bl-btn', 'bl-appearance__track', 'bl-table', 'bl-pagination']
 }
 
@@ -102,14 +110,18 @@ export const NUXT_EXPECTATIONS = {
     '.font-display',
     '@font-face',
     '.bl-display',
-    '.bl-prose'
-  ]
+    '.bl-prose',
+    ':dir(rtl)'
+  ],
+  cssAbsent: [':lang(ae)']
 }
 
 export function verifyVite(dir: string): void {
   const dist = join(dir, 'dist')
   expectAll(readFileSync(join(dist, 'index.html'), 'utf8'), VITE_EXPECTATIONS.html, 'vite html')
-  expectAll(readAll(join(dist, 'assets'), '.css'), VITE_EXPECTATIONS.css, 'vite css')
+  const css = readAll(join(dist, 'assets'), '.css')
+  expectAll(css, VITE_EXPECTATIONS.css, 'vite css')
+  expectNone(css, VITE_EXPECTATIONS.cssAbsent, 'vite css')
   expectAll(readAll(join(dist, 'assets'), '.js'), VITE_EXPECTATIONS.js, 'vite js')
 }
 
@@ -153,7 +165,9 @@ export async function verifyNuxt(dir: string): Promise<void> {
     expectAll(await waitFor(`${base}/`), NUXT_EXPECTATIONS.page, 'nuxt page')
     const api = (await (await fetch(`${base}/api/tokens`)).json()) as { canvas?: string }
     if (api.canvas !== '#101214') throw new Error(`nuxt /api/tokens: ${JSON.stringify(api)}`)
-    expectAll(readAll(join(dir, '.output/public/_nuxt'), '.css'), NUXT_EXPECTATIONS.css, 'nuxt css')
+    const css = readAll(join(dir, '.output/public/_nuxt'), '.css')
+    expectAll(css, NUXT_EXPECTATIONS.css, 'nuxt css')
+    expectNone(css, NUXT_EXPECTATIONS.cssAbsent, 'nuxt css')
     if (readAll(join(dir, '.output'), '.mjs').includes(DEV_WARNING_MARKER)) {
       throw new Error('nuxt production build still contains the library dev warnings')
     }

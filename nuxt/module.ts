@@ -76,5 +76,14 @@ export default defineNuxtModule<ModuleOptions>({
       ...nuxt.options.vite.optimizeDeps,
       exclude: [...(nuxt.options.vite.optimizeDeps?.exclude ?? []), 'benchlight']
     }
+    // lightningcss would lower `:dir()` to `:lang()` for low CSS targets, which ignores `dir="rtl"`.
+    // 4 is lightningcss `Features.DirSelector`; tests/integrations/vite.test.ts pins the value.
+    nuxt.options.vite.css = {
+      ...nuxt.options.vite.css,
+      lightningcss: {
+        ...nuxt.options.vite.css?.lightningcss,
+        exclude: (nuxt.options.vite.css?.lightningcss?.exclude ?? 0) | 4
+      }
+    }
   }
 })

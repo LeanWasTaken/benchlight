@@ -19,9 +19,13 @@ the `Bl` prefix (`useBlAppearance`, `useBlScrollLifted`, `useBlFollowScroll`, `u
   the rest; `prefix: ''` restores the bare names.
 - `prepaint: false` drops the inline appearance script (see Content Security Policy).
 
+The module also keeps lightningcss from lowering `:dir()`, so RTL styling survives Vite 8's default
+CSS target.
+
 **Vite.** `benchlight()` from `benchlight/vite` inlines the no-flash appearance script and keeps
 `benchlight` out of Vite's dependency pre-bundling (the components are already compiled, so this is
-a precaution, not a requirement). `@vitejs/plugin-vue` is only for your own `.vue` files.
+a precaution, not a requirement). It also keeps lightningcss from lowering `:dir()`, so RTL styling
+survives Vite 8's default CSS target. `@vitejs/plugin-vue` is only for your own `.vue` files.
 
 **Tailwind** is optional. If the app uses it, add `@import 'benchlight/tailwind/theme.css';` after
 `@import 'tailwindcss';`. The theme maps the colour tokens to utilities (`bg-surface`,
@@ -40,6 +44,11 @@ Build targets: Chrome 111, Safari 16.2 and Firefox 121. Newer features degrade w
 | Alt-text `content: '!' / ''` (error marks) | Firefox 128, Safari 17.4             | plain mark                  |
 
 RTL is explicitly supported for BlToggle and BlCheckbox and otherwise partial.
+
+If you import the CSS through your own lightningcss or Vite setup without the Vite plugin or Nuxt
+module, set `css.lightningcss.exclude` to include `Features.DirSelector`; lightningcss otherwise
+rewrites `:dir(rtl)` into `:lang()` lists for targets without `:dir()` support (such as Chrome below
+120), which ignore `dir="rtl"`.
 
 ## Colour tokens
 

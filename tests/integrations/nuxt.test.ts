@@ -21,7 +21,10 @@ interface TestNuxt {
     css: string[]
     app: { head: { script?: Array<Record<string, unknown>> } }
     build: { transpile: string[] }
-    vite: { optimizeDeps?: { exclude?: string[]; include?: string[] } }
+    vite: {
+      optimizeDeps?: { exclude?: string[]; include?: string[] }
+      css?: { lightningcss?: { exclude?: number; drafts?: object } }
+    }
   }
 }
 
@@ -169,6 +172,18 @@ describe('nuxt module', () => {
     nuxt.options.vite = {}
     ;(await load()).setup({ fonts: true, autoImports: true }, nuxt)
     expect(nuxt.options.vite.optimizeDeps).toEqual({ exclude: ['benchlight'] })
+  })
+
+  it('keeps lightningcss from lowering :dir(), preserving user options', async () => {
+    const nuxt = makeNuxt()
+    nuxt.options.vite = { css: { lightningcss: { exclude: 8, drafts: {} } } }
+    ;(await load()).setup({ fonts: true, autoImports: true }, nuxt)
+    expect(nuxt.options.vite.css?.lightningcss).toEqual({ exclude: 12, drafts: {} })
+
+    const bare = makeNuxt()
+    bare.options.vite = {}
+    ;(await load()).setup({ fonts: true, autoImports: true }, bare)
+    expect(bare.options.vite.css?.lightningcss?.exclude).toBe(4)
   })
 })
 
