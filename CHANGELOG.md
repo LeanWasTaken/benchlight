@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Production builds with Vite 8 no longer keep the `[benchlight]` development warnings as dead
+  code. The development check now folds to `false` once `process.env.NODE_ENV` is replaced, so
+  rolldown removes the warnings as esbuild already did.
+
 ## 0.11.0 - 2026-11-17
 
 ### Breaking

@@ -47,6 +47,16 @@ describe('compiled vue build', () => {
       await mountMeter()
       expect(warn).not.toHaveBeenCalled()
     })
+
+    it('is not dev, and does not throw, where process is undefined', async () => {
+      vi.stubGlobal('process', undefined)
+      vi.resetModules()
+      const { isDev } = await import(
+        /* @vite-ignore */ join(import.meta.dirname, '..', 'dist', 'vue', 'internal', 'dev.js')
+      )
+      vi.unstubAllGlobals()
+      expect(isDev).toBe(false)
+    })
   })
 })
 

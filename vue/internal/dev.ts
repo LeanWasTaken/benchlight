@@ -3,7 +3,7 @@
 // frozen to `false` at build time and silence every warning.
 declare const process: { env: { NODE_ENV?: string } } | undefined
 // The literal `process.env.NODE_ENV` stays (no optional chaining) so bundler `define` replaces it.
-export const isDev = typeof process !== 'undefined' && process.env.NODE_ENV !== 'production'
+export const isDev = typeof process !== 'undefined' ? process.env.NODE_ENV !== 'production' : false
 
 // Development-only console warning with the library prefix.
 export function warn(message: string): void {
