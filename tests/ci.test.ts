@@ -203,8 +203,8 @@ describe('publish workflow', () => {
     for (const line of uses) {
       expect(line).toMatch(/uses: [\w.-]+\/[\w.-]+@[0-9a-f]{40} # v\d+/)
     }
-    expect(build).toMatch(/uses: actions\/upload-artifact@[0-9a-f]{40} # v4/)
-    expect(publishJob).toMatch(/uses: actions\/download-artifact@[0-9a-f]{40} # v4/)
+    expect(build).toMatch(/uses: actions\/upload-artifact@[0-9a-f]{40} # v7/)
+    expect(publishJob).toMatch(/uses: actions\/download-artifact@[0-9a-f]{40} # v8/)
     // Same upload-artifact pin as ci.yml.
     const ciUpload = /actions\/upload-artifact@[0-9a-f]{40}/.exec(workflow)?.[0]
     expect(build).toContain(ciUpload)
