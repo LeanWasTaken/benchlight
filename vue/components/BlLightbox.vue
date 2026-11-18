@@ -2,6 +2,7 @@
   <dialog
     ref="el"
     class="bl-lightbox"
+    tabindex="-1"
     :aria-label="text.dialog"
     :aria-describedby="hasCaption() ? captionId : undefined"
     @cancel="onCancel"

@@ -39,7 +39,25 @@ export function useModal(o: ModalOptions) {
     lockPage()
     // close() without an argument keeps the previous returnValue; never report a stale one.
     dialog.returnValue = ''
-    dialog.showModal()
+    // Without an autofocus target the browser would focus the ×, and WebKit then rings it even
+    // after a mouse open. The dialog (tabindex="-1") takes focus instead; Tab still reaches the ×.
+    // Nothing inside may be focused and blurred on the way (a field would commit, a tooltip
+    // flash, blur validation run): autofocus on the dialog makes showModal() focus it directly
+    // (the dialog focusing steps; Firefox, Safari), and children inert for the call leave
+    // Chromium, which ignores that attribute, nothing inside to focus.
+    const self = !dialog.hasAttribute('autofocus') && dialog.querySelector('[autofocus]') === null
+    const held = self
+      ? [...dialog.children].filter((c) => c instanceof HTMLElement && !c.inert)
+      : []
+    if (self) dialog.setAttribute('autofocus', '')
+    for (const c of held) (c as HTMLElement).inert = true
+    try {
+      dialog.showModal()
+    } finally {
+      for (const c of held) (c as HTMLElement).inert = false
+      if (self) dialog.removeAttribute('autofocus')
+    }
+    if (self && document.activeElement !== dialog) dialog.focus({ preventScroll: true })
     isOpen = true
     if (toasts.value) pushToastHost(toasts.value)
   }

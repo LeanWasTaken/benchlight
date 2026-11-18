@@ -16,6 +16,10 @@
   .bl-dialog[open] {
     display: flex;
   }
+  /* BlDialog focuses the dialog itself on open: a container, not a control, so no ring. */
+  .bl-dialog:focus {
+    outline: none;
+  }
   .bl-dialog::backdrop {
     background: color-mix(in srgb, var(--bl-color-canvas) 70%, transparent);
     opacity: 0;

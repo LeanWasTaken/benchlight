@@ -24,7 +24,7 @@ test('open lightbox', async ({ page }) => {
 test('arrow keys and buttons move through the group and the counter follows', async ({ page }) => {
   await open(page)
   await expect(count(page)).toHaveText('1 / 4')
-  await expect(viewer(page).getByRole('button', { name: 'Close' })).toBeFocused()
+  await expect(viewer(page)).toBeFocused()
   await page.keyboard.press('ArrowRight')
   await expect(count(page)).toHaveText('2 / 4')
   await expect(page.locator('.bl-lightbox [aria-live="polite"]')).toHaveText('Image 2 of 4')

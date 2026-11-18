@@ -32,6 +32,10 @@
       background-color: transparent;
     }
   }
+  /* BlLightbox focuses the dialog itself on open: a container, not a control, so no ring. */
+  .bl-lightbox:focus {
+    outline: none;
+  }
   /* The dialog paints the scrim, so the UA backdrop would only darken it. */
   .bl-lightbox::backdrop {
     background: transparent;

@@ -2,6 +2,7 @@
   <dialog
     ref="el"
     class="bl-dialog"
+    tabindex="-1"
     :aria-labelledby="titleId"
     :aria-describedby="description ? descId : undefined"
     v-bind="{ closedby: dismissible ? undefined : 'none' }"

@@ -97,11 +97,20 @@ describe('BlLightbox', () => {
     expect(labelled.get('.bl-lightbox__nav--next').attributes('aria-label')).toBe('Weiter')
   })
 
-  it('never renders open, and puts the close button first so showModal focuses it', () => {
+  it('never renders open, and puts the close button first so Tab reaches it first', () => {
     const w = lightbox()
     expect(dialogEl(w).hasAttribute('open')).toBe(false)
     const buttons = w.findAll('button')
     expect(buttons[0]!.classes()).toContain('bl-lightbox__close')
+  })
+
+  it('focuses the dialog itself on open, so arrow keys work at once', async () => {
+    const w = await opened()
+    const d = dialogEl(w)
+    expect(d.getAttribute('tabindex')).toBe('-1')
+    expect(document.activeElement).toBe(d)
+    key(document.activeElement!, 'ArrowRight')
+    expect(indexes(w)).toEqual([1])
   })
 
   it("renders the current item's src, srcset, sizes, alt, width and height", async () => {

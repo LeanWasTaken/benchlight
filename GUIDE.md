@@ -641,10 +641,12 @@ bundle CLI warns otherwise).
   (its CloseWatcher anti-abuse rule); the close is then reported as `'escape'` or `'native'`
   and `v-model` stays in step. In development a warning fires when the footer is empty, since
   nothing could close the dialog.
-- Focus: the browser focuses the first focusable element, which is the × in a dismissible dialog.
-  Put `autofocus` on the least destructive action or on the first field. On close, focus returns
-  to the opener unless a `@close` handler moved it elsewhere; unmounting an open dialog closes
-  it quietly (no emits) and restores focus too.
+- Focus: on open the dialog focuses itself (it has `tabindex="-1"` and paints no ring), so a
+  mouse open rings nothing and Tab moves to the ×, the first control. A keyboard open shows no
+  ring either until the first Tab, on purpose: the focused element is the dialog container. An
+  `autofocus` element inside wins; put it on the least destructive action or on the first field.
+  On close, focus returns to the opener unless a `@close` handler moved it elsewhere; unmounting
+  an open dialog closes it quietly (no emits) and restores focus too.
 - Scroll lock: `html:has(dialog.bl-dialog[open]:modal)` hides the `html` overflow; the component
   measures the scrollbar it removes into `--bl-dialog-gutter` so the page does not shift. An app
   that scrolls `body` instead of `html` is not locked. CSS-only users get no compensation; opt
@@ -742,7 +744,8 @@ function show(i: number) {
   `iframe` or a `[controls]` element, or with `preventDefault()` called, do not count. The stage sets
   `touch-action: pan-y pinch-zoom`, so the page's pinch-zoom keeps working; while the page is
   zoomed in (`visualViewport.scale` above 1) a drag pans instead of swiping.
-- Focus: the browser focuses the × on open and focus stays put while navigating; a focused nav
+- Focus: the dialog focuses itself on open (as BlDialog, so a mouse open rings nothing), the arrow
+  keys work at once, Tab moves to the ×, and focus stays put while navigating; a focused nav
   button disabled at an end hands focus to the other one. Close and unmount restore focus as for
   BlDialog. The live region announces the position after navigation, not on open. One item shows
   no nav buttons, counter or announcement.

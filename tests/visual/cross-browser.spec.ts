@@ -44,6 +44,58 @@ test('the lightbox advances on ArrowRight and closes on Esc', async ({ page }) =
   await expect(demo(page, 'lightbox')).toContainText('Last close: escape')
 })
 
+// WebKit marks the element showModal() focuses as :focus-visible even after a click; the modal
+// focuses itself instead, so a mouse open rings nothing and Tab still reaches the × first.
+for (const [name, openIt, role] of [
+  [
+    'dialog',
+    (page: Page) => demo(page, 'dialog').getByRole('button', { name: 'Rename' }).click(),
+    { name: 'Rename item' }
+  ],
+  [
+    'lightbox',
+    (page: Page) => demo(page, 'lightbox').locator('.pg-thumb').first().click(),
+    { name: 'Image viewer' }
+  ]
+] as const) {
+  test(`a ${name} opened by mouse shows no focus ring until Tab`, async ({ page, browserName }) => {
+    // Nothing inside is focused on the way: a focus then blur would commit fields, flash
+    // tooltips and run blur validation.
+    await page.evaluate(() => {
+      const w = window as unknown as { touched: string[] }
+      w.touched = []
+      document.addEventListener(
+        'focusin',
+        (e) => {
+          const t = e.target as Element
+          if (t.closest('dialog') && t.localName !== 'dialog') w.touched.push(t.className)
+        },
+        true
+      )
+    })
+    await openIt(page)
+    const modal = page.getByRole('dialog', role)
+    await expect(modal).toBeVisible()
+    await expect(modal).toBeFocused()
+    expect(await page.evaluate(() => (window as unknown as { touched: string[] }).touched)).toEqual(
+      []
+    )
+    // WebKit counts the dialog itself as :focus-visible (script focus after a click that never
+    // focused the opener); it is a container and paints no ring. No control inside rings.
+    const ringed = await modal.evaluate((el) =>
+      [...el.querySelectorAll(':focus-visible')].map((node) => node.className)
+    )
+    expect(ringed).toEqual([])
+    expect(await modal.evaluate((el) => getComputedStyle(el).outlineStyle)).toBe('none')
+    // macOS WebKit Tab-focuses buttons only with Option held (system default).
+    const mac = browserName === 'webkit' && process.platform === 'darwin'
+    await page.keyboard.press(mac ? 'Alt+Tab' : 'Tab')
+    const close = modal.getByRole('button', { name: 'Close' })
+    await expect(close).toBeFocused()
+    expect(await close.evaluate((el) => el.matches(':focus-visible'))).toBe(true)
+  })
+}
+
 test('focus is not lost to <body> when a focused toast goes away', async ({ page }) => {
   const opener = demo(page, 'toast').getByRole('button', { name: 'Persistent', exact: true })
   await opener.focus()

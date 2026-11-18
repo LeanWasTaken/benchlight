@@ -11,6 +11,12 @@
   other media. It shares BlDialog's close reasons, focus restore, scroll lock and toast hosting.
   `--bl-lightbox-scrim` sets the backdrop.
 
+### Fixed
+
+- BlDialog no longer shows a focus ring on its × after a mouse open in Safari. Without an
+  `autofocus` element inside, the dialog now focuses itself (`tabindex="-1"`, no ring) instead of
+  leaving the browser to focus the ×; Tab still reaches the × first. BlLightbox does the same.
+
 ## 0.11.1 - 2026-11-18
 
 ### Fixed

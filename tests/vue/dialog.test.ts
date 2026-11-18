@@ -130,6 +130,60 @@ describe('BlDialog', () => {
     opener.remove()
   })
 
+  it('focuses the dialog itself on open when nothing inside asks for focus', async () => {
+    const w = open()
+    await w.setProps({ open: true })
+    const d = dialogEl(w)
+    expect(d.getAttribute('tabindex')).toBe('-1')
+    expect(document.activeElement).toBe(d)
+  })
+
+  // happy-dom has no dialog focusing steps: run them as the HTML spec does on showModal() (the
+  // dialog itself if it has autofocus, else its focus delegate: an autofocus descendant, else
+  // the first focusable one).
+  function focusingSteps(d: HTMLDialogElement) {
+    const real = d.showModal.bind(d)
+    vi.spyOn(d, 'showModal').mockImplementation(() => {
+      real()
+      const target = d.hasAttribute('autofocus')
+        ? d
+        : (d.querySelector<HTMLElement>('[autofocus]') ??
+          d.querySelector<HTMLElement>('button, input, select, textarea, [tabindex]'))
+      target?.focus()
+    })
+  }
+
+  it('lets showModal() focus the dialog directly, never the × first', async () => {
+    const w = open()
+    const d = dialogEl(w)
+    focusingSteps(d)
+    const close = w.get<HTMLElement>('.bl-dialog__close').element
+    const touched: string[] = []
+    close.addEventListener('focus', () => touched.push('focus'))
+    close.addEventListener('blur', () => touched.push('blur'))
+    await w.setProps({ open: true })
+    expect(document.activeElement).toBe(d)
+    expect(touched).toEqual([])
+    expect(d.hasAttribute('autofocus')).toBe(false) // only for the showModal() call
+  })
+
+  it('leaves focus to an autofocus element inside', async () => {
+    const w = open({}, { default: '<input class="name" autofocus />' })
+    const d = dialogEl(w)
+    focusingSteps(d)
+    await w.setProps({ open: true })
+    expect(document.activeElement).toBe(w.get('.name').element)
+  })
+
+  it('keeps an autofocus attribute the consumer put on the dialog', async () => {
+    const w = open({ autofocus: '' })
+    const d = dialogEl(w)
+    focusingSteps(d)
+    await w.setProps({ open: true })
+    expect(document.activeElement).toBe(d)
+    expect(d.hasAttribute('autofocus')).toBe(true)
+  })
+
   it('sets and removes the scrollbar gutter property and the toast host', async () => {
     const w = open()
     await w.setProps({ open: true })
