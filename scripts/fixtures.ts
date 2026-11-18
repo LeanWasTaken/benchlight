@@ -107,7 +107,9 @@ export const NUXT_EXPECTATIONS = {
     'class="bl-lightbox"',
     'bl-lightbox__title',
     'bl-lightbox__actions',
-    'bl-lightbox__stage'
+    'bl-lightbox__stage bl-lightbox__stage--zoomable',
+    'bl-lightbox__frame',
+    'bl-lightbox__zoom'
   ],
   css: [
     '.bg-surface',

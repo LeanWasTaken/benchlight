@@ -547,9 +547,11 @@ const lightboxFits: Probe = (page) =>
       // The bar's parts never overlap one another: a long title truncates instead.
       const bar = [
         ...dialog.querySelectorAll<HTMLElement>(
-          '.bl-lightbox__title, .bl-lightbox__actions .bl-btn, .bl-lightbox__close'
+          '.bl-lightbox__title, .bl-lightbox__actions .bl-btn, .bl-lightbox__zoom .bl-btn, .bl-lightbox__close'
         )
-      ].map((el) => [el.className, el.getBoundingClientRect()] as const)
+      ]
+        .map((el) => [el.className, el.getBoundingClientRect()] as const)
+        .filter(([, r]) => r.width > 0 && r.height > 0) // an empty box paints nothing
       for (const [i, [name, r]] of bar.entries())
         for (const [other, o] of bar.slice(i + 1))
           if (

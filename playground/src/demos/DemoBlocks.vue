@@ -95,6 +95,7 @@
       v-model:index="platesIndex"
       :items="plates"
       announce="position+caption"
+      zoomable
     >
       <template #title="{ item }">{{ item.title }}</template>
       <template #actions="{ item, index }">

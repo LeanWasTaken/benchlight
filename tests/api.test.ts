@@ -41,7 +41,7 @@ describe('exposedKeys', () => {
   })
   it('lists what BlLightbox exposes (a generic SFC)', () => {
     expect(/### BlLightbox\n[\s\S]*?\nExposed: (.*)/.exec(api())?.[1]).toBe(
-      '`go`, `next`, `previous`'
+      '`go`, `next`, `previous`, `resetZoom`, `zoomTo`'
     )
   })
 })

@@ -318,6 +318,9 @@ interface LightboxLabels<T extends LightboxItem = LightboxItem> {
     previous: string;
     next: string;
     failed: string;
+    zoomIn: string;
+    zoomOut: string;
+    resetZoom: string;
     position: (index: number, total: number, item: T) => string;
 }
 ```
@@ -770,14 +773,18 @@ Exposed: none
 | `items` | `readonly T[]` | yes |  |
 | `labels` | `Partial<LabelOverrides<LightboxLabels<T>>> \| undefined` | no |  |
 | `loop` | `boolean \| undefined` | no | `false` |
+| `maxZoom` | `number \| undefined` | no |  |
 | `open` | `boolean` | yes |  |
 | `preload` | `number \| false \| undefined` | no | `1` |
 | `title` | `string \| undefined` | no |  |
+| `zoom` | `number \| undefined` | no | `1` |
+| `zoomControls` | `boolean \| undefined` | no | `true` |
+| `zoomable` | `boolean \| undefined` | no | `false` |
 
 Slots: `actions`, `caption`, `default`, `title`
 Slot props: `actions` `{ item: T; index: number; }`, `caption` `{ item: T; index: number; }`, `default` `{ item: T; index: number; loaded: (size?: { width: number; height: number; } | undefined) => void; failed: () => void; }`, `title` `{ item: T; index: number; }`
-Events: `close`, `update:index`, `update:open`
-Exposed: `go`, `next`, `previous`
+Events: `close`, `update:index`, `update:open`, `update:zoom`
+Exposed: `go`, `next`, `previous`, `resetZoom`, `zoomTo`
 
 ### BlLinkArrow
 
@@ -1376,14 +1383,18 @@ Exposed: none
 - `bl-lightbox__caption`
 - `bl-lightbox__close`
 - `bl-lightbox__count`
+- `bl-lightbox__frame`
 - `bl-lightbox__media`
 - `bl-lightbox__message`
 - `bl-lightbox__nav`
 - `bl-lightbox__nav--next`
 - `bl-lightbox__nav--prev`
+- `bl-lightbox__readout`
 - `bl-lightbox__stage`
+- `bl-lightbox__stage--zoomable`
 - `bl-lightbox__title`
 - `bl-lightbox__toasts`
+- `bl-lightbox__zoom`
 - `bl-link-arrow`
 - `bl-link-arrow--quiet`
 - `bl-link-arrow__icon`
@@ -1543,11 +1554,13 @@ Exposed: none
 - `data-bl-no-swipe`
 - `data-closing`
 - `data-dir`
+- `data-easing`
 - `data-empty`
 - `data-fit`
 - `data-label`
 - `data-lifted`
 - `data-loaded`
+- `data-magnified`
 - `data-measuring`
 - `data-overflowing`
 - `data-ready`

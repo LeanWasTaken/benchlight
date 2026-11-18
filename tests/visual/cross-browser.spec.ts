@@ -44,6 +44,34 @@ test('the lightbox advances on ArrowRight and closes on Esc', async ({ page }) =
   await expect(demo(page, 'lightbox')).toContainText('Last close: escape')
 })
 
+test('a zoomable lightbox zooms on the wheel and keys and pans on a drag', async ({ page }) => {
+  await demo(page, 'lightbox-plates').locator('.pg-thumb').nth(2).click()
+  const viewer = page.locator('.bl-lightbox[open]')
+  const readout = viewer.locator('.bl-lightbox__readout')
+  const frame = viewer.locator('.bl-lightbox__frame')
+  await expect(viewer.locator('.bl-lightbox__stage')).toHaveAttribute('data-loaded', 'true')
+  const b = (await frame.boundingBox())!
+  const [x, y] = [b.x + b.width / 2, b.y + b.height / 2]
+  await page.mouse.move(x, y)
+  await page.mouse.wheel(0, -300)
+  await expect(readout).not.toHaveText('100%')
+  await page.keyboard.press('0')
+  await expect(readout).toHaveText('100%')
+  for (let i = 0; i < 3; i++) await page.keyboard.press('+')
+  await expect(readout).toHaveText('195%')
+  const translate = () =>
+    frame.evaluate((el) => /translate\(([^)]*)\)/.exec(el.style.transform)?.[1])
+  const before = await translate()
+  await page.mouse.down()
+  await page.mouse.move(x - 120, y - 60, { steps: 5 })
+  await page.mouse.up()
+  await expect.poll(translate).not.toBe(before)
+  await expect(readout).toHaveText('195%') // a drag pans, it never swipes to another item
+  await expect(viewer.locator('.bl-lightbox__count')).toHaveText('3 / 3')
+  await page.keyboard.press('Escape')
+  await expect(viewer).toHaveCount(0)
+})
+
 // WebKit marks the element showModal() focuses as :focus-visible even after a click; the modal
 // focuses itself instead, so a mouse open rings nothing and Tab still reaches the × first.
 for (const [name, openIt, role] of [

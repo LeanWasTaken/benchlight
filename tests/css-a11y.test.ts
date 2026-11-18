@@ -85,7 +85,12 @@ describe('forced colors', () => {
   })
   it('lightbox buttons and message keep an edge in forced colors', () => {
     const block = forced(read('css/components/lightbox.css'))
-    for (const sel of ['.bl-lightbox__close', '.bl-lightbox__nav', '.bl-lightbox__message'])
+    for (const sel of [
+      '.bl-lightbox__close',
+      '.bl-lightbox__zoom .bl-btn',
+      '.bl-lightbox__nav',
+      '.bl-lightbox__message'
+    ])
       expect(block).toContain(sel)
     expect(block).toContain('CanvasText')
   })

@@ -15,7 +15,9 @@
   that fails to load, and `next()`, `previous()` and `go(i)` on a template ref. Items are generic
   (`T extends LightboxItem`, `src` optional), so the default slot (any media, reporting through
   `loaded(size?)` and `failed()`), `caption`, `title` and `actions` slots get your item type. A
-  `title` names the dialog; `actions` sit in the bar before the ×. It shares BlDialog's close
+  `title` names the dialog; `actions` sit in the bar before the ×. Opt-in zoom and pan
+  (`zoomable`, `v-model:zoom`, `maxZoom`) by wheel, pinch, drag, double-tap and keys, with zoom
+  controls in the bar and `zoomTo()` and `resetZoom()` on the ref. It shares BlDialog's close
   reasons, focus restore, scroll lock and toast hosting. `--bl-lightbox-scrim` sets the backdrop.
 
 ### Fixed

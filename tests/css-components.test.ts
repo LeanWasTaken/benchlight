@@ -1056,6 +1056,40 @@ describe('lightbox', () => {
   it('hands every touch back to the browser while the page is zoomed', () => {
     expect(ruleBody(css, '.bl-lightbox__stage[data-zoomed]')['touch-action']).toBe('auto')
   })
+  it('takes over touch and clips the media on a zoomable stage, unless the page is zoomed', () => {
+    const zoomable = ruleBody(css, '.bl-lightbox__stage--zoomable')
+    expect(zoomable['touch-action']).toBe('none')
+    expect(zoomable['overflow']).toBe('hidden')
+    // same specificity: the page-zoom rule must come later to win
+    expect(css.indexOf('.bl-lightbox__stage[data-zoomed] {')).toBeGreaterThan(
+      css.indexOf('.bl-lightbox__stage--zoomable {')
+    )
+  })
+  it('sizes the media against the frame and eases the frame only with motion allowed', () => {
+    const frame = ruleBody(css, '.bl-lightbox__frame')
+    expect(frame['grid-template']).toBe('minmax(0, 1fr) / minmax(0, 1fr)')
+    expect(frame['block-size']).toBe('100%')
+    expect(ruleBody(css, '.bl-lightbox__frame[data-easing]')['transition']).toMatch(/^transform /)
+    const reduce = ['@media (prefers-reduced-motion: reduce)']
+    expect(ruleBody(css, '.bl-lightbox__frame[data-easing]', reduce)['transition']).toBe('none')
+  })
+  it('moves the actions and zoom controls under the title from 40em to 64em, and lets a caption scroll', () => {
+    const between = ['@media (min-width: 40em) and (max-width: 63.99em)']
+    expect(ruleBody(css, '.bl-lightbox__actions', between)['grid-area']).toBe('2 / 1 / 3 / 4')
+    expect(ruleBody(css, '.bl-lightbox__zoom', between)['grid-area']).toBe('2 / 4 / 3 / -1')
+    expect(
+      ruleBody(css, '.bl-lightbox__stage--zoomable .bl-lightbox__caption')['touch-action']
+    ).toBe('pan-y')
+  })
+  it('places the bar parts by area: zoom before the × from 40em, in its own row below', () => {
+    expect(ruleBody(css, '.bl-lightbox[open]')['grid-template']).toContain(
+      "'count title actions zoom close'"
+    )
+    expect(ruleBody(css, '.bl-lightbox[open]', narrow)['grid-template']).toContain(
+      "'zoom zoom zoom'"
+    )
+    expect(ruleBody(css, '.bl-lightbox__title')['text-overflow']).toBe('ellipsis')
+  })
   it('adds the caption row only when a caption is there, so the media stays centred', () => {
     const stage = ruleBody(css, '.bl-lightbox__stage')
     expect(stage['grid-template-rows']).toBe('minmax(0, 1fr)')

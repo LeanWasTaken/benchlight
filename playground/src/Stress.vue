@@ -810,6 +810,7 @@
         :open="viewer === 'bar'"
         :items="extremePhotos"
         :title="longTitle"
+        zoomable
         @update:open="viewer = null"
       >
         <template #actions>

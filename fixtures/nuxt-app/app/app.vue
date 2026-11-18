@@ -26,7 +26,7 @@
         :page-size="2"
         :row-link="rowLink"
       />
-      <BlLightbox v-model:open="viewer" :items="photos" title="Photos">
+      <BlLightbox v-model:open="viewer" :items="photos" title="Photos" zoomable>
         <template #actions="{ item }"><a :href="item.src">Original</a></template>
       </BlLightbox>
     </main>

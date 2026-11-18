@@ -199,6 +199,10 @@ export interface LightboxLabels<T extends LightboxItem = LightboxItem> {
   next: string
   /** Shown when an image fails to load and has neither alt text nor a caption. */
   failed: string
+  zoomIn: string
+  zoomOut: string
+  /** The zoom readout's name, followed by the zoom: "Reset zoom, 150%". */
+  resetZoom: string
   /** Live announcement after navigation; `index` is 1-based. */
   position: (index: number, total: number, item: T) => string
 }

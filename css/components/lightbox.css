@@ -24,9 +24,10 @@
   .bl-lightbox[open] {
     display: grid;
     grid-template:
-      'count title actions close' auto
-      'stage stage stage stage' minmax(0, 1fr)
-      / auto minmax(0, 1fr) fit-content(40%) auto;
+      'count title actions zoom close' auto
+      '. . . . .' auto
+      'stage stage stage stage stage' minmax(0, 1fr)
+      / auto minmax(0, 1fr) fit-content(40%) auto auto;
   }
   @starting-style {
     .bl-lightbox[open] {
@@ -122,11 +123,12 @@
     justify-self: end;
     margin: var(--bl-space-2);
   }
-  /* One line: a long title ends in an ellipsis; the dialog's name keeps the whole text. */
+  /* One line: a long title ends in an ellipsis; the dialog's name keeps the whole text. Spaced
+     by margins, so a bar too crowded for any of it leaves no empty box over its neighbours. */
   .bl-lightbox__title {
     grid-area: title;
     min-inline-size: 0;
-    padding-inline: var(--bl-space-4) var(--bl-space-2);
+    margin-inline: var(--bl-space-4) var(--bl-space-2);
     overflow: hidden;
     font-size: var(--bl-text-body);
     font-weight: 600;
@@ -143,8 +145,24 @@
     min-inline-size: 0;
     margin-block: var(--bl-space-2);
   }
+  .bl-lightbox__zoom {
+    grid-area: zoom;
+    align-self: start;
+    display: flex;
+    align-items: center;
+    gap: var(--bl-space-1);
+    margin: var(--bl-space-2) 0 var(--bl-space-2) var(--bl-space-2);
+  }
+  /* A fixed width, so the buttons beside it stay put as the number changes. */
+  .bl-lightbox__readout {
+    min-inline-size: 7ch;
+    font-family: var(--bl-font-mono);
+    font-size: var(--bl-text-small);
+    font-variant-numeric: tabular-nums;
+  }
   /* Over any image: the buttons carry their own surface. */
   .bl-lightbox .bl-lightbox__close,
+  .bl-lightbox .bl-lightbox__zoom .bl-btn,
   .bl-lightbox .bl-lightbox__nav {
     color: var(--bl-color-ink-1);
     background: var(--bl-color-surface);
@@ -152,6 +170,7 @@
   }
   @media (hover: hover) {
     .bl-lightbox .bl-lightbox__close:hover,
+    .bl-lightbox .bl-lightbox__zoom .bl-btn:hover:not(:disabled),
     .bl-lightbox .bl-lightbox__nav:hover:not(:disabled) {
       background: var(--bl-color-raised);
     }
@@ -171,9 +190,41 @@
     /* Horizontal drags are swipes; vertical pan and the page's pinch-zoom stay the browser's. */
     touch-action: pan-y pinch-zoom;
   }
+  /* Zoomable: BlLightbox handles pinch and pan itself, and the zoomed media stays in the stage. */
+  .bl-lightbox__stage--zoomable {
+    overflow: hidden;
+    touch-action: none;
+  }
   /* Pinch-zoomed (BlLightbox sets it): a one-finger drag pans the zoomed page instead. */
   .bl-lightbox__stage[data-zoomed] {
     touch-action: auto;
+  }
+  /* The media's box, filling the stage's first row; BlLightbox sets its transform. */
+  .bl-lightbox__frame {
+    display: grid;
+    /* Definite tracks, so the media's percentage limits resolve against the frame. */
+    grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+    place-items: center;
+    inline-size: 100%;
+    block-size: 100%;
+    min-inline-size: 0;
+    min-block-size: 0;
+  }
+  /* Buttons, keys and double-tap ease; wheel, pinch and drag follow the hand. */
+  .bl-lightbox__frame[data-easing] {
+    transition: transform var(--bl-duration-fast) var(--bl-ease-out);
+  }
+  /* The transformed frame paints above unpositioned content: the caption and the nav buttons
+     are positioned to stay on top, and the caption gets a surface over zoomed-in media. */
+  /* The caption is the one thing on a zoomable stage that scrolls by touch. */
+  .bl-lightbox__stage--zoomable .bl-lightbox__caption {
+    position: relative;
+    touch-action: pan-y;
+  }
+  .bl-lightbox__stage[data-magnified] .bl-lightbox__caption {
+    background: var(--bl-color-surface);
+    border-radius: var(--bl-radius-chip);
+    box-shadow: 0 0 0 var(--bl-space-2) var(--bl-color-surface);
   }
   .bl-lightbox__media {
     display: block;
@@ -210,6 +261,7 @@
     scrollbar-color: var(--bl-color-control-border) transparent;
   }
   .bl-lightbox__nav {
+    position: relative;
     grid-area: stage;
     align-self: center;
     margin-inline: var(--bl-space-4);
@@ -233,12 +285,27 @@
     padding-inline-end: var(--bl-dialog-gutter, 0px);
   }
   /* Below 40em: the buttons move to a bottom row around the counter, within thumb reach. */
+  /* 40em to 64em: the actions and zoom controls take a row under the title, which keeps the
+     room it needs (also with large text, which media queries do not see). */
+  @media (min-width: 40em) and (max-width: 63.99em) {
+    .bl-lightbox__actions {
+      grid-area: 2 / 1 / 3 / 4;
+      justify-content: flex-start;
+      margin: 0 var(--bl-space-4) var(--bl-space-2);
+    }
+    .bl-lightbox__zoom {
+      grid-area: 2 / 4 / 3 / -1;
+      justify-self: end;
+      margin: 0 var(--bl-space-2) var(--bl-space-2) 0;
+    }
+  }
   @media (max-width: 39.99em) {
     .bl-lightbox[open] {
       grid-template:
         'title title close' auto
         'actions actions actions' auto
         'stage stage stage' minmax(0, 1fr)
+        'zoom zoom zoom' auto
         'prev count next' auto
         / minmax(0, 1fr) auto minmax(0, 1fr);
     }
@@ -246,6 +313,11 @@
     .bl-lightbox__actions {
       justify-content: flex-start;
       margin: 0 var(--bl-space-4) var(--bl-space-2);
+    }
+    /* The zoom controls get a row of their own above the nav buttons. */
+    .bl-lightbox__zoom {
+      justify-self: center;
+      margin: var(--bl-space-2) 0 0;
     }
     .bl-lightbox__count {
       align-self: center;
@@ -270,6 +342,9 @@
     .bl-lightbox__toasts > .bl-toaster {
       inset-block-end: calc(env(safe-area-inset-bottom) + 44px + var(--bl-space-6));
     }
+    .bl-lightbox:has(.bl-lightbox__zoom) .bl-lightbox__toasts > .bl-toaster {
+      inset-block-end: calc(env(safe-area-inset-bottom) + 88px + var(--bl-space-8));
+    }
   }
   @media (prefers-reduced-motion: reduce) {
     .bl-lightbox__stage,
@@ -281,6 +356,9 @@
     html:has(dialog.bl-lightbox) {
       transition-property: none;
     }
+    .bl-lightbox__frame[data-easing] {
+      transition: none;
+    }
     @starting-style {
       .bl-lightbox[open] .bl-lightbox__stage {
         scale: none;
@@ -289,6 +367,7 @@
   }
   @media (forced-colors: active) {
     .bl-lightbox .bl-lightbox__close,
+    .bl-lightbox .bl-lightbox__zoom .bl-btn,
     .bl-lightbox .bl-lightbox__nav,
     .bl-lightbox__message {
       border-color: CanvasText;

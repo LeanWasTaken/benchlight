@@ -196,3 +196,165 @@ test('clicks in the bar never close the lightbox', async ({ page }) => {
   await page.waitForTimeout(300)
   await expect(shown(page, '.bl-lightbox__stage')).toBeVisible()
 })
+
+// Zoom, on the plates demo's inline drawing (2400 x 1600, so 1:1 is well above fit).
+const readout = (page: Page) => shown(page, '.bl-lightbox__readout')
+const drawing = (page: Page) => shown(page, 'svg.bl-lightbox__media')
+const box = async (page: Page, part: string) => (await shown(page, part).boundingBox())!
+
+test('the wheel zooms around the pointer and a drag pans, clamped to the frame', async ({
+  page
+}) => {
+  await openPlates(page, 2)
+  const before = (await drawing(page).boundingBox())!
+  const [fx, fy] = [0.55, 0.45]
+  const [px, py] = [before.x + before.width * fx, before.y + before.height * fy]
+  await page.mouse.move(px, py)
+  await page.mouse.wheel(0, -200)
+  await expect(readout(page)).not.toHaveText('100%')
+  await expect
+    .poll(async () => (await drawing(page).boundingBox())!.width)
+    .toBeGreaterThan(before.width * 1.2)
+  const after = (await drawing(page).boundingBox())!
+  // the same spot of the drawing is still under the pointer, on each axis where the drawing
+  // outgrew the frame (where it did not, it stays centred)
+  const frame = await box(page, '.bl-lightbox__frame')
+  if (after.width > frame.width) expect(Math.abs(after.x + after.width * fx - px)).toBeLessThan(1.5)
+  if (after.height > frame.height)
+    expect(Math.abs(after.y + after.height * fy - py)).toBeLessThan(1.5)
+  // dragged far right and down, the drawing's top-left corner stops at the frame's
+  await page.mouse.down()
+  await page.mouse.move(px + 3000, py + 3000, { steps: 6 })
+  await page.mouse.up()
+  await expect
+    .poll(async () => Math.abs((await drawing(page).boundingBox())!.x - frame.x))
+    .toBeLessThan(1.5)
+  const dragged = (await drawing(page).boundingBox())!
+  if (dragged.height > frame.height) expect(Math.abs(dragged.y - frame.y)).toBeLessThan(1.5)
+  // the click that ended the drag did not close it
+  await expect(shown(page, '.bl-lightbox__stage')).toBeVisible()
+})
+
+test('double-click toggles fit and 1:1, and the next item starts at fit', async ({ page }) => {
+  await openPlates(page, 2)
+  // The svg letterboxes its 3:2 drawing (viewBox, meet) inside its own box.
+  const drawn = async () => {
+    const b = (await drawing(page).boundingBox())!
+    return Math.min(b.width, b.height * 1.5)
+  }
+  const fit = await drawn()
+  const frame = await box(page, '.bl-lightbox__frame')
+  const [cx, cy] = [frame.x + frame.width / 2, frame.y + frame.height / 2]
+  await page.mouse.dblclick(cx, cy)
+  await expect.poll(drawn).toBeCloseTo(2400, -1) // 1:1
+  await page.mouse.dblclick(cx, cy)
+  await expect(readout(page)).toHaveText('100%')
+  await expect.poll(drawn).toBeCloseTo(fit, 0)
+  await page.keyboard.press('+')
+  await expect(readout(page)).toHaveText('125%')
+  await page.keyboard.press('Home') // Home and End navigate while zoomed
+  await expect(shown(page, '.bl-lightbox__title')).toHaveText(PLATE_1)
+  await expect(readout(page)).toHaveText('100%')
+  await expect(shown(page, '.bl-lightbox__frame')).not.toHaveAttribute('style', /scale/)
+})
+
+test('lightbox zoomed in with its controls', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name === 'mobile-dark', 'three projects are enough')
+  await openPlates(page, 2)
+  for (let i = 0; i < 4; i++) await page.keyboard.press('+')
+  await expect(readout(page)).toHaveText('244%')
+  await expect(page.getByRole('button', { name: 'Reset zoom, 244%' })).toBeVisible()
+  await page.evaluate(() => document.fonts.ready)
+  await expect(page).toHaveScreenshot('lightbox-zoomed.png')
+})
+
+test.describe('zoom with motion', () => {
+  test.use({ reducedMotion: 'no-preference' })
+
+  test('fast zoom-out steps mid-transition still clamp the pan to the frame', async ({
+    page
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== 'desktop-light', 'one project is enough')
+    await openPlates(page, 2)
+    // once the entry has scaled the stage up to full size, the frame's rect is its layout box
+    await expect
+      .poll(() => shown(page, '.bl-lightbox__stage').evaluate((el) => getComputedStyle(el).scale))
+      .toBe('none')
+    const frame = await box(page, '.bl-lightbox__frame')
+    for (let i = 0; i < 8; i++) await page.keyboard.press('+')
+    await expect(readout(page)).toHaveText('596%')
+    await page.waitForTimeout(400) // the eased steps end
+    // dragged far right, the drawing's left edge stops at the frame's
+    const [x, y] = [frame.x + frame.width / 2, frame.y + frame.height / 2]
+    await page.mouse.move(x, y)
+    await page.mouse.down()
+    await page.mouse.move(x + 4000, y, { steps: 40 })
+    await page.mouse.up()
+    const gap = async () => Math.abs((await drawing(page).boundingBox())!.x - frame.x)
+    await expect.poll(gap).toBeLessThan(1.5)
+    await page.waitForTimeout(400)
+    // three quick steps out, each starting while the last one still eases
+    for (let i = 0; i < 3; i++) await page.keyboard.press('-')
+    await expect(readout(page)).toHaveText('305%')
+    // once the eased steps have finished, the edge is at the frame (one sample, not a poll that
+    // could catch it passing by mid-transition)
+    await shown(page, '.bl-lightbox__frame').evaluate((el) =>
+      Promise.all(el.getAnimations().map((a) => a.finished))
+    )
+    expect(await gap()).toBeLessThan(1.5)
+  })
+})
+
+test.describe('touch zoom', () => {
+  test.use({ hasTouch: true })
+
+  test('a long caption on a zoomable stage still scrolls by touch', async ({ page }, testInfo) => {
+    test.skip(!testInfo.project.name.startsWith('mobile'), 'touch is a mobile concern')
+    await page.goto('/stress.html?case=lightbox-bar')
+    await page.locator('[data-box] .bl-btn').click()
+    const caption = page.locator('.bl-lightbox[open] .bl-lightbox__caption')
+    await expect(caption).toBeVisible()
+    expect(await caption.evaluate((el) => el.scrollHeight > el.clientHeight)).toBe(true)
+    const b = (await caption.boundingBox())!
+    const cdp = await page.context().newCDPSession(page)
+    const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd', y?: number) =>
+      cdp.send('Input.dispatchTouchEvent', {
+        type,
+        touchPoints: y === undefined ? [] : [{ x: b.x + b.width / 2, y }]
+      })
+    await touch('touchStart', b.y + b.height - 5)
+    for (let step = 1; step <= 6; step++) await touch('touchMove', b.y + b.height - 5 - step * 12)
+    await touch('touchEnd')
+    await expect.poll(() => caption.evaluate((el) => el.scrollTop)).toBeGreaterThan(0)
+  })
+
+  test('two fingers pinch the drawing in, and the stage blocks page zoom', async ({
+    page
+  }, testInfo) => {
+    test.skip(!testInfo.project.name.startsWith('mobile'), 'touch is a mobile concern')
+    await openPlates(page, 2)
+    const stage = shown(page, '.bl-lightbox__stage')
+    expect(await stage.evaluate((el) => getComputedStyle(el).touchAction)).toBe('none')
+    const b = (await drawing(page).boundingBox())!
+    const [cx, cy] = [b.x + b.width / 2, b.y + b.height / 2]
+    const cdp = await page.context().newCDPSession(page)
+    const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd', spread?: number) =>
+      cdp.send('Input.dispatchTouchEvent', {
+        type,
+        touchPoints:
+          spread === undefined
+            ? []
+            : [
+                { x: cx - spread, y: cy, id: 1 },
+                { x: cx + spread, y: cy, id: 2 }
+              ]
+      })
+    await touch('touchStart', 20)
+    for (let s = 30; s <= 80; s += 10) await touch('touchMove', s)
+    await touch('touchEnd')
+    await expect(readout(page)).toHaveText('400%')
+    // a pinch is not a swipe or a close
+    await expect(shown(page, '.bl-lightbox__title')).toHaveText('Plate 3: survey grid')
+    expect(await page.evaluate(() => visualViewport?.scale ?? 1)).toBe(1)
+  })
+})

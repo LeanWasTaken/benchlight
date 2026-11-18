@@ -917,3 +917,707 @@ describe('BlLightbox bar, items and media contract', () => {
     expect(indexes(w)).toEqual([2, 1, 2])
   })
 })
+
+// Zoom: a fake layout. The frame (the media box) is 800 x 600 with its centre at (400, 300) on
+// screen; its first element (the media) is `content` at zoom 1, centred. Both rects follow the
+// frame's transform, as in a browser.
+const BIG = { src: 'big.jpg', alt: 'Big', width: 1600, height: 2400 } // fit 0.25: 1:1 is 4x, max 16
+const SMALL = { src: 'small.jpg', alt: 'Small', width: 800, height: 600 } // fit 1: max 8
+type Api = {
+  next: () => void
+  go: (i: number) => void
+  zoomTo: (z: number) => void
+  resetZoom: () => void
+}
+const api = (w: VueWrapper) => w.vm as unknown as Api
+const frameOf = (w: VueWrapper) => w.get<HTMLElement>('.bl-lightbox__frame').element
+function transformOf(el: HTMLElement) {
+  const m = /translate\((\S+)px, (\S+)px\) scale\((\S+)\)/.exec(el.style.transform)
+  return m ? { x: Number(m[1]), y: Number(m[2]), zoom: Number(m[3]) } : { x: 0, y: 0, zoom: 1 }
+}
+const zooms = (w: VueWrapper) => (w.emitted('update:zoom') ?? []).map((e) => e[0])
+// Layout (offset and client sizes) ignores transforms; painted rects follow the frame's
+// transform, or `paint.lag` when set, as while a CSS transition is still running.
+const paint: { lag: ReturnType<typeof transformOf> | null } = { lag: null }
+function fakeLayout(content = { width: 800, height: 400 }) {
+  paint.lag = null
+  const size = (el: Element, axis: 'width' | 'height') => {
+    if (el.classList.contains('bl-lightbox__frame')) return axis === 'width' ? 800 : 600
+    if (el.parentElement?.classList.contains('bl-lightbox__frame')) return content[axis]
+    return 0
+  }
+  for (const [prop, axis] of [
+    ['clientWidth', 'width'],
+    ['clientHeight', 'height'],
+    ['offsetWidth', 'width'],
+    ['offsetHeight', 'height']
+  ] as const)
+    vi.spyOn(HTMLElement.prototype, prop, 'get').mockImplementation(function (this: HTMLElement) {
+      return size(this, axis)
+    })
+  vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (this: Element) {
+    const frame = this.closest<HTMLElement>('.bl-lightbox__frame')
+    if (!frame || (this !== frame && this.parentElement !== frame)) return new DOMRect()
+    const t = paint.lag ?? transformOf(frame)
+    const [w, h] = this === frame ? [800, 600] : [content.width, content.height]
+    return DOMRect.fromRect({
+      x: 400 + t.x - (w * t.zoom) / 2,
+      y: 300 + t.y - (h * t.zoom) / 2,
+      width: w * t.zoom,
+      height: h * t.zoom
+    })
+  })
+}
+async function zoomable(props: Record<string, unknown> = {}, slots: Slots = {}) {
+  const w = await opened({ zoomable: true, items: [BIG, SMALL], ...props }, slots)
+  return w
+}
+function wheel(
+  target: EventTarget,
+  init: { dx?: number; dy?: number; mode?: number; x?: number; y?: number; ctrl?: boolean }
+) {
+  const ev = new WheelEvent('wheel', {
+    bubbles: true,
+    cancelable: true,
+    deltaX: init.dx ?? 0,
+    deltaY: init.dy ?? 0,
+    deltaMode: init.mode ?? 0
+  })
+  Object.defineProperties(ev, {
+    clientX: { value: init.x ?? 400 },
+    clientY: { value: init.y ?? 300 },
+    ctrlKey: { value: init.ctrl ?? false }
+  })
+  target.dispatchEvent(ev)
+  return ev
+}
+function press(target: EventTarget, k: string, init: KeyboardEventInit = {}) {
+  const ev = new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true, ...init })
+  target.dispatchEvent(ev)
+  return ev
+}
+function mouse(target: EventTarget, type: string, x: number, y = 300, id = 1) {
+  const ev = new PointerEvent(type, {
+    bubbles: true,
+    cancelable: true,
+    clientX: x,
+    clientY: y,
+    pointerId: id,
+    isPrimary: true,
+    pointerType: 'mouse',
+    button: 0
+  })
+  target.dispatchEvent(ev)
+  return ev
+}
+
+describe('BlLightbox zoom', () => {
+  it('without zoomable: no frame, no controls, and zoom input is left alone', async () => {
+    const w = await opened({ items: [BIG, SMALL] })
+    expect(w.find('.bl-lightbox__frame').exists()).toBe(false)
+    expect(w.find('.bl-lightbox__zoom').exists()).toBe(false)
+    expect(w.get('.bl-lightbox__stage').classes()).not.toContain('bl-lightbox__stage--zoomable')
+    expect(w.find('.bl-lightbox__stage > .bl-lightbox__media').exists()).toBe(true)
+    expect(wheel(w.get('.bl-lightbox__stage').element, { dy: -100 }).defaultPrevented).toBe(false)
+    expect(press(dialogEl(w), '+').defaultPrevented).toBe(false)
+    api(w).zoomTo(3)
+    await nextTick()
+    expect(zooms(w)).toEqual([])
+  })
+
+  it('wraps the media in a frame and resets v-model:zoom on item change, close and open', async () => {
+    fakeLayout()
+    const w = await zoomable()
+    expect(w.get('.bl-lightbox__stage').classes()).toContain('bl-lightbox__stage--zoomable')
+    expect(w.find('.bl-lightbox__frame > .bl-lightbox__media').exists()).toBe(true)
+    api(w).zoomTo(2)
+    await nextTick()
+    expect(zooms(w)).toEqual([2])
+    expect(transformOf(frameOf(w)).zoom).toBe(2)
+    expect(w.get('.bl-lightbox__stage').attributes('data-magnified')).toBeDefined()
+    api(w).next()
+    await nextTick()
+    expect(zooms(w)).toEqual([2, 1])
+    expect(frameOf(w).style.transform).toBe('')
+    expect(w.get('.bl-lightbox__stage').attributes('data-magnified')).toBeUndefined()
+    api(w).zoomTo(3)
+    await w.setProps({ open: false })
+    expect(zooms(w)).toEqual([2, 1, 3, 1])
+    await w.setProps({ open: true, zoom: 1 })
+    expect(frameOf(w).style.transform).toBe('')
+  })
+
+  it('follows a bound zoom, clamped into 1 to maxZoom', async () => {
+    fakeLayout()
+    const w = await zoomable({ zoom: 1 })
+    await w.setProps({ zoom: 3 })
+    expect(transformOf(frameOf(w)).zoom).toBe(3)
+    await w.setProps({ zoom: 100 })
+    await nextTick()
+    expect(transformOf(frameOf(w)).zoom).toBe(16)
+    expect(zooms(w)).toEqual([16])
+    await w.setProps({ zoom: 0.2 })
+    await nextTick()
+    expect(frameOf(w).style.transform).toBe('')
+    expect(zooms(w)).toEqual([16, 1])
+    const capped = await zoomable({ maxZoom: 3 })
+    api(capped).zoomTo(10)
+    await nextTick()
+    expect(zooms(capped)).toEqual([3])
+  })
+
+  it('+, = and - step by 1.25, 0 resets, with a single item and Shift, never with Ctrl', async () => {
+    fakeLayout()
+    const w = await zoomable({ items: [BIG] })
+    const d = dialogEl(w)
+    expect(press(d, '+', { shiftKey: true }).defaultPrevented).toBe(true)
+    press(d, '=')
+    press(d, '-')
+    expect(press(d, '0').defaultPrevented).toBe(true)
+    expect(press(d, '+', { ctrlKey: true }).defaultPrevented).toBe(false)
+    expect(press(d, '-', { metaKey: true }).defaultPrevented).toBe(false)
+    await nextTick()
+    expect(zooms(w)).toEqual([1.25, 1.5625, 1.25, 1])
+  })
+
+  it('arrow keys pan by a tenth of the stage while zoomed; Home and End still navigate', async () => {
+    fakeLayout()
+    const w = await zoomable()
+    const d = dialogEl(w)
+    api(w).zoomTo(4) // 3200 x 1600 in 800 x 600: 1200 and 500 each way
+    await nextTick()
+    press(d, 'ArrowRight')
+    press(d, 'ArrowRight')
+    press(d, 'ArrowDown')
+    await nextTick()
+    expect(transformOf(frameOf(w))).toEqual({ x: -160, y: -60, zoom: 4 })
+    press(d, 'ArrowLeft')
+    press(d, 'ArrowUp')
+    await nextTick()
+    expect(transformOf(frameOf(w))).toEqual({ x: -80, y: 0, zoom: 4 })
+    expect(indexes(w)).toEqual([])
+    press(d, 'End')
+    await nextTick()
+    expect(indexes(w)).toEqual([1])
+    expect(zooms(w)).toEqual([4, 1])
+    press(d, 'Home')
+    expect(indexes(w)).toEqual([1, 0])
+    press(d, 'ArrowRight') // at fit the arrows navigate again
+    expect(indexes(w)).toEqual([1, 0, 1])
+  })
+
+  it('the wheel zooms around the pointer, with deltaMode and ctrl (pinch) normalised', async () => {
+    fakeLayout()
+    const w = await zoomable()
+    const stage = w.get('.bl-lightbox__stage').element
+    const zoomOf = () => transformOf(frameOf(w)).zoom
+    // A point 200px right of the frame centre stays where it is.
+    expect(wheel(stage, { dy: -100, x: 600 }).defaultPrevented).toBe(true)
+    await nextTick()
+    const s = transformOf(frameOf(w))
+    expect(s.zoom).toBeCloseTo(Math.exp(0.2), 6)
+    expect(s.x + s.zoom * 200).toBeCloseTo(200, 6)
+    const cases: [Parameters<typeof wheel>[1], number][] = [
+      [{ dy: -3, mode: 1 }, Math.exp(48 * 0.002)], // lines x16
+      [{ dy: -1, mode: 2 }, 2], // a page is 600px: capped at x2 per event
+      [{ dy: -10, ctrl: true }, Math.exp(0.1)], // trackpad pinch
+      [{ dy: 100 }, 1] // out of fit: stays at 1
+    ]
+    for (const [init, want] of cases) {
+      api(w).resetZoom()
+      await nextTick()
+      expect(wheel(stage, init).defaultPrevented).toBe(true)
+      await nextTick()
+      expect(zoomOf()).toBeCloseTo(want, 6)
+    }
+  })
+
+  it('a mostly horizontal wheel pans while zoomed and is left alone at fit', async () => {
+    fakeLayout()
+    const w = await zoomable()
+    const stage = w.get('.bl-lightbox__stage').element
+    expect(wheel(stage, { dx: 50, dy: 5 }).defaultPrevented).toBe(false)
+    await nextTick()
+    expect(frameOf(w).style.transform).toBe('')
+    api(w).zoomTo(2) // 1600 x 800: 400 and 100 each way
+    await nextTick()
+    expect(wheel(stage, { dx: 50, dy: 10 }).defaultPrevented).toBe(true)
+    await nextTick()
+    expect(transformOf(frameOf(w))).toEqual({ x: -50, y: -10, zoom: 2 })
+    expect(wheel(stage, { dx: -900, dy: 0 }).defaultPrevented).toBe(true)
+    await nextTick()
+    expect(transformOf(frameOf(w)).x).toBe(400)
+    expect(indexes(w)).toEqual([])
+  })
+
+  it('two pointers pinch around their midpoint; lifting one continues as a pan', async () => {
+    fakeLayout()
+    const w = await zoomable()
+    const stage = w.get('.bl-lightbox__stage').element
+    pointer(stage, 'pointerdown', 300, 300, 1)
+    pointer(stage, 'pointerdown', 500, 300, 2)
+    pointer(stage, 'pointermove', 700, 300, 2) // twice as far apart, midpoint 100px right
+    await nextTick()
+    expect(transformOf(frameOf(w))).toEqual({ x: 100, y: 0, zoom: 2 })
+    pointer(stage, 'pointerup', 700, 300, 2)
+    await nextTick()
+    expect(transformOf(frameOf(w))).toEqual({ x: 100, y: 0, zoom: 2 })
+    pointer(stage, 'pointermove', 250, 340, 1)
+    await nextTick()
+    expect(transformOf(frameOf(w))).toEqual({ x: 50, y: 40, zoom: 2 })
+    pointer(stage, 'pointerup', 250, 340, 1)
+    expect(indexes(w)).toEqual([])
+    expect(zooms(w)).toEqual([2])
+  })
+
+  it('a pinch that starts as a one-finger pan picks up without a jump', async () => {
+    fakeLayout()
+    const w = await zoomable()
+    api(w).zoomTo(2)
+    await nextTick()
+    const stage = w.get('.bl-lightbox__stage').element
+    pointer(stage, 'pointerdown', 400, 300, 1)
+    pointer(stage, 'pointermove', 380, 300, 1)
+    await nextTick()
+    expect(transformOf(frameOf(w))).toEqual({ x: -20, y: 0, zoom: 2 })
+    pointer(stage, 'pointerdown', 580, 300, 2)
+    await nextTick()
+    expect(transformOf(frameOf(w))).toEqual({ x: -20, y: 0, zoom: 2 })
+    pointer(stage, 'pointermove', 780, 300, 2) // distance 200 -> 400
+    await nextTick()
+    // the content under the old midpoint (480) is now under the new one (580)
+    const s = transformOf(frameOf(w))
+    expect(s.zoom).toBe(4)
+    expect(s.x + 4 * ((80 + 20) / 2)).toBeCloseTo(180, 6)
+  })
+
+  it('swipes navigate at fit only; a drag while zoomed pans', async () => {
+    fakeLayout()
+    const w = await zoomable()
+    const stage = w.get('.bl-lightbox__stage').element
+    api(w).zoomTo(2)
+    await nextTick()
+    swipe(stage, -200)
+    await nextTick()
+    expect(indexes(w)).toEqual([])
+    expect(transformOf(frameOf(w))).toEqual({ x: -200, y: 0, zoom: 2 })
+    api(w).resetZoom()
+    await nextTick()
+    swipe(stage, -200)
+    expect(indexes(w)).toEqual([1])
+  })
+
+  it('a drag suppresses the click that ends it: no slotted link, no close', async () => {
+    fakeLayout()
+    const onLink = vi.fn()
+    const w = await zoomable(
+      {},
+      { default: () => h('a', { class: 'link', href: '#x', onClick: onLink }, 'Map') }
+    )
+    api(w).zoomTo(2)
+    await nextTick()
+    const link = w.get('.link').element
+    const stage = w.get('.bl-lightbox__stage').element
+    mouse(link, 'pointerdown', 400)
+    mouse(link, 'pointermove', 350)
+    mouse(link, 'pointerup', 350)
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 })
+    link.dispatchEvent(click)
+    expect(onLink).not.toHaveBeenCalled()
+    expect(click.defaultPrevented).toBe(true)
+    // pressed on the frame around the media, dragged, released and clicked on the stage
+    mouse(frameOf(w), 'pointerdown', 50)
+    mouse(stage, 'pointermove', 100)
+    mouse(stage, 'pointerup', 100)
+    stage.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }))
+    expect(dialogEl(w).open).toBe(true)
+    // a plain click still works, and a plain press on the frame around the media still closes
+    mouse(link, 'pointerdown', 400)
+    mouse(link, 'pointerup', 400)
+    link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+    expect(onLink).toHaveBeenCalledTimes(1)
+    mouse(frameOf(w), 'pointerdown', 50)
+    mouse(frameOf(w), 'pointerup', 50)
+    frameOf(w).dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+    expect(dialogEl(w).open).toBe(false)
+  })
+
+  it('double-click or double-tap toggles fit and 1:1, or 2.5x when 1:1 is near fit', async () => {
+    fakeLayout()
+    vi.useFakeTimers()
+    try {
+      const w = await zoomable()
+      const tap = (x: number, y = 300) => {
+        const media = w.get('.bl-lightbox__media').element
+        pointer(media, 'pointerdown', x, y)
+        pointer(media, 'pointerup', x, y)
+      }
+      tap(600)
+      vi.advanceTimersByTime(200)
+      tap(610, 310)
+      await nextTick()
+      const s = transformOf(frameOf(w))
+      expect(s.zoom).toBe(4) // 1:1 of a 1600px image shown at a quarter
+      // the content under the second tap (210, 10 from the centre) stays under it
+      expect(s.x + 4 * 210).toBeCloseTo(210, 6)
+      expect(s.y + 4 * 10).toBeCloseTo(10, 6)
+      tap(500)
+      vi.advanceTimersByTime(100)
+      tap(500)
+      await nextTick()
+      expect(frameOf(w).style.transform).toBe('')
+      // too slow, then too far apart
+      tap(500)
+      vi.advanceTimersByTime(301)
+      tap(500)
+      vi.advanceTimersByTime(400)
+      tap(500)
+      tap(530)
+      await nextTick()
+      expect(frameOf(w).style.transform).toBe('')
+      api(w).next()
+      await nextTick()
+      tap(400)
+      tap(400)
+      await nextTick()
+      expect(transformOf(frameOf(w)).zoom).toBe(2.5)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('controls: out and in disabled at the limits, the readout names and resets the zoom', async () => {
+    fakeLayout()
+    const w = await zoomable({ labels: { zoomIn: 'Größer' } })
+    const [out, readout, inn] = w.findAll<HTMLButtonElement>('.bl-lightbox__zoom button')
+    expect(w.find('.bl-lightbox__bar .bl-lightbox__zoom').exists()).toBe(true)
+    expect(out!.attributes('aria-label')).toBe('Zoom out')
+    expect(inn!.attributes('aria-label')).toBe('Größer')
+    expect(out!.element.disabled).toBe(true)
+    expect(readout!.text()).toBe('100%')
+    expect(readout!.attributes('aria-label')).toBe('Reset zoom, 100%')
+    await inn!.trigger('click')
+    expect(zooms(w)).toEqual([1.25])
+    expect(readout!.text()).toBe('125%')
+    expect(out!.element.disabled).toBe(false)
+    api(w).zoomTo(14)
+    await nextTick()
+    inn!.element.focus()
+    await inn!.trigger('click')
+    await nextTick()
+    expect(zooms(w)).toEqual([1.25, 14, 16])
+    expect(inn!.element.disabled).toBe(true)
+    expect(document.activeElement).toBe(out!.element) // not dropped to <body>
+    await readout!.trigger('click')
+    expect(zooms(w)).toEqual([1.25, 14, 16, 1])
+    const hidden = await zoomable({ zoomControls: false })
+    expect(hidden.find('.bl-lightbox__zoom').exists()).toBe(false)
+  })
+
+  it('takes the natural size from loaded(size) and re-fits later without resetting', async () => {
+    fakeLayout()
+    let scope: Media | undefined
+    const w = await zoomable(
+      { items: [{ alt: 'Drawing' }] },
+      {
+        default: (p: Scope) => {
+          scope = p as Media
+          return h('svg', { class: 'drawing' })
+        }
+      }
+    )
+    api(w).zoomTo(100)
+    await nextTick()
+    expect(zooms(w)).toEqual([8]) // no natural size known
+    scope!.loaded({ width: 4000, height: 3000 }) // fit 0.2: max 20
+    await nextTick()
+    api(w).zoomTo(100)
+    await nextTick()
+    expect(zooms(w)).toEqual([8, 20])
+    scope!.loaded({ width: 1600, height: 1200 }) // fit 0.5: max 8, so 20 is clamped
+    await nextTick()
+    expect(zooms(w)).toEqual([8, 20, 8])
+    api(w).zoomTo(3)
+    scope!.loaded({ width: 1600, height: 1200 })
+    await nextTick()
+    expect(zooms(w)).toEqual([8, 20, 8, 3])
+  })
+
+  it('reads the natural size from a slotted svg viewBox', async () => {
+    fakeLayout()
+    const w = await zoomable(
+      { items: [{ alt: 'Drawing' }] },
+      { default: () => h('svg', { viewBox: '0 0 4000 3000' }) }
+    )
+    api(w).zoomTo(100)
+    await nextTick()
+    expect(zooms(w)).toEqual([20])
+  })
+
+  it("zooms on Safari's trackpad gesture events, leaving touch pinches to the pointers", async () => {
+    fakeLayout()
+    const w = await zoomable()
+    const stage = w.get('.bl-lightbox__stage').element
+    const gesture = (type: string, scale = 1) => {
+      const ev = Object.assign(new Event(type, { bubbles: true, cancelable: true }), {
+        scale,
+        clientX: 600,
+        clientY: 300
+      })
+      stage.dispatchEvent(ev)
+      return ev
+    }
+    expect(gesture('gesturestart').defaultPrevented).toBe(true)
+    gesture('gesturechange', 2)
+    await nextTick()
+    expect(transformOf(frameOf(w))).toEqual({ x: -200, y: 0, zoom: 2 })
+    gesture('gesturechange', 3)
+    await nextTick()
+    expect(transformOf(frameOf(w))).toEqual({ x: -400, y: 0, zoom: 3 })
+    gesture('gestureend')
+    api(w).resetZoom()
+    pointer(stage, 'pointerdown', 300, 300, 1)
+    pointer(stage, 'pointerdown', 500, 300, 2)
+    expect(gesture('gesturestart').defaultPrevented).toBe(false)
+    gesture('gesturechange', 2)
+    await nextTick()
+    expect(frameOf(w).style.transform).toBe('')
+  })
+
+  it('measures layout, not a painted rect a running transition still holds', async () => {
+    fakeLayout()
+    const w = await zoomable()
+    api(w).zoomTo(4) // 3200 wide: 1200 each way
+    await nextTick()
+    wheel(w.get('.bl-lightbox__stage').element, { dx: -5000, dy: 0 })
+    await nextTick()
+    expect(transformOf(frameOf(w)).x).toBe(1200)
+    paint.lag = transformOf(frameOf(w)) // the eased steps below have not painted yet
+    press(dialogEl(w), '-')
+    await nextTick()
+    expect(transformOf(frameOf(w))).toEqual({ x: 880, y: 0, zoom: 3.2 })
+    press(dialogEl(w), '-')
+    await nextTick()
+    expect(transformOf(frameOf(w))).toEqual({ x: 624, y: 0, zoom: 2.56 })
+    // a wheel mid-transition anchors on the layout, not on the stale paint
+    wheel(w.get('.bl-lightbox__stage').element, { dy: -100, ctrl: true, x: 500 })
+    await nextTick()
+    const s = transformOf(frameOf(w))
+    expect(s.zoom).toBeCloseTo(5.12, 6)
+    expect(s.x).toBeCloseTo(100 - 2 * (100 - 624), 6)
+  })
+
+  it('reports the clamped zoom back when a bound value clamps to the current one', async () => {
+    fakeLayout()
+    const w = await zoomable({ zoom: 1 })
+    await w.setProps({ zoom: 0.5 })
+    await nextTick()
+    expect(zooms(w)).toEqual([1])
+    await w.setProps({ zoom: 16 })
+    await w.setProps({ zoom: 100 })
+    await nextTick()
+    expect(zooms(w)).toEqual([1, 16])
+    await w.setProps({ zoom: Number.NaN })
+    await nextTick()
+    expect(zooms(w)).toEqual([1, 16, 16])
+    const off = await opened({ items: [BIG], zoom: 1 })
+    await off.setProps({ zoom: 3 })
+    await nextTick()
+    expect(zooms(off)).toEqual([1])
+  })
+
+  it('never drops a keyboard click, or a click a task after a drag', async () => {
+    fakeLayout()
+    const onLink = vi.fn()
+    const w = await zoomable(
+      {},
+      { default: () => h('a', { class: 'link', href: '#x', onClick: onLink }, 'Map') }
+    )
+    api(w).zoomTo(2)
+    await nextTick()
+    const link = w.get('.link').element
+    // a touch drag: no click follows it
+    pointer(link, 'pointerdown', 400)
+    pointer(link, 'pointermove', 350)
+    pointer(link, 'pointerup', 350)
+    // Enter on the focused link (detail 0) right away still activates it
+    link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 0 }))
+    expect(onLink).toHaveBeenCalledTimes(1)
+    // a mouse drag, then a click a task later, also gets through
+    mouse(link, 'pointerdown', 400)
+    mouse(link, 'pointermove', 350)
+    mouse(link, 'pointerup', 350)
+    await new Promise((resolve) => setTimeout(resolve)) // the next task
+    link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }))
+    expect(onLink).toHaveBeenCalledTimes(2)
+  })
+
+  it('leaves Safari gestures over interactive content alone, and ctrl+wheel during one', async () => {
+    fakeLayout()
+    const w = await zoomable(
+      {},
+      { default: () => h('div', { class: 'map', 'data-bl-no-swipe': '' }) }
+    )
+    const gesture = (target: EventTarget, type: string, scale = 1) => {
+      const ev = Object.assign(new Event(type, { bubbles: true, cancelable: true }), {
+        scale,
+        clientX: 400,
+        clientY: 300
+      })
+      target.dispatchEvent(ev)
+      return ev
+    }
+    const map = w.get('.map').element
+    expect(gesture(map, 'gesturestart').defaultPrevented).toBe(false)
+    gesture(map, 'gesturechange', 2)
+    await nextTick()
+    expect(zooms(w)).toEqual([])
+    const stage = w.get('.bl-lightbox__stage').element
+    gesture(stage, 'gesturestart')
+    gesture(stage, 'gesturechange', 2)
+    // WebKit may also send ctrl+wheel for the same pinch: it must not zoom twice
+    expect(wheel(stage, { dy: -50, ctrl: true }).defaultPrevented).toBe(true)
+    await nextTick()
+    expect(zooms(w)).toEqual([2])
+    gesture(stage, 'gestureend')
+    wheel(stage, { dy: -10, ctrl: true })
+    await nextTick()
+    expect(zooms(w)).toHaveLength(2)
+  })
+
+  it('does not zoom a failed item: keys pass, controls are disabled at 100%', async () => {
+    fakeLayout()
+    const w = await zoomable()
+    api(w).zoomTo(2)
+    await nextTick()
+    img(w).element.dispatchEvent(new Event('error'))
+    await nextTick()
+    expect(zooms(w)).toEqual([2, 1])
+    expect(press(dialogEl(w), '+').defaultPrevented).toBe(false)
+    api(w).zoomTo(3)
+    await nextTick()
+    expect(zooms(w)).toEqual([2, 1])
+    const buttons = w.findAll<HTMLButtonElement>('.bl-lightbox__zoom button')
+    expect(buttons.map((b) => b.element.disabled)).toEqual([true, true, true])
+    expect(w.get('.bl-lightbox__readout').text()).toBe('100%')
+  })
+
+  it("drops a touch double-tap's click that arrives in a later task, but not after 350ms", async () => {
+    fakeLayout()
+    const onLink = vi.fn()
+    const w = await zoomable(
+      {},
+      { default: () => h('a', { class: 'link', href: '#x', onClick: onLink }, 'Map') }
+    )
+    const link = w.get('.link').element
+    const later = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+    const doubleTap = () => {
+      for (let i = 0; i < 2; i++) {
+        pointer(link, 'pointerdown', 400)
+        pointer(link, 'pointerup', 400)
+      }
+    }
+    doubleTap()
+    await nextTick()
+    expect(zooms(w)).toEqual([4])
+    await later(20) // Chromium sends a tap's click as its own task (GestureTap)
+    link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }))
+    expect(onLink).not.toHaveBeenCalled()
+    doubleTap()
+    await later(20)
+    link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 0 }))
+    expect(onLink).toHaveBeenCalledTimes(1) // never a keyboard or AT activation
+    doubleTap()
+    await later(400) // no click came: the flag has expired
+    link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }))
+    expect(onLink).toHaveBeenCalledTimes(2)
+  })
+
+  it('moves focus to the dialog when a focused zoom control is disabled with no enabled partner', async () => {
+    fakeLayout()
+    const w = await zoomable()
+    api(w).next()
+    await nextTick()
+    const readout = w.get<HTMLButtonElement>('.bl-lightbox__readout').element
+    readout.focus()
+    img(w).element.dispatchEvent(new Event('error')) // the item shown fails: no zoom control left
+    await nextTick()
+    await nextTick()
+    expect(readout.disabled).toBe(true)
+    expect(document.activeElement).toBe(dialogEl(w))
+  })
+
+  it('leaves pointers on the caption alone: no double-click zoom, no pan', async () => {
+    fakeLayout()
+    const w = await zoomable({ items: [{ ...BIG, caption: 'Big' }, SMALL] })
+    const caption = w.get('.bl-lightbox__caption').element
+    for (let i = 0; i < 2; i++) {
+      pointer(caption, 'pointerdown', 400, 580)
+      pointer(caption, 'pointerup', 400, 580)
+    }
+    await nextTick()
+    expect(zooms(w)).toEqual([])
+    api(w).zoomTo(2)
+    await nextTick()
+    pointer(caption, 'pointerdown', 400, 580)
+    pointer(caption, 'pointermove', 300, 580)
+    await nextTick()
+    expect(transformOf(frameOf(w))).toEqual({ x: 0, y: 0, zoom: 2 })
+  })
+
+  it('adds or removes its blur listener when zoomable changes while open', async () => {
+    fakeLayout()
+    const add = vi.spyOn(window, 'addEventListener')
+    const remove = vi.spyOn(window, 'removeEventListener')
+    const blurs = (spy: typeof add) => spy.mock.calls.filter((c) => c[0] === 'blur')
+    const w = await opened({ items: [BIG] })
+    expect(blurs(add)).toHaveLength(0)
+    await w.setProps({ zoomable: true })
+    expect(blurs(add)).toHaveLength(1)
+    await w.setProps({ zoomable: false })
+    expect(blurs(remove).map((c) => c[1])).toContain(blurs(add)[0]![1])
+  })
+
+  it('cancel, lost capture and window blur end a gesture', async () => {
+    fakeLayout()
+    const w = await zoomable()
+    api(w).zoomTo(2)
+    await nextTick()
+    const stage = w.get('.bl-lightbox__stage').element
+    const at = () => transformOf(frameOf(w))
+    for (const end of [
+      () => pointer(stage, 'pointercancel', 380),
+      () => pointer(stage, 'lostpointercapture', 380),
+      () => window.dispatchEvent(new Event('blur'))
+    ]) {
+      api(w).zoomTo(2)
+      pointer(stage, 'pointerdown', 400)
+      pointer(stage, 'pointermove', 380)
+      await nextTick()
+      const before = at()
+      end()
+      pointer(stage, 'pointermove', 300)
+      await nextTick()
+      expect(at()).toEqual(before)
+      pointer(stage, 'pointerup', 300)
+    }
+  })
+
+  it('adds its window listener only while open and removes it on close and unmount', async () => {
+    fakeLayout()
+    const add = vi.spyOn(window, 'addEventListener')
+    const remove = vi.spyOn(window, 'removeEventListener')
+    const blurs = (spy: typeof add) => spy.mock.calls.filter((c) => c[0] === 'blur')
+    const w = lightbox({ zoomable: true, items: [BIG] })
+    expect(blurs(add)).toHaveLength(0)
+    await w.setProps({ open: true })
+    expect(blurs(add)).toHaveLength(1)
+    await w.setProps({ open: false })
+    expect(blurs(remove)).toHaveLength(1)
+    expect(blurs(remove)[0]![1]).toBe(blurs(add)[0]![1])
+    await w.setProps({ open: true })
+    w.unmount()
+    wrappers = wrappers.filter((x) => x !== w)
+    expect(blurs(remove)).toHaveLength(2)
+  })
+})

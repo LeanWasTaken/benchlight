@@ -752,17 +752,19 @@ function show(i: number) {
 - Props: `items` (`readonly T[]` with `T extends LightboxItem`: optional `src`, `alt`, `caption`,
   `srcset`, `sizes` (default `'100vw'`), `width`, `height` and `key`; the slots receive your own
   item type), `loop` (default `false`), `title`, `preload` (default `1`), `announce` (default
-  `'position'`) and `labels`: `dialog`, `close`, `previous`, `next`, `failed` (defaults
-  `'Image viewer'`, `'Close'`, `'Previous image'`, `'Next image'`,
-  `'The image could not be loaded.'`) and `position(i, n, item)`, the announcement with `i`
+  `'position'`), `zoomable` (default `false`), `maxZoom`, `zoomControls` (default `true`) and
+  `labels`: `dialog`, `close`, `previous`, `next`, `failed`, `zoomIn`, `zoomOut`, `resetZoom`
+  (defaults `'Image viewer'`, `'Close'`, `'Previous image'`, `'Next image'`,
+  `'The image could not be loaded.'`, `'Zoom in'`, `'Zoom out'`, `'Reset zoom'`) and
+  `position(i, n, item)`, the announcement with `i`
   1-based and `item` of your item type (default "Image i of n"). For other media, relabel them, for example
   `dialog: 'Media viewer'`, `previous: 'Previous item'` and
   `` position: (i, n) => `Item ${i} of ${n}` ``.
 - Name: with a title (the `title` slot, else the `title` prop) the dialog is named by it
   (`aria-labelledby`), otherwise by `labels.dialog`. The title stays on one line and ends in an
   ellipsis when the bar is short of room; the name keeps the whole text.
-- Models: `open` (`v-model:open`) and `index` (`v-model:index`, default `0`; kept internally when
-  unbound). An index out of range or not an integer is clamped, with a development warning; when
+- Models: `open` (`v-model:open`), `index` (`v-model:index`, default `0`; kept internally when
+  unbound) and `zoom` (`v-model:zoom`, see Zoom). An index out of range or not an integer is clamped, with a development warning; when
   `items` shrinks below the index it is clamped and `update:index` reports it. Opened with empty
   `items`, it shows nothing and warns in development; `open` stays as set and it opens once items
   arrive. Emptied while open, it closes with `update:open(false)` and reason `'program'`, so a
@@ -782,7 +784,7 @@ function show(i: number) {
   at mount for inline content), and `failed()`. They drive the built-in image's states:
   `data-loaded` on the stage, then preloading; the message box in place of the slot. Calls for an
   item no longer shown are ignored. A slot that never calls `loaded` shows at once, without a fade
-  and without preloading. `size` is the natural `{ width, height }`.
+  and without preloading. `size` is the natural `{ width, height }`, for the zoom limit and 1:1.
 - `width` and `height` reserve the image box before it loads. The image fades in on `load`, then
   `preload` neighbours each way (`0` or `false` for none; wrapping with `loop`; only items with a
   `src`) are preloaded with their `srcset` and `sizes`. An image that fails to load is replaced by
@@ -808,16 +810,50 @@ function show(i: number) {
 - The live region announces the position after navigation, not on open; with
   `announce="position+caption"` it adds the item's caption, else its alt
   ("Image 2 of 5, Harbour at dawn").
-- A template ref exposes `next()`, `previous()` and `go(i)`, which move as the buttons do; `go`
-  ignores an index outside `items`, and the announcement plays only while open.
-- From 40em up the bar holds the counter, title, actions and ×, and the nav buttons sit over the
-  stage's inline edges. Below, the actions wrap onto their own row under the title and the nav
-  buttons move to a bottom row either side of the counter. The dialog is `100dvh` tall and padded
+- Zoom (`zoomable`): the media sits in `.bl-lightbox__frame`, which carries the transform, so
+  slotted media zooms too. `v-model:zoom` is relative to fit (`1`) and returns to `1` on open,
+  on close and on another item; a value set from outside is clamped to `1` to `maxZoom` and the
+  zoom in effect reported back (`update:zoom`), also when nothing changes (`0.5` at fit). Without
+  `zoomable` it stays `1`, and so on an item that failed to load, where the controls are disabled
+  and the zoom keys pass through. `maxZoom` defaults to 8, or to four times the natural size when that is
+  more (the natural size comes from `loaded(size)`, else the item's `width` and `height`, else
+  the image's own or a slotted svg's `viewBox`). Give zoomable `srcset` images `width` and
+  `height`: a responsive image's own natural size is density-corrected, so 1:1 would sit near fit,
+  and `sizes` is not raised while zoomed, so the browser keeps the candidate chosen for fit. The
+  wheel zooms around the pointer (line and page deltas normalised; Ctrl+wheel, a trackpad pinch,
+  scaled for its small steps; Safari's gesture events, with no second zoom from the Ctrl+wheel
+  WebKit may send alongside), and while zoomed in a mostly sideways wheel pans. Two fingers pinch around their
+  midpoint, and lifting one carries on as a pan. One pointer pans while zoomed in and never
+  swipes. A double-click or double-tap (300ms, 24px) toggles fit and 1:1, or 2.5x when 1:1 is
+  under 1.5x fit. Keys: `+` or `=`, `-` and `0` (reset), with one item too; Ctrl or Cmd with them
+  stays the browser's zoom. While zoomed in the arrow keys pan by a tenth of the stage; Home, End
+  and the nav buttons still navigate. The pan is clamped: the media covers the frame along an
+  axis where it is larger and stays centred where it is not. The click that ends a drag or a
+  double-tap is dropped (a touch tap's click up to 350ms later), so it neither follows a slotted
+  link nor closes; a keyboard or assistive-technology
+  activation (`detail` 0) never is. Pointers and gestures on the caption, and on what the keys
+  and swipe leave alone (`iframe`, `[controls]`, `[data-bl-no-swipe]`, `preventDefault()`), are
+  not zoom input.
+- The zoomable stage clips the media and sets `touch-action: none`: its own pinch replaces the
+  page's there, and the caption keeps `pan-y` so a long one still scrolls. It has
+  `data-magnified` while zoomed in, when the caption gets a surface. The controls (unless
+  `zoomControls` is `false`) are zoom out, a readout that resets (named "Reset zoom, 150%") and
+  zoom in, disabled at the limits; a focused one that becomes disabled hands focus to another
+  control, or to the dialog when none is left (a failed item). Buttons, keys and double-tap ease for 150ms (not under reduced
+  motion); the wheel, a pinch and a drag never do.
+- A template ref exposes `next()`, `previous()`, `go(i)`, `zoomTo(z)` and `resetZoom()`; the first
+  three move as the buttons do, `go` ignores an index outside `items`, and the announcement plays
+  only while open.
+- From 64em up the bar holds the counter, title, actions, zoom controls and ×; from 40em to
+  64em the actions and zoom controls take a row under the title, which keeps its room. From 40em
+  up the nav buttons sit over the stage's inline edges. Below 40em the actions wrap onto their
+  own row under the title, the zoom controls get a row above the nav buttons, and those move to
+  a bottom row either side of the counter. The dialog is `100dvh` tall and padded
   by the safe areas; the caption clamps to about four lines and scrolls beyond that.
 - Scroll lock and toasts work as for BlDialog (`html:has(dialog.bl-lightbox[open]:modal)`, the same
   `--bl-dialog-gutter`). `--bl-lightbox-scrim` sets the backdrop, by default the canvas at 96%, so
   it follows the appearance.
-- CSS-only: call `showModal()`/`close()` yourself and wire the ids. Navigation, swipe, the
+- CSS-only: call `showModal()`/`close()` yourself and wire the ids. Navigation, swipe, zoom, the
   announcement, preloading, the load fade (`data-loaded`, set only by the component) and the
   load-error message are Vue-only.
 
