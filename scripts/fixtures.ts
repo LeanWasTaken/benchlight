@@ -102,7 +102,12 @@ export const NUXT_EXPECTATIONS = {
     'bl-spec-row',
     'bl-table',
     'bl-pagination',
-    '--bl-rise-delay:60ms'
+    '--bl-rise-delay:60ms',
+    // A closed BlLightbox renders on the server: dialog, bar slots and stage, never open.
+    'class="bl-lightbox"',
+    'bl-lightbox__title',
+    'bl-lightbox__actions',
+    'bl-lightbox__stage'
   ],
   css: [
     '.bg-surface',
@@ -162,7 +167,10 @@ export async function verifyNuxt(dir: string): Promise<void> {
   })
   try {
     const base = `http://127.0.0.1:${port}`
-    expectAll(await waitFor(`${base}/`), NUXT_EXPECTATIONS.page, 'nuxt page')
+    const page = await waitFor(`${base}/`)
+    expectAll(page, NUXT_EXPECTATIONS.page, 'nuxt page')
+    const lightbox = /<dialog[^>]*class="bl-lightbox"[^>]*>/.exec(page)?.[0] ?? ''
+    if (/\sopen[\s=>]/.test(lightbox)) throw new Error(`nuxt page: lightbox open: ${lightbox}`)
     const api = (await (await fetch(`${base}/api/tokens`)).json()) as { canvas?: string }
     if (api.canvas !== '#101214') throw new Error(`nuxt /api/tokens: ${JSON.stringify(api)}`)
     const css = readAll(join(dir, '.output/public/_nuxt'), '.css')

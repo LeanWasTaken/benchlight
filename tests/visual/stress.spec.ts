@@ -525,7 +525,7 @@ const lightboxFits: Probe = (page) =>
       if (Math.abs(d.width - innerWidth) > 1 || Math.abs(d.height - innerHeight) > 1)
         bad.push(`dialog ${Math.round(d.width)}x${Math.round(d.height)} is not the viewport`)
       const parts = dialog.querySelectorAll<HTMLElement>(
-        '.bl-lightbox__media, .bl-lightbox__caption, .bl-lightbox__count, .bl-btn'
+        '.bl-lightbox__media, .bl-lightbox__caption, .bl-lightbox__count, .bl-lightbox__title, .bl-lightbox__actions, .bl-btn'
       )
       for (const el of parts) {
         const r = el.getBoundingClientRect()
@@ -541,6 +541,24 @@ const lightboxFits: Probe = (page) =>
         const r = el.getBoundingClientRect()
         if (r.width < 43.5 || r.height < 43.5) bad.push(`${el.className} below 44px`)
       }
+      // A title keeps a readable width: crowded actions move out of its row instead.
+      const title = dialog.querySelector('.bl-lightbox__title')?.getBoundingClientRect()
+      if (title && title.width < 120) bad.push(`title only ${Math.round(title.width)}px wide`)
+      // The bar's parts never overlap one another: a long title truncates instead.
+      const bar = [
+        ...dialog.querySelectorAll<HTMLElement>(
+          '.bl-lightbox__title, .bl-lightbox__actions .bl-btn, .bl-lightbox__close'
+        )
+      ].map((el) => [el.className, el.getBoundingClientRect()] as const)
+      for (const [i, [name, r]] of bar.entries())
+        for (const [other, o] of bar.slice(i + 1))
+          if (
+            r.left < o.right - 0.5 &&
+            o.left < r.right - 0.5 &&
+            r.top < o.bottom - 0.5 &&
+            o.top < r.bottom - 0.5
+          )
+            bad.push(`${name} overlaps ${other}`)
       const media = dialog.querySelector('.bl-lightbox__media')?.getBoundingClientRect()
       const caption = dialog.querySelector('.bl-lightbox__caption')?.getBoundingClientRect()
       if (!media || media.width < 1 || media.height < 1) bad.push('no visible media')
@@ -641,6 +659,10 @@ const cases: Case[] = [
   {
     id: 'lightbox-narrow',
     checks: [...generic(), { name: 'fits-the-viewport', variants: ALL, probe: lightboxFits }]
+  },
+  {
+    id: 'lightbox-bar',
+    checks: [{ name: 'fits-the-viewport', variants: ALL, probe: lightboxFits }]
   },
   {
     id: 'button-icon-toolbar',

@@ -93,3 +93,51 @@ export const photos: LightboxItem[] = [
     height: 600
   }
 ]
+
+// A measured drawing with labels too small to read at fit; the second lightbox demo renders it
+// inline through the default slot (no src).
+const [dw, dh, cell] = [2400, 1600, 100]
+export const drawingMarkup = (() => {
+  let out = `<rect width="${dw}" height="${dh}" fill="#f3efe6"/>`
+  for (let x = 0; x <= dw; x += cell)
+    out += `<path d="M${x} 0V${dh}" stroke="#9a8f7a" stroke-width="${x % 500 ? 1 : 3}"/>`
+  for (let y = 0; y <= dh; y += cell)
+    out += `<path d="M0 ${y}H${dw}" stroke="#9a8f7a" stroke-width="${y % 500 ? 1 : 3}"/>`
+  for (let y = 0; y < dh; y += cell)
+    for (let x = 0; x < dw; x += cell)
+      out += `<text x="${x + 8}" y="${y + 20}" font-family="monospace" font-size="13" fill="#4a4236">${String.fromCharCode(65 + x / cell)}${y / cell + 1}</text>`
+  out += `<circle cx="1450" cy="650" r="320" fill="none" stroke="#b5532f" stroke-width="6"/>`
+  return out
+})()
+export const drawingThumb = `data:image/svg+xml;utf8,${encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${dw} ${dh}">${drawingMarkup}</svg>`
+)}`
+
+export interface Plate extends LightboxItem {
+  title: string
+}
+export const plates: Plate[] = [
+  {
+    src: photo(1500, 1000, 30),
+    alt: 'Hills under an amber sky',
+    title: 'Plate 1: amber hills over the river valley, late on a long summer evening',
+    caption: 'Landscape, 3:2.',
+    width: 1500,
+    height: 1000
+  },
+  {
+    src: photo(1000, 1250, 300),
+    alt: 'Hills under a rose sky, portrait',
+    title: 'Plate 2: rose hills',
+    width: 1000,
+    height: 1250
+  },
+  {
+    key: 'drawing',
+    alt: 'A survey grid of lettered and numbered cells with one circled area',
+    title: 'Plate 3: survey grid',
+    caption: 'Drawn inline, no src.',
+    width: dw,
+    height: dh
+  }
+]

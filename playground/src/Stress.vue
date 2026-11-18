@@ -767,7 +767,8 @@
       </dialog>
     </section>
 
-    <!-- Lightbox: extreme aspect ratios and long captions, a single item, a narrow flex host. -->
+    <!-- Lightbox: extreme aspect ratios and long captions, a single item, a narrow flex host,
+         a long title with actions. -->
     <section v-if="show('lightbox-long')" data-case="lightbox-long">
       <h2 class="st-label">lightbox-long</h2>
       <div data-box>
@@ -798,6 +799,24 @@
           @update:open="viewer = null"
         />
       </div>
+    </section>
+
+    <section v-if="show('lightbox-bar')" data-case="lightbox-bar">
+      <h2 class="st-label">lightbox-bar</h2>
+      <div data-box>
+        <BlButton variant="secondary" @click="viewer = 'bar'">Open viewer</BlButton>
+      </div>
+      <BlLightbox
+        :open="viewer === 'bar'"
+        :items="extremePhotos"
+        :title="longTitle"
+        @update:open="viewer = null"
+      >
+        <template #actions>
+          <BlButton variant="secondary">Open original</BlButton>
+          <BlButton variant="secondary">Share</BlButton>
+        </template>
+      </BlLightbox>
     </section>
 
     <!-- D3: page chrome; each rendered alone via ?case=<id> -->
@@ -993,7 +1012,8 @@
   const sheetOpen = ref(false)
   const detailsOpen = ref(false)
   const formDialog = ref<HTMLDialogElement>()
-  const viewer = ref<'long' | 'single' | 'narrow' | null>(null)
+  const viewer = ref<'long' | 'single' | 'narrow' | 'bar' | null>(null)
+  const longTitle = `${german} ${'with a title long enough to need an ellipsis '.repeat(4)}`
   const longCaption = `${german} ${'and a caption long enough to wrap over many lines '.repeat(12)}${url}`
   const extremePhotos = [
     {

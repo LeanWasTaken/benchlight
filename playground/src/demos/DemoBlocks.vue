@@ -80,6 +80,51 @@
     />
   </div>
 
+  <div class="pg-row" data-demo="lightbox-plates">
+    <button
+      v-for="(plate, i) in plates"
+      :key="plate.key ?? i"
+      type="button"
+      class="pg-thumb"
+      @click="openPlates(i)"
+    >
+      <img :src="plate.src ?? drawingThumb" :alt="plate.alt" />
+    </button>
+    <BlLightbox
+      v-model:open="platesOpen"
+      v-model:index="platesIndex"
+      :items="plates"
+      announce="position+caption"
+    >
+      <template #title="{ item }">{{ item.title }}</template>
+      <template #actions="{ item, index }">
+        <BlButton
+          v-if="item.src"
+          variant="secondary"
+          :href="item.src"
+          :download="`plate-${index + 1}.svg`"
+        >
+          Download
+        </BlButton>
+      </template>
+      <template #default="{ item, loaded }">
+        <!-- eslint-disable vue/no-v-html -- fixed markup generated in data.ts -->
+        <svg
+          v-if="!item.src"
+          class="bl-lightbox__media"
+          :viewBox="`0 0 ${item.width} ${item.height}`"
+          :width="item.width"
+          :height="item.height"
+          role="img"
+          :aria-label="item.alt"
+          @vue:mounted="loaded({ width: item.width!, height: item.height! })"
+          v-html="drawingMarkup"
+        />
+        <!-- eslint-enable vue/no-v-html -->
+      </template>
+    </BlLightbox>
+  </div>
+
   <div class="pg-row" data-demo="toast">
     <BlButton variant="secondary" @click="toast('Saved')">Toast</BlButton>
     <BlButton variant="secondary" @click="toast({ message: 'Connected', tone: 'success' })">
@@ -104,7 +149,7 @@
 
 <script setup lang="ts">
   import { ref } from 'vue'
-  import { photos } from './data'
+  import { drawingMarkup, drawingThumb, photos, plates } from './data'
   import {
     BlButton,
     BlDialog,
@@ -130,5 +175,11 @@
   function openViewer(i: number): void {
     viewerIndex.value = i
     viewerOpen.value = true
+  }
+  const platesOpen = ref(false)
+  const platesIndex = ref(0)
+  function openPlates(i: number): void {
+    platesIndex.value = i
+    platesOpen.value = true
   }
 </script>

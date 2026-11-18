@@ -673,3 +673,247 @@ describe('BlLightbox', () => {
     expect(warn).not.toHaveBeenCalled()
   })
 })
+
+type Media = Scope & {
+  loaded: (size?: { width: number; height: number }) => void
+  failed: () => void
+}
+function images() {
+  const made: HTMLImageElement[] = []
+  const Real = globalThis.Image
+  vi.spyOn(globalThis, 'Image').mockImplementation(function () {
+    const image = new Real()
+    made.push(image)
+    return image
+  } as unknown as () => HTMLImageElement)
+  return made
+}
+const srcs = (made: HTMLImageElement[]) => made.map((i) => i.getAttribute('src'))
+
+describe('BlLightbox bar, items and media contract', () => {
+  it('renders slotted items without src: no img and no warning', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const w = await opened(
+      { items: [{ alt: 'A drawing', key: 'svg' }, { caption: 'A clip' }] },
+      { default: (p: Scope) => h('svg', { class: 'drawing', 'data-i': p.index }) }
+    )
+    expect(w.find('img').exists()).toBe(false)
+    expect(w.get('.drawing').attributes('data-i')).toBe('0')
+    await w.setProps({ index: 1 })
+    expect(w.get('.drawing').attributes('data-i')).toBe('1')
+    expect(w.find('.bl-lightbox__message').exists()).toBe(false)
+    expect(warn).not.toHaveBeenCalled()
+  })
+
+  it('without a default slot, an item with no src shows its message and warns', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const w = await opened({ items: [{ alt: 'Lost photo' }, ITEMS[0]] })
+    expect(w.find('img').exists()).toBe(false)
+    expect(w.get('.bl-lightbox__message').text()).toBe('Lost photo')
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('no src'))
+  })
+
+  it('de-duplicates warnings by key, else by index, never by src', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const w = lightbox({
+      items: [{ caption: 'no src' }, { src: 'same.jpg' }, { src: 'same.jpg', key: 'b' }]
+    })
+    expect(warn).toHaveBeenCalledTimes(3) // the same src at two places warns for both
+    await w.setProps({
+      items: [{ caption: 'still none' }, { src: 'renamed.jpg' }, { src: 'other.jpg', key: 'b' }]
+    })
+    expect(warn).toHaveBeenCalledTimes(3) // same indexes and key
+    await w.setProps({ items: [{ src: 'other.jpg', key: 'c', alt: '' }] })
+    expect(warn).toHaveBeenCalledTimes(4)
+    expect(warn).toHaveBeenLastCalledWith(expect.stringContaining('other.jpg'))
+  })
+
+  it('names the dialog by the title prop or slot via aria-labelledby, else by labels.dialog', async () => {
+    const w = await opened({ title: 'Trip to the coast' })
+    const d = dialogEl(w)
+    const title = w.get('.bl-lightbox__title')
+    expect(title.text()).toBe('Trip to the coast')
+    expect(d.getAttribute('aria-labelledby')).toBe(title.attributes('id'))
+    expect(d.hasAttribute('aria-label')).toBe(false)
+    const slotted = await opened(
+      { title: 'ignored' },
+      { title: (p: Scope) => h('span', `${p.index + 1}: ${p.item.alt}`) }
+    )
+    expect(slotted.get('.bl-lightbox__title').text()).toBe('1: A bridge at dusk')
+    expect(dialogEl(slotted).getAttribute('aria-labelledby')).toBe(
+      slotted.get('.bl-lightbox__title').attributes('id')
+    )
+    // an empty slot falls back to the prop, and with neither there is no title
+    const fallback = await opened({ title: 'Prop' }, { title: () => [createCommentVNode('v-if')] })
+    expect(fallback.get('.bl-lightbox__title').text()).toBe('Prop')
+    const none = await opened({}, { title: () => [createCommentVNode('v-if')] })
+    expect(none.find('.bl-lightbox__title').exists()).toBe(false)
+    expect(dialogEl(none).getAttribute('aria-label')).toBe('Image viewer')
+    expect(dialogEl(none).hasAttribute('aria-labelledby')).toBe(false)
+  })
+
+  it('renders actions with item and index in the bar; clicks and drags there never close or swipe', async () => {
+    const w = await opened(
+      { index: 1 },
+      {
+        actions: (p: Scope) =>
+          h('a', { class: 'original', href: `#${p.item.src}`, 'data-i': p.index }, 'Original')
+      }
+    )
+    const link = w.get('.bl-lightbox__bar .bl-lightbox__actions .original')
+    expect(link.attributes('href')).toBe('#b.jpg')
+    expect(link.attributes('data-i')).toBe('1')
+    pointer(link.element, 'pointerdown', 10)
+    pointer(link.element, 'pointerup', 10)
+    link.element.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    swipe(link.element, -200)
+    link.element.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    expect(indexes(w)).toEqual([])
+    expect(dialogEl(w).open).toBe(true)
+    expect(w.emitted('close')).toBeUndefined()
+    // an empty actions slot renders no wrapper
+    const empty = await opened({}, { actions: () => [createCommentVNode('v-if')] })
+    expect(empty.find('.bl-lightbox__actions').exists()).toBe(false)
+  })
+
+  it('loaded(size) marks the item loaded and preloads; failed() shows the message; stale calls are ignored', async () => {
+    const made = images()
+    let scope: Media | undefined
+    const items = [{ src: 'a.jpg', alt: 'A' }, { alt: 'A drawing', key: 'd' }, { src: 'c.jpg' }]
+    const w = await opened(
+      { index: 1, items },
+      {
+        default: (p: Scope) => {
+          scope = p as Media
+          return h('svg', { class: 'drawing' })
+        }
+      }
+    )
+    const stage = () => w.get('.bl-lightbox__stage')
+    expect(stage().attributes('data-loaded')).toBe('false')
+    expect(made).toEqual([])
+    const first = scope!
+    first.loaded({ width: 400, height: 300 })
+    await nextTick()
+    expect(stage().attributes('data-loaded')).toBe('true')
+    expect(srcs(made)).toEqual(['a.jpg', 'c.jpg'])
+    first.loaded() // again: no second preload
+    expect(made).toHaveLength(2)
+    first.failed()
+    await nextTick()
+    expect(w.find('.drawing').exists()).toBe(false)
+    expect(w.get('.bl-lightbox__message').text()).toBe('A drawing')
+    await w.setProps({ index: 2 })
+    expect(w.find('.bl-lightbox__message').exists()).toBe(false)
+    expect(stage().attributes('data-loaded')).toBe('false')
+    first.failed() // from the previous item
+    first.loaded()
+    await nextTick()
+    expect(w.find('.bl-lightbox__message').exists()).toBe(false)
+    expect(stage().attributes('data-loaded')).toBe('false')
+  })
+
+  it('shows a slot that never calls loaded at once: nothing hides it', async () => {
+    const w = await opened({}, { default: () => h('video', { class: 'clip' }) })
+    const clip = w.get('.clip')
+    expect(clip.attributes('data-loaded')).toBeUndefined()
+    expect(clip.attributes('style')).toBeUndefined()
+    expect(w.find('[data-loaded="false"]:not(.bl-lightbox__stage)').exists()).toBe(false)
+  })
+
+  it('data-bl-no-swipe on slotted content keeps keys, swipes and stage clicks there', async () => {
+    const w = await opened(
+      { index: 1 },
+      {
+        default: () =>
+          h('div', { class: 'map', 'data-bl-no-swipe': '' }, [h('span', { class: 'pin' })])
+      }
+    )
+    const pin = w.get('.pin').element
+    const stage = w.get('.bl-lightbox__stage').element
+    key(pin, 'ArrowRight')
+    key(pin, 'End')
+    swipe(pin, -200)
+    pointer(pin, 'pointerdown', 10)
+    pointer(stage, 'pointerup', 10)
+    stage.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    expect(indexes(w)).toEqual([])
+    expect(dialogEl(w).open).toBe(true)
+    key(dialogEl(w), 'ArrowRight')
+    expect(indexes(w)).toEqual([2])
+  })
+
+  it.each([
+    [0, 2, false, []],
+    [false, 2, false, []],
+    [1, 2, false, ['b.jpg', 'd.jpg']],
+    [2, 2, false, ['b.jpg', 'd.jpg', 'a.jpg', 'e.jpg']],
+    [2, 0, true, ['e.jpg', 'b.jpg', 'd.jpg', 'c.jpg']],
+    [9, 0, false, ['b.jpg', 'c.jpg', 'd.jpg', 'e.jpg']]
+  ] as const)('preload %s from index %i (loop %s) loads %j', async (preload, index, loop, want) => {
+    const made = images()
+    const items = ['a', 'b', 'c', 'd', 'e'].map((n) => ({ src: `${n}.jpg`, alt: n }))
+    const w = await opened({ items, index, loop, preload })
+    img(w).element.dispatchEvent(new Event('load'))
+    expect(srcs(made)).toEqual(want)
+  })
+
+  it('preloads only neighbours with a src', async () => {
+    const made = images()
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const w = await opened({
+      items: [{ src: 'a.jpg', alt: 'a' }, { alt: 'no src' }, { caption: 'none either' }],
+      preload: 2
+    })
+    img(w).element.dispatchEvent(new Event('load'))
+    expect(srcs(made)).toEqual([])
+  })
+
+  it("announce 'position+caption' appends the caption, else the alt", async () => {
+    const w = await opened({ announce: 'position+caption' })
+    const live = w.get('[aria-live="polite"]')
+    key(dialogEl(w), 'ArrowRight')
+    await nextTick()
+    expect(live.text()).toBe('Image 2 of 3, A tall tower')
+    key(dialogEl(w), 'End')
+    await nextTick()
+    expect(live.text()).toBe('Image 3 of 3, Valley')
+    const bare = await opened({
+      announce: 'position+caption',
+      items: [ITEMS[0], { src: 'x.jpg', alt: '' }]
+    })
+    key(dialogEl(bare), 'ArrowRight')
+    await nextTick()
+    expect(bare.get('[aria-live="polite"]').text()).toBe('Image 2 of 2')
+  })
+
+  it('labels.position receives the item', async () => {
+    const position = vi.fn((i: number, n: number, item: LightboxItem) => `${i}/${n} ${item.alt}`)
+    const w = await opened({ labels: { position } })
+    key(dialogEl(w), 'ArrowRight')
+    await nextTick()
+    expect(position).toHaveBeenLastCalledWith(2, 3, ITEMS[1])
+    expect(w.get('[aria-live="polite"]').text()).toBe('2/3 A tall tower')
+  })
+
+  it('exposes next, previous and go, which emit update:index and announce while open', async () => {
+    type Api = { next: () => void; previous: () => void; go: (i: number) => void }
+    const w = lightbox()
+    const api = w.vm as unknown as Api
+    api.go(2)
+    await nextTick()
+    expect(indexes(w)).toEqual([2])
+    await w.setProps({ open: true })
+    expect(w.get('[aria-live="polite"]').text()).toBe('') // nothing stale from the closed go()
+    api.previous()
+    await nextTick()
+    expect(indexes(w)).toEqual([2, 1])
+    expect(w.get('[aria-live="polite"]').text()).toBe('Image 2 of 3')
+    api.next()
+    api.go(7)
+    api.go(-1)
+    api.go(0.5)
+    await nextTick()
+    expect(indexes(w)).toEqual([2, 1, 2])
+  })
+})

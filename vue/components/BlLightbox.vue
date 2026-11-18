@@ -3,7 +3,8 @@
     ref="el"
     class="bl-lightbox"
     tabindex="-1"
-    :aria-label="text.dialog"
+    :aria-labelledby="hasTitle() ? titleId : undefined"
+    :aria-label="hasTitle() ? undefined : text.dialog"
     :aria-describedby="hasCaption() ? captionId : undefined"
     @cancel="onCancel"
     @close="onClose"
@@ -25,11 +26,19 @@
       <p v-if="many" class="bl-lightbox__count" aria-hidden="true">
         {{ current + 1 }} / {{ items.length }}
       </p>
+      <h2 v-if="hasTitle()" :id="titleId" class="bl-lightbox__title">
+        <Nodes v-if="slotNodes('title')" :nodes="slotNodes('title')!" />
+        <template v-else>{{ title }}</template>
+      </h2>
+      <div v-if="slotNodes('actions')" class="bl-lightbox__actions">
+        <Nodes :nodes="slotNodes('actions')!" />
+      </div>
     </div>
     <figure
       v-if="item"
       ref="stage"
       class="bl-lightbox__stage"
+      :data-loaded="status === 'loaded' ? 'true' : 'false'"
       :data-zoomed="zoomed ? '' : undefined"
       @pointerdown="onStageDown"
       @pointermove="onStageMove"
@@ -37,19 +46,23 @@
       @pointercancel="onStageCancel"
       @click="onStageClick"
     >
-      <slot :item="item" :index="current">
-        <p v-if="status === 'failed'" class="bl-lightbox__message">
-          {{ item.alt || item.caption || text.failed }}
-        </p>
+      <p v-if="status === 'failed'" class="bl-lightbox__message">{{ failure() }}</p>
+      <slot
+        v-else
+        :item="item"
+        :index="current"
+        :loaded="loadedFor(generation)"
+        :failed="failedFor(generation)"
+      >
         <img
-          v-else
+          v-if="item.src"
           ref="media"
           :key="`${current}:${item.src}`"
           class="bl-lightbox__media"
           :src="item.src"
           :srcset="item.srcset"
           :sizes="item.sizes ?? '100vw'"
-          :alt="item.alt"
+          :alt="item.alt ?? ''"
           :width="item.width"
           :height="item.height"
           :data-loaded="status === 'loaded' ? 'true' : 'false'"
@@ -57,9 +70,10 @@
           @load="onLoad"
           @error="onError"
         />
+        <p v-else class="bl-lightbox__message">{{ failure() }}</p>
       </slot>
       <figcaption v-if="hasCaption()" :id="captionId" class="bl-lightbox__caption">
-        <Nodes v-if="captionNodes()" :nodes="captionNodes()!" />
+        <Nodes v-if="slotNodes('caption')" :nodes="slotNodes('caption')!" />
         <template v-else>{{ item.caption }}</template>
       </figcaption>
     </figure>
@@ -98,7 +112,7 @@
   </dialog>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" generic="T extends LightboxItem">
   import {
     computed,
     nextTick,
@@ -109,7 +123,6 @@
     onMounted,
     ref,
     useId,
-    useSlots,
     watch,
     type VNode
   } from 'vue'
@@ -122,22 +135,31 @@
 
   const props = withDefaults(
     defineProps<{
-      items: readonly LightboxItem[]
+      items: readonly T[]
       loop?: boolean
-      labels?: Partial<LabelOverrides<LightboxLabels>>
+      title?: string
+      preload?: number | false
+      announce?: 'position' | 'position+caption'
+      labels?: Partial<LabelOverrides<LightboxLabels<T>>>
     }>(),
-    { loop: false }
+    { loop: false, preload: 1, announce: 'position' }
   )
-  defineSlots<{
-    default?: (scope: { item: LightboxItem; index: number }) => VNode[]
-    caption?: (scope: { item: LightboxItem; index: number }) => VNode[]
+  const slots = defineSlots<{
+    default?: (scope: {
+      item: T
+      index: number
+      loaded: (size?: { width: number; height: number }) => void
+      failed: () => void
+    }) => VNode[]
+    caption?: (scope: { item: T; index: number }) => VNode[]
+    title?: (scope: { item: T; index: number }) => VNode[]
+    actions?: (scope: { item: T; index: number }) => VNode[]
   }>()
   const open = defineModel<boolean>('open', { required: true })
   const index = defineModel<number>('index', { default: 0 })
   const emit = defineEmits<{
     close: [payload: DialogCloseEvent]
   }>()
-  const slots = useSlots()
 
   const el = ref<HTMLDialogElement>()
   const toasts = ref<HTMLElement>()
@@ -147,8 +169,9 @@
   const prev = ref<InstanceType<typeof BlButton>>()
   const next = ref<InstanceType<typeof BlButton>>()
   const captionId = useId()
-  const text = computed<LightboxLabels>(() =>
-    mergeLabels(
+  const titleId = useId()
+  const text = computed<LightboxLabels<T>>(() =>
+    mergeLabels<LightboxLabels<T>>(
       {
         dialog: 'Image viewer',
         close: 'Close',
@@ -164,25 +187,28 @@
   const clamp = (i: number) =>
     Math.min(Math.max(Number.isFinite(i) ? Math.trunc(i) : 0, 0), props.items.length - 1)
   const current = computed(() => Math.max(clamp(index.value), 0))
-  const item = computed<LightboxItem | undefined>(() => props.items[current.value])
+  const item = computed<T | undefined>(() => props.items[current.value])
   const many = computed(() => props.items.length > 1)
-  // The caption slot is evaluated once per render: an empty one falls back to item.caption, and
-  // with neither there is no figcaption for aria-describedby to point at.
-  let captionCache: VNode[] | null | undefined
+  // Each optional slot is evaluated once per render: an empty one falls back (caption and title
+  // to the item or prop, actions to nothing), and the dialog's aria attributes follow.
+  type Named = 'caption' | 'title' | 'actions'
+  let rendered: Partial<Record<Named, VNode[] | null>> = {}
   onBeforeUpdate(() => {
-    captionCache = undefined
+    rendered = {}
   })
-  function captionNodes(): VNode[] | null {
-    if (captionCache === undefined) {
+  function slotNodes(name: Named): VNode[] | null {
+    if (!(name in rendered)) {
       const it = item.value
-      const nodes = it ? slots['caption']?.({ item: it, index: current.value }) : undefined
-      captionCache = hasContent(nodes) ? nodes! : null
+      const nodes = it ? slots[name]?.({ item: it, index: current.value }) : undefined
+      rendered[name] = hasContent(nodes) ? nodes! : null
     }
-    return captionCache
+    return rendered[name] ?? null
   }
-  const hasCaption = () => Boolean(item.value?.caption) || captionNodes() !== null
+  const hasCaption = () => Boolean(item.value?.caption) || slotNodes('caption') !== null
+  const hasTitle = () => Boolean(props.title) || slotNodes('title') !== null
   const Nodes = (p: { nodes: VNode[] }) => p.nodes
   const status = ref<'loading' | 'loaded' | 'failed'>('loading')
+  const failure = () => item.value?.alt || item.value?.caption || text.value.failed
   const announcement = ref('')
 
   // An index the parent set out of range is a mistake; one left behind by shrinking items is not.
@@ -198,7 +224,10 @@
     },
     { immediate: true }
   )
-  watch([current, () => item.value?.src], () => {
+  // Each item shown starts a new generation: loaded()/failed() handed to an earlier one do nothing.
+  let generation = 0
+  watch([current, () => item.value?.src, () => item.value?.key], () => {
+    generation++
     status.value = 'loading'
     // A focused nav button that just became disabled at an end would drop focus to <body>.
     nextTick(() => {
@@ -208,17 +237,27 @@
     })
   })
 
-  const unnamed = new Set<string>()
+  const warned = new Set<string>()
+  function warnFor(id: string, message: string): void {
+    if (warned.has(id)) return
+    warned.add(id)
+    warn(message)
+  }
   watch(
     () => props.items,
     (items) => {
       // A default slot renders its own media and names it there.
-      if (slots['default']) return
-      for (const it of items) {
-        if (it.alt !== '' || it.caption || unnamed.has(it.src)) continue
-        unnamed.add(it.src)
-        warn(`BlLightbox: ${it.src} has an empty alt and no caption, so nothing names it.`)
-      }
+      if (slots.default) return
+      items.forEach((it, i) => {
+        const key = String(it.key ?? i)
+        if (!it.src)
+          warnFor(`src:${key}`, `BlLightbox: item ${key} has no src and there is no default slot.`)
+        else if (!it.alt && !it.caption)
+          warnFor(
+            `alt:${key}`,
+            `BlLightbox: ${it.src} (item ${key}) has no alt and no caption, so nothing names it.`
+          )
+      })
     },
     { immediate: true }
   )
@@ -238,7 +277,7 @@
 
   // The dialog itself is not a backdrop here: a tap in the bar or the bottom row would close it.
   // Its controls and stage are inert during the exit; the dialog keeps its toast host usable.
-  const { closeWith, onCancel, onClose } = useModal({
+  const { closeWith, onCancel, onClose, isOpen } = useModal({
     el,
     toasts,
     open: active,
@@ -272,9 +311,15 @@
   onBeforeUnmount(() => watchZoom(false))
 
   function go(i: number): void {
-    if (i === current.value || i < 0 || i >= props.items.length) return
+    const n = props.items.length
+    if (!Number.isInteger(i) || i === current.value || i < 0 || i >= n) return
     index.value = i
-    announcement.value = text.value.position(i + 1, props.items.length)
+    // Only while shown: a live region filled before opening would speak on open.
+    if (!isOpen()) return
+    const it = props.items[i]!
+    const position = text.value.position(i + 1, n, it)
+    const extra = props.announce === 'position+caption' ? it.caption || it.alt : ''
+    announcement.value = extra ? `${position}, ${extra}` : position
   }
   function previous(): void {
     const i = current.value
@@ -284,12 +329,14 @@
     const i = current.value
     go(i < props.items.length - 1 ? i + 1 : props.loop ? 0 : i)
   }
+  defineExpose({ next: nextItem, previous, go })
 
   const isRtl = () => !!el.value && getComputedStyle(el.value).direction === 'rtl'
 
-  // Media with its own controls keeps its keys and drags (seeking, volume).
+  // Media with its own controls keeps its keys and drags (seeking, volume), as does content that
+  // opts out with data-bl-no-swipe (a map, a 3D view).
   const interactive = (target: EventTarget | null) =>
-    target instanceof Element && target.closest('iframe, [controls]') !== null
+    target instanceof Element && target.closest('iframe, [controls], [data-bl-no-swipe]') !== null
 
   function onKeydown(event: KeyboardEvent): void {
     if (event.defaultPrevented || !many.value || el.value?.hasAttribute('data-closing')) return
@@ -375,27 +422,42 @@
     })
   }
 
-  function onLoad(event: Event): void {
-    if (event.currentTarget !== media.value) return
+  // The built-in image and a default slot report through the same states.
+  function settle(): void {
+    if (status.value === 'loaded') return
     status.value = 'loaded'
-    preload()
+    preloadNeighbours()
+  }
+  const loadedFor = (g: number) => () => {
+    if (g === generation) settle()
+  }
+  const failedFor = (g: number) => () => {
+    if (g === generation) status.value = 'failed'
+  }
+  function onLoad(event: Event): void {
+    if (event.currentTarget === media.value) settle()
   }
   function onError(event: Event): void {
     if (event.currentTarget === media.value) status.value = 'failed'
   }
-  function preload(): void {
+  // `preload` neighbours each way (wrapping with loop), nearest first; only items with a src.
+  function preloadNeighbours(): void {
     const n = props.items.length
-    if (n < 2) return
+    const reach = props.preload === false ? 0 : Math.min(Math.floor(props.preload), n - 1)
     const i = current.value
-    const around = [i - 1, i + 1]
-      .map((j) => (props.loop ? (j + n) % n : j))
-      .filter((j, k, all) => j >= 0 && j < n && j !== i && all.indexOf(j) === k)
-    for (const j of around) {
-      const neighbour = props.items[j]!
-      const image = new Image()
-      image.sizes = neighbour.sizes ?? '100vw'
-      if (neighbour.srcset) image.srcset = neighbour.srcset
-      image.src = neighbour.src
+    const seen = new Set([i])
+    for (let d = 1; d <= reach; d++) {
+      for (const j of [i - d, i + d]) {
+        const k = props.loop ? (j + n * d) % n : j
+        if (k < 0 || k >= n || seen.has(k)) continue
+        seen.add(k)
+        const neighbour = props.items[k]!
+        if (!neighbour.src) continue
+        const image = new Image()
+        image.sizes = neighbour.sizes ?? '100vw'
+        if (neighbour.srcset) image.srcset = neighbour.srcset
+        image.src = neighbour.src
+      }
     }
   }
 </script>

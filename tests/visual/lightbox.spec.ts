@@ -6,13 +6,15 @@ test.use({ launchOptions: { ignoreDefaultArgs: ['--hide-scrollbars'] } })
 
 const thumbs = (page: Page) => page.locator('[data-demo="lightbox"] .pg-thumb')
 const viewer = (page: Page) => page.getByRole('dialog', { name: 'Image viewer' })
-const count = (page: Page) => page.locator('.bl-lightbox__count')
+// The playground has two lightboxes; only the open one counts.
+const shown = (page: Page, part: string) => page.locator(`.bl-lightbox[open] ${part}`)
+const count = (page: Page) => shown(page, '.bl-lightbox__count')
 
 async function open(page: Page, at = 0) {
   await page.goto('/')
   await thumbs(page).nth(at).click()
   await expect(viewer(page)).toBeVisible()
-  await expect(page.locator('.bl-lightbox__media')).toHaveAttribute('data-loaded', 'true')
+  await expect(shown(page, '.bl-lightbox__media')).toHaveAttribute('data-loaded', 'true')
 }
 
 test('open lightbox', async ({ page }) => {
@@ -27,7 +29,7 @@ test('arrow keys and buttons move through the group and the counter follows', as
   await expect(viewer(page)).toBeFocused()
   await page.keyboard.press('ArrowRight')
   await expect(count(page)).toHaveText('2 / 4')
-  await expect(page.locator('.bl-lightbox [aria-live="polite"]')).toHaveText('Image 2 of 4')
+  await expect(shown(page, '[aria-live="polite"]')).toHaveText('Image 2 of 4')
   await page.keyboard.press('End')
   await expect(count(page)).toHaveText('4 / 4')
   await expect(page.getByRole('button', { name: 'Next image' })).toBeDisabled()
@@ -49,7 +51,7 @@ test.describe('touch', () => {
   test('swipe moves to the next image', async ({ page }, testInfo) => {
     test.skip(!testInfo.project.name.startsWith('mobile'), 'touch is a mobile concern')
     await open(page)
-    const box = (await page.locator('.bl-lightbox__stage').boundingBox())!
+    const box = (await shown(page, '.bl-lightbox__stage').boundingBox())!
     const y = box.y + box.height / 2
     const cdp = await page.context().newCDPSession(page)
     const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd', x?: number) =>
@@ -82,11 +84,11 @@ test('media and caption stay inside the viewport', async ({ page }) => {
   await open(page)
   for (let i = 0; i < 4; i++) {
     await expect(count(page)).toHaveText(`${i + 1} / 4`)
-    await expect(page.locator('.bl-lightbox__media')).toHaveAttribute('data-loaded', 'true')
+    await expect(shown(page, '.bl-lightbox__media')).toHaveAttribute('data-loaded', 'true')
     const outside = await page.evaluate(() =>
       [
         ...document.querySelectorAll(
-          '.bl-lightbox__media, .bl-lightbox__caption, .bl-lightbox .bl-btn'
+          '.bl-lightbox[open] :is(.bl-lightbox__media, .bl-lightbox__caption, .bl-btn)'
         )
       ]
         .filter((el) => {
@@ -128,12 +130,69 @@ test.describe('forced colors', () => {
   test.use({ forcedColors: 'active' })
   test('the buttons keep a visible edge', async ({ page }) => {
     await open(page)
-    const [edge, text] = await page
-      .locator('.bl-lightbox__nav--next')
-      .evaluate((el) => [
-        getComputedStyle(el).borderTopColor,
-        getComputedStyle(document.body).color
-      ])
+    const [edge, text] = await shown(page, '.bl-lightbox__nav--next').evaluate((el) => [
+      getComputedStyle(el).borderTopColor,
+      getComputedStyle(document.body).color
+    ])
     expect(edge).toBe(text) // CanvasText
   })
+})
+
+const plates = (page: Page) => page.locator('[data-demo="lightbox-plates"] .pg-thumb')
+const PLATE_1 = 'Plate 1: amber hills over the river valley, late on a long summer evening'
+
+async function openPlates(page: Page, at = 0) {
+  await page.goto('/')
+  await plates(page).nth(at).click()
+  await expect(shown(page, '.bl-lightbox__stage')).toHaveAttribute('data-loaded', 'true')
+}
+
+test('lightbox bar with a title and actions', async ({ page }) => {
+  await openPlates(page)
+  // Named by its title, which truncates where the bar is short of room; the name keeps it whole.
+  await expect(page.getByRole('dialog', { name: PLATE_1 })).toBeVisible()
+  await expect(shown(page, '.bl-lightbox__actions').getByRole('link')).toHaveText('Download')
+  await page.evaluate(() => document.fonts.ready)
+  await expect(page).toHaveScreenshot('lightbox-bar.png')
+})
+
+test('a long title ends in an ellipsis instead of crowding the ×', async ({ page }, testInfo) => {
+  test.skip(!testInfo.project.name.startsWith('mobile'), 'the title fits on desktop')
+  await openPlates(page)
+  const title = shown(page, '.bl-lightbox__title')
+  const [scroll, client] = await title.evaluate((el) => [el.scrollWidth, el.clientWidth])
+  expect(scroll).toBeGreaterThan(client)
+  const t = (await title.boundingBox())!
+  const close = (await shown(page, '.bl-lightbox__close').boundingBox())!
+  expect(t.x + t.width).toBeLessThanOrEqual(close.x + 0.5)
+})
+
+test('a slotted drawing without src shows at once and the bar follows the item', async ({
+  page
+}) => {
+  await openPlates(page, 2)
+  await expect(shown(page, 'svg.bl-lightbox__media')).toBeVisible()
+  await expect(shown(page, '.bl-lightbox__title')).toHaveText('Plate 3: survey grid')
+  await expect(shown(page, '.bl-lightbox__actions')).toHaveCount(0)
+  await page.keyboard.press('Home')
+  await expect(shown(page, '.bl-lightbox__title')).toHaveText(PLATE_1)
+  await expect(shown(page, '[aria-live="polite"]')).toHaveText('Image 1 of 3, Landscape, 3:2.')
+})
+
+test('under rtl the title starts on the right and the × sits on the left', async ({ page }) => {
+  await openPlates(page)
+  await page.evaluate(() => (document.documentElement.dir = 'rtl'))
+  const title = (await shown(page, '.bl-lightbox__title').boundingBox())!
+  const close = (await shown(page, '.bl-lightbox__close').boundingBox())!
+  expect(close.x).toBeLessThan(title.x)
+  // Desktop: the actions sit between the title and the ×; mobile: under the title, on its side.
+  const actions = (await shown(page, '.bl-lightbox__actions .bl-btn').boundingBox())!
+  expect(actions.x + actions.width).toBeLessThanOrEqual(title.x + title.width + 0.5)
+})
+
+test('clicks in the bar never close the lightbox', async ({ page }) => {
+  await openPlates(page)
+  await shown(page, '.bl-lightbox__title').click()
+  await page.waitForTimeout(300)
+  await expect(shown(page, '.bl-lightbox__stage')).toBeVisible()
 })

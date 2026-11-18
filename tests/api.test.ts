@@ -2,7 +2,13 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { HOOK_ONLY_CLASSES, barrelExports, autoImports, renderApi } from '../scripts/lib/api'
+import {
+  HOOK_ONLY_CLASSES,
+  barrelExports,
+  autoImports,
+  exposedKeys,
+  renderApi
+} from '../scripts/lib/api'
 
 const ROOT = process.cwd()
 
@@ -15,6 +21,30 @@ describe('API.md', () => {
 const api = () => readFileSync(join(ROOT, 'API.md'), 'utf8')
 const slotsOf = (component: string) =>
   new RegExp(`### ${component}\\n[\\s\\S]*?\\nSlots: (.*)`).exec(api())?.[1] ?? ''
+
+describe('exposedKeys', () => {
+  it('reads defineExpose keys from the script setup AST, not from text', () => {
+    const sfc = `<template><div /></template>
+<script setup lang="ts" generic="T">
+  // defineExpose({ commented })
+  const text = 'defineExpose({ inString })'
+  defineExpose({
+    next: nextItem,
+    go,
+    zoomTo: (z: number, at = { x: 0 }) => zoom(z, at),
+    reset() { return { done: true } },
+    'quoted': 1
+  })
+</script>`
+    expect(exposedKeys(sfc)).toEqual(['go', 'next', 'quoted', 'reset', 'zoomTo'])
+    expect(exposedKeys('<script setup lang="ts">const a = 1</script>')).toEqual([])
+  })
+  it('lists what BlLightbox exposes (a generic SFC)', () => {
+    expect(/### BlLightbox\n[\s\S]*?\nExposed: (.*)/.exec(api())?.[1]).toBe(
+      '`go`, `next`, `previous`'
+    )
+  })
+})
 
 describe('API.md slots', () => {
   it('lists the BlMedia figure and aside slots', () => {

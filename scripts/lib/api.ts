@@ -91,6 +91,30 @@ function dynamicSlots(root: string, name: string, file: string) {
   return declared
 }
 
+// The keys of the object literal passed to `defineExpose` in an SFC's `<script setup>`.
+export function exposedKeys(sfc: string): string[] {
+  const script = /<script\b[^>]*\bsetup\b[^>]*>([\s\S]*?)<\/script>/.exec(sfc)?.[1] ?? ''
+  const sf = ts.createSourceFile('setup.ts', script, ts.ScriptTarget.Latest, true)
+  const keys: string[] = []
+  const visit = (node: ts.Node): void => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 'defineExpose' &&
+      node.arguments[0] &&
+      ts.isObjectLiteralExpression(node.arguments[0])
+    ) {
+      for (const prop of node.arguments[0].properties)
+        if (prop.name && (ts.isIdentifier(prop.name) || ts.isStringLiteral(prop.name)))
+          keys.push(prop.name.text)
+      return
+    }
+    ts.forEachChild(node, visit)
+  }
+  visit(sf)
+  return sorted(keys)
+}
+
 function componentSection(root: string): string {
   const checker = createChecker(join(root, 'tsconfig.json'), {
     schema: false,
@@ -129,6 +153,8 @@ function componentSection(root: string): string {
           .map((e) => e.name)
           .filter((n) => !propNames.has(n) && !n.startsWith('$') && !/^on[A-Z]/.test(n))
       )
+      // vue-component-meta reports nothing exposed for a generic SFC; read defineExpose instead.
+      if (!exposed.length) exposed.push(...exposedKeys(readFileSync(file, 'utf8')))
       return [
         `### ${name}`,
         '',

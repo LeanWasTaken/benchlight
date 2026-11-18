@@ -298,26 +298,27 @@ type LabelOverrides<T> = {
 
 ```ts
 interface LightboxItem {
-    src: string;
-    alt: string;
+    src?: string;
+    alt?: string;
     caption?: string;
     srcset?: string;
     sizes?: string;
     width?: number;
     height?: number;
+    key?: string | number;
 }
 ```
 
 ### `LightboxLabels`
 
 ```ts
-interface LightboxLabels {
+interface LightboxLabels<T extends LightboxItem = LightboxItem> {
     dialog: string;
     close: string;
     previous: string;
     next: string;
     failed: string;
-    position: (index: number, total: number) => string;
+    position: (index: number, total: number, item: T) => string;
 }
 ```
 
@@ -764,16 +765,19 @@ Exposed: none
 
 | prop | type | required | default |
 | --- | --- | --- | --- |
+| `announce` | `"position" \| "position+caption" \| undefined` | no | `"position"` |
 | `index` | `number \| undefined` | no | `0` |
-| `items` | `readonly LightboxItem[]` | yes |  |
-| `labels` | `Partial<LabelOverrides<LightboxLabels>> \| undefined` | no |  |
+| `items` | `readonly T[]` | yes |  |
+| `labels` | `Partial<LabelOverrides<LightboxLabels<T>>> \| undefined` | no |  |
 | `loop` | `boolean \| undefined` | no | `false` |
 | `open` | `boolean` | yes |  |
+| `preload` | `number \| false \| undefined` | no | `1` |
+| `title` | `string \| undefined` | no |  |
 
-Slots: `caption`, `default`
-Slot props: `caption` `{ item: LightboxItem; index: number; }`, `default` `{ item: LightboxItem; index: number; }`
+Slots: `actions`, `caption`, `default`, `title`
+Slot props: `actions` `{ item: T; index: number; }`, `caption` `{ item: T; index: number; }`, `default` `{ item: T; index: number; loaded: (size?: { width: number; height: number; } | undefined) => void; failed: () => void; }`, `title` `{ item: T; index: number; }`
 Events: `close`, `update:index`, `update:open`
-Exposed: none
+Exposed: `go`, `next`, `previous`
 
 ### BlLinkArrow
 
@@ -1367,6 +1371,7 @@ Exposed: none
 - `bl-led--on`
 - `bl-lede`
 - `bl-lightbox`
+- `bl-lightbox__actions`
 - `bl-lightbox__bar`
 - `bl-lightbox__caption`
 - `bl-lightbox__close`
@@ -1377,6 +1382,7 @@ Exposed: none
 - `bl-lightbox__nav--next`
 - `bl-lightbox__nav--prev`
 - `bl-lightbox__stage`
+- `bl-lightbox__title`
 - `bl-lightbox__toasts`
 - `bl-link-arrow`
 - `bl-link-arrow--quiet`
@@ -1534,6 +1540,7 @@ Exposed: none
 - `data-align`
 - `data-bl-appearance`
 - `data-bl-lift`
+- `data-bl-no-swipe`
 - `data-closing`
 - `data-dir`
 - `data-empty`

@@ -698,9 +698,10 @@ bundle CLI warns otherwise).
 
 ## BlLightbox
 
-A modal viewer for one image or a group, on native `<dialog>` and `showModal()`. It fills the
-viewport; apps keep their own thumbnails, grids or links and open it at an index. `lightbox` needs
-the `btn` and `layout` modules (the bundle CLI warns otherwise).
+A modal viewer for one image or a group, or any media through its default slot, on native
+`<dialog>` and `showModal()`. It fills the viewport; apps keep their own thumbnails, grids or links
+and open it at an index. `lightbox` needs the `btn` and `layout` modules (the bundle CLI warns
+otherwise).
 
 ```vue
 <button v-for="(photo, i) in photos" :key="photo.src" type="button" @click="show(i)">
@@ -719,12 +720,14 @@ function show(i: number) {
 ```
 
 ```html
-<dialog class="bl-lightbox" aria-label="Image viewer" aria-describedby="cap">
+<dialog class="bl-lightbox" aria-labelledby="title" aria-describedby="cap">
   <div class="bl-lightbox__bar">
     <button class="bl-btn bl-btn--ghost bl-btn--icon bl-lightbox__close" aria-label="Close">
       …
     </button>
     <p class="bl-lightbox__count" aria-hidden="true">2 / 5</p>
+    <h2 class="bl-lightbox__title" id="title">Harbour</h2>
+    <div class="bl-lightbox__actions">…</div>
   </div>
   <figure class="bl-lightbox__stage">
     <img class="bl-lightbox__media" src="…" alt="…" width="1600" height="1067" />
@@ -746,11 +749,18 @@ function show(i: number) {
 </dialog>
 ```
 
-- Props: `items` (`LightboxItem[]`: `src`, `alt`, optional `caption`, `srcset`, `sizes` (default
-  `'100vw'`), `width` and `height`), `loop` (default `false`) and `labels`: `dialog`, `close`,
-  `previous`, `next`, `failed` (defaults `'Image viewer'`, `'Close'`, `'Previous image'`,
-  `'Next image'`, `'The image could not be loaded.'`) and `position(i, n)`, the announcement with
-  `i` 1-based (default "Image i of n").
+- Props: `items` (`readonly T[]` with `T extends LightboxItem`: optional `src`, `alt`, `caption`,
+  `srcset`, `sizes` (default `'100vw'`), `width`, `height` and `key`; the slots receive your own
+  item type), `loop` (default `false`), `title`, `preload` (default `1`), `announce` (default
+  `'position'`) and `labels`: `dialog`, `close`, `previous`, `next`, `failed` (defaults
+  `'Image viewer'`, `'Close'`, `'Previous image'`, `'Next image'`,
+  `'The image could not be loaded.'`) and `position(i, n, item)`, the announcement with `i`
+  1-based and `item` of your item type (default "Image i of n"). For other media, relabel them, for example
+  `dialog: 'Media viewer'`, `previous: 'Previous item'` and
+  `` position: (i, n) => `Item ${i} of ${n}` ``.
+- Name: with a title (the `title` slot, else the `title` prop) the dialog is named by it
+  (`aria-labelledby`), otherwise by `labels.dialog`. The title stays on one line and ends in an
+  ellipsis when the bar is short of room; the name keeps the whole text.
 - Models: `open` (`v-model:open`) and `index` (`v-model:index`, default `0`; kept internally when
   unbound). An index out of range or not an integer is clamped, with a development warning; when
   `items` shrinks below the index it is clamped and `update:index` reports it. Opened with empty
@@ -762,33 +772,48 @@ function show(i: number) {
   runs; `data-closing` is set meanwhile, the bar, stage and nav buttons are `inert` and the arrow
   keys rest; the toast host stays usable). The lightbox is always dismissible: the ×, Esc and the
   back gesture, or a click on the stage outside the media and caption (pressed and released
-  there; a swipe never counts). Clicks in the bar, in the bottom row and within 24px of a nav
-  button do not close it.
-- Slots: default `{ item, index }` replaces the `<img>` (a video, an iframe, any figure); `caption`
-  `{ item, index }` replaces the caption text. A slot that renders nothing falls back.
+  there; a swipe never counts). Clicks in the bar (title and actions included), in the bottom row
+  and within 24px of a nav button do not close it.
+- Slots, each with `{ item, index }`: default (also `loaded` and `failed`) replaces the `<img>`
+  (a video, an iframe, inline SVG, any figure); `caption` replaces the caption text; `title`
+  replaces the `title` prop; `actions` fills the bar before the ×. A slot that renders nothing
+  falls back (`actions` to nothing).
+- Slotted media reports through `loaded(size?)`, called once it shows (from its `load` event, or
+  at mount for inline content), and `failed()`. They drive the built-in image's states:
+  `data-loaded` on the stage, then preloading; the message box in place of the slot. Calls for an
+  item no longer shown are ignored. A slot that never calls `loaded` shows at once, without a fade
+  and without preloading. `size` is the natural `{ width, height }`.
 - `width` and `height` reserve the image box before it loads. The image fades in on `load`, then
-  the neighbours (index ±1, wrapping with `loop`) are preloaded with their `srcset` and `sizes`. An
-  image that fails to load is replaced by its alt text, the caption, or `labels.failed`, in a
-  message box. Without a default slot, an item with an empty `alt` and no caption warns in
-  development, once per `src`.
+  `preload` neighbours each way (`0` or `false` for none; wrapping with `loop`; only items with a
+  `src`) are preloaded with their `srcset` and `sizes`. An image that fails to load is replaced by
+  its alt text, the caption, or `labels.failed`, in a message box. Without a default slot, an item
+  with no `src` shows that message box; it, and an item with neither `alt` nor caption, warn in
+  development, once per `key` (the index without one).
 - Keys on the dialog: ArrowLeft/ArrowRight move back and forward (swapped under `rtl`), Home and End
   jump to the ends. Keys from an input, textarea, select or contenteditable element, from inside an
-  `iframe` or an element with a `controls` attribute (such as `<video controls>`), with a modifier
-  held, or already handled (`preventDefault()`), are left alone. A video without `controls` does
-  not block them.
+  `iframe`, an element with a `controls` attribute (such as `<video controls>`) or one marked
+  `data-bl-no-swipe`, with a modifier held, or already handled (`preventDefault()`), are left
+  alone. A video without `controls` does not block them.
 - Swipe: one pointer, mostly horizontal, at least 48px or 15% of the stage width, whichever is
   more; it follows the reading direction. A second pointer cancels it, and drags that start in an
-  `iframe` or a `[controls]` element, or with `preventDefault()` called, do not count. The stage sets
-  `touch-action: pan-y pinch-zoom`, so the page's pinch-zoom keeps working; while the page is
-  zoomed in (`visualViewport.scale` above 1) a drag pans instead of swiping.
+  `iframe`, a `[controls]` or `[data-bl-no-swipe]` element, or with `preventDefault()` called on
+  their `pointerdown`, do not count. Mark slotted content that drags itself (a map, a 3D view)
+  with `data-bl-no-swipe`. The stage sets `touch-action: pan-y pinch-zoom`, so the page's
+  pinch-zoom keeps working; while the page is zoomed in (`visualViewport.scale` above 1) a drag
+  pans instead of swiping.
 - Focus: the dialog focuses itself on open (as BlDialog, so a mouse open rings nothing), the arrow
   keys work at once, Tab moves to the ×, and focus stays put while navigating; a focused nav
   button disabled at an end hands focus to the other one. Close and unmount restore focus as for
-  BlDialog. The live region announces the position after navigation, not on open. One item shows
-  no nav buttons, counter or announcement.
-- From 40em up the nav buttons sit over the stage's inline edges; below, they move to a bottom row
-  either side of the counter. The dialog is `100dvh` tall and padded by the safe areas; the
-  caption clamps to about four lines and scrolls beyond that.
+  BlDialog. One item shows no nav buttons, counter or announcement.
+- The live region announces the position after navigation, not on open; with
+  `announce="position+caption"` it adds the item's caption, else its alt
+  ("Image 2 of 5, Harbour at dawn").
+- A template ref exposes `next()`, `previous()` and `go(i)`, which move as the buttons do; `go`
+  ignores an index outside `items`, and the announcement plays only while open.
+- From 40em up the bar holds the counter, title, actions and ×, and the nav buttons sit over the
+  stage's inline edges. Below, the actions wrap onto their own row under the title and the nav
+  buttons move to a bottom row either side of the counter. The dialog is `100dvh` tall and padded
+  by the safe areas; the caption clamps to about four lines and scrolls beyond that.
 - Scroll lock and toasts work as for BlDialog (`html:has(dialog.bl-lightbox[open]:modal)`, the same
   `--bl-dialog-gutter`). `--bl-lightbox-scrim` sets the backdrop, by default the canvas at 96%, so
   it follows the appearance.

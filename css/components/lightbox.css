@@ -20,12 +20,13 @@
     border: 0;
     transition: background-color var(--bl-duration-base) ease;
   }
+  /* Auto tracks grow before an fr track: capped, the actions wrap before the title gives way. */
   .bl-lightbox[open] {
     display: grid;
     grid-template:
-      'count . close' auto
-      'stage stage stage' minmax(0, 1fr)
-      / minmax(0, 1fr) auto minmax(0, 1fr);
+      'count title actions close' auto
+      'stage stage stage stage' minmax(0, 1fr)
+      / auto minmax(0, 1fr) fit-content(40%) auto;
   }
   @starting-style {
     .bl-lightbox[open] {
@@ -65,8 +66,7 @@
   .bl-lightbox__bar {
     display: contents;
   }
-  .bl-lightbox__count,
-  .bl-lightbox__close,
+  .bl-lightbox__bar > *,
   .bl-lightbox__stage,
   .bl-lightbox__nav {
     opacity: 0;
@@ -78,7 +78,7 @@
       opacity var(--bl-duration-base) ease,
       scale var(--bl-duration-base) var(--bl-ease-out);
   }
-  .bl-lightbox[open] :is(.bl-lightbox__count, .bl-lightbox__close, .bl-lightbox__nav) {
+  .bl-lightbox[open] :is(.bl-lightbox__bar > *, .bl-lightbox__nav) {
     opacity: 1;
   }
   .bl-lightbox[open] .bl-lightbox__stage {
@@ -86,7 +86,7 @@
     scale: none;
   }
   @starting-style {
-    .bl-lightbox[open] :is(.bl-lightbox__count, .bl-lightbox__close, .bl-lightbox__nav) {
+    .bl-lightbox[open] :is(.bl-lightbox__bar > *, .bl-lightbox__nav) {
       opacity: 0;
     }
     .bl-lightbox[open] .bl-lightbox__stage {
@@ -94,17 +94,21 @@
       scale: 0.98;
     }
   }
-  .bl-lightbox[data-closing] :is(.bl-lightbox__count, .bl-lightbox__close, .bl-lightbox__nav) {
+  .bl-lightbox[data-closing] :is(.bl-lightbox__bar > *, .bl-lightbox__nav) {
     opacity: 0;
   }
   .bl-lightbox[data-closing] .bl-lightbox__stage {
     opacity: 0;
     scale: 0.98;
   }
+  /* The bar's text lines up with the ×, also when wrapped actions make the row taller. */
+  .bl-lightbox__count,
+  .bl-lightbox__title {
+    align-self: start;
+    margin: max(0px, calc(var(--bl-space-2) + 22px - 0.5lh)) 0 0;
+  }
   .bl-lightbox__count {
     grid-area: count;
-    align-self: center;
-    margin: 0;
     padding-inline: var(--bl-space-4);
     color: var(--bl-color-ink-2);
     font-family: var(--bl-font-mono);
@@ -114,8 +118,30 @@
   }
   .bl-lightbox__close {
     grid-area: close;
+    align-self: start;
     justify-self: end;
     margin: var(--bl-space-2);
+  }
+  /* One line: a long title ends in an ellipsis; the dialog's name keeps the whole text. */
+  .bl-lightbox__title {
+    grid-area: title;
+    min-inline-size: 0;
+    padding-inline: var(--bl-space-4) var(--bl-space-2);
+    overflow: hidden;
+    font-size: var(--bl-text-body);
+    font-weight: 600;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .bl-lightbox__actions {
+    grid-area: actions;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--bl-space-2);
+    min-inline-size: 0;
+    margin-block: var(--bl-space-2);
   }
   /* Over any image: the buttons carry their own surface. */
   .bl-lightbox .bl-lightbox__close,
@@ -210,13 +236,21 @@
   @media (max-width: 39.99em) {
     .bl-lightbox[open] {
       grid-template:
-        '. . close' auto
+        'title title close' auto
+        'actions actions actions' auto
         'stage stage stage' minmax(0, 1fr)
         'prev count next' auto
         / minmax(0, 1fr) auto minmax(0, 1fr);
     }
+    /* The actions wrap onto their own row under the title, clear of the ×. */
+    .bl-lightbox__actions {
+      justify-content: flex-start;
+      margin: 0 var(--bl-space-4) var(--bl-space-2);
+    }
     .bl-lightbox__count {
+      align-self: center;
       justify-self: center;
+      margin: 0;
       padding-inline: var(--bl-space-2);
     }
     .bl-lightbox__nav {

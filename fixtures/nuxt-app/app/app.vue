@@ -26,6 +26,9 @@
         :page-size="2"
         :row-link="rowLink"
       />
+      <BlLightbox v-model:open="viewer" :items="photos" title="Photos">
+        <template #actions="{ item }"><a :href="item.src">Original</a></template>
+      </BlLightbox>
     </main>
     <BlColophon :items="['fixture']" />
   </div>
@@ -51,4 +54,6 @@
     { name: 'gamma', value: 2 }
   ]
   const rowLink = () => ({ href: '#row' })
+  const viewer = ref(false)
+  const photos = [{ src: '/photo.jpg', alt: 'A photo', width: 1200, height: 800 }]
 </script>
