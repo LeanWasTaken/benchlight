@@ -1,4 +1,3 @@
-const FIELD_CONTEXT = /* @__PURE__ */ Symbol("bl-field");
-export {
-  FIELD_CONTEXT
-};
+// vue/types.ts
+var FIELD_CONTEXT = Symbol("bl-field");
+export { FIELD_CONTEXT };

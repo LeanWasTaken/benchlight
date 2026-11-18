@@ -104,6 +104,13 @@ var module_default = defineNuxtModule({
       ...nuxt.options.vite.optimizeDeps,
       exclude: [...nuxt.options.vite.optimizeDeps?.exclude ?? [], "benchlight"]
     };
+    nuxt.options.vite.css = {
+      ...nuxt.options.vite.css,
+      lightningcss: {
+        ...nuxt.options.vite.css?.lightningcss,
+        exclude: (nuxt.options.vite.css?.lightningcss?.exclude ?? 0) | 4
+      }
+    };
   }
 });
 export {

@@ -1,7 +1,10 @@
-import { clearToasts, dismissToast, addToast } from "../internal/toastStore.js";
+import { addToast, clearToasts, dismissToast } from "../internal/toastStore.js";
+// vue/composables/useToast.ts
 function useToast() {
-  return { toast: addToast, dismiss: dismissToast, clear: clearToasts };
+	return {
+		toast: addToast,
+		dismiss: dismissToast,
+		clear: clearToasts
+	};
 }
-export {
-  useToast
-};
+export { useToast };

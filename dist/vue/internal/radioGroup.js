@@ -1,4 +1,3 @@
-const RADIO_GROUP_CONTEXT = /* @__PURE__ */ Symbol("bl-radio-group");
-export {
-  RADIO_GROUP_CONTEXT
-};
+// vue/internal/radioGroup.ts
+var RADIO_GROUP_CONTEXT = Symbol("bl-radio-group");
+export { RADIO_GROUP_CONTEXT };

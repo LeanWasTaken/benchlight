@@ -1,15 +1,11 @@
 import { shallowRef } from "vue";
-const toastHosts = shallowRef([]);
+// vue/internal/toastHosts.ts
+var toastHosts = shallowRef([]);
 function pushToastHost(el) {
-  toastHosts.value = [...toastHosts.value.filter((h) => h !== el), el];
+	toastHosts.value = [...toastHosts.value.filter((h) => h !== el), el];
 }
 function removeToastHost(el) {
-  toastHosts.value = toastHosts.value.filter((h) => h !== el);
+	toastHosts.value = toastHosts.value.filter((h) => h !== el);
 }
-const toastFocus = { returnTarget: null };
-export {
-  pushToastHost,
-  removeToastHost,
-  toastFocus,
-  toastHosts
-};
+var toastFocus = { returnTarget: null };
+export { pushToastHost, removeToastHost, toastFocus, toastHosts };

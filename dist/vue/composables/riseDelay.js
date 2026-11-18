@@ -1,7 +1,5 @@
+// vue/composables/riseDelay.ts
 function riseDelay(index, { base = 0, step = 60, cap } = {}) {
-  const n = Math.max(0, cap === void 0 ? index : Math.min(index, cap));
-  return { "--bl-rise-delay": `${base + n * step}ms` };
+	return { "--bl-rise-delay": `${base + Math.max(0, cap === void 0 ? index : Math.min(index, cap)) * step}ms` };
 }
-export {
-  riseDelay
-};
+export { riseDelay };
