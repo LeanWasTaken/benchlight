@@ -767,6 +767,39 @@
       </dialog>
     </section>
 
+    <!-- Lightbox: extreme aspect ratios and long captions, a single item, a narrow flex host. -->
+    <section v-if="show('lightbox-long')" data-case="lightbox-long">
+      <h2 class="st-label">lightbox-long</h2>
+      <div data-box>
+        <BlButton variant="secondary" @click="viewer = 'long'">Open viewer</BlButton>
+      </div>
+      <BlLightbox :open="viewer === 'long'" :items="extremePhotos" @update:open="viewer = null" />
+    </section>
+
+    <section v-if="show('lightbox-single')" data-case="lightbox-single">
+      <h2 class="st-label">lightbox-single</h2>
+      <div data-box>
+        <BlButton variant="secondary" @click="viewer = 'single'">Open viewer</BlButton>
+      </div>
+      <BlLightbox
+        :open="viewer === 'single'"
+        :items="extremePhotos.slice(0, 1)"
+        @update:open="viewer = null"
+      />
+    </section>
+
+    <section v-if="show('lightbox-narrow')" data-case="lightbox-narrow">
+      <h2 class="st-label">lightbox-narrow</h2>
+      <div data-box style="display: inline-flex; max-width: 160px">
+        <BlButton variant="secondary" @click="viewer = 'narrow'">Open viewer</BlButton>
+        <BlLightbox
+          :open="viewer === 'narrow'"
+          :items="extremePhotos.slice(1)"
+          @update:open="viewer = null"
+        />
+      </div>
+    </section>
+
     <!-- D3: page chrome; each rendered alone via ?case=<id> -->
     <template v-if="chrome">
       <div v-for="n in 12" :key="n" class="st-filler">Filler line {{ n }}</div>
@@ -823,6 +856,7 @@
     BlTextarea,
     BlToggle,
     BlDialog,
+    BlLightbox,
     BlDisclosure,
     BlTabBarItem,
     BlTelemetry,
@@ -833,6 +867,7 @@
   import { nextTick, onMounted, ref } from 'vue'
 
   import type { TableColumn } from '../../vue'
+  import { photo } from './demos/data'
 
   const hash = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
   const url =
@@ -958,6 +993,25 @@
   const sheetOpen = ref(false)
   const detailsOpen = ref(false)
   const formDialog = ref<HTMLDialogElement>()
+  const viewer = ref<'long' | 'single' | 'narrow' | null>(null)
+  const longCaption = `${german} ${'and a caption long enough to wrap over many lines '.repeat(12)}${url}`
+  const extremePhotos = [
+    {
+      src: photo(4000, 500, 200),
+      alt: 'A very wide panorama',
+      caption: longCaption,
+      width: 4000,
+      height: 500
+    },
+    {
+      src: photo(500, 3000, 20),
+      alt: 'A very tall strip',
+      caption: longCaption,
+      width: 500,
+      height: 3000
+    },
+    { src: photo(16, 16, 120), alt: 'A tiny square', caption: hash, width: 16, height: 16 }
+  ]
   function save(): void {
     sheetOpen.value = false
     toast('Saved')

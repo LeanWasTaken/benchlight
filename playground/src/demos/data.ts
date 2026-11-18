@@ -1,4 +1,4 @@
-import type { TableColumn } from '../../../vue'
+import type { LightboxItem, TableColumn } from '../../../vue'
 
 export type Client = {
   name: string
@@ -46,4 +46,50 @@ export const logLines = [
   '\x1b[0;31mE (2011) ota: image too large\x1b[0m',
   'I (2100) main: idle',
   ...Array.from({ length: 16 }, (_, i) => `I (${2200 + i * 40}) main: tick ${i + 1}`)
+]
+
+/**
+ * A deterministic stand-in photo as an SVG data URI: sky, sun and two hills, `width` x `height`.
+ * `hue` picks the palette so a group of them stays distinguishable.
+ */
+export function photo(width: number, height: number, hue: number): string {
+  const [w, h] = [width, height]
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">` +
+    `<rect width="${w}" height="${h}" fill="hsl(${hue} 45% 72%)"/>` +
+    `<circle cx="${w * 0.72}" cy="${h * 0.3}" r="${Math.min(w, h) / 8}" fill="hsl(${hue + 40} 80% 88%)"/>` +
+    `<path d="M0 ${h * 0.7}Q${w * 0.3} ${h * 0.45} ${w * 0.6} ${h * 0.68}T${w} ${h * 0.6}V${h}H0Z" fill="hsl(${hue + 160} 30% 42%)"/>` +
+    `<path d="M0 ${h * 0.85}Q${w * 0.5} ${h * 0.7} ${w} ${h * 0.88}V${h}H0Z" fill="hsl(${hue + 170} 35% 28%)"/>` +
+    `</svg>`
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
+}
+
+export const photos: LightboxItem[] = [
+  {
+    src: photo(1500, 1000, 200),
+    alt: 'Hills under a pale blue sky',
+    caption: 'Landscape, 3:2.',
+    width: 1500,
+    height: 1000
+  },
+  {
+    src: photo(800, 1200, 20),
+    alt: 'Hills under a warm sky, portrait',
+    caption: 'Portrait, 2:3.',
+    width: 800,
+    height: 1200
+  },
+  {
+    src: photo(1000, 1000, 120),
+    alt: 'Hills under a green sky, square',
+    width: 1000,
+    height: 1000
+  },
+  {
+    src: photo(2400, 600, 260),
+    alt: 'A wide panorama of hills under a violet sky',
+    caption: 'Panorama, 4:1.',
+    width: 2400,
+    height: 600
+  }
 ]

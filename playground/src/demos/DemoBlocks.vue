@@ -61,6 +61,25 @@
     </BlDialog>
   </div>
 
+  <div class="pg-row" data-demo="lightbox">
+    <button
+      v-for="(photo, i) in photos"
+      :key="i"
+      type="button"
+      class="pg-thumb"
+      @click="openViewer(i)"
+    >
+      <img :src="photo.src" :alt="photo.alt" />
+    </button>
+    <span class="bl-annotation">Last close: {{ viewerClose }}</span>
+    <BlLightbox
+      v-model:open="viewerOpen"
+      v-model:index="viewerIndex"
+      :items="photos"
+      @close="viewerClose = $event.reason"
+    />
+  </div>
+
   <div class="pg-row" data-demo="toast">
     <BlButton variant="secondary" @click="toast('Saved')">Toast</BlButton>
     <BlButton variant="secondary" @click="toast({ message: 'Connected', tone: 'success' })">
@@ -85,12 +104,14 @@
 
 <script setup lang="ts">
   import { ref } from 'vue'
+  import { photos } from './data'
   import {
     BlButton,
     BlDialog,
     BlDisclosure,
     BlField,
     BlInput,
+    BlLightbox,
     BlTooltip,
     useToast
   } from '../../../vue'
@@ -103,4 +124,11 @@
   const itemName = ref('Item 1')
   const lastClose = ref('none')
   const { toast, dismiss, clear } = useToast()
+  const viewerOpen = ref(false)
+  const viewerIndex = ref(0)
+  const viewerClose = ref('none')
+  function openViewer(i: number): void {
+    viewerIndex.value = i
+    viewerOpen.value = true
+  }
 </script>

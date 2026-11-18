@@ -74,6 +74,20 @@
 .pg-media-large {
   --bl-media-size: 96px;
 }
+.pg-thumb {
+  padding: 0;
+  overflow: hidden;
+  background: none;
+  border: 1px solid var(--bl-color-separator);
+  border-radius: var(--bl-radius-chip);
+  cursor: zoom-in;
+}
+.pg-thumb img {
+  display: block;
+  inline-size: 96px;
+  block-size: 64px;
+  object-fit: cover;
+}
 .pg-dialog-wide {
   --bl-dialog-width: 48rem;
 }

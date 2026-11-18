@@ -660,6 +660,102 @@ bundle CLI warns otherwise).
   `.bl-dialog` (it fades in with it), so it cannot be shown on its own. Backdrop-click closing, gutter
   compensation, focus-restore hardening and in-dialog toasts are Vue-only.
 
+## BlLightbox
+
+A modal viewer for one image or a group, on native `<dialog>` and `showModal()`. It fills the
+viewport; apps keep their own thumbnails, grids or links and open it at an index. `lightbox` needs
+the `btn` and `layout` modules (the bundle CLI warns otherwise).
+
+```vue
+<button v-for="(photo, i) in photos" :key="photo.src" type="button" @click="show(i)">
+  <img :src="photo.thumb" :alt="photo.alt" />
+</button>
+<BlLightbox v-model:open="viewerOpen" v-model:index="viewerIndex" :items="photos" />
+```
+
+```ts
+const viewerOpen = ref(false)
+const viewerIndex = ref(0)
+function show(i: number) {
+  viewerIndex.value = i
+  viewerOpen.value = true
+}
+```
+
+```html
+<dialog class="bl-lightbox" aria-label="Image viewer" aria-describedby="cap">
+  <div class="bl-lightbox__bar">
+    <button class="bl-btn bl-btn--ghost bl-btn--icon bl-lightbox__close" aria-label="Close">
+      …
+    </button>
+    <p class="bl-lightbox__count" aria-hidden="true">2 / 5</p>
+  </div>
+  <figure class="bl-lightbox__stage">
+    <img class="bl-lightbox__media" src="…" alt="…" width="1600" height="1067" />
+    <figcaption class="bl-lightbox__caption" id="cap">…</figcaption>
+  </figure>
+  <button
+    class="bl-btn bl-btn--ghost bl-btn--icon bl-lightbox__nav bl-lightbox__nav--prev"
+    aria-label="Previous image"
+  >
+    …
+  </button>
+  <button
+    class="bl-btn bl-btn--ghost bl-btn--icon bl-lightbox__nav bl-lightbox__nav--next"
+    aria-label="Next image"
+  >
+    …
+  </button>
+  <p class="bl-sr-only" aria-live="polite"></p>
+</dialog>
+```
+
+- Props: `items` (`LightboxItem[]`: `src`, `alt`, optional `caption`, `srcset`, `sizes` (default
+  `'100vw'`), `width` and `height`), `loop` (default `false`) and `labels`: `dialog`, `close`,
+  `previous`, `next`, `failed` (defaults `'Image viewer'`, `'Close'`, `'Previous image'`,
+  `'Next image'`, `'The image could not be loaded.'`) and `position(i, n)`, the announcement with
+  `i` 1-based (default "Image i of n").
+- Models: `open` (`v-model:open`) and `index` (`v-model:index`, default `0`; kept internally when
+  unbound). An index out of range or not an integer is clamped, with a development warning; when
+  `items` shrinks below the index it is clamped and `update:index` reports it. Opened with empty
+  `items`, it shows nothing and warns in development; `open` stays as set and it opens once items
+  arrive. Emptied while open, it closes with `update:open(false)` and reason `'program'`, so a
+  refill does not reopen it.
+- Emits `update:open(false)` and `close({ reason, returnValue })` once per close, with BlDialog's
+  reasons. The lightbox is always dismissible: the ×, Esc and the back gesture, or a click on the
+  stage outside the media and caption (pressed and released there; a swipe never counts). Clicks in
+  the bar, in the bottom row and within 24px of a nav button do not close it.
+- Slots: default `{ item, index }` replaces the `<img>` (a video, an iframe, any figure); `caption`
+  `{ item, index }` replaces the caption text. A slot that renders nothing falls back.
+- `width` and `height` reserve the image box before it loads. The image fades in on `load`, then
+  the neighbours (index ±1, wrapping with `loop`) are preloaded with their `srcset` and `sizes`. An
+  image that fails to load is replaced by its alt text, the caption, or `labels.failed`, in a
+  message box. Without a default slot, an item with an empty `alt` and no caption warns in
+  development, once per `src`.
+- Keys on the dialog: ArrowLeft/ArrowRight move back and forward (swapped under `rtl`), Home and End
+  jump to the ends. Keys from an input, textarea, select or contenteditable element, from inside an
+  `iframe` or an element with a `controls` attribute (such as `<video controls>`), with a modifier
+  held, or already handled (`preventDefault()`), are left alone. A video without `controls` does
+  not block them.
+- Swipe: one pointer, mostly horizontal, at least 48px or 15% of the stage width, whichever is
+  more; it follows the reading direction. A second pointer cancels it, and drags that start in an
+  `iframe` or a `[controls]` element, or with `preventDefault()` called, do not count. The stage sets
+  `touch-action: pan-y pinch-zoom`, so the page's pinch-zoom keeps working; while the page is
+  zoomed in (`visualViewport.scale` above 1) a drag pans instead of swiping.
+- Focus: the browser focuses the × on open and focus stays put while navigating; a focused nav
+  button disabled at an end hands focus to the other one. Close and unmount restore focus as for
+  BlDialog. The live region announces the position after navigation, not on open. One item shows
+  no nav buttons, counter or announcement.
+- From 40em up the nav buttons sit over the stage's inline edges; below, they move to a bottom row
+  either side of the counter. The dialog is `100dvh` tall and padded by the safe areas; the
+  caption clamps to about four lines and scrolls beyond that.
+- Scroll lock and toasts work as for BlDialog (`html:has(dialog.bl-lightbox[open]:modal)`, the same
+  `--bl-dialog-gutter`). `--bl-lightbox-scrim` sets the backdrop, by default the canvas at 96%, so
+  it follows the appearance.
+- CSS-only: call `showModal()`/`close()` yourself and wire the ids. Navigation, swipe, the
+  announcement, preloading, the load fade (`data-loaded`, set only by the component) and the
+  load-error message are Vue-only.
+
 ## BlToast
 
 Short, queued notifications: `useToast()` adds them and one `<BlToaster />` shows them. `toast`
@@ -859,6 +955,7 @@ Custom properties a consumer may set. API.md lists them under "CSS hooks".
 | `--bl-popover-width`                                  | max width of a BlPopover panel, never wider than the viewport less 16px      | `20rem`                  |
 | `--bl-tooltip-width`                                  | max width of a BlTooltip panel, never wider than the viewport less 16px      | `16rem`                  |
 | `--bl-dialog-width`                                   | width of a centred BlDialog, never wider than the viewport less 32px         | `32rem`                  |
+| `--bl-lightbox-scrim`                                 | backdrop colour of a BlLightbox                                              | canvas at 96%            |
 | `--bl-media-size`                                     | size of a BlMedia figure                                                     | `64px`                   |
 | `--bl-chevron-mask`                                   | chevron shape of both the select and the disclosure                          | built-in chevron         |
 | `--bl-meter-value`                                    | fill fraction of a BlMeter bar (0 to 1; BlMeter and BlProgress set it)       | `0`                      |
@@ -869,7 +966,7 @@ Custom properties a consumer may set. API.md lists them under "CSS hooks".
 | `--bl-table-min-col`                                  | narrowest BlTable column before the table stacks                             | `8rem`                   |
 | `--bl-table-col-min`                                  | narrowest width of one column (BlTable sets it from `TableColumn.width`)     | `--bl-table-min-col`     |
 
-`--bl-dialog-gutter` is internal: BlDialog sets it on `html` while open.
+`--bl-dialog-gutter` is internal: BlDialog and BlLightbox set it on `html` while open.
 
 ## Component to module
 
@@ -911,6 +1008,7 @@ places. `tokens` always comes first; `base`, `type`, `motion`, `layout` and `tin
 | BlMedia                                         | `media`                        |
 | BlDisclosure                                    | `disclosure`                   |
 | BlDialog                                        | `dialog`                       |
+| BlLightbox                                      | `lightbox`                     |
 | BlToaster                                       | `toast`                        |
 | (shared placement for popovers)                 | `anchored`                     |
 | BlPopover                                       | `popover` (needs `anchored`)   |

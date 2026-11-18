@@ -97,7 +97,7 @@ BlIndex, BlSkipLink, BlColophon, BlSectionHead, BlProse, BlLinkArrow, BlAppearan
 Forms: BlField, BlInput, BlTextarea, BlSelect, BlNumberField, BlRange, BlCheckbox, BlToggle,
 BlRadioGroup, BlSegmented, BlButton.
 
-Overlays and feedback: BlDialog, BlPopover, BlTooltip, BlToaster, BlMsg, BlDisclosure.
+Overlays and feedback: BlDialog, BlLightbox, BlPopover, BlTooltip, BlToaster, BlMsg, BlDisclosure.
 
 Data and status: BlTable, BlMeter, BlProgress, BlLed, BlReadout, BlTelemetry, BlSpecPanel,
 BlLog, BlEqBars, BlMarquee, BlMedia, BlMeta.

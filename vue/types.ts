@@ -173,6 +173,30 @@ export interface DialogLabels {
 
 export type DialogCloseReason = 'button' | 'backdrop' | 'escape' | 'program' | 'native'
 
+/** One BlLightbox item. `width`/`height` are the intrinsic size, reserving the box before load. */
+export interface LightboxItem {
+  src: string
+  /** Required; `''` only for a decorative image whose caption names it. */
+  alt: string
+  caption?: string
+  srcset?: string
+  /** Default `'100vw'`. */
+  sizes?: string
+  width?: number
+  height?: number
+}
+
+export interface LightboxLabels {
+  dialog: string
+  close: string
+  previous: string
+  next: string
+  /** Shown when an image fails to load and has neither alt text nor a caption. */
+  failed: string
+  /** Live announcement after navigation; `index` is 1-based. */
+  position: (index: number, total: number) => string
+}
+
 /** Status vocabulary shared by BlMsg, BlLed and toasts. Neutral is the unmarked base (an unlit BlLed). */
 export type StatusTone = 'neutral' | 'success' | 'danger'
 

@@ -75,7 +75,11 @@
     </section>
 
     <section id="blocks">
-      <BlSectionHead eyebrow="Building blocks" heading="Disclosure, dialog, toast" ruled />
+      <BlSectionHead
+        eyebrow="Building blocks"
+        heading="Disclosure, dialog, lightbox, toast"
+        ruled
+      />
       <DemoBlocks />
     </section>
 

@@ -130,6 +130,21 @@ describe('WCAG AA for text tokens', () => {
   })
 })
 
+// BlLightbox: counter (ink-2) and caption (ink-1) sit on the default scrim, the canvas at 96%
+// over whatever the page shows behind it; black and white bound that.
+describe('BlLightbox scrim', () => {
+  const pairs = THEMES.flatMap((theme) =>
+    (['ink-1', 'ink-2'] as const).flatMap((fg) =>
+      ['#000000', '#ffffff'].map((under) => [theme, fg, under] as const)
+    )
+  )
+  it.each(pairs)('%s %s on the scrim over %s', (theme, fg, under) => {
+    const c = tokens.color[theme]
+    const scrim = mix(hexToRgb(c.canvas), hexToRgb(under), 0.96)
+    expect(contrast(hexToRgb(c[fg]), scrim)).toBeGreaterThanOrEqual(4.5)
+  })
+})
+
 describe('non-text contrast for control edges (WCAG 1.4.11)', () => {
   const pairs = THEMES.flatMap((theme) => SURFACES.map((bg) => [theme, bg] as const))
   it.each(pairs)('%s control-border on %s', (theme, bg) => {

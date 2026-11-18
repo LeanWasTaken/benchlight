@@ -45,6 +45,7 @@
 - `dist/modules/index-row.min.css`
 - `dist/modules/layout.min.css`
 - `dist/modules/led.min.css`
+- `dist/modules/lightbox.min.css`
 - `dist/modules/link-arrow.min.css`
 - `dist/modules/log.min.css`
 - `dist/modules/marquee.min.css`
@@ -91,6 +92,7 @@
 - `BlIndexRow`
 - `BlInput`
 - `BlLed`
+- `BlLightbox`
 - `BlLinkArrow`
 - `BlLog`
 - `BlMarquee`
@@ -280,6 +282,33 @@ type KeyColumn<Row extends object> = {
 type LabelOverrides<T> = {
     [K in keyof T]?: T[K] | undefined;
 };
+```
+
+### `LightboxItem`
+
+```ts
+interface LightboxItem {
+    src: string;
+    alt: string;
+    caption?: string;
+    srcset?: string;
+    sizes?: string;
+    width?: number;
+    height?: number;
+}
+```
+
+### `LightboxLabels`
+
+```ts
+interface LightboxLabels {
+    dialog: string;
+    close: string;
+    previous: string;
+    next: string;
+    failed: string;
+    position: (index: number, total: number) => string;
+}
 ```
 
 ### `LinkAs`
@@ -719,6 +748,21 @@ Exposed: none
 
 Slots: none
 Events: none
+Exposed: none
+
+### BlLightbox
+
+| prop | type | required | default |
+| --- | --- | --- | --- |
+| `index` | `number \| undefined` | no | `0` |
+| `items` | `readonly LightboxItem[]` | yes |  |
+| `labels` | `Partial<LabelOverrides<LightboxLabels>> \| undefined` | no |  |
+| `loop` | `boolean \| undefined` | no | `false` |
+| `open` | `boolean` | yes |  |
+
+Slots: `caption`, `default`
+Slot props: `caption` `{ item: LightboxItem; index: number; }`, `default` `{ item: LightboxItem; index: number; }`
+Events: `close`, `update:index`, `update:open`
 Exposed: none
 
 ### BlLinkArrow
@@ -1312,6 +1356,18 @@ Exposed: none
 - `bl-led--danger`
 - `bl-led--on`
 - `bl-lede`
+- `bl-lightbox`
+- `bl-lightbox__bar`
+- `bl-lightbox__caption`
+- `bl-lightbox__close`
+- `bl-lightbox__count`
+- `bl-lightbox__media`
+- `bl-lightbox__message`
+- `bl-lightbox__nav`
+- `bl-lightbox__nav--next`
+- `bl-lightbox__nav--prev`
+- `bl-lightbox__stage`
+- `bl-lightbox__toasts`
 - `bl-link-arrow`
 - `bl-link-arrow--quiet`
 - `bl-link-arrow__icon`
@@ -1473,11 +1529,13 @@ Exposed: none
 - `data-fit`
 - `data-label`
 - `data-lifted`
+- `data-loaded`
 - `data-measuring`
 - `data-overflowing`
 - `data-ready`
 - `data-side`
 - `data-stacked`
+- `data-zoomed`
 
 ## Tokens
 - `--bl-color-canvas`
@@ -1547,6 +1605,7 @@ Exposed: none
 - `--bl-anchored-gap`
 - `--bl-chevron-mask`
 - `--bl-dialog-width`
+- `--bl-lightbox-scrim`
 - `--bl-log-height`
 - `--bl-media-size`
 - `--bl-meter-value`

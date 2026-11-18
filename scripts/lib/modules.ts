@@ -39,6 +39,7 @@ export const MODULES = {
   media: 'css/components/media.css',
   disclosure: 'css/components/disclosure.css',
   dialog: 'css/components/dialog.css',
+  lightbox: 'css/components/lightbox.css',
   toast: 'css/components/toast.css',
   anchored: 'css/components/anchored.css',
   popover: 'css/components/popover.css',
@@ -53,6 +54,7 @@ export type ModuleName = keyof typeof MODULES
 // without them (CSS-derived `type`/`base` needs are detected separately in bundle.ts).
 export const REQUIRES: Partial<Record<ModuleName, readonly ModuleName[]>> = {
   dialog: ['btn'],
+  lightbox: ['btn', 'layout'],
   'number-field': ['field'],
   pagination: ['layout'],
   popover: ['anchored'],

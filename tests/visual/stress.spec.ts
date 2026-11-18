@@ -510,6 +510,50 @@ const iconButtonsStay44: Check = {
     })
 }
 
+/** Opens the case's lightbox and steps through every item: the media, caption and buttons stay
+ * inside the viewport, the caption sits below the media, and the buttons keep 44px. */
+const lightboxFits: Probe = (page) =>
+  page.evaluate(async () => {
+    const frame = () => new Promise((resolve) => requestAnimationFrame(resolve))
+    document.querySelector<HTMLElement>('[data-box] .bl-btn')!.click()
+    const dialog = document.querySelector<HTMLDialogElement>('dialog.bl-lightbox')!
+    const bad: string[] = []
+    for (let step = 0; step < 8; step++) {
+      for (let i = 0; i < 60 && !dialog.querySelector('[data-loaded="true"]'); i++) await frame()
+      await frame()
+      const d = dialog.getBoundingClientRect()
+      if (Math.abs(d.width - innerWidth) > 1 || Math.abs(d.height - innerHeight) > 1)
+        bad.push(`dialog ${Math.round(d.width)}x${Math.round(d.height)} is not the viewport`)
+      const parts = dialog.querySelectorAll<HTMLElement>(
+        '.bl-lightbox__media, .bl-lightbox__caption, .bl-lightbox__count, .bl-btn'
+      )
+      for (const el of parts) {
+        const r = el.getBoundingClientRect()
+        if (
+          r.left < -0.5 ||
+          r.top < -0.5 ||
+          r.right > innerWidth + 0.5 ||
+          r.bottom > innerHeight + 0.5
+        )
+          bad.push(`${el.className} outside the viewport`)
+      }
+      for (const el of dialog.querySelectorAll<HTMLElement>('.bl-btn')) {
+        const r = el.getBoundingClientRect()
+        if (r.width < 43.5 || r.height < 43.5) bad.push(`${el.className} below 44px`)
+      }
+      const media = dialog.querySelector('.bl-lightbox__media')?.getBoundingClientRect()
+      const caption = dialog.querySelector('.bl-lightbox__caption')?.getBoundingClientRect()
+      if (!media || media.width < 1 || media.height < 1) bad.push('no visible media')
+      else if (caption && caption.top < media.bottom - 0.5) bad.push('caption overlaps the media')
+      const next = dialog.querySelector<HTMLButtonElement>('.bl-lightbox__nav--next')
+      if (!next || next.disabled) break
+      next.click()
+      await frame()
+    }
+    dialog.close()
+    return bad.length ? [...new Set(bad)].slice(0, 4).join('; ') : null
+  })
+
 const cases: Case[] = [
   // D1: wrapping / intrinsic sizing
   { id: 'readout-long', checks: generic() },
@@ -586,6 +630,18 @@ const cases: Case[] = [
     ]
   },
   { id: 'dialog-toast', checks: generic() },
+  {
+    id: 'lightbox-long',
+    checks: [...generic(), { name: 'fits-the-viewport', variants: ALL, probe: lightboxFits }]
+  },
+  {
+    id: 'lightbox-single',
+    checks: [{ name: 'fits-the-viewport', variants: ALL, probe: lightboxFits }]
+  },
+  {
+    id: 'lightbox-narrow',
+    checks: [...generic(), { name: 'fits-the-viewport', variants: ALL, probe: lightboxFits }]
+  },
   {
     id: 'button-icon-toolbar',
     checks: [{ name: 'no-page-overflow', variants: ALL, probe: noPageOverflow }, iconButtonsStay44]

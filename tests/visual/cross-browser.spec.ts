@@ -33,6 +33,17 @@ test('a non-dismissible dialog stays open on Esc and closes from its footer', as
   await expect(dialog).toBeHidden()
 })
 
+test('the lightbox advances on ArrowRight and closes on Esc', async ({ page }) => {
+  await demo(page, 'lightbox').locator('.pg-thumb').first().click()
+  const viewer = page.getByRole('dialog', { name: 'Image viewer' })
+  await expect(viewer).toBeVisible()
+  await page.keyboard.press('ArrowRight')
+  await expect(viewer.locator('.bl-lightbox__count')).toHaveText('2 / 4')
+  await page.keyboard.press('Escape')
+  await expect(viewer).toBeHidden()
+  await expect(demo(page, 'lightbox')).toContainText('Last close: escape')
+})
+
 test('focus is not lost to <body> when a focused toast goes away', async ({ page }) => {
   const opener = demo(page, 'toast').getByRole('button', { name: 'Persistent', exact: true })
   await opener.focus()

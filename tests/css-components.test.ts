@@ -36,6 +36,24 @@ const REQUIRED: Record<string, string[]> = {
     '.bl-dialog__foot',
     'html:has(dialog.bl-dialog[open]:modal)'
   ],
+  lightbox: [
+    '.bl-lightbox',
+    '.bl-lightbox[open]',
+    '.bl-lightbox::backdrop',
+    '.bl-lightbox__bar',
+    '.bl-lightbox__count',
+    '.bl-lightbox__close',
+    '.bl-lightbox__stage',
+    '.bl-lightbox__media',
+    ".bl-lightbox__media[data-loaded='false']",
+    '.bl-lightbox__message',
+    '.bl-lightbox__caption',
+    '.bl-lightbox__nav',
+    '.bl-lightbox__nav--prev',
+    '.bl-lightbox__nav--next',
+    '.bl-lightbox__toasts > .bl-toaster',
+    'html:has(dialog.bl-lightbox[open]:modal)'
+  ],
   media: [
     '.bl-media',
     '.bl-media--center',
@@ -995,6 +1013,78 @@ describe('dialog', () => {
   })
   it('pads the locked page by the measured scrollbar gutter', () => {
     expect(ruleBody(css, 'html:has(dialog.bl-dialog[open]:modal)')['padding-inline-end']).toBe(
+      'var(--bl-dialog-gutter, 0px)'
+    )
+  })
+})
+
+describe('lightbox', () => {
+  const css = read('lightbox')
+  const narrow = ['@media (max-width: 39.99em)']
+  it('fills the dynamic viewport clear of the safe areas', () => {
+    const box = ruleBody(css, '.bl-lightbox')
+    expect(box['block-size']).toBe('100dvh')
+    expect(box['inline-size']).toBe('100%')
+    expect(box['margin']).toBe('0')
+    for (const side of ['top', 'right', 'bottom', 'left'])
+      expect(box['padding']).toContain(`env(safe-area-inset-${side})`)
+  })
+  it('paints the scrim from the hook, defaulting to the canvas so it follows the appearance', () => {
+    expect(ruleBody(css, '.bl-lightbox')['background']).toMatch(
+      /^var\(\s*--bl-lightbox-scrim,\s*color-mix\(in srgb, var\(--bl-color-canvas\) 96%, transparent\)\s*\)$/
+    )
+    expect(ruleBody(css, '.bl-lightbox::backdrop')['background']).toBe('transparent')
+  })
+  it('fades its contents, never the dialog, so the hosted toaster is untouched', () => {
+    for (const sel of ['.bl-lightbox', '.bl-lightbox[open]'])
+      for (const prop of ['opacity', 'scale', 'translate'])
+        expect(ruleBody(css, sel)[prop]).toBeUndefined()
+    expect(ruleBody(css, '.bl-lightbox', ['@supports (overlay: auto)'])['transition']).toMatch(
+      /display .*allow-discrete.*overlay .*allow-discrete/s
+    )
+  })
+  it('keeps the media inside the stage', () => {
+    const media = ruleBody(css, '.bl-lightbox__media')
+    expect(media['max-inline-size']).toBe('100%')
+    expect(media['max-block-size']).toBe('100%')
+    expect(media['object-fit']).toBe('contain')
+    expect(ruleBody(css, '.bl-lightbox__stage')['min-block-size']).toBe('0')
+  })
+  it('leaves vertical pan and pinch-zoom to the browser on the stage', () => {
+    expect(ruleBody(css, '.bl-lightbox__stage')['touch-action']).toBe('pan-y pinch-zoom')
+  })
+  it('hands every touch back to the browser while the page is zoomed', () => {
+    expect(ruleBody(css, '.bl-lightbox__stage[data-zoomed]')['touch-action']).toBe('auto')
+  })
+  it('adds the caption row only when a caption is there, so the media stays centred', () => {
+    const stage = ruleBody(css, '.bl-lightbox__stage')
+    expect(stage['grid-template-rows']).toBe('minmax(0, 1fr)')
+    expect(stage['grid-auto-rows']).toBe('auto')
+  })
+  it('clamps a long caption and lets it scroll', () => {
+    const caption = ruleBody(css, '.bl-lightbox__caption')
+    expect(caption['max-block-size']).toBeDefined()
+    expect(caption['overflow']).toBe('auto')
+  })
+  it('moves the nav buttons to a bottom row below 40em', () => {
+    expect(ruleBody(css, '.bl-lightbox[open]', narrow)['grid-template']).toContain(
+      "'prev count next'"
+    )
+    expect(ruleBody(css, '.bl-lightbox__nav--prev', narrow)['grid-area']).toBe('prev')
+    expect(ruleBody(css, '.bl-lightbox__nav--next', narrow)['grid-area']).toBe('next')
+  })
+  it('flips the chevrons under rtl', () => {
+    expect(ruleBody(css, '.bl-lightbox__nav:dir(rtl) svg')['scale']).toBe('-1 1')
+  })
+  it('drops the scale under reduced motion and keeps the gutter in step', () => {
+    const reduce = ['@media (prefers-reduced-motion: reduce)']
+    expect(ruleBody(css, '.bl-lightbox[open] .bl-lightbox__stage', reduce)['scale']).toBe('none')
+    expect(ruleBody(css, 'html:has(dialog.bl-lightbox)', reduce)['transition-property']).toBe(
+      'none'
+    )
+  })
+  it('pads the locked page by the gutter BlDialog measures', () => {
+    expect(ruleBody(css, 'html:has(dialog.bl-lightbox[open]:modal)')['padding-inline-end']).toBe(
       'var(--bl-dialog-gutter, 0px)'
     )
   })

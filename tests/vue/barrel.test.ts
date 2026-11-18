@@ -44,6 +44,7 @@ const COMPONENTS = [
   'BlMedia',
   'BlDisclosure',
   'BlDialog',
+  'BlLightbox',
   'BlToaster',
   'BlPopover',
   'BlTooltip',

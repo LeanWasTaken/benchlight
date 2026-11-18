@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- BlLightbox, a modal viewer for one image or a group on native `<dialog>`, with the `lightbox` CSS
+  module (needs `btn` and `layout`). `v-model:open` and `v-model:index`, previous/next by button,
+  arrow keys, Home/End and horizontal swipe, all following RTL; a polite position announcement,
+  neighbour preloading, an alt-text message for an image that fails to load, and a default slot for
+  other media. It shares BlDialog's close reasons, focus restore, scroll lock and toast hosting.
+  `--bl-lightbox-scrim` sets the backdrop.
+
 ## 0.11.1 - 2026-11-18
 
 ### Fixed
