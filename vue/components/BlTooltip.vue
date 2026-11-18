@@ -22,10 +22,12 @@
   // here. Hover waits `delay`, keyboard focus (:focus-visible) shows at once, touch never shows
   // on hover. Leaving the trigger starts a short grace so the pointer can cross onto the tooltip
   // (WCAG 1.4.13 hoverable); Esc hides it through a document listener that exists only while
-  // it is open. The disabled-trigger check runs once, at mount.
+  // it is open. Hiding plays the exit first (playExit); showing again meanwhile cancels it. The
+  // disabled-trigger check runs once, at mount.
   import { onBeforeUnmount, onDeactivated, onMounted, ref, useId, type VNode } from 'vue'
   import { panelAnchorStyle, triggerAnchorStyle } from '../internal/anchor'
   import { warn } from '../internal/dev'
+  import { playExit } from '../internal/exit'
   import type { PopoverAlign, PopoverSide, TooltipTriggerBind } from '../types'
 
   defineOptions({ inheritAttrs: false })
@@ -54,6 +56,8 @@
   let focused = false
   let showTimer: ReturnType<typeof setTimeout> | undefined
   let hideTimer: ReturnType<typeof setTimeout> | undefined
+  // Cancels the exit under way: the tooltip is still showing until it ends.
+  let exit: (() => void) | null = null
 
   function clearTimers(): void {
     clearTimeout(showTimer)
@@ -73,11 +77,17 @@
     clearTimers()
     const el = tip.value
     if (open || !el) return
-    try {
-      el.showPopover()
-    } catch {
-      // Disconnected, or no popover support: nothing to show.
-      return
+    if (exit) {
+      // Still showing: stop the exit instead of hiding and showing again.
+      exit()
+      exit = null
+    } else {
+      try {
+        el.showPopover()
+      } catch {
+        // Disconnected, or no popover support: nothing to show.
+        return
+      }
     }
     open = true
     el.ownerDocument.addEventListener('keydown', onKeydown)
@@ -89,12 +99,17 @@
     if (!open) return
     open = false
     const el = tip.value
-    el?.ownerDocument.removeEventListener('keydown', onKeydown)
-    try {
-      el?.hidePopover()
-    } catch {
-      // Already hidden or disconnected.
-    }
+    if (!el) return
+    el.ownerDocument.removeEventListener('keydown', onKeydown)
+    const cancel = playExit(el, () => {
+      exit = null
+      try {
+        el.hidePopover()
+      } catch {
+        // Already hidden or disconnected.
+      }
+    })
+    exit = el.hasAttribute('data-closing') ? cancel : null
   }
 
   function onEnter(event: PointerEvent): void {
@@ -158,9 +173,18 @@
           'so the tooltip never shows.'
       )
   })
+  // Removal hides the popover at once: an exit under way has nothing left to play.
+  function dropExit(): void {
+    exit?.()
+    exit = null
+  }
   // KeepAlive: a deactivated tooltip would otherwise stay open with its Esc listener attached.
-  onDeactivated(hide)
+  onDeactivated(() => {
+    hide()
+    dropExit()
+  })
   onBeforeUnmount(() => {
+    dropExit()
     clearTimers()
     tip.value?.ownerDocument.removeEventListener('keydown', onKeydown)
     open = false

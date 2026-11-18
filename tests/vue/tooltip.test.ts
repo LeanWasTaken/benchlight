@@ -4,6 +4,7 @@ import { createSSRApp, defineComponent, h, KeepAlive, nextTick, ref } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 import BlTooltip from '../../vue/components/BlTooltip.vue'
 import type { TooltipTriggerBind } from '../../vue/types'
+import { mockTransition, transitionEnd } from './transitions'
 
 // happy-dom has no popover API: stub the methods and track what the component asked for.
 const proto = HTMLElement.prototype as unknown as Record<string, unknown>
@@ -300,5 +301,77 @@ describe('BlTooltip', () => {
     expect(html).toMatch(/position-anchor:\s*--bl-/)
     expect(html).toContain('popover="manual"')
     expect(html).toContain('role="tooltip"')
+  })
+
+  describe('exit', () => {
+    // The tooltip fades out over 150ms before hidePopover() runs.
+    function fading() {
+      const r = setup()
+      mockTransition([r.tip.element, { property: 'opacity', duration: '150ms' }])
+      return r
+    }
+
+    it('fades out before it hides, then hides once', () => {
+      const { trigger, tip } = fading()
+      trigger.focus()
+      trigger.blur()
+      expect(tip.attributes('data-closing')).toBe('')
+      expect(hide).not.toHaveBeenCalled()
+      transitionEnd(tip.element, 'opacity')
+      expect(hide).toHaveBeenCalledTimes(1)
+      expect(tip.attributes('data-closing')).toBeUndefined()
+      vi.advanceTimersByTime(1000)
+      expect(hide).toHaveBeenCalledTimes(1)
+    })
+
+    it('hides on a timer when no transitionend arrives', () => {
+      const { trigger } = fading()
+      trigger.focus()
+      esc()
+      vi.advanceTimersByTime(199)
+      expect(hide).not.toHaveBeenCalled()
+      vi.advanceTimersByTime(1)
+      expect(hide).toHaveBeenCalledTimes(1)
+    })
+
+    it('shown again during the exit: stays up without hiding or showing again', () => {
+      const { trigger, tip } = fading()
+      trigger.focus()
+      trigger.blur()
+      trigger.focus()
+      expect(tip.attributes('data-closing')).toBeUndefined()
+      expect(show).toHaveBeenCalledTimes(1)
+      vi.advanceTimersByTime(1000)
+      expect(hide).not.toHaveBeenCalled()
+      // still open: Esc hides it (and plays the exit again)
+      esc()
+      expect(tip.attributes('data-closing')).toBe('')
+    })
+
+    it('hover still waits the delay after an exit has finished', () => {
+      const { trigger } = fading()
+      pointer(trigger, 'pointerenter')
+      vi.advanceTimersByTime(400)
+      pointer(trigger, 'pointerleave')
+      vi.advanceTimersByTime(100 + 200)
+      expect(hide).toHaveBeenCalledTimes(1)
+      pointer(trigger, 'pointerenter')
+      vi.advanceTimersByTime(399)
+      expect(show).toHaveBeenCalledTimes(1)
+      vi.advanceTimersByTime(1)
+      expect(show).toHaveBeenCalledTimes(2)
+    })
+
+    it('unmounted during the exit: nothing fires later', () => {
+      const { w, trigger, tip } = fading()
+      trigger.focus()
+      trigger.blur()
+      const el = tip.element
+      w.unmount()
+      mounted.splice(mounted.indexOf(w), 1)
+      expect(el.hasAttribute('data-closing')).toBe(false)
+      vi.advanceTimersByTime(1000)
+      expect(hide).not.toHaveBeenCalled()
+    })
   })
 })

@@ -22,6 +22,12 @@
   under reduced motion). Esc animates when the browser lets `cancel` be held. During the exit the
   pointer is ignored, the content is `inert` (keys cannot activate a control in it) and repeat
   closes are dropped. Unmounting still closes at once.
+- BlTooltip and BlPopover now fade out in Firefox and Safari too, for every close the component
+  starts: a tooltip hiding, a popover's `open` set to false or a click on its trigger. A trigger
+  click on a showing popover now cancels the browser's toggle and closes through the model, so
+  `update:open(false)` arrives a task later. The panel is `inert` during its exit. Light dismiss
+  (Esc, an outside click) still closes instantly outside Chromium; the browser cannot be held
+  there.
 
 ## 0.11.1 - 2026-11-18
 

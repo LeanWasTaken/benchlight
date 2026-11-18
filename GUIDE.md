@@ -904,8 +904,17 @@ A disclosure panel on the native popover API, anchored to its trigger. Full prop
   `mergeProps` comes from `vue`.
 
 - Placement needs CSS anchor positioning with `position-area` (Chromium 129, Safari 26, Firefox
-  147); without it the panel stays centred in the viewport. Exit animations run in Chromium only;
-  Safari and Firefox close instantly.
+  147); without it the panel stays centred in the viewport.
+- Closing animates in every browser when BlPopover closes it: `open` set to false, or a click
+  on the trigger while the panel shows (the component cancels the browser's toggle and closes
+  through the model, so `update:open(false)` arrives a task after the click, before the exit;
+  `preventDefault()` on that click still keeps the panel as it is, and a click whose propagation
+  was stopped toggles natively).
+  The panel gets `data-closing` and is `inert` (focus inside moves to the trigger at once), and
+  `hidePopover()` runs after the exit (about 200ms; at once under reduced motion); a trigger
+  click or `open` set to true meanwhile keeps it open. The browser's light dismiss (Esc, an
+  outside click) cannot be held: it animates in Chromium only (`overlay`) and closes instantly in
+  Safari and Firefox, also when it lands during an exit.
 - Set the writing direction with the `dir` attribute, not CSS `direction`: Firefox places the
   panel correctly under a nested `dir` only.
 
@@ -925,6 +934,9 @@ A plain-text hint on a native popover, shown on hover and focus. Full prop list 
   the first Esc hides only the tooltip and the next one closes the container. Text only, no
   interactive content (use BlPopover for that).
 - On a button that also triggers a BlPopover, set both anchor names (see BlPopover).
+- Hiding fades it out in every browser: the tooltip gets `data-closing` and ignores the pointer,
+  and `hidePopover()` runs once the fade ends (about 150ms; at once under reduced motion). Shown
+  again meanwhile (focus, or a hover after its delay), it stays up without flicker.
 - Same browser requirements as BlPopover.
 
 ## BlTabs

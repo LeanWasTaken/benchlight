@@ -5,6 +5,7 @@ import { renderToString } from 'vue/server-renderer'
 import BlButton from '../../vue/components/BlButton.vue'
 import BlPopover from '../../vue/components/BlPopover.vue'
 import type { PopoverTriggerBind } from '../../vue/types'
+import { mockTransition, transitionEnd } from './transitions'
 
 // happy-dom has no popover API and ignores popovertarget: stub the methods, fire the events by hand.
 const proto = HTMLElement.prototype as unknown as Record<string, unknown>
@@ -281,5 +282,167 @@ describe('BlPopover', () => {
     expect(html).toMatch(/anchor-name:\s*--bl-/)
     expect(html).toMatch(/position-anchor:\s*--bl-/)
     expect(html).toContain('popover="auto"')
+  })
+
+  describe('exit', () => {
+    // The panel fades out over 200ms before hidePopover() runs.
+    async function fading(props: Record<string, unknown> = { open: true }) {
+      const w = mount(BlPopover, { props, slots: button, attachTo: document.body })
+      const panel = w.get('.bl-popover').element
+      mockTransition([panel, { property: 'opacity, scale', duration: '0.2s, 0.2s' }])
+      await nextTick()
+      return { w, panel, trigger: w.get('button').element as HTMLButtonElement }
+    }
+
+    it('v-model false fades the panel out before hiding it', async () => {
+      const { w, panel } = await fading()
+      await w.setProps({ open: false })
+      await nextTick()
+      expect(panel.hasAttribute('data-closing')).toBe(true)
+      expect(hide).not.toHaveBeenCalled()
+      expect(w.get('button').attributes('aria-expanded')).toBe('false')
+      transitionEnd(panel, 'opacity')
+      expect(hide).toHaveBeenCalledTimes(1)
+      expect(panel.hasAttribute('data-closing')).toBe(false)
+    })
+
+    it('makes the panel inert during the exit and hands focus inside it to the trigger', async () => {
+      const w = mount(BlPopover, {
+        props: { open: true },
+        slots: { ...button, default: '<button class="apply">Apply</button>' },
+        attachTo: document.body
+      })
+      const panel = w.get<HTMLElement>('.bl-popover').element
+      mockTransition([panel, { property: 'opacity', duration: '0.2s' }])
+      await nextTick()
+      w.get<HTMLElement>('.apply').element.focus()
+      await w.setProps({ open: false })
+      await nextTick()
+      expect(panel.inert).toBe(true)
+      expect(document.activeElement).toBe(w.get('button').element) // where hidePopover puts it
+      transitionEnd(panel, 'opacity')
+      expect(hide).toHaveBeenCalledTimes(1)
+      expect(panel.inert).toBe(false)
+    })
+
+    it('without a wired trigger, leaves focus where it is for hidePopover() to restore', async () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const w = mount(BlPopover, {
+        props: { open: true },
+        slots: {
+          trigger: () => h('button', 'Loose'),
+          default: '<button class="apply">Apply</button>'
+        },
+        attachTo: document.body
+      })
+      const panel = w.get('.bl-popover').element as HTMLElement
+      mockTransition([panel, { property: 'opacity', duration: '0.2s' }])
+      await nextTick()
+      const apply = w.get<HTMLElement>('.apply').element
+      apply.focus()
+      await w.setProps({ open: false })
+      await nextTick()
+      expect(panel.inert).toBe(true)
+      expect(document.activeElement).toBe(apply) // not the panel, about to be inert
+    })
+
+    it("a consumer's preventDefault on the trigger click keeps a showing panel open", async () => {
+      vi.useFakeTimers()
+      try {
+        const w = mount(BlPopover, {
+          props: { open: true },
+          slots: {
+            trigger: ({ bind }: { bind: PopoverTriggerBind }) =>
+              h('button', { ...bind, onClick: (e: Event) => e.preventDefault() }, 'More')
+          },
+          attachTo: document.body
+        })
+        const panel = w.get('.bl-popover').element
+        mockTransition([panel, { property: 'opacity', duration: '0.2s' }])
+        await nextTick()
+        ;(w.get('button').element as HTMLButtonElement).click()
+        vi.runOnlyPendingTimers()
+        await nextTick()
+        expect(w.emitted('update:open')).toBeUndefined()
+        expect(panel.hasAttribute('data-closing')).toBe(false)
+        vi.advanceTimersByTime(1000)
+        expect(hide).not.toHaveBeenCalled()
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('v-model true during the exit keeps it open', async () => {
+      vi.useFakeTimers()
+      try {
+        const { w, panel } = await fading()
+        await w.setProps({ open: false })
+        await nextTick()
+        await w.setProps({ open: true })
+        await nextTick()
+        expect(panel.hasAttribute('data-closing')).toBe(false)
+        expect((panel as HTMLElement).inert).toBe(false)
+        vi.advanceTimersByTime(1000)
+        expect(hide).not.toHaveBeenCalled()
+        expect(show).toHaveBeenCalledTimes(1) // the first open only
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('a trigger click on the open panel closes it with the exit, not by the native toggle', async () => {
+      vi.useFakeTimers()
+      try {
+        const { w, panel, trigger } = await fading()
+        const click = new MouseEvent('click', { bubbles: true, cancelable: true })
+        trigger.dispatchEvent(click)
+        expect(click.defaultPrevented).toBe(true) // the browser does not toggle it
+        vi.runOnlyPendingTimers()
+        await nextTick()
+        expect(w.emitted('update:open')?.at(-1)).toEqual([false])
+        expect(panel.hasAttribute('data-closing')).toBe(true)
+        expect(hide).not.toHaveBeenCalled()
+        vi.advanceTimersByTime(250)
+        expect(hide).toHaveBeenCalledTimes(1)
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('a trigger click during the exit keeps it open', async () => {
+      vi.useFakeTimers()
+      try {
+        const { w, panel, trigger } = await fading()
+        await w.setProps({ open: false })
+        await nextTick()
+        expect(panel.hasAttribute('data-closing')).toBe(true)
+        const click = new MouseEvent('click', { bubbles: true, cancelable: true })
+        trigger.dispatchEvent(click)
+        expect(click.defaultPrevented).toBe(true)
+        vi.runOnlyPendingTimers()
+        await nextTick()
+        expect(w.emitted('update:open')?.at(-1)).toEqual([true])
+        expect(panel.hasAttribute('data-closing')).toBe(false)
+        vi.advanceTimersByTime(1000)
+        expect(hide).not.toHaveBeenCalled()
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('a light dismiss during the exit ends it', async () => {
+      vi.useFakeTimers()
+      try {
+        const { w, panel } = await fading()
+        await w.setProps({ open: false })
+        await nextTick()
+        beforeToggle(panel, 'closed') // the browser hides it (outside click, Esc)
+        expect(panel.hasAttribute('data-closing')).toBe(false)
+        vi.advanceTimersByTime(1000)
+        expect(hide).not.toHaveBeenCalled()
+      } finally {
+        vi.useRealTimers()
+      }
+    })
   })
 })

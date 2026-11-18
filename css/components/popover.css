@@ -36,7 +36,15 @@
       scale: 0.98;
     }
   }
-  /* Exit animations need `overlay` (Chromium only); elsewhere the panel closes instantly. */
+  /* BlPopover sets data-closing and plays the exit while the panel still shows, in every
+     browser, for closes it starts (the model, the trigger). No pointer meanwhile. */
+  .bl-popover[data-closing] {
+    opacity: 0;
+    scale: 0.98;
+    pointer-events: none;
+  }
+  /* A light dismiss (Esc, an outside click) can only animate with `overlay` (Chromium); elsewhere
+     it closes instantly. After BlPopover's own exit there is nothing left to hold. */
   @supports (overlay: auto) {
     .bl-popover {
       transition:
@@ -45,9 +53,15 @@
         display var(--bl-duration-base) allow-discrete,
         overlay var(--bl-duration-base) allow-discrete;
     }
+    .bl-popover[data-closing] {
+      transition:
+        opacity var(--bl-duration-base) ease,
+        scale var(--bl-duration-base) var(--bl-ease-out);
+    }
   }
   @media (prefers-reduced-motion: reduce) {
-    .bl-popover {
+    .bl-popover,
+    .bl-popover[data-closing] {
       scale: none;
     }
     @starting-style {

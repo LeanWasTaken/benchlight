@@ -204,6 +204,42 @@ test.describe('exit animations', () => {
     )
     await expect(opener).toBeFocused()
   })
+
+  // Closes the component starts: a hovered tooltip's Esc, a popover trigger's second click.
+  for (const [name, openIt, closeIt] of [
+    [
+      'tooltip',
+      async (page: Page) => {
+        const t = demo(page, 'tooltip').getByRole('button', { name: 'Copy hash', exact: true })
+        await t.hover()
+        return page.locator(`[id="${await t.getAttribute('aria-describedby')}"]`)
+      },
+      (page: Page) => page.keyboard.press('Escape')
+    ],
+    [
+      'popover',
+      async (page: Page) => {
+        const t = demo(page, 'popover').getByRole('button', { name: 'Details', exact: true })
+        await t.click()
+        return page.locator(`[id="${await t.getAttribute('aria-controls')}"]`)
+      },
+      (page: Page) =>
+        demo(page, 'popover').getByRole('button', { name: 'Details', exact: true }).click()
+    ]
+  ] as const) {
+    test(`a ${name} fades out before it hides`, async ({ page }) => {
+      const panel = await openIt(page)
+      await expect(panel).toBeVisible()
+      await expect.poll(() => panel.evaluate((el) => getComputedStyle(el).opacity)).toBe('1')
+      await armExit(panel, null)
+      await closeIt(page)
+      const [open, lowest, openLater] = await readExit(page)
+      expect(open, 'still showing mid-exit').toBe(true)
+      expect(lowest, 'faded while still showing').toBeLessThan(1)
+      expect(openLater, 'hidden by 600ms').toBe(false)
+      await expect(panel).toBeHidden()
+    })
+  }
 })
 
 test('focus is not lost to <body> when a focused toast goes away', async ({ page }) => {

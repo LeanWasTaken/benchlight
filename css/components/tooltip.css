@@ -32,13 +32,23 @@
       opacity: 0;
     }
   }
-  /* Exit animations need `overlay` (Chromium only); elsewhere the tooltip hides instantly. */
+  /* BlTooltip sets data-closing and fades out while the tooltip still shows, in every browser.
+     No pointer meanwhile. */
+  .bl-tooltip[data-closing] {
+    opacity: 0;
+    pointer-events: none;
+  }
+  /* A plain hidePopover() can only animate with `overlay` (Chromium); elsewhere it hides
+     instantly. After BlTooltip's own exit there is nothing left to hold. */
   @supports (overlay: auto) {
     .bl-tooltip {
       transition:
         opacity var(--bl-duration-fast) ease,
         display var(--bl-duration-fast) allow-discrete,
         overlay var(--bl-duration-fast) allow-discrete;
+    }
+    .bl-tooltip[data-closing] {
+      transition: opacity var(--bl-duration-fast) ease;
     }
   }
   @media (forced-colors: active) {
