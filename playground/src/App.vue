@@ -9,7 +9,7 @@
         v-for="s in sections"
         :key="s.id"
         :href="`#${s.id}`"
-        :current="s.id === 'tokens'"
+        :current="active === s.id"
       >
         {{ s.nav }}
       </BlSiteBarLink>
@@ -99,7 +99,7 @@
       v-for="item in tabs"
       :key="item.id"
       :href="`#${item.id}`"
-      :current="item.id === 'tokens'"
+      :current="active === item.id"
     >
       <template #icon>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -132,7 +132,8 @@
     BlTelemetry,
     BlTelemetryCell,
     BlToaster,
-    riseDelay
+    riseDelay,
+    useActiveSection
   } from '../../vue'
   import DemoBlocks from './demos/DemoBlocks.vue'
   import DemoContent from './demos/DemoContent.vue'
@@ -157,6 +158,11 @@
     { id: 'blocks', nav: 'Blocks' },
     { id: 'hooks', nav: 'Hooks' }
   ]
+  // the sticky site bar is 56px; the tab bar's sections are a subset of the nav's
+  const { active } = useActiveSection(
+    sections.map((s) => s.id),
+    { offset: 56 }
+  )
   const tabs = [
     { id: 'tokens', label: 'Tokens', icon: 'M4 4h16v16H4z' },
     { id: 'controls', label: 'Controls', icon: 'M4 7h16M4 17h16' },

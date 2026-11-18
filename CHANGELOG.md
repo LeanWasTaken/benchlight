@@ -4,6 +4,10 @@
 
 ### Added
 
+- `useActiveSection(ids, { offset })`, a ref of the section the reader is in, for site-bar and
+  tab-bar `current`. A passive scroll tracker with a reading line at `offset` plus a quarter of the
+  viewport; the first section at the top, the last at the bottom, and a URL hash wins until the
+  reader scrolls.
 - BlLightbox, a modal viewer for one image or a group on native `<dialog>`, with the `lightbox` CSS
   module (needs `btn` and `layout`). `v-model:open` and `v-model:index`, previous/next by button,
   arrow keys, Home/End and horizontal swipe, all following RTL; a polite position announcement,

@@ -24,6 +24,7 @@ const AUTO_IMPORTS = [
   'useReducedMotion',
   'useMarquee',
   'useFollowScroll',
+  'useActiveSection',
   'riseDelay',
   'ansiToSegments',
   'useToast'

@@ -222,6 +222,27 @@ script, so you can keep `prepaint` on and only do the `replaceAll`.
   reader is at the bottom. An enabled follower starts at the bottom on mount.
   `useScrollLifted(threshold)` takes a number, `false`, a ref or a getter. Both it and
   `useReducedMotion()` return a ref that is `false` on the server and until mounted.
+  `useActiveSection(ids, { offset })` returns `{ active }`, the id of the section the reader is in
+  (the first id on the server and at the top, the last at the bottom, a URL hash until the reader
+  scrolls). `offset` is the px of sticky chrome to clear; the reading line sits a quarter of the
+  viewport below it. `ids` must be in document order. Sections that mount later are picked up when
+  `ids` changes. Several short sections at the very bottom cannot all pass the line, so only the
+  last becomes active there.
+
+  ```vue
+  <script setup>
+    const sections = ['intro', 'api', 'faq']
+    const { active } = useActiveSection(sections, { offset: 56 })
+  </script>
+  <BlSiteBar aria-label="Sections">
+    <template #nav>
+      <BlSiteBarLink v-for="id in sections" :key="id" :href="`#${id}`" :current="active === id">
+        {{ id }}
+      </BlSiteBarLink>
+    </template>
+  </BlSiteBar>
+  ```
+
 - **Fields:** BlField passes its `id` and hint id to BlInput, BlTextarea, BlSelect, BlRange and BlNumberField
   automatically, and that id always wins inside a BlField (a different `id` on the control is
   ignored with a development warning, so the label keeps targeting it). Your own `aria-describedby` is merged: the

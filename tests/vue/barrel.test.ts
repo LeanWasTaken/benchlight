@@ -59,6 +59,7 @@ const HELPERS = [
   'useReducedMotion',
   'useMarquee',
   'useFollowScroll',
+  'useActiveSection',
   'riseDelay',
   'ansiToSegments',
   'useToast',

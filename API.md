@@ -132,6 +132,7 @@
 - `FIELD_CONTEXT`
 - `ansiToSegments`
 - `riseDelay`
+- `useActiveSection`
 - `useAppearance`
 - `useFollowScroll`
 - `useMarquee`
@@ -144,6 +145,7 @@ Default `Bl` prefix; `autoImports: { prefix }` changes them (`prefix: ''` keeps 
 
 - `blAnsiToSegments`
 - `blRiseDelay`
+- `useBlActiveSection`
 - `useBlAppearance`
 - `useBlFollowScroll`
 - `useBlMarquee`
@@ -152,6 +154,14 @@ Default `Bl` prefix; `autoImports: { prefix }` changes them (`prefix: ''` keeps 
 - `useBlToast`
 
 ## Exported types
+
+### `ActiveSectionOptions`
+
+```ts
+interface ActiveSectionOptions {
+    offset?: MaybeRefOrGetter<number>;
+}
+```
 
 ### `AnsiSegment`
 

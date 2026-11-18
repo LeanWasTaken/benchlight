@@ -113,6 +113,7 @@ describe('nuxt module', () => {
     'useReducedMotion',
     'useMarquee',
     'useFollowScroll',
+    'useActiveSection',
     'riseDelay',
     'ansiToSegments',
     'useToast'

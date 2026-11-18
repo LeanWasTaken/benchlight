@@ -3,6 +3,7 @@ import { createSSRApp, defineComponent, h, nextTick, ref, watch, type Ref } from
 import { renderToString } from 'vue/server-renderer'
 import { riseDelay } from '../../vue/composables/riseDelay'
 import { resetAppearanceState, useAppearance } from '../../vue/composables/useAppearance'
+import { useActiveSection } from '../../vue/composables/useActiveSection'
 import { useFollowScroll } from '../../vue/composables/useFollowScroll'
 import { useMarquee } from '../../vue/composables/useMarquee'
 import { useReducedMotion } from '../../vue/composables/useReducedMotion'
@@ -672,5 +673,374 @@ describe('useFollowScroll', () => {
     wrapper.unmount()
     first.remove()
     second.remove()
+  })
+})
+
+describe('useActiveSection', () => {
+  const IDS = ['one', 'two', 'three']
+  const view = { y: 0, height: 1000, total: 3000 }
+  let tops: Record<string, number>
+  let added: HTMLElement[]
+
+  const section = (id: string) => {
+    const el = document.createElement('section')
+    el.id = id
+    el.getBoundingClientRect = () => ({ top: (tops[id] ?? 0) - view.y }) as DOMRect
+    document.body.append(el)
+    added.push(el)
+  }
+  const scrollTo = (y: number) => {
+    view.y = y
+    window.dispatchEvent(new Event('scroll'))
+  }
+
+  beforeEach(() => {
+    added = []
+    tops = { one: 0, two: 1000, three: 2000 }
+    Object.assign(view, { y: 0, height: 1000, total: 3000 })
+    vi.stubGlobal('requestAnimationFrame', (cb: () => void) => {
+      cb()
+      return 0 // already ran, so there is no pending frame
+    })
+    vi.stubGlobal('cancelAnimationFrame', () => {})
+    Object.defineProperty(window, 'scrollY', { get: () => view.y, configurable: true })
+    Object.defineProperty(window, 'innerHeight', { get: () => view.height, configurable: true })
+    Object.defineProperty(document.documentElement, 'scrollHeight', {
+      get: () => view.total,
+      configurable: true
+    })
+    history.replaceState(null, '', '/')
+    IDS.forEach(section)
+  })
+  afterEach(() => {
+    added.forEach((el) => el.remove())
+    vi.unstubAllGlobals()
+    delete (window as unknown as Record<string, unknown>)['scrollY']
+    delete (window as unknown as Record<string, unknown>)['innerHeight']
+    delete (document.documentElement as unknown as Record<string, unknown>)['scrollHeight']
+    history.replaceState(null, '', '/')
+  })
+
+  it('is the first id before mount and at the top, null without ids', () => {
+    const { result, wrapper } = withSetup(() => useActiveSection(IDS))
+    expect(result.active.value).toBe('one')
+    wrapper.unmount()
+    const empty = withSetup(() => useActiveSection([]))
+    expect(empty.result.active.value).toBeNull()
+    empty.wrapper.unmount()
+  })
+
+  it('follows the scroll past a reading line a quarter down the viewport', () => {
+    const { result, wrapper } = withSetup(() => useActiveSection(IDS))
+    scrollTo(500) // two sits at 500px, below the 250px line
+    expect(result.active.value).toBe('one')
+    scrollTo(800) // two at 200px
+    expect(result.active.value).toBe('two')
+    scrollTo(1200) // two at -200, three at 800
+    expect(result.active.value).toBe('two')
+    wrapper.unmount()
+  })
+
+  it('adds the offset to the line', () => {
+    const offset = ref(0)
+    const { result, wrapper } = withSetup(() => useActiveSection(IDS, { offset }))
+    scrollTo(500)
+    expect(result.active.value).toBe('one')
+    offset.value = 300 // line at 550px
+    return nextTick().then(() => {
+      expect(result.active.value).toBe('two')
+      wrapper.unmount()
+    })
+  })
+
+  it('falls back to the first id at the top and the last at the bottom', () => {
+    tops['three'] = 2900 // a short last section that never reaches the line
+    const { result, wrapper } = withSetup(() => useActiveSection(IDS))
+    scrollTo(1500)
+    expect(result.active.value).toBe('two')
+    scrollTo(2000) // scrollY + height == total
+    expect(result.active.value).toBe('three')
+    scrollTo(0)
+    expect(result.active.value).toBe('one')
+    wrapper.unmount()
+  })
+
+  it('lets a hash win on load and on hashchange until the reader scrolls on their own', () => {
+    history.replaceState(null, '', '#two')
+    const { result, wrapper } = withSetup(() => useActiveSection(IDS))
+    expect(result.active.value).toBe('two')
+    scrollTo(0) // the browser scrolling toward the target
+    expect(result.active.value).toBe('two')
+    window.dispatchEvent(new Event('wheel'))
+    scrollTo(0)
+    expect(result.active.value).toBe('one')
+    history.replaceState(null, '', '#three')
+    window.dispatchEvent(new Event('hashchange'))
+    expect(result.active.value).toBe('three')
+    wrapper.unmount()
+  })
+
+  it('ignores a hash that is not one of the ids', () => {
+    history.replaceState(null, '', '#elsewhere')
+    const { result, wrapper } = withSetup(() => useActiveSection(IDS))
+    expect(result.active.value).toBe('one')
+    wrapper.unmount()
+  })
+
+  it('re-measures when ids change and skips ids with no element yet', async () => {
+    const ids = ref(['one', 'two'])
+    const { result, wrapper } = withSetup(() => useActiveSection(ids))
+    scrollTo(1200)
+    expect(result.active.value).toBe('two')
+    ids.value = ['one', 'two', 'later', 'three']
+    await nextTick()
+    expect(result.active.value).toBe('two')
+    tops['later'] = 1100
+    section('later')
+    ids.value = ['one', 'two', 'later']
+    await nextTick()
+    expect(result.active.value).toBe('later')
+    ids.value = ['three']
+    await nextTick()
+    expect(result.active.value).toBe('three')
+    wrapper.unmount()
+  })
+
+  it('removes every listener on unmount', () => {
+    const add = vi.spyOn(window, 'addEventListener')
+    const remove = vi.spyOn(window, 'removeEventListener')
+    const { result, wrapper } = withSetup(() => useActiveSection(IDS))
+    const added = add.mock.calls.map(([type]) => type).sort()
+    expect(added).toEqual(
+      [
+        'hashchange',
+        'keydown',
+        'pointerdown',
+        'resize',
+        'scroll',
+        'scrollend',
+        'touchstart',
+        'wheel'
+      ].sort()
+    )
+    wrapper.unmount()
+    expect(remove.mock.calls.map(([type]) => type).sort()).toEqual(added)
+    scrollTo(1200)
+    expect(result.active.value).toBe('one')
+  })
+
+  it('keeps tracking when the hash is malformed', () => {
+    history.replaceState(null, '', '#%zz')
+    const { result, wrapper } = withSetup(() => useActiveSection(IDS))
+    expect(result.active.value).toBe('one')
+    scrollTo(1200)
+    expect(result.active.value).toBe('two')
+    wrapper.unmount()
+  })
+
+  it('pins an id with a percent-encoded hash', () => {
+    const ids = ['a b', 'two']
+    section('a b')
+    tops['a b'] = 0
+    history.replaceState(null, '', '#a%20b')
+    const { result, wrapper } = withSetup(() => useActiveSection(ids))
+    scrollTo(1200)
+    expect(result.active.value).toBe('a b')
+    wrapper.unmount()
+  })
+
+  it('re-pins on a click of an in-page link to the hash it is already on', () => {
+    history.replaceState(null, '', '#two')
+    const { result, wrapper } = withSetup(() => useActiveSection(IDS))
+    const link = (href: string) => {
+      const a = document.createElement('a')
+      a.href = href
+      document.body.append(a)
+      added.push(a)
+      return a
+    }
+    const click = (a: HTMLElement, prevent = false) => {
+      if (prevent) a.addEventListener('click', (event) => event.preventDefault())
+      a.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+    }
+    const release = () => {
+      window.dispatchEvent(new Event('pointerdown')) // the click's own pointerdown
+      scrollTo(0)
+      expect(result.active.value).toBe('one')
+    }
+    release()
+    click(link('https://example.com/#two')) // another page
+    scrollTo(0)
+    expect(result.active.value).toBe('one')
+    click(link('#two'), true) // handled by someone else
+    scrollTo(0)
+    expect(result.active.value).toBe('one')
+    click(link('#two'))
+    expect(result.active.value).toBe('two')
+    wrapper.unmount()
+  })
+
+  it('keeps a hash pin for a section that renders later', async () => {
+    const ids = ref(['one', 'late'])
+    history.replaceState(null, '', '#late')
+    const { result, wrapper } = withSetup(() => useActiveSection(ids))
+    expect(result.active.value).toBe('late')
+    scrollTo(500)
+    expect(result.active.value).toBe('late')
+    tops['late'] = 400
+    section('late')
+    ids.value = ['one', 'late']
+    await nextTick()
+    expect(result.active.value).toBe('late')
+    wrapper.unmount()
+  })
+
+  it('releases a pin on touch and pointer input', () => {
+    history.replaceState(null, '', '#two')
+    const { result, wrapper } = withSetup(() => useActiveSection(IDS))
+    for (const type of ['touchstart', 'pointerdown']) {
+      history.replaceState(null, '', '#two')
+      window.dispatchEvent(new Event('hashchange'))
+      expect(result.active.value).toBe('two')
+      window.dispatchEvent(new Event(type))
+      scrollTo(0)
+      expect(result.active.value).toBe('one')
+    }
+    wrapper.unmount()
+  })
+
+  it('releases a pin only on scrolling keys outside editable fields', () => {
+    history.replaceState(null, '', '#two')
+    const { result, wrapper } = withSetup(() => useActiveSection(IDS))
+    const press = (key: string, target: EventTarget = document.body) =>
+      target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }))
+    press('Tab')
+    press('c')
+    scrollTo(0)
+    expect(result.active.value).toBe('two')
+    const input = document.createElement('input')
+    document.body.append(input)
+    added.push(input)
+    press(' ', input)
+    press('ArrowDown', input)
+    scrollTo(0)
+    expect(result.active.value).toBe('two')
+    press('PageDown')
+    scrollTo(0)
+    expect(result.active.value).toBe('one')
+    wrapper.unmount()
+  })
+
+  it('ends a load-time pin at the first scroll after the hash scroll has settled', () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    history.replaceState(null, '', '#two')
+    const { result, wrapper } = withSetup(() => useActiveSection(IDS))
+    scrollTo(800)
+    vi.advanceTimersByTime(100)
+    scrollTo(850) // still the browser's smooth scroll, the quiet period restarts
+    vi.advanceTimersByTime(100)
+    expect(result.active.value).toBe('two')
+    vi.advanceTimersByTime(100) // settled, with the target near the line
+    expect(result.active.value).toBe('two')
+    scrollTo(100) // a scrollbar drag, find-in-page, ...
+    expect(result.active.value).toBe('one')
+    wrapper.unmount()
+    vi.useRealTimers()
+  })
+
+  it('drops a pin on settle when the page was jumped away from its target', () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    history.replaceState(null, '', '#three')
+    const { result, wrapper } = withSetup(() => useActiveSection(IDS))
+    scrollTo(100) // an app scrollTo mid-flight; three is still 1900px down
+    expect(result.active.value).toBe('three')
+    vi.advanceTimersByTime(200)
+    expect(result.active.value).toBe('one')
+    wrapper.unmount()
+    vi.useRealTimers()
+  })
+
+  it('keeps a pin on settle when the page bottom stops short of the target line', () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    tops['two'] = 2800
+    history.replaceState(null, '', '#two')
+    const { result, wrapper } = withSetup(() => useActiveSection(IDS))
+    scrollTo(2000) // the bottom: two cannot reach the top
+    vi.advanceTimersByTime(200)
+    expect(result.active.value).toBe('two')
+    wrapper.unmount()
+    vi.useRealTimers()
+  })
+
+  it('ignores clicks that do not navigate this page to the hash', () => {
+    history.replaceState(null, '', '#two')
+    const { result, wrapper } = withSetup(() => useActiveSection(IDS))
+    window.dispatchEvent(new Event('pointerdown'))
+    scrollTo(0)
+    const link = document.createElement('a')
+    link.href = '#two'
+    document.body.append(link)
+    added.push(link)
+    const click = (init: MouseEventInit = {}) => {
+      link.dispatchEvent(new MouseEvent('click', { bubbles: true, ...init }))
+    }
+    for (const init of [
+      { ctrlKey: true },
+      { metaKey: true },
+      { shiftKey: true },
+      { altKey: true },
+      { button: 1 }
+    ])
+      click(init)
+    link.target = '_blank'
+    click()
+    link.target = ''
+    link.setAttribute('download', '')
+    click()
+    expect(result.active.value).toBe('one')
+    wrapper.unmount()
+  })
+
+  it('treats scrollend as settled at once', () => {
+    history.replaceState(null, '', '#two')
+    const { result, wrapper } = withSetup(() => useActiveSection(IDS))
+    scrollTo(100)
+    window.dispatchEvent(new Event('scrollend'))
+    scrollTo(200)
+    expect(result.active.value).toBe('one')
+    wrapper.unmount()
+  })
+
+  it('measures once per frame however many scrolls arrive', () => {
+    const { result, wrapper } = withSetup(() => useActiveSection(IDS))
+    const frames: (() => void)[] = []
+    vi.stubGlobal('requestAnimationFrame', (cb: () => void) => frames.push(cb))
+    const spy = vi.spyOn(document, 'getElementById')
+    spy.mockClear()
+    scrollTo(100)
+    scrollTo(900)
+    scrollTo(1200)
+    expect(frames).toHaveLength(1)
+    expect(spy).not.toHaveBeenCalled()
+    view.y = 1200
+    frames[0]!()
+    expect(result.active.value).toBe('two')
+    wrapper.unmount()
+  })
+
+  it('touches neither window nor document during SSR', async () => {
+    const win = vi.spyOn(window, 'addEventListener')
+    const get = vi.spyOn(document, 'getElementById')
+    const app = createSSRApp(
+      defineComponent({
+        setup() {
+          const { active } = useActiveSection(IDS)
+          return () => h('span', active.value ?? undefined)
+        }
+      })
+    )
+    expect(await renderToString(app)).toBe('<span>one</span>')
+    expect(win).not.toHaveBeenCalled()
+    expect(get).not.toHaveBeenCalled()
   })
 })
