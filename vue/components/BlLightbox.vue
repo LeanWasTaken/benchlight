@@ -9,7 +9,7 @@
     @close="onClose"
     @keydown="onKeydown"
   >
-    <div class="bl-lightbox__bar">
+    <div ref="bar" class="bl-lightbox__bar">
       <BlButton
         class="bl-lightbox__close"
         variant="ghost"
@@ -141,6 +141,7 @@
 
   const el = ref<HTMLDialogElement>()
   const toasts = ref<HTMLElement>()
+  const bar = ref<HTMLElement>()
   const stage = ref<HTMLElement>()
   const media = ref<HTMLImageElement>()
   const prev = ref<InstanceType<typeof BlButton>>()
@@ -236,11 +237,13 @@
   )
 
   // The dialog itself is not a backdrop here: a tap in the bar or the bottom row would close it.
+  // Its controls and stage are inert during the exit; the dialog keeps its toast host usable.
   const { closeWith, onCancel, onClose } = useModal({
     el,
     toasts,
     open: active,
     dismissible: () => true,
+    inert: () => [bar.value, stage.value, prev.value?.$el, next.value?.$el],
     emitClose: (payload) => {
       announcement.value = ''
       if (open.value && props.items.length === 0) open.value = false
@@ -289,7 +292,7 @@
     target instanceof Element && target.closest('iframe, [controls]') !== null
 
   function onKeydown(event: KeyboardEvent): void {
-    if (event.defaultPrevented || !many.value) return
+    if (event.defaultPrevented || !many.value || el.value?.hasAttribute('data-closing')) return
     if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
     const target = event.target as HTMLElement | null
     if (target?.isContentEditable || target?.closest('input, textarea, select, [contenteditable]'))

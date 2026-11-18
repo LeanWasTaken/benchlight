@@ -1,8 +1,9 @@
 import { mount, type VueWrapper } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { defineComponent, h, nextTick, ref } from 'vue'
+import { defineComponent, h, KeepAlive, nextTick, ref } from 'vue'
 import BlDialog from '../../vue/components/BlDialog.vue'
 import { toastFocus, toastHosts } from '../../vue/internal/toastHosts'
+import { mockTransition, transitionEnd } from './transitions'
 
 let wrappers: VueWrapper[] = []
 afterEach(() => {
@@ -355,5 +356,272 @@ describe('BlDialog', () => {
     d.close()
     await nextTick()
     expect(d.open).toBe(false)
+  })
+})
+
+describe('BlDialog exit animation', () => {
+  // The panel fades out over 200ms before close() runs.
+  async function animated(props: Record<string, unknown> = {}) {
+    const w = open(props)
+    mockTransition([
+      w.get('.bl-dialog__panel').element,
+      { property: 'opacity, scale, translate', duration: '0.2s, 0.2s, 0.2s' }
+    ])
+    await w.setProps({ open: true })
+    return w
+  }
+  const panel = (w: VueWrapper) => w.get('.bl-dialog__panel').element
+  const reasons = (w: VueWrapper) =>
+    (w.emitted('close') ?? []).map((e) => (e[0] as { reason: string }).reason)
+
+  it('stays open with data-closing until the panel transition ends, then emits', async () => {
+    const w = await animated()
+    const d = dialogEl(w)
+    await w.get('.bl-dialog__close').trigger('click')
+    expect(d.open).toBe(true)
+    expect(d.hasAttribute('data-closing')).toBe(true)
+    // still modal, so the page is inert: its toasts stay inside until close()
+    expect(toastHosts.value).toEqual([w.get('.bl-dialog__toasts').element])
+    expect(w.emitted('close')).toBeUndefined()
+    expect(w.emitted('update:open')).toBeUndefined()
+    transitionEnd(panel(w), 'translate') // not the property waited on
+    expect(d.open).toBe(true)
+    transitionEnd(panel(w), 'opacity')
+    expect(d.open).toBe(false)
+    expect(d.hasAttribute('data-closing')).toBe(false)
+    expect(toastHosts.value).toEqual([])
+    expect(reasons(w)).toEqual(['button'])
+    expect(w.emitted('update:open')).toEqual([[false]])
+  })
+
+  it('closes on a timer when no transitionend arrives', async () => {
+    vi.useFakeTimers()
+    try {
+      const w = await animated()
+      await w.setProps({ open: false })
+      vi.advanceTimersByTime(249)
+      expect(dialogEl(w).open).toBe(true)
+      vi.advanceTimersByTime(1)
+      expect(dialogEl(w).open).toBe(false)
+      expect(reasons(w)).toEqual(['program'])
+      expect(w.emitted('update:open')).toBeUndefined() // program: no echo
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('ignores further closes while closing', async () => {
+    const w = await animated()
+    const d = dialogEl(w)
+    await w.get('.bl-dialog__close').trigger('click')
+    d.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+    d.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    esc(w)
+    await w.setProps({ open: false })
+    expect(d.open).toBe(true)
+    transitionEnd(panel(w), 'opacity')
+    expect(reasons(w)).toEqual(['button'])
+  })
+
+  it('animates Esc when cancel is cancelable', async () => {
+    const w = await animated()
+    const d = dialogEl(w)
+    const ev = new Event('cancel', { cancelable: true })
+    d.dispatchEvent(ev)
+    expect(ev.defaultPrevented).toBe(true)
+    expect(d.open).toBe(true)
+    expect(d.hasAttribute('data-closing')).toBe(true)
+    transitionEnd(panel(w), 'opacity')
+    expect(d.open).toBe(false)
+    expect(reasons(w)).toEqual(['escape'])
+  })
+
+  it('keeps the old Esc path when cancel is not cancelable', async () => {
+    const w = await animated()
+    const d = dialogEl(w)
+    d.dispatchEvent(new Event('cancel'))
+    d.close() // the browser closes it
+    expect(reasons(w)).toEqual(['escape'])
+  })
+
+  it('reopened while closing: settles the first session once and opens again', async () => {
+    vi.useFakeTimers()
+    try {
+      const w = await animated()
+      const d = dialogEl(w)
+      await w.setProps({ open: false })
+      await w.setProps({ open: true })
+      expect(d.open).toBe(true)
+      expect(d.hasAttribute('data-closing')).toBe(false)
+      expect(reasons(w)).toEqual(['program'])
+      expect(w.emitted('update:open')).toBeUndefined()
+      expect(toastHosts.value).toEqual([w.get('.bl-dialog__toasts').element])
+      // the cancelled exit never fires
+      transitionEnd(panel(w), 'opacity')
+      vi.advanceTimersByTime(1000)
+      expect(d.open).toBe(true)
+      expect(reasons(w)).toEqual(['program'])
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('unmounted while closing: closes at once, emits nothing, restores focus, unlocks', async () => {
+    const opener = document.createElement('button')
+    document.body.append(opener)
+    opener.focus()
+    const w = await animated()
+    const d = dialogEl(w)
+    w.get<HTMLElement>('.bl-dialog__close').element.focus()
+    await w.get('.bl-dialog__close').trigger('click')
+    w.unmount()
+    wrappers = wrappers.filter((x) => x !== w)
+    expect(d.open).toBe(false)
+    expect(d.hasAttribute('data-closing')).toBe(false)
+    expect(w.emitted('close')).toBeUndefined()
+    expect(w.emitted('update:open')).toBeUndefined()
+    expect(document.activeElement).toBe(opener)
+    expect(document.documentElement.style.getPropertyValue('--bl-dialog-gutter')).toBe('')
+    expect(toastHosts.value).toEqual([])
+    opener.remove()
+  })
+
+  it('a native close during the exit settles at once', async () => {
+    const w = await animated()
+    const d = dialogEl(w)
+    await w.get('.bl-dialog__close').trigger('click')
+    d.close('done')
+    expect(d.hasAttribute('data-closing')).toBe(false)
+    expect(reasons(w)).toEqual(['button'])
+    transitionEnd(panel(w), 'opacity')
+    expect(w.emitted('close')).toHaveLength(1)
+  })
+
+  // pointer-events: none stops only the mouse: a focused control would still take Enter.
+  it('makes the panel inert during the exit, not the toast host', async () => {
+    const w = await animated()
+    const d = dialogEl(w)
+    w.get<HTMLElement>('.bl-dialog__close').element.focus()
+    await w.get('.bl-dialog__close').trigger('click')
+    expect((panel(w) as HTMLElement).inert).toBe(true)
+    expect(w.get<HTMLElement>('.bl-dialog__toasts').element.inert).toBe(false)
+    // Chromium moves focus off an inert element only at the next frame: move it at once
+    expect(document.activeElement).toBe(d)
+    transitionEnd(panel(w), 'opacity')
+    expect(d.open).toBe(false)
+    expect((panel(w) as HTMLElement).inert).toBe(false)
+  })
+
+  it('clears inert when reopened during the exit', async () => {
+    const w = await animated()
+    await w.setProps({ open: false })
+    expect((panel(w) as HTMLElement).inert).toBe(true)
+    await w.setProps({ open: true })
+    expect((panel(w) as HTMLElement).inert).toBe(false)
+  })
+
+  it('returns focus to the opener after the exit, also when it fell to <body>', async () => {
+    const opener = document.createElement('button')
+    document.body.append(opener)
+    opener.focus()
+    const w = await animated()
+    w.get<HTMLElement>('.bl-dialog__close').element.focus()
+    await w.get('.bl-dialog__close').trigger('click')
+    transitionEnd(panel(w), 'opacity')
+    expect(document.activeElement).toBe(opener) // from the dialog itself
+    opener.remove()
+  })
+
+  it('returns focus to the opener when focus fell to <body> during the exit', async () => {
+    const opener = document.createElement('button')
+    document.body.append(opener)
+    opener.focus()
+    const w = await animated()
+    w.get<HTMLElement>('.bl-dialog__close').element.focus()
+    await w.get('.bl-dialog__close').trigger('click')
+    ;(document.activeElement as HTMLElement).blur() // as if it fell to <body>
+    transitionEnd(panel(w), 'opacity')
+    expect(document.activeElement).toBe(opener)
+    opener.remove()
+  })
+
+  // A KeepAlive host swapped out mid-exit: a user close is settled, a program close dropped.
+  function keptAlive() {
+    const show = ref(true)
+    const isOpen = ref(true)
+    const events: string[] = []
+    const Host = defineComponent({
+      setup: () => () =>
+        h(KeepAlive, null, [
+          show.value
+            ? h(BlDialog, {
+                key: 'd',
+                title: 'T',
+                open: isOpen.value,
+                'onUpdate:open': (v: boolean) => {
+                  events.push(`update:open ${v}`)
+                  isOpen.value = v
+                },
+                onClose: (e: { reason: string }) => events.push(`close ${e.reason}`)
+              })
+            : h('p', 'other')
+        ])
+    })
+    const w = mount(Host, { attachTo: document.body })
+    wrappers.push(w)
+    return { w, show, isOpen, events }
+  }
+
+  it('deactivated during a user close: settles it, and does not reopen on activation', async () => {
+    const { w, show, events } = keptAlive()
+    await nextTick()
+    const d = w.get('dialog').element as HTMLDialogElement
+    mockTransition([
+      d.querySelector('.bl-dialog__panel')!,
+      { property: 'opacity', duration: '0.2s' }
+    ])
+    await w.get('.bl-dialog__close').trigger('click')
+    expect(d.hasAttribute('data-closing')).toBe(true)
+    show.value = false
+    await nextTick()
+    expect(d.open).toBe(false)
+    expect(d.hasAttribute('data-closing')).toBe(false)
+    expect(events).toEqual(['update:open false', 'close button'])
+    show.value = true
+    await nextTick()
+    expect(d.open).toBe(false)
+  })
+
+  it('deactivated during a program close: drops it quietly, as before', async () => {
+    const { w, show, isOpen, events } = keptAlive()
+    await nextTick()
+    const d = w.get('dialog').element as HTMLDialogElement
+    mockTransition([
+      d.querySelector('.bl-dialog__panel')!,
+      { property: 'opacity', duration: '0.2s' }
+    ])
+    isOpen.value = false
+    await nextTick()
+    expect(d.hasAttribute('data-closing')).toBe(true)
+    show.value = false
+    await nextTick()
+    expect(d.open).toBe(false)
+    expect(events).toEqual([])
+    show.value = true
+    await nextTick()
+    expect(d.open).toBe(false)
+  })
+
+  it('a cancelable Esc during a program exit keeps the reason (not dismissible)', async () => {
+    const w = open({ dismissible: false }, { footer: '<button>OK</button>' })
+    mockTransition([w.get('.bl-dialog__panel').element, { property: 'opacity', duration: '0.2s' }])
+    await w.setProps({ open: true })
+    await w.setProps({ open: false })
+    const d = dialogEl(w)
+    const ev = new Event('cancel', { cancelable: true })
+    d.dispatchEvent(ev)
+    expect(ev.defaultPrevented).toBe(true)
+    transitionEnd(panel(w), 'opacity')
+    expect(reasons(w)).toEqual(['program'])
   })
 })

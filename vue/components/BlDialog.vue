@@ -11,7 +11,7 @@
     @pointerdown="onPointerDown"
     @click="onClick"
   >
-    <div class="bl-dialog__panel">
+    <div ref="panel" class="bl-dialog__panel">
       <div class="bl-dialog__head">
         <h2 :id="titleId" class="bl-dialog__title">{{ title }}</h2>
         <BlButton
@@ -62,6 +62,7 @@
   }>()
   const el = ref<HTMLDialogElement>()
   const toasts = ref<HTMLElement>()
+  const panel = ref<HTMLElement>()
   // The footer slot is evaluated once per render; an empty or v-if-ed footer is dropped, and
   // the result is remembered for the "no way out" warning (slots are not called outside render).
   let hasFooter = false
@@ -78,6 +79,8 @@
     toasts,
     open,
     dismissible: () => props.dismissible,
+    exit: () => panel.value,
+    inert: () => [panel.value],
     beforeShow: () => {
       if (!props.dismissible && !hasFooter)
         warn('BlDialog: dismissible is false and the footer is empty, so nothing can close it.')

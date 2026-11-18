@@ -16,6 +16,12 @@
 - BlDialog no longer shows a focus ring on its × after a mouse open in Safari. Without an
   `autofocus` element inside, the dialog now focuses itself (`tabindex="-1"`, no ring) instead of
   leaving the browser to focus the ×; Tab still reaches the × first. BlLightbox does the same.
+- BlDialog and BlLightbox now play their close animation in Firefox and Safari too; it was
+  Chromium-only (`overlay`). Closing sets `data-closing`, waits for the exit transition, then calls
+  `close()`, so `update:open(false)` and `close` now arrive after the exit (about 200ms, at once
+  under reduced motion). Esc animates when the browser lets `cancel` be held. During the exit the
+  pointer is ignored, the content is `inert` (keys cannot activate a control in it) and repeat
+  closes are dropped. Unmounting still closes at once.
 
 ## 0.11.1 - 2026-11-18
 

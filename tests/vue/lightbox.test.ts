@@ -4,6 +4,7 @@ import { createCommentVNode, defineComponent, h, KeepAlive, nextTick, ref } from
 import BlLightbox from '../../vue/components/BlLightbox.vue'
 import { toastHosts } from '../../vue/internal/toastHosts'
 import type { LightboxItem } from '../../vue/types'
+import { mockTransition, transitionEnd } from './transitions'
 
 type Scope = { item: LightboxItem; index: number }
 const ITEMS: LightboxItem[] = [
@@ -111,6 +112,36 @@ describe('BlLightbox', () => {
     expect(document.activeElement).toBe(d)
     key(document.activeElement!, 'ArrowRight')
     expect(indexes(w)).toEqual([1])
+  })
+
+  it('fades the scrim out before it closes, then emits', async () => {
+    const w = lightbox()
+    const d = dialogEl(w)
+    mockTransition([d, { property: 'background-color', duration: '200ms' }])
+    await w.setProps({ open: true })
+    w.get<HTMLElement>('.bl-lightbox__close').element.focus()
+    await w.get('.bl-lightbox__close').trigger('click')
+    expect(d.open).toBe(true)
+    expect(d.hasAttribute('data-closing')).toBe(true)
+    expect(w.emitted('close')).toBeUndefined()
+    transitionEnd(w.get('.bl-lightbox__close').element, 'background-color') // bubbled, not ours
+    expect(d.open).toBe(true)
+    // the controls and the stage are inert meanwhile; the dialog and its toast host are not
+    const parts = ['.bl-lightbox__bar', '.bl-lightbox__stage', '.bl-lightbox__nav--prev']
+    const inert = () => parts.map((s) => w.get<HTMLElement>(s).element.inert)
+    expect(inert()).toEqual([true, true, true])
+    expect(w.get<HTMLElement>('.bl-lightbox__nav--next').element.inert).toBe(true)
+    expect(d.inert).toBe(false)
+    expect(w.get<HTMLElement>('.bl-lightbox__toasts').element.inert).toBe(false)
+    expect(document.activeElement).toBe(d) // out of the inert bar
+    key(d, 'ArrowRight') // the arrow keys rest during the exit
+    expect(indexes(w)).toEqual([])
+    transitionEnd(d, 'background-color')
+    expect(d.open).toBe(false)
+    expect(d.hasAttribute('data-closing')).toBe(false)
+    expect(inert()).toEqual([false, false, false])
+    expect(w.emitted('update:open')).toEqual([[false]])
+    expect((w.emitted('close')![0]![0] as { reason: string }).reason).toBe('button')
   })
 
   it("renders the current item's src, srcset, sizes, alt, width and height", async () => {

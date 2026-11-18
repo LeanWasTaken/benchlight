@@ -1524,6 +1524,7 @@ Exposed: none
 - `data-align`
 - `data-bl-appearance`
 - `data-bl-lift`
+- `data-closing`
 - `data-dir`
 - `data-empty`
 - `data-fit`

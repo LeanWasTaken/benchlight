@@ -33,9 +33,19 @@
       opacity: 0;
     }
   }
-  /* Exit animations need `overlay` (Chromium only); elsewhere the dialog closes instantly
-     instead of flashing at its in-flow position. The dialog itself only holds display and
-     overlay for the exit; its panel fades and moves. */
+  /* BlDialog sets data-closing and plays the exit while the dialog is still open, in every
+     browser; the dialog ignores the pointer meanwhile. */
+  .bl-dialog[data-closing],
+  .bl-dialog[data-closing]::backdrop {
+    pointer-events: none;
+  }
+  .bl-dialog[data-closing]::backdrop {
+    opacity: 0;
+  }
+  /* A native close (<form method="dialog">, a close invoker) can only animate with `overlay`
+     (Chromium); elsewhere it closes instantly instead of flashing at its in-flow position. The
+     dialog itself only holds display and overlay for the exit; its panel fades and moves. After
+     BlDialog's own exit there is nothing left to hold, so data-closing drops the hold. */
   @supports (overlay: auto) {
     .bl-dialog {
       transition:
@@ -45,6 +55,12 @@
     .bl-dialog::backdrop {
       transition-property: opacity, display, overlay;
       transition-behavior: allow-discrete;
+    }
+    .bl-dialog[data-closing] {
+      transition: none;
+    }
+    .bl-dialog[data-closing]::backdrop {
+      transition-property: opacity;
     }
   }
   .bl-dialog__panel {
@@ -78,6 +94,10 @@
       opacity: 0;
       scale: 0.98;
     }
+  }
+  .bl-dialog[data-closing] .bl-dialog__panel:not(:where(.bl-dialog:not([data-closing]) *)) {
+    opacity: 0;
+    scale: 0.98;
   }
   .bl-dialog__head {
     display: flex;
@@ -137,6 +157,10 @@
     .bl-dialog[open] .bl-dialog__panel:not(:where(.bl-dialog:not([open]) *)) {
       translate: none;
     }
+    .bl-dialog[data-closing] .bl-dialog__panel:not(:where(.bl-dialog:not([data-closing]) *)) {
+      scale: none;
+      translate: 0 100%;
+    }
     @starting-style {
       .bl-dialog[open] .bl-dialog__panel:not(:where(.bl-dialog:not([open]) *)) {
         scale: none;
@@ -158,7 +182,8 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .bl-dialog__panel,
-    .bl-dialog[open] .bl-dialog__panel:not(:where(.bl-dialog:not([open]) *)) {
+    .bl-dialog[open] .bl-dialog__panel:not(:where(.bl-dialog:not([open]) *)),
+    .bl-dialog[data-closing] .bl-dialog__panel:not(:where(.bl-dialog:not([data-closing]) *)) {
       scale: none;
       translate: none;
     }

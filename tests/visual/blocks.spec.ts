@@ -653,7 +653,9 @@ test.describe('motion: toasts and dialogs', () => {
         const r = copied.getBoundingClientRect()
         const top = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)
         frames.push({
-          closing: !d.open && getComputedStyle(d).display !== 'none',
+          // BlDialog's exit (data-closing, still open) or a native one (closed, still shown).
+          closing:
+            d.hasAttribute('data-closing') || (!d.open && getComputedStyle(d).display !== 'none'),
           hit: top?.closest('.bl-toast') !== null // the entering 'Saved' toast may slide under
         })
       }

@@ -633,6 +633,17 @@ bundle CLI warns otherwise).
   `request-close` invoker, which all fire `cancel`), `'program'` (the parent set `open` to false;
   no `update:open` echo) or `'native'` (`<form method="dialog">`, a `close` invoker command).
   `returnValue` is the string given to `close()`, or `''`.
+- Closing plays the exit first, in every browser: the dialog gets `data-closing` (the panel and
+  backdrop fade out, the dialog ignores the pointer) and the panel is `inert`, so keys reach
+  nothing in it (focus inside moves to the dialog itself, and back to the opener after).
+  `close()` runs once the panel's transition ends, so `update:open(false)` and `close` arrive
+  after the exit (about 200ms; at once under reduced motion). This covers the ×, the backdrop,
+  Esc (when the browser lets `cancel` be held) and the parent setting `open` to false. Further
+  closes and Esc during the exit are ignored and keep the first reason. A native close
+  (`<form method="dialog">`, a `close` invoker, an Esc the browser will not let be held)
+  animates in Chromium only. Unmounting or deactivating closes at once; a KeepAlive deactivation
+  during a user close still reports it (`update:open(false)` and `close`), so activation does not
+  reopen it.
 - A backdrop click counts only when the press also started on the backdrop, so a drag from inside
   the panel does not close.
 - `dismissible: false` drops the ×, ignores backdrop clicks and renders `closedby="none"`, which
@@ -653,14 +664,16 @@ bundle CLI warns otherwise).
   in with `html { scrollbar-gutter: stable }`.
 - Below 40em the dialog is a bottom sheet clear of the safe areas. `dvh` does not shrink for the
   iOS keyboard, so a field near the bottom of a sheet can sit behind it.
-- Setting `open` to false and back to true within one task (before the browser's async `close`
-  event) closes and reopens it: the first session reports `close` with reason `'program'` and no
+- Setting `open` to false and back to true during the exit (or, with no exit to play, before the
+  browser's async `close` event) closes and reopens it: the first session reports `close` with reason `'program'` and no
   `update:open` echo, and the late `close` event is ignored.
 - CSS-only: the classes work on any `<dialog>`. Call `showModal()`/`close()` yourself, wire the
   ids and add `closedby="none"` for a non-dismissible dialog. The panel may be wrapped, e.g. in a
   `<form method="dialog">` that closes it without script. The panel is only visible inside an open
   `.bl-dialog` (it fades in with it), so it cannot be shown on its own. Backdrop-click closing, gutter
-  compensation, focus-restore hardening and in-dialog toasts are Vue-only.
+  compensation, focus-restore hardening and in-dialog toasts are Vue-only. A plain `close()`
+  animates in Chromium only; elsewhere set `data-closing` on the dialog, wait out the panel's
+  transition, then call `close()` and remove the attribute.
 
 ## BlLightbox
 
@@ -724,9 +737,12 @@ function show(i: number) {
   arrive. Emptied while open, it closes with `update:open(false)` and reason `'program'`, so a
   refill does not reopen it.
 - Emits `update:open(false)` and `close({ reason, returnValue })` once per close, with BlDialog's
-  reasons. The lightbox is always dismissible: the ×, Esc and the back gesture, or a click on the
-  stage outside the media and caption (pressed and released there; a swipe never counts). Clicks in
-  the bar, in the bottom row and within 24px of a nav button do not close it.
+  reasons, after the exit as for BlDialog (the scrim clears and the contents fade, then `close()`
+  runs; `data-closing` is set meanwhile, the bar, stage and nav buttons are `inert` and the arrow
+  keys rest; the toast host stays usable). The lightbox is always dismissible: the ×, Esc and the
+  back gesture, or a click on the stage outside the media and caption (pressed and released
+  there; a swipe never counts). Clicks in the bar, in the bottom row and within 24px of a nav
+  button do not close it.
 - Slots: default `{ item, index }` replaces the `<img>` (a video, an iframe, any figure); `caption`
   `{ item, index }` replaces the caption text. A slot that renders nothing falls back.
 - `width` and `height` reserve the image box before it loads. The image fades in on `load`, then
@@ -828,8 +844,10 @@ const id = toast({ message: 'Item deleted', action: { label: 'Undo', onClick: re
   open the toaster moves into the topmost one (above its backdrop, reachable and announced) and
   moves back when it closes. Visible toasts and timers carry across. Below 40em it sits at the
   top of the screen there, clear of the sheet's footer actions. A toast fired as a dialog closes
-  is announced where the toaster lands next, and while a closing dialog fades out (Chromium) the
-  toaster stays above it in the top layer, as a manual popover, until the fade ends.
+  is announced where the toaster lands next. During a BlDialog's exit the toaster stays inside
+  it (the dialog is still modal) and moves out at `close()`; while a natively closed dialog fades
+  out (Chromium) the toaster stays above it in the top layer, as a manual popover, until the
+  fade ends.
 - The store is one per JS realm, shared by every Vue app on the page, so mount one toaster per
   page; a development warning fires for a second.
 - SSR: `toast()` does nothing on the server and returns `''`. The toaster renders its section and

@@ -117,13 +117,15 @@
   function speak(danger: boolean, words: string): void {
     const region = danger ? alert.value : status.value
     if (!region) return
-    // A region inside a closing dialog is leaving the accessibility tree, and text moved along
-    // with it is not announced: wait until the toaster has moved to its next host.
+    // A region inside a closing dialog (closed, or playing its exit with data-closing) is leaving
+    // the accessibility tree, and text moved along with it is not announced: wait until the
+    // toaster has moved to its next host. Any host change counts, so a dialog reopened during
+    // its exit (released and pushed again in one tick, the same host) retries too.
     const dialog = region.closest('dialog')
-    if (dialog && !dialog.open) {
+    if (dialog && (!dialog.open || dialog.hasAttribute('data-closing'))) {
       scope.run(() => {
         const stop = watch(
-          host,
+          toastHosts,
           () => {
             stop()
             speak(danger, words)

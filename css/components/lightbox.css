@@ -36,10 +36,18 @@
   .bl-lightbox:focus {
     outline: none;
   }
+  /* BlLightbox sets data-closing and plays the exit while the dialog is still open, in every
+     browser: the scrim clears and the contents fade as when closed. No pointer meanwhile. */
+  .bl-lightbox[data-closing] {
+    background-color: transparent;
+    pointer-events: none;
+  }
   /* The dialog paints the scrim, so the UA backdrop would only darken it. */
   .bl-lightbox::backdrop {
     background: transparent;
   }
+  /* A native close can only animate with `overlay` (Chromium); after BlLightbox's own exit
+     there is nothing left to hold, so data-closing drops the hold. */
   @supports (overlay: auto) {
     .bl-lightbox {
       transition:
@@ -49,6 +57,9 @@
     }
     .bl-lightbox:not([open]) {
       background-color: transparent;
+    }
+    .bl-lightbox[data-closing] {
+      transition: background-color var(--bl-duration-base) ease;
     }
   }
   .bl-lightbox__bar {
@@ -82,6 +93,13 @@
       opacity: 0;
       scale: 0.98;
     }
+  }
+  .bl-lightbox[data-closing] :is(.bl-lightbox__count, .bl-lightbox__close, .bl-lightbox__nav) {
+    opacity: 0;
+  }
+  .bl-lightbox[data-closing] .bl-lightbox__stage {
+    opacity: 0;
+    scale: 0.98;
   }
   .bl-lightbox__count {
     grid-area: count;
@@ -221,7 +239,8 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .bl-lightbox__stage,
-    .bl-lightbox[open] .bl-lightbox__stage {
+    .bl-lightbox[open] .bl-lightbox__stage,
+    .bl-lightbox[data-closing] .bl-lightbox__stage {
       scale: none;
     }
     /* See dialog: a trailing transition on html would shift the page by the gutter. */

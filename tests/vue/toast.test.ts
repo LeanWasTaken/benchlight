@@ -143,6 +143,50 @@ describe('BlToaster', () => {
     dialog.remove()
   })
 
+  it('speaks a toast fired during a dialog exit only once the toaster has moved out', async () => {
+    await mountToaster()
+    const dialog = document.createElement('dialog')
+    const host = document.createElement('div')
+    dialog.append(host)
+    document.body.append(dialog)
+    dialog.showModal()
+    pushToastHost(host)
+    await flush()
+    dialog.setAttribute('data-closing', '') // still open and modal, fading out
+    toast('Saved')
+    await flush()
+    expect(host.querySelector('[role="status"]')!.textContent).toBe('')
+    removeToastHost(host)
+    dialog.close()
+    await flush()
+    const region = document.querySelector('.bl-toaster [role="status"]')!
+    expect(region.closest('dialog')).toBeNull()
+    expect(region.textContent).toBe('Saved')
+    dialog.remove()
+  })
+
+  it('speaks a toast held back by an exit once the dialog reopens instead', async () => {
+    await mountToaster()
+    const dialog = document.createElement('dialog')
+    const host = document.createElement('div')
+    dialog.append(host)
+    document.body.append(dialog)
+    dialog.showModal()
+    pushToastHost(host)
+    await flush()
+    dialog.setAttribute('data-closing', '')
+    toast('Saved')
+    await flush()
+    expect(host.querySelector('[role="status"]')!.textContent).toBe('')
+    // reopened before the exit ended: the session settles and the same host returns, in one tick
+    dialog.removeAttribute('data-closing')
+    removeToastHost(host)
+    pushToastHost(host)
+    await flush()
+    expect(host.querySelector('[role="status"]')!.textContent).toBe('Saved')
+    dialog.remove()
+  })
+
   it('rides in the top layer while the dialog it left is still fading out', async () => {
     await mountToaster()
     const shown: boolean[] = []
