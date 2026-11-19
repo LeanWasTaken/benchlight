@@ -15,7 +15,7 @@
     color: var(--bl-color-ink-1);
     background: var(
       --bl-lightbox-scrim,
-      color-mix(in srgb, var(--bl-color-canvas) 96%, transparent)
+      color-mix(in srgb, var(--bl-color-canvas) 85%, transparent)
     );
     border: 0;
     transition: background-color var(--bl-duration-base) ease;

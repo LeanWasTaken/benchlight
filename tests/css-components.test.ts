@@ -1031,7 +1031,7 @@ describe('lightbox', () => {
   })
   it('paints the scrim from the hook, defaulting to the canvas so it follows the appearance', () => {
     expect(ruleBody(css, '.bl-lightbox')['background']).toMatch(
-      /^var\(\s*--bl-lightbox-scrim,\s*color-mix\(in srgb, var\(--bl-color-canvas\) 96%, transparent\)\s*\)$/
+      /^var\(\s*--bl-lightbox-scrim,\s*color-mix\(in srgb, var\(--bl-color-canvas\) 85%, transparent\)\s*\)$/
     )
     expect(ruleBody(css, '.bl-lightbox::backdrop')['background']).toBe('transparent')
   })

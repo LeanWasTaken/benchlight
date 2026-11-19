@@ -130,7 +130,7 @@ describe('WCAG AA for text tokens', () => {
   })
 })
 
-// BlLightbox: counter (ink-2) and caption (ink-1) sit on the default scrim, the canvas at 96%
+// BlLightbox: counter (ink-2) and caption (ink-1) sit on the default scrim, the canvas at 85%
 // over whatever the page shows behind it; black and white bound that.
 describe('BlLightbox scrim', () => {
   const pairs = THEMES.flatMap((theme) =>
@@ -140,7 +140,7 @@ describe('BlLightbox scrim', () => {
   )
   it.each(pairs)('%s %s on the scrim over %s', (theme, fg, under) => {
     const c = tokens.color[theme]
-    const scrim = mix(hexToRgb(c.canvas), hexToRgb(under), 0.96)
+    const scrim = mix(hexToRgb(c.canvas), hexToRgb(under), 0.85)
     expect(contrast(hexToRgb(c[fg]), scrim)).toBeGreaterThanOrEqual(4.5)
   })
 })

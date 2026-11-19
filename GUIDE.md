@@ -851,7 +851,7 @@ function show(i: number) {
   a bottom row either side of the counter. The dialog is `100dvh` tall and padded
   by the safe areas; the caption clamps to about four lines and scrolls beyond that.
 - Scroll lock and toasts work as for BlDialog (`html:has(dialog.bl-lightbox[open]:modal)`, the same
-  `--bl-dialog-gutter`). `--bl-lightbox-scrim` sets the backdrop, by default the canvas at 96%, so
+  `--bl-dialog-gutter`). `--bl-lightbox-scrim` sets the backdrop, by default the canvas at 85%, so
   it follows the appearance.
 - CSS-only: call `showModal()`/`close()` yourself and wire the ids. Navigation, swipe, zoom, the
   announcement, preloading, the load fade (`data-loaded`, set only by the component) and the
@@ -1070,7 +1070,7 @@ Custom properties a consumer may set. API.md lists them under "CSS hooks".
 | `--bl-popover-width`                                  | max width of a BlPopover panel, never wider than the viewport less 16px      | `20rem`                  |
 | `--bl-tooltip-width`                                  | max width of a BlTooltip panel, never wider than the viewport less 16px      | `16rem`                  |
 | `--bl-dialog-width`                                   | width of a centred BlDialog, never wider than the viewport less 32px         | `32rem`                  |
-| `--bl-lightbox-scrim`                                 | backdrop colour of a BlLightbox                                              | canvas at 96%            |
+| `--bl-lightbox-scrim`                                 | backdrop colour of a BlLightbox                                              | canvas at 85%            |
 | `--bl-media-size`                                     | size of a BlMedia figure                                                     | `64px`                   |
 | `--bl-chevron-mask`                                   | chevron shape of both the select and the disclosure                          | built-in chevron         |
 | `--bl-meter-value`                                    | fill fraction of a BlMeter bar (0 to 1; BlMeter and BlProgress set it)       | `0`                      |
