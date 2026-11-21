@@ -49,13 +49,35 @@
     padding-block-end: var(--bl-space-4);
     overflow-wrap: anywhere;
   }
+  /* The body grows and fades on open and close. ::details-content holds the closed content
+     (content-visibility is a discrete transition), so the exit plays before it hides. Engines
+     without ::details-content, or without interpolate-size, open and close instantly. */
+  @supports (interpolate-size: allow-keywords) and selector(::details-content) {
+    .bl-disclosure {
+      interpolate-size: allow-keywords;
+    }
+    .bl-disclosure::details-content {
+      block-size: 0;
+      opacity: 0;
+      overflow-y: clip;
+      transition:
+        block-size var(--bl-duration-base) var(--bl-ease-out),
+        opacity var(--bl-duration-base) var(--bl-ease-out),
+        content-visibility var(--bl-duration-base) allow-discrete;
+    }
+    .bl-disclosure[open]::details-content {
+      block-size: auto;
+      opacity: 1;
+    }
+  }
   @media (hover: hover) {
     .bl-disclosure__summary:hover .bl-disclosure__chevron {
       background: var(--bl-color-ink-1);
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .bl-disclosure__chevron {
+    .bl-disclosure__chevron,
+    .bl-disclosure::details-content {
       transition: none;
     }
   }

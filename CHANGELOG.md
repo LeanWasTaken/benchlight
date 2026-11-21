@@ -20,6 +20,12 @@
   controls in the bar and `zoomTo()` and `resetZoom()` on the ref. It shares BlDialog's close
   reasons, focus restore, scroll lock and toast hosting. `--bl-lightbox-scrim` sets the backdrop.
 
+### Changed
+
+- BlDisclosure now animates its body open and closed (a height and opacity transition on
+  `::details-content`, CSS only, instant under reduced motion). Engines without `::details-content`
+  or `interpolate-size` (Firefox today) open and close instantly as before.
+
 ### Fixed
 
 - BlDialog no longer shows a focus ring on its × after a mouse open in Safari. Without an

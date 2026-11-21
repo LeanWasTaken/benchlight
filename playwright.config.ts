@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const behaviourSpecs = /(cross-browser|popover|tooltip|tabs|number-field|form-reset)\.spec\.ts/
+const behaviourSpecs =
+  /(cross-browser|popover|disclosure|tooltip|tabs|number-field|form-reset)\.spec\.ts/
 
 // Parallel worktrees can run side by side with PW_PORT=<free port>.
 const port = Number(process.env['PW_PORT'] ?? 4173)

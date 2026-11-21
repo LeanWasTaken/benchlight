@@ -932,6 +932,15 @@ describe('disclosure', () => {
   it('has a 44px summary row', () => {
     expect(ruleBody(css, '.bl-disclosure__summary')['min-block-size']).toBe('44px')
   })
+  it('animates the body through ::details-content and stops it under reduced motion', () => {
+    expect(css).toContain(
+      '@supports (interpolate-size: allow-keywords) and selector(::details-content)'
+    )
+    expect(css).toMatch(/content-visibility var\(--bl-duration-base\) allow-discrete/)
+    const reduced = css.slice(css.indexOf('@media (prefers-reduced-motion: reduce)'))
+    expect(reduced).toContain('.bl-disclosure::details-content')
+    expect(reduced).toContain('transition: none;')
+  })
   it('gates hover behind (hover: hover)', () => {
     // Strip every (hover: hover) block, nested ones included, by brace depth.
     let ungated = ''

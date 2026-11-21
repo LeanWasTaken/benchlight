@@ -614,6 +614,9 @@ A collapsible section on native `<details>`. Full prop list is in [API.md](API.m
 - `open` without `v-model` is the initial state only.
 - The summary is not a heading; wrap the disclosure if you need one.
 - The chevron reuses `--bl-chevron-mask`.
+- The body grows and fades on open and close (CSS on `::details-content`, no script). Browsers
+  without `::details-content` or `interpolate-size` (Firefox today) open and close it instantly;
+  reduced motion does the same everywhere.
 
 ## BlDialog
 
